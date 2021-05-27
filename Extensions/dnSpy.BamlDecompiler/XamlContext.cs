@@ -173,6 +173,10 @@ namespace dnSpy.BamlDecompiler {
 			return ns;
 		}
 
+		public const string KnownNamespace_Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+		public const string KnownNamespace_Presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+		public const string KnownNamespace_PresentationOptions = "http://schemas.microsoft.com/winfx/2006/xaml/presentation/options";
+
 		public string TryGetXmlNamespace(IAssembly assembly, string typeNamespace) {
 			var asm = assembly as AssemblyDef;
 			if (asm is null)
@@ -194,16 +198,16 @@ namespace dnSpy.BamlDecompiler {
 					possibleXmlNs.Add(xmlNs);
 			}
 
-			if (possibleXmlNs.Contains("http://schemas.microsoft.com/winfx/2006/xaml/presentation"))
-				return "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+			if (possibleXmlNs.Contains(KnownNamespace_Presentation))
+				return KnownNamespace_Presentation;
 
 			return possibleXmlNs.FirstOrDefault();
 		}
 
-		public XName GetXamlNsName(string name, XElement elem = null) {
-			var xNs = GetXmlNamespace("http://schemas.microsoft.com/winfx/2006/xaml");
+		public XName GetKnownNamespace(string name, string xmlNamespace, XElement context = null) {
+			var xNs = GetXmlNamespace(xmlNamespace);
 			XName xName;
-			if (elem is not null && xNs == elem.GetDefaultNamespace())
+			if (context != null && xNs == context.GetDefaultNamespace())
 				xName = name;
 			else
 				xName = xNs + name;

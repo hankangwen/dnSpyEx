@@ -32,7 +32,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		XName ctor;
 
 		public void Run(XamlContext ctx, XDocument document) {
-			key = ctx.GetXamlNsName("Key");
+			key = ctx.GetKnownNamespace("Key", XamlContext.KnownNamespace_Xaml);
 			ctor = ctx.GetPseudoName("Ctor");
 
 			bool doWork;

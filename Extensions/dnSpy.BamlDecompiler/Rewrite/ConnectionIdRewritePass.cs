@@ -45,7 +45,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		}
 
 		public void Run(XamlContext ctx, XDocument document) {
-			var xClass = document.Root.Elements().First().Attribute(ctx.GetXamlNsName("Class"));
+			var xClass = document.Root.Elements().First().Attribute(ctx.GetKnownNamespace("Class", XamlContext.KnownNamespace_Xaml));
 			if (xClass is null)
 				return;
 
@@ -113,7 +113,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			public string FieldName;
 
 			public void Callback(XamlContext ctx, XElement elem) {
-				var xName = ctx.GetXamlNsName("Name");
+				var xName = ctx.GetKnownNamespace("Name", XamlContext.KnownNamespace_Xaml);
 				if (elem.Attribute("Name") is null && elem.Attribute(xName) is null)
 					elem.Add(new XAttribute(xName, FieldName));
 			}
