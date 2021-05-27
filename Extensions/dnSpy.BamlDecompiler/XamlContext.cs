@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
 using dnlib.DotNet;
@@ -133,8 +134,8 @@ namespace dnSpy.BamlDecompiler {
 			IMemberDef member;
 
 			if (id > 0x7fff) {
-				var knownProp = Baml.KnownThings.Members((KnownMembers)(-id));
-				type = ResolveType((ushort)-(short)knownProp.Parent);
+				var knownProp = Baml.KnownThings.Members((KnownMembers)unchecked((short)-(short)id));
+				type = ResolveType(unchecked((ushort)(short)-(short)knownProp.Parent));
 				name = knownProp.Name;
 				member = knownProp.Property;
 			}
@@ -156,7 +157,7 @@ namespace dnSpy.BamlDecompiler {
 
 		public string ResolveString(ushort id) {
 			if (id > 0x7fff)
-				return Baml.KnownThings.Strings((short)-id);
+				return Baml.KnownThings.Strings(unchecked((short)-id));
 			else if (Baml.StringIdMap.ContainsKey(id))
 				return Baml.StringIdMap[id].Value;
 
@@ -177,6 +178,8 @@ namespace dnSpy.BamlDecompiler {
 			if (asm is null)
 				return null;
 
+			var possibleXmlNs = new HashSet<string>();
+
 			foreach (var attr in asm.CustomAttributes.FindAll("System.Windows.Markup.XmlnsDefinitionAttribute")) {
 				Debug.Assert(attr.ConstructorArguments.Count == 2);
 				if (attr.ConstructorArguments.Count != 2)
@@ -188,10 +191,13 @@ namespace dnSpy.BamlDecompiler {
 					continue;
 
 				if (typeNamespace == typeNs.String)
-					return xmlNs;
+					possibleXmlNs.Add(xmlNs);
 			}
 
-			return null;
+			if (possibleXmlNs.Contains("http://schemas.microsoft.com/winfx/2006/xaml/presentation"))
+				return "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+
+			return possibleXmlNs.FirstOrDefault();
 		}
 
 		public XName GetXamlNsName(string name, XElement elem = null) {

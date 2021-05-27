@@ -52,7 +52,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 				string attrName;
 				if (record.ValueId > 0x7fff) {
 					bool isKey = true;
-					short bamlId = (short)-record.ValueId;
+					short bamlId = unchecked((short)-record.ValueId);
 					if (bamlId > 232 && bamlId < 464) {
 						bamlId -= 232;
 						isKey = false;
