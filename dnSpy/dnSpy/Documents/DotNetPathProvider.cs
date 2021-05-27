@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -168,7 +169,9 @@ namespace dnSpy.Documents {
 			return best;
 		}
 
-		const string DotNetExeName = "dotnet.exe";
+		static readonly string DotNetExeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "dotnet.exe" : "dotnet";
+		static readonly Regex NetCoreRuntimePattern = new Regex(@"\.NET( Core)? \d+\.\d+\.\d+");
+
 		static IEnumerable<DotNetPathInfo> GetDotNetBaseDirs() {
 			var hash = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 			foreach (var tmp in GetDotNetBaseDirCandidates()) {
@@ -210,38 +213,57 @@ namespace dnSpy.Documents {
 
 		// NOTE: This same method exists in DotNetHelpers (CorDebug project). Update both methods if this one gets updated.
 		static IEnumerable<string> GetDotNetBaseDirCandidates() {
-			// Microsoft tools don't check the PATH env var, only the default locations (eg. ProgramFiles)
-			var envVars = new string[] {
-				"PATH",
-				"DOTNET_ROOT(x86)",
-				"DOTNET_ROOT",
-			};
-			foreach (var envVar in envVars) {
-				var pathEnvVar = Environment.GetEnvironmentVariable(envVar) ?? string.Empty;
-				foreach (var path in pathEnvVar.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
-					yield return path;
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+				// Microsoft tools don't check the PATH env var, only the default locations (eg. ProgramFiles)
+				var envVars = new string[] {
+					"PATH",
+					"DOTNET_ROOT(x86)",
+					"DOTNET_ROOT",
+				};
+				foreach (var envVar in envVars) {
+					var pathEnvVar = Environment.GetEnvironmentVariable(envVar) ?? string.Empty;
+					foreach (var path in pathEnvVar.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
+						yield return path;
+				}
+
+				var regPathFormat = IntPtr.Size == 4 ?
+					@"SOFTWARE\dotnet\Setup\InstalledVersions\{0}" :
+					@"SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\{0}";
+				var archs = new[] { "x86", "x64" };
+				foreach (var arch in archs) {
+					var regPath = string.Format(regPathFormat, arch);
+					if (TryGetInstallLocationFromRegistry(regPath, out var installLocation))
+						yield return installLocation;
+				}
+
+				// Check default locations
+				var progDirX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+				var progDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+				if (!string.IsNullOrEmpty(progDirX86) && StringComparer.OrdinalIgnoreCase.Equals(progDirX86, progDir) && Path.GetDirectoryName(progDir) is string baseDir)
+					progDir = Path.Combine(baseDir, "Program Files");
+				const string dotnetDirName = "dotnet";
+				if (!string.IsNullOrEmpty(progDir))
+					yield return Path.Combine(progDir, dotnetDirName);
+				if (!string.IsNullOrEmpty(progDirX86))
+					yield return Path.Combine(progDirX86, dotnetDirName);
+			}
+			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+				yield return "/usr/share/dotnet/shared";
+				yield return "/opt/dotnet/shared/";
 			}
 
-			var regPathFormat = IntPtr.Size == 4 ?
-				@"SOFTWARE\dotnet\Setup\InstalledVersions\{0}" :
-				@"SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\{0}";
-			var archs = new[] { "x86", "x64" };
-			foreach (var arch in archs) {
-				var regPath = string.Format(regPathFormat, arch);
-				if (TryGetInstallLocationFromRegistry(regPath, out var installLocation))
-					yield return installLocation;
-			}
+			if (NetCoreRuntimePattern.Match(RuntimeInformation.FrameworkDescription).Success) {
+				// Fallback: if we are currently running .NET Core or newer, we can infer the installation directory
+				// with the help of System.Reflection. The assembly of System.Object is either System.Runtime
+				// or System.Private.CoreLib, which is located at <installation_directory>/shared/<runtime>/<version>/.
 
-			// Check default locations
-			var progDirX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-			var progDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-			if (!string.IsNullOrEmpty(progDirX86) && StringComparer.OrdinalIgnoreCase.Equals(progDirX86, progDir) && Path.GetDirectoryName(progDir) is string baseDir)
-				progDir = Path.Combine(baseDir, "Program Files");
-			const string dotnetDirName = "dotnet";
-			if (!string.IsNullOrEmpty(progDir))
-				yield return Path.Combine(progDir, dotnetDirName);
-			if (!string.IsNullOrEmpty(progDirX86))
-				yield return Path.Combine(progDirX86, dotnetDirName);
+				string corlibPath = typeof(object).Assembly.Location;
+				string? versionPath = Path.GetDirectoryName(corlibPath);
+				string? runtimePath = Path.GetDirectoryName(versionPath);
+				string? sharedPath = Path.GetDirectoryName(runtimePath);
+				if (Path.GetDirectoryName(sharedPath) is string dir)
+					yield return dir;
+			}
 		}
 
 		static bool TryGetInstallLocationFromRegistry(string regPath, [NotNullWhen(true)] out string? installLocation) {
