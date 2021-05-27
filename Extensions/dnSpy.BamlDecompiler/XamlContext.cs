@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
 using dnlib.DotNet;
@@ -133,8 +134,8 @@ namespace dnSpy.BamlDecompiler {
 			IMemberDef member;
 
 			if (id > 0x7fff) {
-				var knownProp = Baml.KnownThings.Members((KnownMembers)(-id));
-				type = ResolveType((ushort)-(short)knownProp.Parent);
+				var knownProp = Baml.KnownThings.Members((KnownMembers)unchecked((short)-(short)id));
+				type = ResolveType(unchecked((ushort)(short)-(short)knownProp.Parent));
 				name = knownProp.Name;
 				member = knownProp.Property;
 			}
@@ -156,7 +157,7 @@ namespace dnSpy.BamlDecompiler {
 
 		public string ResolveString(ushort id) {
 			if (id > 0x7fff)
-				return Baml.KnownThings.Strings((short)-id);
+				return Baml.KnownThings.Strings(unchecked((short)-id));
 			else if (Baml.StringIdMap.ContainsKey(id))
 				return Baml.StringIdMap[id].Value;
 
@@ -172,10 +173,16 @@ namespace dnSpy.BamlDecompiler {
 			return ns;
 		}
 
+		public const string KnownNamespace_Xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
+		public const string KnownNamespace_Presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+		public const string KnownNamespace_PresentationOptions = "http://schemas.microsoft.com/winfx/2006/xaml/presentation/options";
+
 		public string TryGetXmlNamespace(IAssembly assembly, string typeNamespace) {
 			var asm = assembly as AssemblyDef;
 			if (asm is null)
 				return null;
+
+			var possibleXmlNs = new HashSet<string>();
 
 			foreach (var attr in asm.CustomAttributes.FindAll("System.Windows.Markup.XmlnsDefinitionAttribute")) {
 				Debug.Assert(attr.ConstructorArguments.Count == 2);
@@ -188,16 +195,19 @@ namespace dnSpy.BamlDecompiler {
 					continue;
 
 				if (typeNamespace == typeNs.String)
-					return xmlNs;
+					possibleXmlNs.Add(xmlNs);
 			}
 
-			return null;
+			if (possibleXmlNs.Contains(KnownNamespace_Presentation))
+				return KnownNamespace_Presentation;
+
+			return possibleXmlNs.FirstOrDefault();
 		}
 
-		public XName GetXamlNsName(string name, XElement elem = null) {
-			var xNs = GetXmlNamespace("http://schemas.microsoft.com/winfx/2006/xaml");
+		public XName GetKnownNamespace(string name, string xmlNamespace, XElement context = null) {
+			var xNs = GetXmlNamespace(xmlNamespace);
 			XName xName;
-			if (elem is not null && xNs == elem.GetDefaultNamespace())
+			if (context != null && xNs == context.GetDefaultNamespace())
 				xName = name;
 			else
 				xName = xNs + name;

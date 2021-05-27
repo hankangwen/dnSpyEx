@@ -32,7 +32,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		XName ctor;
 
 		public void Run(XamlContext ctx, XDocument document) {
-			key = ctx.GetXamlNsName("Key");
+			key = ctx.GetKnownNamespace("Key", XamlContext.KnownNamespace_Xaml);
 			ctor = ctx.GetPseudoName("Ctor");
 
 			bool doWork;
@@ -78,8 +78,16 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			var attrName = elem.Name;
 			if (attrName != key)
 				attrName = property.ToXName(ctx, parent, property.IsAttachedTo(type));
-			var attr = new XAttribute(attrName, extValue);
-			parent.Add(attr);
+			if (!parent.Attributes(attrName).Any()) {
+				var attr = new XAttribute(attrName, extValue);
+				var list = new List<XAttribute>(parent.Attributes());
+				if (attrName == key)
+					list.Insert(0, attr);
+				else
+					list.Add(attr);
+				parent.RemoveAttributes();
+				parent.ReplaceAttributes(list);
+			}
 			elem.Remove();
 
 			return true;

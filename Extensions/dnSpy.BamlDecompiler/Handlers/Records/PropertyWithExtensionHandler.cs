@@ -36,7 +36,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 			var elemType = parent.Xaml.Element.Annotation<XamlType>();
 			var xamlProp = ctx.ResolveProperty(record.AttributeId);
-			var extType = ctx.ResolveType((ushort)-extTypeId);
+			var extType = ctx.ResolveType(unchecked((ushort)-extTypeId));
 			extType.ResolveNamespace(parent.Xaml, ctx);
 
 			var ext = new XamlExtension(extType);
@@ -56,7 +56,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 				string attrName;
 				if (record.ValueId > 0x7fff) {
 					bool isKey = true;
-					short bamlId = (short)-record.ValueId;
+					short bamlId = unchecked((short)-record.ValueId);
 					if (bamlId > 232 && bamlId < 464) {
 						bamlId -= 232;
 						isKey = false;
