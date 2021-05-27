@@ -77,17 +77,4 @@ jobs:
           name: dnSpy-net-win64
           path: C:\builtfiles\dnSpy-net-win64.zip
           if-no-files-found: error
-
-      # Create a new release: create a tag, then 'git push origin <tagname>', wait for it to build
-      - name: Create a new GitHub release if a new tag is pushed
-        uses: softprops/action-gh-release@b28d815 #@v1
-        with:
-          files: |
-            C:\builtfiles\dnSpy-netframework.zip
-            C:\builtfiles\dnSpy-net-win32.zip
-            C:\builtfiles\dnSpy-net-win64.zip
-          body: |
-            If your antivirus software complains, it's a false positive and you should contact them. I can't fix their buggy software.
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
