@@ -310,6 +310,9 @@ namespace dnSpy.Documents {
 			}
 			else if (TryParseNetFrameworkVersion("net", dirName, out fwkVersion)) {
 				version = fwkVersion;
+				// net5 for .NET 5 which should be considered as .NET Core
+				if (version.Major >= 5)
+					return FrameworkKind.DotNet;
 				return version.Major < 4 ? FrameworkKind.DotNetFramework2 : FrameworkKind.DotNetFramework4;
 			}
 
