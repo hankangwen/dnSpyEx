@@ -1,4 +1,4 @@
-Before clicking `Submit new issue`, try the latest build [![](https://github.com/0xd4d/dnSpy/workflows/GitHub%20CI/badge.svg)](https://github.com/0xd4d/dnSpy/actions)
+Before clicking `Submit new issue`, try the latest build [![](https://github.com/dnSpyEx/dnSpy/workflows/GitHub%20CI/badge.svg)](https://github.com/dnSpyEx/dnSpy/actions)
 
 - What version did you use?
 
