@@ -1,4 +1,4 @@
-# dnSpy - [Latest release](https://github.com/dnSpy/dnSpy/releases)
+# dnSpy - [Latest release](https://github.com/dnSpyEx/dnSpy/releases)
 
 dnSpy is a debugger and .NET assembly editor. You can use it to edit and debug assemblies even if you don't have any source code available. Main features:
 
@@ -14,18 +14,18 @@ See below for more features
 
 ## Binaries
 
-https://github.com/dnSpy/dnSpy/releases
+https://github.com/dnSpyEx/dnSpy/releases
 
 ## Building
 
 ```PS
-git clone --recursive https://github.com/dnSpy/dnSpy.git
+git clone --recursive https://github.com/dnSpyEx/dnSpy.git
 cd dnSpy
 # or dotnet build
 ./build.ps1 -NoMsbuild
 ```
 
-To debug Unity games, you need this repo too: https://github.com/dnSpy/dnSpy-Unity-mono (or get the binaries from https://github.com/dnSpy/dnSpy/releases/unity)
+To debug Unity games, you need this repo too: https://github.com/dnSpyEx/dnSpy-Unity-mono (or get the binaries from https://github.com/dnSpyEx/dnSpy/releases/unity)
 
 # Debugger
 
@@ -86,7 +86,7 @@ To debug Unity games, you need this repo too: https://github.com/dnSpy/dnSpy-Uni
 - [dnlib](https://github.com/0xd4d/dnlib) (.NET metadata reader/writer which can also read obfuscated assemblies)
 - [VS MEF](https://github.com/microsoft/vs-mef) (Faster MEF equals faster startup)
 - [ClrMD](https://github.com/microsoft/clrmd) (Access to lower level debugging info not provided by the CorDebug API)
-- [Iced](https://github.com/0xd4d/iced) (x86/x64 disassembler)
+- [Iced](https://github.com/icedland/iced) (x86/x64 disassembler)
 
 # Translating dnSpy
 
