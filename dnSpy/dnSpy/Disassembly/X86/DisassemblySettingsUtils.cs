@@ -39,7 +39,7 @@ namespace dnSpy.Disassembly.X86 {
 			switch (memorySizeOptions) {
 			case Contracts.Disassembly.MemorySizeOptions.Default:	return Iced.Intel.MemorySizeOptions.Default;
 			case Contracts.Disassembly.MemorySizeOptions.Always:	return Iced.Intel.MemorySizeOptions.Always;
-			case Contracts.Disassembly.MemorySizeOptions.Minimum:	return Iced.Intel.MemorySizeOptions.Minimum;
+			case Contracts.Disassembly.MemorySizeOptions.Minimum:	return Iced.Intel.MemorySizeOptions.Minimal;
 			case Contracts.Disassembly.MemorySizeOptions.Never:		return Iced.Intel.MemorySizeOptions.Never;
 			default:
 				Debug.Fail($"Unknown mem size options: {memorySizeOptions}");

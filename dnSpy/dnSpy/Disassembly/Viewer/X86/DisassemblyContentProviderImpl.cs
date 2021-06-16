@@ -95,7 +95,7 @@ namespace dnSpy.Disassembly.Viewer.X86 {
 				if (owner.cachedSymbolResolver.TryResolve(address, out var symResult, out bool fakeSymbol)) {
 					if (!fakeSymbol || owner.AddLabels) {
 						symbol = new SymbolResult(symResult.Address, symResult.Symbol, SymbolKindUtils.ToFormatterOutputTextKind(symResult.Kind), SymbolFlags.None);
-						if (instruction.OpCount == 1 && (instruction.Op0Kind == OpKind.Memory || instruction.Op0Kind == OpKind.Memory64)) {
+						if (instruction.OpCount == 1 && instruction.Op0Kind == OpKind.Memory) {
 							var code = instruction.Code;
 							if (code == Code.Call_rm32 || code == Code.Jmp_rm32)
 								symbol = new SymbolResult(symbol.Address, symbol.Text, symbol.Flags, MemorySize.DwordOffset);

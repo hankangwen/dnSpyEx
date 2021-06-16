@@ -89,9 +89,9 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 				}
 				if (instr.MemoryBase == Register.None && instr.MemoryIndex == Register.None) {
 					if (is64)
-						jmpTarget = (ulong)(int)instr.MemoryDisplacement;
+						jmpTarget = instr.MemoryDisplacement64;
 					else
-						jmpTarget = instr.MemoryDisplacement;
+						jmpTarget = instr.MemoryDisplacement32;
 					jmpTargetIsIndirect = true;
 					return;
 				}
@@ -130,8 +130,8 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 			}
 		}
 
-		static bool ModifiesRegistersOrMemory(in InstructionInfo info) {
-			if (info.IsStackInstruction)
+		static bool ModifiesRegistersOrMemory(in Instruction instr, in InstructionInfo info) {
+			if (instr.IsStackInstruction)
 				return true;
 
 			foreach (var regInfo in info.GetUsedRegisters()) {
@@ -187,7 +187,7 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 					// We can only follow the branch if this code did not modify any registers or memory
 					// locations (eg. the stack). The handlers assume they have the exact same input as
 					// the real function.
-					modifiesRegsOrMem |= ModifiesRegistersOrMemory(info);
+					modifiesRegsOrMem |= ModifiesRegistersOrMemory(instr, info);
 					if (modifiesRegsOrMem) {
 						jmpTarget = 0;
 						jmpTargetIsIndirect = false;
@@ -196,7 +196,7 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 						GetJmpTarget(ref instr, out jmpTarget, out jmpTargetIsIndirect);
 
 					bool canDecodeMore;
-					switch (info.FlowControl) {
+					switch (instr.FlowControl) {
 					case FlowControl.Next:
 					case FlowControl.ConditionalBranch:
 					case FlowControl.Call:
@@ -214,7 +214,7 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 						break;
 
 					default:
-						Debug.Fail($"Unknown flow control: {info.FlowControl}");
+						Debug.Fail($"Unknown flow control: {instr.FlowControl}");
 						canDecodeMore = false;
 						break;
 					}
