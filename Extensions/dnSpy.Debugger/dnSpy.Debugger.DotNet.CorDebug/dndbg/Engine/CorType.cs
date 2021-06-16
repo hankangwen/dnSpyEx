@@ -60,6 +60,13 @@ namespace dndbg.Engine {
 			}
 		}
 
+		public CorType? Base {
+			get {
+				int hr = obj.GetBase(out var @base);
+				return hr < 0 || @base is null ? null : new CorType(@base);
+			}
+		}
+
 		internal IMetaDataImport? MetaDataImport => GetMetaDataImport(out uint token);
 
 		internal IMetaDataImport? GetMetaDataImport(out uint token) {
