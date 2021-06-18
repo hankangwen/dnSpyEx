@@ -34,6 +34,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var elemType = parent.Xaml.Element.Annotation<XamlType>();
 			var xamlProp = ctx.ResolveProperty(record.AttributeId);
 			var value = XamlUtils.Escape(record.Value);
+			xamlProp.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
 
 			var attr = new XAttribute(xamlProp.ToXName(ctx, parent.Xaml, xamlProp.IsAttachedTo(elemType)), value);
 			parent.Xaml.Element.Add(attr);
