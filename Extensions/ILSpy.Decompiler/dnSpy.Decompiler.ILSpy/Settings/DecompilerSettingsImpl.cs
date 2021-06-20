@@ -19,8 +19,10 @@
 
 using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using dnSpy.Contracts.Settings;
 using ICSharpCode.Decompiler;
+using ICSharpCode.NRefactory.CSharp;
 
 namespace dnSpy.Decompiler.ILSpy.Settings {
 	[Export]
@@ -75,7 +77,86 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			MemberAddPrivateModifier = sect.Attribute<bool?>(nameof(MemberAddPrivateModifier)) ?? MemberAddPrivateModifier;
 			//RemoveNewDelegateClass = sect.Attribute<bool?>(nameof(RemoveNewDelegateClass)) ?? RemoveNewDelegateClass;
 			HexadecimalNumbers = sect.Attribute<bool?>(nameof(HexadecimalNumbers)) ?? HexadecimalNumbers;
-			//TODO: CSharpFormattingOptions
+
+			CSharpFormattingOptions.IndentSwitchBody = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.IndentSwitchBody)) ?? CSharpFormattingOptions.IndentSwitchBody;
+			CSharpFormattingOptions.IndentCaseBody = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.IndentCaseBody)) ?? CSharpFormattingOptions.IndentCaseBody;
+			CSharpFormattingOptions.AutoPropertyFormatting = sect.Attribute<PropertyFormatting?>(nameof(CSharpFormattingOptions.AutoPropertyFormatting)) ?? CSharpFormattingOptions.AutoPropertyFormatting;
+
+			CSharpFormattingOptions.NamespaceBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.NamespaceBraceStyle)) ?? CSharpFormattingOptions.NamespaceBraceStyle;
+			CSharpFormattingOptions.ClassBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.ClassBraceStyle)) ?? CSharpFormattingOptions.ClassBraceStyle;
+			CSharpFormattingOptions.InterfaceBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.InterfaceBraceStyle)) ?? CSharpFormattingOptions.InterfaceBraceStyle;
+			CSharpFormattingOptions.StructBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.StructBraceStyle)) ?? CSharpFormattingOptions.StructBraceStyle;
+			CSharpFormattingOptions.EnumBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.EnumBraceStyle)) ?? CSharpFormattingOptions.EnumBraceStyle;
+			CSharpFormattingOptions.MethodBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.MethodBraceStyle)) ?? CSharpFormattingOptions.MethodBraceStyle;
+			CSharpFormattingOptions.AnonymousMethodBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.AnonymousMethodBraceStyle)) ?? CSharpFormattingOptions.AnonymousMethodBraceStyle;
+			CSharpFormattingOptions.ConstructorBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.ConstructorBraceStyle)) ?? CSharpFormattingOptions.ConstructorBraceStyle;
+			CSharpFormattingOptions.DestructorBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.DestructorBraceStyle)) ?? CSharpFormattingOptions.DestructorBraceStyle;
+			CSharpFormattingOptions.PropertyBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.PropertyBraceStyle)) ?? CSharpFormattingOptions.PropertyBraceStyle;
+			CSharpFormattingOptions.PropertyGetBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.PropertyGetBraceStyle)) ?? CSharpFormattingOptions.PropertyGetBraceStyle;
+			CSharpFormattingOptions.PropertySetBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.PropertySetBraceStyle)) ?? CSharpFormattingOptions.PropertySetBraceStyle;
+			CSharpFormattingOptions.EventBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.EventBraceStyle)) ?? CSharpFormattingOptions.EventBraceStyle;
+			CSharpFormattingOptions.EventAddBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.EventAddBraceStyle)) ?? CSharpFormattingOptions.EventAddBraceStyle;
+			CSharpFormattingOptions.EventRemoveBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.EventRemoveBraceStyle)) ?? CSharpFormattingOptions.EventRemoveBraceStyle;
+			CSharpFormattingOptions.StatementBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.StatementBraceStyle)) ?? CSharpFormattingOptions.StatementBraceStyle;
+
+			CSharpFormattingOptions.ElseNewLinePlacement = sect.Attribute<NewLinePlacement?>(nameof(CSharpFormattingOptions.ElseNewLinePlacement)) ?? CSharpFormattingOptions.ElseNewLinePlacement;
+			CSharpFormattingOptions.ElseIfNewLinePlacement = sect.Attribute<NewLinePlacement?>(nameof(CSharpFormattingOptions.ElseIfNewLinePlacement)) ?? CSharpFormattingOptions.ElseIfNewLinePlacement;
+			CSharpFormattingOptions.CatchNewLinePlacement = sect.Attribute<NewLinePlacement?>(nameof(CSharpFormattingOptions.CatchNewLinePlacement)) ?? CSharpFormattingOptions.CatchNewLinePlacement;
+			CSharpFormattingOptions.FinallyNewLinePlacement = sect.Attribute<NewLinePlacement?>(nameof(CSharpFormattingOptions.FinallyNewLinePlacement)) ?? CSharpFormattingOptions.FinallyNewLinePlacement;
+			CSharpFormattingOptions.WhileNewLinePlacement = sect.Attribute<NewLinePlacement?>(nameof(CSharpFormattingOptions.WhileNewLinePlacement)) ?? CSharpFormattingOptions.WhileNewLinePlacement;
+
+			CSharpFormattingOptions.SpaceBeforeMethodDeclarationParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeMethodDeclarationParentheses)) ?? CSharpFormattingOptions.SpaceBeforeMethodDeclarationParentheses;
+			CSharpFormattingOptions.SpaceWithinMethodDeclarationParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceWithinMethodDeclarationParentheses)) ?? CSharpFormattingOptions.SpaceWithinMethodDeclarationParentheses;
+			CSharpFormattingOptions.SpaceBeforeMethodCallParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeMethodCallParentheses)) ?? CSharpFormattingOptions.SpaceBeforeMethodCallParentheses;
+			CSharpFormattingOptions.SpaceWithinMethodCallParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceWithinMethodCallParentheses)) ?? CSharpFormattingOptions.SpaceWithinMethodCallParentheses;
+			CSharpFormattingOptions.SpaceBeforeConstructorDeclarationParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeConstructorDeclarationParentheses)) ?? CSharpFormattingOptions.SpaceBeforeConstructorDeclarationParentheses;
+			CSharpFormattingOptions.SpaceBeforeDelegateDeclarationParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeDelegateDeclarationParentheses)) ?? CSharpFormattingOptions.SpaceBeforeDelegateDeclarationParentheses;
+			CSharpFormattingOptions.SpaceBeforeIfParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeIfParentheses)) ?? CSharpFormattingOptions.SpaceBeforeIfParentheses;
+			CSharpFormattingOptions.SpaceBeforeWhileParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeWhileParentheses)) ?? CSharpFormattingOptions.SpaceBeforeWhileParentheses;
+			CSharpFormattingOptions.SpaceBeforeForParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeForParentheses)) ?? CSharpFormattingOptions.SpaceBeforeForParentheses;
+			CSharpFormattingOptions.SpaceBeforeForeachParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeForeachParentheses)) ?? CSharpFormattingOptions.SpaceBeforeForeachParentheses;
+			CSharpFormattingOptions.SpaceBeforeCatchParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeCatchParentheses)) ?? CSharpFormattingOptions.SpaceBeforeCatchParentheses;
+			CSharpFormattingOptions.SpaceBeforeSwitchParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeSwitchParentheses)) ?? CSharpFormattingOptions.SpaceBeforeSwitchParentheses;
+			CSharpFormattingOptions.SpaceBeforeLockParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeLockParentheses)) ?? CSharpFormattingOptions.SpaceBeforeLockParentheses;
+			CSharpFormattingOptions.SpaceBeforeUsingParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeUsingParentheses)) ?? CSharpFormattingOptions.SpaceBeforeUsingParentheses;
+			CSharpFormattingOptions.SpaceAroundAssignment = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundAssignment)) ?? CSharpFormattingOptions.SpaceAroundAssignment;
+			CSharpFormattingOptions.SpaceAroundLogicalOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundLogicalOperator)) ?? CSharpFormattingOptions.SpaceAroundLogicalOperator;
+			CSharpFormattingOptions.SpaceAroundEqualityOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundEqualityOperator)) ?? CSharpFormattingOptions.SpaceAroundEqualityOperator;
+			CSharpFormattingOptions.SpaceAroundRelationalOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundRelationalOperator)) ?? CSharpFormattingOptions.SpaceAroundRelationalOperator;
+			CSharpFormattingOptions.SpaceAroundBitwiseOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundBitwiseOperator)) ?? CSharpFormattingOptions.SpaceAroundBitwiseOperator;
+			CSharpFormattingOptions.SpaceAroundAdditiveOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundAdditiveOperator)) ?? CSharpFormattingOptions.SpaceAroundAdditiveOperator;
+			CSharpFormattingOptions.SpaceAroundMultiplicativeOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundMultiplicativeOperator)) ?? CSharpFormattingOptions.SpaceAroundMultiplicativeOperator;
+			CSharpFormattingOptions.SpaceAroundShiftOperator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAroundShiftOperator)) ?? CSharpFormattingOptions.SpaceAroundShiftOperator;
+			CSharpFormattingOptions.SpacesWithinParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinParentheses)) ?? CSharpFormattingOptions.SpacesWithinParentheses;
+			CSharpFormattingOptions.SpacesWithinIfParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinIfParentheses)) ?? CSharpFormattingOptions.SpacesWithinIfParentheses;
+			CSharpFormattingOptions.SpacesWithinWhileParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinWhileParentheses)) ?? CSharpFormattingOptions.SpacesWithinWhileParentheses;
+			CSharpFormattingOptions.SpacesWithinForParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinForParentheses)) ?? CSharpFormattingOptions.SpacesWithinForParentheses;
+			CSharpFormattingOptions.SpacesWithinForeachParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinForeachParentheses)) ?? CSharpFormattingOptions.SpacesWithinForeachParentheses;
+			CSharpFormattingOptions.SpacesWithinCatchParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinCatchParentheses)) ?? CSharpFormattingOptions.SpacesWithinCatchParentheses;
+			CSharpFormattingOptions.SpacesWithinSwitchParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinSwitchParentheses)) ?? CSharpFormattingOptions.SpacesWithinSwitchParentheses;
+			CSharpFormattingOptions.SpacesWithinLockParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinLockParentheses)) ?? CSharpFormattingOptions.SpacesWithinLockParentheses;
+			CSharpFormattingOptions.SpacesWithinUsingParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinUsingParentheses)) ?? CSharpFormattingOptions.SpacesWithinUsingParentheses;
+			CSharpFormattingOptions.SpacesWithinCastParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinCastParentheses)) ?? CSharpFormattingOptions.SpacesWithinCastParentheses;
+			CSharpFormattingOptions.SpacesWithinSizeOfParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinSizeOfParentheses)) ?? CSharpFormattingOptions.SpacesWithinSizeOfParentheses;
+			CSharpFormattingOptions.SpacesWithinTypeOfParentheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinTypeOfParentheses)) ?? CSharpFormattingOptions.SpacesWithinTypeOfParentheses;
+			CSharpFormattingOptions.SpacesWithinCheckedExpressionParantheses = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinCheckedExpressionParantheses)) ?? CSharpFormattingOptions.SpacesWithinCheckedExpressionParantheses;
+			CSharpFormattingOptions.SpaceBeforeConditionalOperatorCondition = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeConditionalOperatorCondition)) ?? CSharpFormattingOptions.SpaceBeforeConditionalOperatorCondition;
+			CSharpFormattingOptions.SpaceAfterConditionalOperatorCondition = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAfterConditionalOperatorCondition)) ?? CSharpFormattingOptions.SpaceAfterConditionalOperatorCondition;
+			CSharpFormattingOptions.SpaceBeforeConditionalOperatorSeparator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeConditionalOperatorSeparator)) ?? CSharpFormattingOptions.SpaceBeforeConditionalOperatorSeparator;
+			CSharpFormattingOptions.SpaceAfterConditionalOperatorSeparator = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAfterConditionalOperatorSeparator)) ?? CSharpFormattingOptions.SpaceAfterConditionalOperatorSeparator;
+			CSharpFormattingOptions.SpacesWithinBrackets = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpacesWithinBrackets)) ?? CSharpFormattingOptions.SpacesWithinBrackets;
+			CSharpFormattingOptions.SpaceBeforeBracketComma = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeBracketComma)) ?? CSharpFormattingOptions.SpaceBeforeBracketComma;
+			CSharpFormattingOptions.SpaceAfterBracketComma = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAfterBracketComma)) ?? CSharpFormattingOptions.SpaceAfterBracketComma;
+			CSharpFormattingOptions.SpaceBeforeForSemicolon = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceBeforeForSemicolon)) ?? CSharpFormattingOptions.SpaceBeforeForSemicolon;
+			CSharpFormattingOptions.SpaceAfterForSemicolon = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAfterForSemicolon)) ?? CSharpFormattingOptions.SpaceAfterForSemicolon;
+			CSharpFormattingOptions.SpaceAfterTypecast = sect.Attribute<bool?>(nameof(CSharpFormattingOptions.SpaceAfterTypecast)) ?? CSharpFormattingOptions.SpaceAfterTypecast;
+
+			CSharpFormattingOptions.MinimumBlankLinesAfterUsings = sect.Attribute<int?>(nameof(CSharpFormattingOptions.MinimumBlankLinesAfterUsings)) ?? CSharpFormattingOptions.MinimumBlankLinesAfterUsings;
+			CSharpFormattingOptions.MinimumBlankLinesBetweenMembers = sect.Attribute<int?>(nameof(CSharpFormattingOptions.MinimumBlankLinesBetweenMembers)) ?? CSharpFormattingOptions.MinimumBlankLinesBetweenMembers;
+
+			CSharpFormattingOptions.ArrayInitializerWrapping = sect.Attribute<Wrapping?>(nameof(CSharpFormattingOptions.ArrayInitializerWrapping)) ?? CSharpFormattingOptions.ArrayInitializerWrapping;
+			CSharpFormattingOptions.ArrayInitializerBraceStyle = sect.Attribute<BraceStyle?>(nameof(CSharpFormattingOptions.ArrayInitializerBraceStyle)) ?? CSharpFormattingOptions.ArrayInitializerBraceStyle;
+
 			disableSave = false;
 		}
 		readonly bool disableSave;
@@ -125,7 +206,85 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			sect.Attribute(nameof(MemberAddPrivateModifier), MemberAddPrivateModifier);
 			//sect.Attribute(nameof(RemoveNewDelegateClass), RemoveNewDelegateClass);
 			sect.Attribute(nameof(HexadecimalNumbers), HexadecimalNumbers);
-			//TODO: CSharpFormattingOptions
+
+			sect.Attribute(nameof(CSharpFormattingOptions.IndentSwitchBody), CSharpFormattingOptions.IndentSwitchBody);
+            sect.Attribute(nameof(CSharpFormattingOptions.IndentCaseBody), CSharpFormattingOptions.IndentCaseBody);
+            sect.Attribute(nameof(CSharpFormattingOptions.AutoPropertyFormatting), CSharpFormattingOptions.AutoPropertyFormatting);
+
+            sect.Attribute(nameof(CSharpFormattingOptions.NamespaceBraceStyle), CSharpFormattingOptions.NamespaceBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.ClassBraceStyle), CSharpFormattingOptions.ClassBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.InterfaceBraceStyle), CSharpFormattingOptions.InterfaceBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.StructBraceStyle), CSharpFormattingOptions.StructBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.EnumBraceStyle), CSharpFormattingOptions.EnumBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.MethodBraceStyle), CSharpFormattingOptions.MethodBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.AnonymousMethodBraceStyle), CSharpFormattingOptions.AnonymousMethodBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.ConstructorBraceStyle), CSharpFormattingOptions.ConstructorBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.DestructorBraceStyle), CSharpFormattingOptions.DestructorBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.PropertyBraceStyle), CSharpFormattingOptions.PropertyBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.PropertyGetBraceStyle), CSharpFormattingOptions.PropertyGetBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.PropertySetBraceStyle), CSharpFormattingOptions.PropertySetBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.EventBraceStyle), CSharpFormattingOptions.EventBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.EventAddBraceStyle), CSharpFormattingOptions.EventAddBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.EventRemoveBraceStyle), CSharpFormattingOptions.EventRemoveBraceStyle);
+            sect.Attribute(nameof(CSharpFormattingOptions.StatementBraceStyle), CSharpFormattingOptions.StatementBraceStyle);
+
+            sect.Attribute(nameof(CSharpFormattingOptions.ElseNewLinePlacement), CSharpFormattingOptions.ElseNewLinePlacement);
+            sect.Attribute(nameof(CSharpFormattingOptions.ElseIfNewLinePlacement), CSharpFormattingOptions.ElseIfNewLinePlacement);
+            sect.Attribute(nameof(CSharpFormattingOptions.CatchNewLinePlacement), CSharpFormattingOptions.CatchNewLinePlacement);
+            sect.Attribute(nameof(CSharpFormattingOptions.FinallyNewLinePlacement), CSharpFormattingOptions.FinallyNewLinePlacement);
+            sect.Attribute(nameof(CSharpFormattingOptions.WhileNewLinePlacement), CSharpFormattingOptions.WhileNewLinePlacement);
+
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeMethodDeclarationParentheses), CSharpFormattingOptions.SpaceBeforeMethodDeclarationParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceWithinMethodDeclarationParentheses), CSharpFormattingOptions.SpaceWithinMethodDeclarationParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeMethodCallParentheses), CSharpFormattingOptions.SpaceBeforeMethodCallParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceWithinMethodCallParentheses), CSharpFormattingOptions.SpaceWithinMethodCallParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeConstructorDeclarationParentheses), CSharpFormattingOptions.SpaceBeforeConstructorDeclarationParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeDelegateDeclarationParentheses), CSharpFormattingOptions.SpaceBeforeDelegateDeclarationParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeIfParentheses), CSharpFormattingOptions.SpaceBeforeIfParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeWhileParentheses), CSharpFormattingOptions.SpaceBeforeWhileParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeForParentheses), CSharpFormattingOptions.SpaceBeforeForParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeForeachParentheses), CSharpFormattingOptions.SpaceBeforeForeachParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeCatchParentheses), CSharpFormattingOptions.SpaceBeforeCatchParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeSwitchParentheses), CSharpFormattingOptions.SpaceBeforeSwitchParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeLockParentheses), CSharpFormattingOptions.SpaceBeforeLockParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeUsingParentheses), CSharpFormattingOptions.SpaceBeforeUsingParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundAssignment), CSharpFormattingOptions.SpaceAroundAssignment);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundLogicalOperator), CSharpFormattingOptions.SpaceAroundLogicalOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundEqualityOperator), CSharpFormattingOptions.SpaceAroundEqualityOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundRelationalOperator), CSharpFormattingOptions.SpaceAroundRelationalOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundBitwiseOperator), CSharpFormattingOptions.SpaceAroundBitwiseOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundAdditiveOperator), CSharpFormattingOptions.SpaceAroundAdditiveOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundMultiplicativeOperator), CSharpFormattingOptions.SpaceAroundMultiplicativeOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAroundShiftOperator), CSharpFormattingOptions.SpaceAroundShiftOperator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinParentheses), CSharpFormattingOptions.SpacesWithinParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinIfParentheses), CSharpFormattingOptions.SpacesWithinIfParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinWhileParentheses), CSharpFormattingOptions.SpacesWithinWhileParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinForParentheses), CSharpFormattingOptions.SpacesWithinForParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinForeachParentheses), CSharpFormattingOptions.SpacesWithinForeachParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinCatchParentheses), CSharpFormattingOptions.SpacesWithinCatchParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinSwitchParentheses), CSharpFormattingOptions.SpacesWithinSwitchParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinLockParentheses), CSharpFormattingOptions.SpacesWithinLockParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinUsingParentheses), CSharpFormattingOptions.SpacesWithinUsingParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinCastParentheses), CSharpFormattingOptions.SpacesWithinCastParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinSizeOfParentheses), CSharpFormattingOptions.SpacesWithinSizeOfParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinTypeOfParentheses), CSharpFormattingOptions.SpacesWithinTypeOfParentheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinCheckedExpressionParantheses), CSharpFormattingOptions.SpacesWithinCheckedExpressionParantheses);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeConditionalOperatorCondition), CSharpFormattingOptions.SpaceBeforeConditionalOperatorCondition);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAfterConditionalOperatorCondition), CSharpFormattingOptions.SpaceAfterConditionalOperatorCondition);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeConditionalOperatorSeparator), CSharpFormattingOptions.SpaceBeforeConditionalOperatorSeparator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAfterConditionalOperatorSeparator), CSharpFormattingOptions.SpaceAfterConditionalOperatorSeparator);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpacesWithinBrackets), CSharpFormattingOptions.SpacesWithinBrackets);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeBracketComma), CSharpFormattingOptions.SpaceBeforeBracketComma);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAfterBracketComma), CSharpFormattingOptions.SpaceAfterBracketComma);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceBeforeForSemicolon), CSharpFormattingOptions.SpaceBeforeForSemicolon);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAfterForSemicolon), CSharpFormattingOptions.SpaceAfterForSemicolon);
+            sect.Attribute(nameof(CSharpFormattingOptions.SpaceAfterTypecast), CSharpFormattingOptions.SpaceAfterTypecast);
+
+            sect.Attribute(nameof(CSharpFormattingOptions.MinimumBlankLinesAfterUsings), CSharpFormattingOptions.MinimumBlankLinesAfterUsings);
+            sect.Attribute(nameof(CSharpFormattingOptions.MinimumBlankLinesBetweenMembers), CSharpFormattingOptions.MinimumBlankLinesBetweenMembers);
+
+            sect.Attribute(nameof(CSharpFormattingOptions.ArrayInitializerWrapping), CSharpFormattingOptions.ArrayInitializerWrapping);
+            sect.Attribute(nameof(CSharpFormattingOptions.ArrayInitializerBraceStyle), CSharpFormattingOptions.ArrayInitializerBraceStyle);
 		}
 	}
 }

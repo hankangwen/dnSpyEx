@@ -24,6 +24,7 @@ using dnSpy.Contracts.MVVM;
 using dnSpy.Contracts.Settings.Dialog;
 using dnSpy.Decompiler.ILSpy.Properties;
 using ICSharpCode.Decompiler;
+using ICSharpCode.NRefactory.CSharp;
 
 namespace dnSpy.Decompiler.ILSpy.Settings {
 	sealed class CSharpDecompilerSettingsPage : AppSettingsPage, IAppSettingsPage2 {
@@ -40,6 +41,22 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 		public DecompilationObjectVM[] DecompilationObjectsArray => decompilationObjectVMs2;
 		readonly DecompilationObjectVM[] decompilationObjectVMs;
 		readonly DecompilationObjectVM[] decompilationObjectVMs2;
+		public FormattingOptionsVM[] FormattingOptionsArray => formattingOptionsVMs;
+		readonly FormattingOptionsVM[] formattingOptionsVMs;
+
+		FormattingOptionsVM backing;
+
+		public FormattingOptionsVM SelectedFormattingOptions {
+			get => backing;
+			set {
+				if (value is null)
+					throw new ArgumentNullException(nameof(value));
+				if (value != backing) {
+					backing = value;
+					OnPropertyChanged(nameof(SelectedFormattingOptions));
+				}
+			}
+		}
 
 		public DecompilationObjectVM DecompilationObject0 {
 			get => decompilationObjectVMs[0];
@@ -94,6 +111,18 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 				decompilationObjectVMs[i] = new DecompilationObjectVM(defObjs[i], ToString(defObjs[i]));
 			decompilationObjectVMs2 = decompilationObjectVMs.ToArray();
 
+			formattingOptionsVMs = new FormattingOptionsVM[7];
+			formattingOptionsVMs[0] = new FormattingOptionsVM(decompilerSettings.CSharpFormattingOptions.Clone(), "saved");
+			var dnSpyExDefault = FormattingOptionsFactory.CreateAllman();
+			dnSpyExDefault.IndentSwitchBody = false;
+			formattingOptionsVMs[1] = new FormattingOptionsVM(dnSpyExDefault, "dnSpyEx default");
+			formattingOptionsVMs[2] = new FormattingOptionsVM(FormattingOptionsFactory.CreateAllman(), "Allman");
+			formattingOptionsVMs[3] = new FormattingOptionsVM(FormattingOptionsFactory.CreateMono(), "Mono");
+			formattingOptionsVMs[4] = new FormattingOptionsVM(FormattingOptionsFactory.CreateKRStyle(), "SharpDevelop/K&R");
+			formattingOptionsVMs[5] = new FormattingOptionsVM(FormattingOptionsFactory.CreateWhitesmiths(), "Whitesmiths");
+			formattingOptionsVMs[6] = new FormattingOptionsVM(FormattingOptionsFactory.CreateGNU(), "GNU");
+			backing = formattingOptionsVMs[0];
+
 			DecompilationObject0 = decompilationObjectVMs.First(a => a.Object == decompilerSettings.DecompilationObject0);
 			DecompilationObject1 = decompilationObjectVMs.First(a => a.Object == decompilerSettings.DecompilationObject1);
 			DecompilationObject2 = decompilationObjectVMs.First(a => a.Object == decompilerSettings.DecompilationObject2);
@@ -134,6 +163,7 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			d.DecompilationObject2 = DecompilationObject2.Object;
 			d.DecompilationObject3 = DecompilationObject3.Object;
 			d.DecompilationObject4 = DecompilationObject4.Object;
+			d.CSharpFormattingOptions = SelectedFormattingOptions.Object;
 
 			if (g.AnonymousMethods != d.AnonymousMethods) flags |= RefreshFlags.ILAst | RefreshFlags.ShowMember;
 			if (g.ExpressionTrees != d.ExpressionTrees) flags |= RefreshFlags.ILAst;
@@ -175,6 +205,10 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			if (g.MemberAddPrivateModifier != d.MemberAddPrivateModifier) flags |= RefreshFlags.CSharp;
 			if (g.HexadecimalNumbers != d.HexadecimalNumbers) flags |= RefreshFlags.CSharp;
 
+			if (!g.CSharpFormattingOptions.Equals(d.CSharpFormattingOptions)) {
+				flags |= RefreshFlags.CSharp | RefreshFlags.ShowMember;
+			}
+
 			if ((flags & RefreshFlags.ShowMember) != 0)
 				appRefreshSettings.Add(AppSettingsConstants.REFRESH_LANGUAGE_SHOWMEMBER);
 			if ((flags & RefreshFlags.ILAst) != 0)
@@ -196,6 +230,16 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 
 		public DecompilationObjectVM(DecompilationObject decompilationObject, string text) {
 			Object = decompilationObject;
+			Text = text;
+		}
+	}
+
+	sealed class FormattingOptionsVM : ViewModelBase {
+		public CSharpFormattingOptions Object { get; }
+		public string Text { get; }
+
+		public FormattingOptionsVM(CSharpFormattingOptions formattingOptions, string text) {
+			Object = formattingOptions;
 			Text = text;
 		}
 	}
