@@ -273,12 +273,11 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		}
 
 		static string? TryGetExceptionName(CorValue? exObj) {
-			var corClass = exObj?.ExactType?.Class;
-			if (corClass is null)
+			var exactType = exObj?.ExactType;
+			if (exactType is null)
 				return null;
-			var mdi = corClass.Module?.GetMetaDataInterface<IMetaDataImport>();
+			var mdi = exactType.GetMetaDataImport(out uint token);
 			var list = new List<string>(4);
-			uint token = corClass.Token;
 
 			while ((token & 0x00FFFFFF) != 0) {
 				var name = MDAPI.GetTypeDefName(mdi, token);
@@ -329,8 +328,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			token = null;
 
 			while (type is not null) {
-				var mdi = type.Class?.Module?.GetMetaDataInterface<IMetaDataImport>();
-				var fdTokens = MDAPI.GetFieldTokens(mdi, type.Class?.Token ?? 0);
+				var mdi = type.GetMetaDataImport(out uint typeToken);
+				var fdTokens = MDAPI.GetFieldTokens(mdi, typeToken);
 				foreach (var fdToken in fdTokens) {
 					if (MDAPI.GetFieldName(mdi, fdToken) != name)
 						continue;
