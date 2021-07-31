@@ -445,6 +445,13 @@ namespace dnSpy.Documents {
 					}
 				}
 
+				var bundle = SingleFileBundle.FromPEImage(peImage);
+				if (bundle != null) {
+					var options = new ModuleCreationOptions(DsDotNetDocumentBase.CreateModuleContext(assemblyResolver));
+					options.TryToLoadPdbFromDisk = false;
+					return new DsBundleDocument(peImage, bundle, options);
+				}
+
 				return new DsPEDocument(peImage);
 			}
 			catch {

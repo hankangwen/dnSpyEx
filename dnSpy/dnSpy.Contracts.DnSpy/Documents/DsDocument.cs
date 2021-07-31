@@ -310,6 +310,51 @@ namespace dnSpy.Contracts.Documents {
 	}
 
 	/// <summary>
+	/// .NET single file bundle
+	/// </summary>
+	public class DsBundleDocument : DsDocument, IDsPEDocument, IDisposable {
+		/// <inheritdoc/>
+		public override DsDocumentInfo? SerializedDocument => DsDocumentInfo.CreateDocument(Filename);
+		/// <inheritdoc/>
+		public override IDsDocumentNameKey Key => FilenameKey.CreateFullPath(Filename);
+		/// <inheritdoc/>
+		public override IPEImage? PEImage { get; }
+		/// <summary>
+		/// The bundle represented by this document.
+		/// </summary>
+		public SingleFileBundle Bundle { get; }
+
+		ModuleCreationOptions opts;
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="peImage">PE image</param>
+		/// <param name="bundle">Parsed bundle</param>
+		public DsBundleDocument(IPEImage peImage, SingleFileBundle bundle, ModuleCreationOptions options) {
+			PEImage = peImage;
+			Filename = peImage.Filename ?? string.Empty;
+			Bundle = bundle;
+			opts = options;
+		}
+
+		/// <inheritdoc/>
+		protected override TList<IDsDocument> CreateChildren() {
+			var list = new TList<IDsDocument>();
+			foreach (var entry in Bundle.Entries) {
+				if (entry.Type == BundleFileType.Assembly) {
+					list.Add(DsDotNetDocument.CreateAssembly(DsDocumentInfo.CreateInMemory(() => (entry.Data, true), null), ModuleDefMD.Load(entry.Data, opts), true));
+				}
+			}
+
+			return list;
+		}
+
+		/// <inheritdoc/>
+		public void Dispose() => PEImage!.Dispose();
+	}
+
+	/// <summary>
 	/// mmap'd I/O helper methods
 	/// </summary>
 	static class MemoryMappedIOHelper {

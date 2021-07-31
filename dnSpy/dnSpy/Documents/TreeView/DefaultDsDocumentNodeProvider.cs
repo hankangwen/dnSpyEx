@@ -27,7 +27,7 @@ namespace dnSpy.Documents.TreeView {
 		public DsDocumentNode? Create(IDocumentTreeView documentTreeView, DsDocumentNode? owner, IDsDocument document) {
 			if (document is IDsDotNetDocument dnDocument) {
 				Debug2.Assert(document.ModuleDef is not null);
-				if (document.AssemblyDef is null || owner is not null)
+				if (document.AssemblyDef is null || owner is not null && owner.Document is not DsBundleDocument)
 					return new ModuleDocumentNodeImpl(dnDocument);
 				return new AssemblyDocumentNodeImpl(dnDocument);
 			}
