@@ -36,10 +36,10 @@
     <!-- Update app.config whenever some of these versions change (eg. dnlib version) -->
     <DiaSymReaderVersion>1.7.0</DiaSymReaderVersion>
     <DnlibVersion>3.3.3</DnlibVersion>
-    <IcedVersion>1.12.0</IcedVersion>
+    <IcedVersion>1.13.0</IcedVersion>
     <MSBuildNuGetVersion>16.10.0</MSBuildNuGetVersion>
     <MSDiagRuntimeVersion>1.1.142101</MSDiagRuntimeVersion>
-    <MSVSCompositionVersion>16.4.11</MSVSCompositionVersion>
+    <MSVSCompositionVersion>16.9.20</MSVSCompositionVersion>
     <MSVSIntellisenseVersion>15.5.27130</MSVSIntellisenseVersion>
     <MSVSTextVersion>15.5.27130</MSVSTextVersion>
     <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
