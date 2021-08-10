@@ -21,6 +21,7 @@
 */
 
 using System.Xml.Linq;
+using dnlib.DotNet;
 using dnSpy.BamlDecompiler.Baml;
 using dnSpy.BamlDecompiler.Xaml;
 
@@ -36,10 +37,19 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var value = XamlUtils.Escape(record.Value);
 			xamlProp.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
 
-			var attr = new XAttribute(xamlProp.ToXName(ctx, parent.Xaml, xamlProp.IsAttachedTo(elemType)), value);
-			parent.Xaml.Element.Add(attr);
+			parent.Xaml.Element.Add(ConstructXAttribute());
 
 			return null;
+
+			XAttribute ConstructXAttribute() {
+				if (xamlProp.IsAttachedTo(elemType))
+					return new XAttribute(xamlProp.ToXName(ctx, parent.Xaml), value);
+
+				if (xamlProp.PropertyName == "Name" && elemType?.ResolvedType.ResolveTypeDef()?.Scope == ctx.Module)
+					return new XAttribute(ctx.GetKnownNamespace("Name", XamlContext.KnownNamespace_Xaml), value);
+
+				return new XAttribute(xamlProp.ToXName(ctx, parent.Xaml, false), value);
+			}
 		}
 	}
 }
