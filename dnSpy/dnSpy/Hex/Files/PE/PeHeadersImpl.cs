@@ -47,9 +47,15 @@ namespace dnSpy.Hex.Files.PE {
 			var fileSpan = this.fileSpan;
 			if (IsFileLayout) {
 				foreach (var sect in SectionHeaders) {
-					if (rva >= sect.VirtualAddress && rva < sect.VirtualAddress + Math.Max(sect.VirtualSize, sect.SizeOfRawData))
-						return fileSpan.Start + ((rva - sect.VirtualAddress) + sect.PointerToRawData);
+					if (rva >= sect.VirtualAddress &&
+						rva < sect.VirtualAddress + Math.Max(sect.VirtualSize, sect.SizeOfRawData)) {
+						uint offset = (rva - sect.VirtualAddress) + sect.PointerToRawData;
+						if (sect.PointerToRawData <= offset && offset < sect.PointerToRawData + sect.SizeOfRawData)
+							return fileSpan.Start + offset;
+					}
 				}
+
+				return 0;
 			}
 
 			return fileSpan.Start + rva;
@@ -65,6 +71,8 @@ namespace dnSpy.Hex.Files.PE {
 					if (offset >= sect.PointerToRawData && offset < sect.PointerToRawData + sect.SizeOfRawData)
 						return (uint)(offset - sect.PointerToRawData) + sect.VirtualAddress;
 				}
+
+				return 0;
 			}
 
 			return (uint)(position - fileSpan.Start).ToUInt64();
@@ -78,9 +86,15 @@ namespace dnSpy.Hex.Files.PE {
 			ulong pos = (position - fileSpan.Start).ToUInt64();
 			if (!IsFileLayout) {
 				foreach (var sect in SectionHeaders) {
-					if (pos >= sect.VirtualAddress && pos < sect.VirtualAddress + Math.Max(sect.VirtualSize, sect.SizeOfRawData))
-						return (pos - sect.VirtualAddress) + sect.PointerToRawData;
+					if (pos >= sect.VirtualAddress &&
+						pos < sect.VirtualAddress + Math.Max(sect.VirtualSize, sect.SizeOfRawData)) {
+						pos = pos - sect.VirtualAddress + sect.PointerToRawData;
+						if (sect.PointerToRawData <= pos && pos < sect.PointerToRawData + sect.SizeOfRawData)
+							return pos;
+					}
 				}
+
+				return 0;
 			}
 
 			return pos;
@@ -93,6 +107,8 @@ namespace dnSpy.Hex.Files.PE {
 					if (position >= sect.PointerToRawData && position < sect.PointerToRawData + sect.SizeOfRawData)
 						return fileSpan.Start + position - sect.PointerToRawData + sect.VirtualAddress;
 				}
+
+				return 0;
 			}
 
 			if (position >= fileSpan.Length)
