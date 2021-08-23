@@ -54,6 +54,8 @@ The workaround is to add WindowsDesktop above.
     </None>
   </ItemGroup>
 
+  <Import Project="$(MSBuildProjectDirectory)\..\..\Build\PatchSubSystem\PatchSubSystem.tasks" Condition=" '$(IsDotNetFramework)' != 'true' "/>
+
   <ItemGroup>
     <ProjectReference Include="..\dnSpy.Contracts.Logic\dnSpy.Contracts.Logic.csproj" />
     <ProjectReference Include="..\dnSpy.Decompiler\dnSpy.Decompiler.csproj" />
