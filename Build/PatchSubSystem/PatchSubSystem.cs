@@ -35,13 +35,20 @@ namespace PatchSubSystem {
 				return false;
 			}
 
+			var exeFile = Path.ChangeExtension(OutputFile, "exe");
+
+			if (!File.Exists(exeFile)) {
+				Log.LogMessageFromText("Apphost for specified output file does not exist", MessageImportance.High);
+				return false;
+			}
+
 			uint subSystemOffset;
-			using (var peImage = new PEImage(OutputFile, verify: true)) {
+			using (var peImage = new PEImage(exeFile, verify: true)) {
 				// 68 = offset from start of optional header to SubSystem value.
 				subSystemOffset = (uint)peImage.ImageNTHeaders.OptionalHeader.StartOffset + 68;
 			}
 
-			using (var fs = File.Open(OutputFile, FileMode.Open, FileAccess.Write)) {
+			using (var fs = File.Open(exeFile, FileMode.Open, FileAccess.Write)) {
 				fs.Position = subSystemOffset;
 				var subSystemBytes = BitConverter.GetBytes((ushort)targetSubSystem);
 				fs.Write(subSystemBytes, 0, sizeof(ushort));
