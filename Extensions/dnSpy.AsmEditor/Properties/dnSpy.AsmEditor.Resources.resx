@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2106,7 +2106,7 @@ Most options will be re-initialized when this checkbox is clicked</value>
     <value>M_ajorVersion</value>
   </data>
   <data name="SaveModule_TablesHeap_MinorVersion" xml:space="preserve">
-    <value>Reserv_ed1</value>
+    <value>M_inorVersion</value>
   </data>
   <data name="SaveModule_TablesHeap_Reserved1" xml:space="preserve">
     <value>Reserv_ed1</value>
