@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using dnlib.DotNet;
 
@@ -28,6 +29,7 @@ namespace dnSpy.AsmEditor.Resources {
 		public ManifestResourceAttributes Attributes;
 		public AssemblyRef? Assembly;
 		public FileDef? File;
+		public List<CustomAttribute> CustomAttributes = new List<CustomAttribute>();
 
 		public ResourceOptions() {
 		}
@@ -36,6 +38,7 @@ namespace dnSpy.AsmEditor.Resources {
 			ResourceType = resource.ResourceType;
 			Name = resource.Name ?? UTF8String.Empty;
 			Attributes = resource.Attributes;
+			CustomAttributes.AddRange(resource.CustomAttributes);
 			switch (resource.ResourceType) {
 			case ResourceType.Embedded:
 				break;
@@ -78,6 +81,8 @@ namespace dnSpy.AsmEditor.Resources {
 
 			resource.Name = Name;
 			resource.Attributes = Attributes;
+			resource.CustomAttributes.Clear();
+			resource.CustomAttributes.AddRange(CustomAttributes);
 		}
 	}
 }

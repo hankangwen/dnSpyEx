@@ -757,7 +757,7 @@ namespace dnSpy.AsmEditor.Resources {
 				Name = "my.resources",
 				Attributes = ManifestResourceAttributes.Public,
 			};
-			var data = new ResourceVM(options, module);
+			var data = new ResourceVM(options, module, appService.DecompilerService);
 			var win = new ResourceDlg();
 			win.Title = dnSpy_AsmEditor_Resources.CreateMultiFileResourceCommand2;
 			win.DataContext = data;
@@ -856,7 +856,7 @@ namespace dnSpy.AsmEditor.Resources {
 				Attributes = ManifestResourceAttributes.Public,
 				Assembly = module.CorLibTypes.AssemblyRef,
 			};
-			var data = new ResourceVM(options, module);
+			var data = new ResourceVM(options, module, appService.DecompilerService);
 			var win = new ResourceDlg();
 			win.Title = dnSpy_AsmEditor_Resources.CreateAssemblyLinkedResourceCommand2;
 			win.DataContext = data;
@@ -951,7 +951,7 @@ namespace dnSpy.AsmEditor.Resources {
 				Attributes = ManifestResourceAttributes.Public,
 				File = new FileDefUser("somefile", dnlib.DotNet.FileAttributes.ContainsNoMetadata, Array.Empty<byte>()),
 			};
-			var data = new ResourceVM(options, module);
+			var data = new ResourceVM(options, module, appService.DecompilerService);
 			var win = new ResourceDlg();
 			win.Title = dnSpy_AsmEditor_Resources.CreateFileLinkedResourceCommand2;
 			win.DataContext = data;
@@ -1036,7 +1036,7 @@ namespace dnSpy.AsmEditor.Resources {
 			if (module is null)
 				throw new InvalidOperationException();
 
-			var data = new ResourceVM(new ResourceOptions(rsrcNode.Resource), module);
+			var data = new ResourceVM(new ResourceOptions(rsrcNode.Resource), module, appService.DecompilerService);
 			var win = new ResourceDlg();
 			win.DataContext = data;
 			win.Owner = appService.MainWindow;
