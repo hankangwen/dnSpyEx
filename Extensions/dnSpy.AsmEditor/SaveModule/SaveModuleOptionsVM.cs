@@ -1079,6 +1079,7 @@ namespace dnSpy.AsmEditor.SaveModule {
 			MajorVersion = new NullableByteVM(a => HasErrorUpdated());
 			MinorVersion = new NullableByteVM(a => HasErrorUpdated());
 			ExtraData = new NullableUInt32VM(a => HasErrorUpdated());
+			Log2Rid = new NullableByteVM(a => HasErrorUpdated());
 		}
 
 		public NullableUInt32VM Reserved1 { get; }
@@ -1096,6 +1097,8 @@ namespace dnSpy.AsmEditor.SaveModule {
 
 		public NullableUInt32VM ExtraData { get; }
 
+		public NullableByteVM Log2Rid { get; }
+
 		public bool? HasDeletedRows {
 			get => hasDeletedRows;
 			set {
@@ -1111,6 +1114,7 @@ namespace dnSpy.AsmEditor.SaveModule {
 			options.MinorVersion = MinorVersion.Value;
 			options.UseENC = UseENC;
 			options.ExtraData = ExtraData.Value;
+			options.Log2Rid = Log2Rid.Value;
 			options.HasDeletedRows = HasDeletedRows;
 		}
 
@@ -1120,6 +1124,7 @@ namespace dnSpy.AsmEditor.SaveModule {
 			MinorVersion.Value = options.MinorVersion;
 			UseENC = options.UseENC;
 			ExtraData.Value = options.ExtraData;
+			Log2Rid.Value = options.Log2Rid;
 			HasDeletedRows = options.HasDeletedRows;
 		}
 
@@ -1128,7 +1133,8 @@ namespace dnSpy.AsmEditor.SaveModule {
 				return Reserved1.HasError ||
 					MajorVersion.HasError ||
 					MinorVersion.HasError ||
-					ExtraData.HasError;
+					ExtraData.HasError ||
+					Log2Rid.HasError;
 			}
 		}
 	}
