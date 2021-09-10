@@ -19,7 +19,6 @@
 
 using System;
 using dnSpy.Contracts.Decompiler;
-using ICSharpCode.Decompiler.Ast;
 
 namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 	/// <summary>
@@ -27,7 +26,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 	/// gets called.
 	/// </summary>
 	struct BuilderState : IDisposable {
-		public AstBuilder AstBuilder => State.AstBuilder;
+		public ICSharpCode.Decompiler.CSharp.CSharpDecompiler AstBuilder => State.AstBuilder;
 
 		public readonly AstBuilderState State;
 		readonly BuilderCache cache;
@@ -35,9 +34,9 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		public BuilderState(DecompilationContext ctx, BuilderCache cache, MetadataTextColorProvider metadataTextColorProvider) {
 			this.cache = cache;
 			State = cache.AllocateAstBuilderState();
-			State.AstBuilder.Context.CalculateILSpans = ctx.CalculateILSpans;
-			State.AstBuilder.Context.MetadataTextColorProvider = metadataTextColorProvider;
-			State.AstBuilder.Context.AsyncMethodBodyDecompilation = ctx.AsyncMethodBodyDecompilation;
+			// State.AstBuilder.Context.CalculateILSpans = ctx.CalculateILSpans;
+			// State.AstBuilder.Context.MetadataTextColorProvider = metadataTextColorProvider;
+			// State.AstBuilder.Context.AsyncMethodBodyDecompilation = ctx.AsyncMethodBodyDecompilation;
 		}
 
 		public void Dispose() => cache.Free(State);

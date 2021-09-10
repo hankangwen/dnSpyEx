@@ -20,30 +20,40 @@
 using System.Diagnostics;
 using System.Linq;
 using dnlib.DotNet;
-using ICSharpCode.Decompiler.Ast.Transforms;
-using ICSharpCode.NRefactory.CSharp;
+using ICSharpCode.Decompiler.CSharp;
+using ICSharpCode.Decompiler.CSharp.Syntax;
+using ICSharpCode.Decompiler.CSharp.Transforms;
 
 namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 	sealed class AssemblyInfoTransform : IAstTransform {
-		public void Run(AstNode compilationUnit) {
+		public void Run(AstNode compilationUnit, TransformContext context) {
 			foreach (var attrSect in compilationUnit.Descendants.OfType<AttributeSection>()) {
 				var attr = attrSect.Descendants.OfType<Attribute>().FirstOrDefault();
 				Debug2.Assert(attr is not null);
-				if (attr is null)
-					continue;
-				bool remove = false;
-				if (!remove && attr.Annotation<CustomAttribute>() is CustomAttribute ca) {
-					remove =
-						Compare(ca.AttributeType, systemRuntimeVersioningString, targetFrameworkAttributeString) ||
-						Compare(ca.AttributeType, systemSecurityString, unverifiableCodeAttributeString) ||
-						Compare(ca.AttributeType, systemRuntimeCompilerServicesyString, compilationRelaxationsAttributeString) ||
-						Compare(ca.AttributeType, systemRuntimeCompilerServicesyString, runtimeCompatibilityAttributeString) ||
-						Compare(ca.AttributeType, systemDiagnosticsString, debuggableAttributeString);
-				}
-				if (!remove && attr.Annotation<SecurityAttribute>() is SecurityAttribute)
-					remove = true;
-				if (remove)
-					attrSect.Remove();
+				// if (attr is null)
+				// 	continue;
+				// var symbol = attr.GetSymbol();
+				// ITypeDefOrRef? def;
+				// switch (symbol) {
+				// case ICSharpCode.Decompiler.TypeSystem.IType type:
+				// 	def = type.GetDefinition()?.MetadataToken as ITypeDefOrRef;
+				// 	break;
+				// default:
+				// 	continue;
+				// }
+				// bool remove = false;
+				// if (!remove && attr.Annotation<CustomAttribute>() is CustomAttribute ca) {
+				// 	remove =
+				// 		Compare(def, systemRuntimeVersioningString, targetFrameworkAttributeString) ||
+				// 		Compare(def, systemSecurityString, unverifiableCodeAttributeString) ||
+				// 		Compare(def, systemRuntimeCompilerServicesyString, compilationRelaxationsAttributeString) ||
+				// 		Compare(def, systemRuntimeCompilerServicesyString, runtimeCompatibilityAttributeString) ||
+				// 		Compare(def, systemDiagnosticsString, debuggableAttributeString);
+				// }
+				// if (!remove && attr.Annotation<SecurityAttribute>() is SecurityAttribute)
+				// 	remove = true;
+				// if (remove)
+				// 	attrSect.Remove();
 			}
 		}
 		static readonly UTF8String systemRuntimeVersioningString = new UTF8String("System.Runtime.Versioning");
@@ -56,7 +66,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		static readonly UTF8String systemDiagnosticsString = new UTF8String("System.Diagnostics");
 		static readonly UTF8String debuggableAttributeString = new UTF8String("DebuggableAttribute");
 
-		static bool Compare(ITypeDefOrRef type, UTF8String expNs, UTF8String expName) {
+		static bool Compare(ITypeDefOrRef? type, UTF8String expNs, UTF8String expName) {
 			if (type is null)
 				return false;
 

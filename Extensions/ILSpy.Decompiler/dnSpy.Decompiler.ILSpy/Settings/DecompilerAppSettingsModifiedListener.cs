@@ -45,13 +45,13 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			if (refreshIL)
 				RefreshCode<Core.IL.ILDecompiler>();
 #if DEBUG
-			if (refreshILAst)
-				RefreshCode<Core.ILAst.ILAstDecompiler>();
+			// if (refreshILAst)
+			// 	RefreshCode<Core.ILAst.ILAstDecompiler>();
 #endif
 			if (refreshCSharp)
 				RefreshCode<Core.CSharp.CSharpDecompiler>();
-			if (refreshVB)
-				RefreshCode<Core.VisualBasic.VBDecompiler>();
+			// if (refreshVB)
+			// 	RefreshCode<Core.VisualBasic.VBDecompiler>();
 		}
 
 		IEnumerable<(IDocumentTab tab, IDecompiler decompiler)> DecompilerTabs {

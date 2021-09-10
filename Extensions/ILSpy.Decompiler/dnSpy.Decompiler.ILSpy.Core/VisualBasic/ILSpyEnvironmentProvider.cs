@@ -1,14 +1,14 @@
 // Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -22,10 +22,8 @@ using System.Linq;
 using System.Text;
 using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
-using ICSharpCode.Decompiler.Ast;
-using ICSharpCode.NRefactory.TypeSystem;
-using ICSharpCode.NRefactory.VB.Visitors;
 
+/*
 namespace dnSpy.Decompiler.ILSpy.Core.VisualBasic {
 	sealed class ILSpyEnvironmentProvider : IEnvironmentProvider {
 		public string RootNamespace => "";
@@ -41,7 +39,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.VisualBasic {
 			return mr is null ? string.Empty : mr.FullName;
 		}
 
-		/*
+
 var annotation = type.Annotation<TypeReference>();
 if (annotation is null )
 	return null;
@@ -52,7 +50,7 @@ if (entity is not null) {
 	current = loader.ReadTypeReference(typeInfo).Resolve(context).GetDefinition();
 }
 
-return loader.ReadTypeReference(annotation, entity: current).Resolve(context);*/
+return loader.ReadTypeReference(annotation, entity: current).Resolve(context);
 		public ICSharpCode.NRefactory.TypeSystem.IType ResolveType(ICSharpCode.NRefactory.VB.Ast.AstType type, ICSharpCode.NRefactory.VB.Ast.TypeDeclaration? entity = null) => SpecialType.UnknownType;
 
 		public TypeKind GetTypeKindForAstType(ICSharpCode.NRefactory.CSharp.AstType type) {
@@ -170,3 +168,4 @@ return loader.ReadTypeReference(annotation, entity: current).Resolve(context);*/
 		}
 	}
 }
+*/

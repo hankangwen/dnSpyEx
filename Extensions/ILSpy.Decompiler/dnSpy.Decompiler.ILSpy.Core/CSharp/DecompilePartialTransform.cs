@@ -21,8 +21,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using dnlib.DotNet;
-using ICSharpCode.Decompiler.Ast.Transforms;
-using ICSharpCode.NRefactory.CSharp;
+using ICSharpCode.Decompiler.CSharp;
+using ICSharpCode.Decompiler.CSharp.Syntax;
+using ICSharpCode.Decompiler.CSharp.Transforms;
 
 namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 	sealed class DecompilePartialTransform : IAstTransform {
@@ -40,9 +41,20 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			this.ifacesToRemove = new HashSet<ITypeDefOrRef>(ifacesToRemove, TypeEqualityComparer.Instance);
 		}
 
-		public void Run(AstNode compilationUnit) {
+		public void Run(AstNode compilationUnit, TransformContext context) {
 			foreach (var en in compilationUnit.Descendants.OfType<EntityDeclaration>()) {
-				var def = en.Annotation<IMemberDef>();
+				var symbol = en.GetSymbol();
+				dnlib.DotNet.IMemberRef? def;
+				switch (symbol) {
+				case ICSharpCode.Decompiler.TypeSystem.IMember member:
+					def = member.MetadataToken;
+					break;
+				case ICSharpCode.Decompiler.TypeSystem.IType type:
+					def = type.GetDefinition()?.MetadataToken;
+					break;
+				default:
+					continue;
+				}
 				Debug2.Assert(def is not null);
 				if (def is null)
 					continue;

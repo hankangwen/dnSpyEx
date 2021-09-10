@@ -28,12 +28,8 @@ using dnSpy.Decompiler.ILSpy.Core.Settings;
 using dnSpy.Decompiler.ILSpy.Core.Text;
 using dnSpy.Decompiler.VisualBasic;
 using ICSharpCode.Decompiler;
-using ICSharpCode.Decompiler.Ast;
-using ICSharpCode.Decompiler.Ast.Transforms;
-using ICSharpCode.NRefactory.CSharp;
-using ICSharpCode.NRefactory.VB;
-using ICSharpCode.NRefactory.VB.Visitors;
 
+/*
 namespace dnSpy.Decompiler.ILSpy.Core.VisualBasic {
 	sealed class DecompilerProvider : IDecompilerProvider {
 		readonly DecompilerSettingsService decompilerSettingsService;
@@ -333,3 +329,4 @@ namespace dnSpy.Decompiler.ILSpy.Core.VisualBasic {
 			new VisualBasicFormatter(output, flags, null).Write(member);
 	}
 }
+*/
