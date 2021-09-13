@@ -29,6 +29,7 @@ using System.Windows.Media;
 using System.Windows.Shell;
 using dnSpy.Contracts.Images;
 using dnSpy.Contracts.MVVM;
+using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.Contracts.Controls {
 	/// <summary>
@@ -116,6 +117,7 @@ namespace dnSpy.Contracts.Controls {
 		int WM_DPICHANGED_counter = 0;
 		IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
 			const int WM_DPICHANGED = 0x02E0;
+			const int WM_MOUSEHWHEEL = 0x020E;
 
 			if (msg == WM_DPICHANGED) {
 				if (WM_DPICHANGED_counter != 0)
@@ -134,7 +136,47 @@ namespace dnSpy.Contracts.Controls {
 				}
 			}
 
+			if (msg == WM_MOUSEHWHEEL) {
+				short delta = (short)unchecked((uint)(long)wParam >> 16);
+				if (delta == 0) {
+					return IntPtr.Zero;
+				}
+
+				var element = Mouse.DirectlyOver;
+				if (element is null)
+					return IntPtr.Zero;
+
+				handled = HandleHoriztonalScroll(element, (short)(delta / 10));
+
+				return IntPtr.Zero;
+			}
+
 			return IntPtr.Zero;
+		}
+
+		private protected virtual bool HandleHoriztonalScroll(IInputElement element, short delta) {
+			ScrollViewer? scrollViewer = null;
+			if (element is ScrollViewer scViewer) {
+				scrollViewer = scViewer;
+			}
+			else if (element is DependencyObject dependencyObject) {
+				var current = UIUtilities.GetParent(dependencyObject);
+
+				while (current != null) {
+					if (current is ScrollViewer newScrollViewer) {
+						scrollViewer = newScrollViewer;
+						break;
+					}
+					current = UIUtilities.GetParent(current);
+				}
+			}
+
+			if (scrollViewer is not null) {
+				scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + delta);
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>

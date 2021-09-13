@@ -33,36 +33,43 @@ jobs:
         shell: pwsh
         run: |
           .\build.ps1 netframework
+          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
+          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net48\* -DestinationPath C:\builtfiles\dnSpy-netframework.zip
+          .\clean-all.cmd
           
       - uses: actions/upload-artifact@v2
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
           name: dnSpy-netframework
-          path: dnSpy\dnSpy\bin\Release\net48\*
+          path: C:\builtfiles\dnSpy-netframework.zip
           if-no-files-found: error
 
       - name: Build dnSpy (.NET x86)
         shell: pwsh
         run: |
-          .\clean-all.cmd
           .\build.ps1 net-x86
+          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
+          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net5.0-windows\win-x86\publish\* -DestinationPath C:\builtfiles\dnSpy-net-win32.zip
+          .\clean-all.cmd
 
       - uses: actions/upload-artifact@v2
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
           name: dnSpy-net-win32
-          path: dnSpy\dnSpy\bin\Release\net5.0-windows\win-x86\publish\*
+          path: C:\builtfiles\dnSpy-net-win32.zip
           if-no-files-found: error
           
       - name: Build dnSpy (.NET x64)
         shell: pwsh
         run: |
-          .\clean-all.cmd
           .\build.ps1 net-x64
+          New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
+          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net5.0-windows\win-x64\publish\* -DestinationPath C:\builtfiles\dnSpy-net-win64.zip
+          .\clean-all.cmd
 
       - uses: actions/upload-artifact@v2
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
           name: dnSpy-net-win64
-          path: dnSpy\dnSpy\bin\Release\net5.0-windows\win-x64\publish\*
+          path: C:\builtfiles\dnSpy-net-win64.zip
           if-no-files-found: error

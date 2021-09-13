@@ -21,8 +21,10 @@ using System;
 using System.Linq;
 using System.Windows.Input;
 using dnlib.DotNet;
+using dnSpy.AsmEditor.DnlibDialogs;
 using dnSpy.AsmEditor.Properties;
 using dnSpy.AsmEditor.ViewHelpers;
+using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents;
 using dnSpy.Contracts.MVVM;
 using dnSpy.Contracts.Search;
@@ -129,13 +131,17 @@ namespace dnSpy.AsmEditor.Resources {
 		}
 		bool fileContainsNoMetadata;
 
+		public CustomAttributesVM CustomAttributesVM { get; }
+
 		readonly ModuleDef ownerModule;
 
-		public ResourceVM(ResourceOptions options, ModuleDef ownerModule) {
+		public ResourceVM(ResourceOptions options, ModuleDef ownerModule, IDecompilerService decompilerService) {
 			origOptions = options;
 			this.ownerModule = ownerModule;
 
 			FileHashValue = new HexStringVM(a => HasErrorUpdated());
+
+			CustomAttributesVM = new CustomAttributesVM(ownerModule, decompilerService);
 
 			Reinitialize();
 		}
@@ -167,6 +173,7 @@ namespace dnSpy.AsmEditor.Resources {
 				FileName = string.Empty;
 				FileContainsNoMetadata = false;
 			}
+			CustomAttributesVM.InitializeFrom(options.CustomAttributes);
 		}
 
 		ResourceOptions CopyTo(ResourceOptions options) {
@@ -177,6 +184,8 @@ namespace dnSpy.AsmEditor.Resources {
 			options.File = new FileDefUser(FileName,
 					FileContainsNoMetadata ? FileAttributes.ContainsNoMetadata : FileAttributes.ContainsMetadata,
 					FileHashValue.Value.ToArray());
+			options.CustomAttributes.Clear();
+			options.CustomAttributes.AddRange(CustomAttributesVM.Collection.Select(a => a.CreateCustomAttributeOptions().Create()));
 			return options;
 		}
 

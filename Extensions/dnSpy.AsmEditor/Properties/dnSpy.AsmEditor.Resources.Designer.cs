@@ -5366,6 +5366,15 @@ namespace dnSpy.AsmEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Log2Rid.
+        /// </summary>
+        public static string SaveModule_TablesHeap_Log2Rid {
+            get {
+                return ResourceManager.GetString("SaveModule_TablesHeap_Log2Rid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to M_ajorVersion.
         /// </summary>
         public static string SaveModule_TablesHeap_MajorVersion {
@@ -5375,7 +5384,7 @@ namespace dnSpy.AsmEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reserv_ed1.
+        ///   Looks up a localized string similar to M_inorVersion.
         /// </summary>
         public static string SaveModule_TablesHeap_MinorVersion {
             get {
