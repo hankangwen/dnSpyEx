@@ -25,8 +25,8 @@ using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Text;
 using dnSpy.Decompiler.ILSpy.Core.Settings;
 using dnSpy.Decompiler.ILSpy.Core.Text;
-using ICSharpCode.Decompiler;
 using ICSharpCode.Decompiler.Disassembler;
+using ICSharpCode.Decompiler.IL;
 
 /*
 namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
@@ -178,7 +178,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 		readonly List<SourceLocal> sourceLocalsList = new List<SourceLocal>();
 		SourceLocal[] CreateSourceLocals(HashSet<ILVariable> variables) {
 			foreach (var v in variables) {
-				if (v.IsParameter)
+				if (v.Kind == VariableKind.Parameter)
 					continue;
 				sourceLocalsList.Add(v.GetSourceLocal());
 			}
@@ -190,7 +190,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 		readonly List<SourceParameter> sourceParametersList = new List<SourceParameter>();
 		SourceParameter[] CreateSourceParameters(HashSet<ILVariable> variables) {
 			foreach (var v in variables) {
-				if (!v.IsParameter)
+				if (v.Kind != VariableKind.Parameter)
 					continue;
 				sourceParametersList.Add(v.GetSourceParameter());
 			}
@@ -367,14 +367,14 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 				uniqueGuid = new Guid($"CB470049-6AFB-4BDB-93DC-1BB9{id++:X8}"),
 				inlineVariables = false
 			};
-			string nextName = "ILAst (variable splitting)";
-			foreach (ILAstOptimizationStep step in (ILAstOptimizationStep[])Enum.GetValues(typeof(ILAstOptimizationStep))) {
-				yield return new ILAstDecompiler(decompilerSettingsService.ILAstDecompilerSettings, orderUI++, nextName) {
-					uniqueGuid = new Guid($"CB470049-6AFB-4BDB-93DC-1BB9{id++:X8}"),
-					abortBeforeStep = step
-				};
-				nextName = "ILAst (after " + step + ")";
-			}
+			// string nextName = "ILAst (variable splitting)";
+			// foreach (ILAstOptimizationStep step in (ILAstOptimizationStep[])Enum.GetValues(typeof(ILAstOptimizationStep))) {
+			// 	yield return new ILAstDecompiler(decompilerSettingsService.ILAstDecompilerSettings, orderUI++, nextName) {
+			// 		uniqueGuid = new Guid($"CB470049-6AFB-4BDB-93DC-1BB9{id++:X8}"),
+			// 		abortBeforeStep = step
+			// 	};
+			// 	nextName = "ILAst (after " + step + ")";
+			// }
 		}
 
 		public override string FileExtension => ".il";
