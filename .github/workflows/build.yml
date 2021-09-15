@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+      - feature/new-ilspy
   pull_request:
     branches:
       - master
+      - feature/new-ilspy
   release:
     types: released
 
