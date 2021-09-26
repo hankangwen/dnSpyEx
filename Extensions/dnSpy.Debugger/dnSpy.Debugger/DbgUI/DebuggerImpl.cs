@@ -406,6 +406,7 @@ namespace dnSpy.Debugger.DbgUI {
 			dbgManager.MessageUserMessage += DbgManager_MessageUserMessage;
 			dbgManager.MessageExceptionThrown += DbgManager_MessageExceptionThrown;
 			dbgManager.DbgManagerMessage += DbgManager_DbgManagerMessage;
+			dbgManager.ProcessesChanged += DbgManager_ProcessChanged;
 		}
 
 		void DbgManager_DbgManagerMessage(object? sender, DbgManagerMessageEventArgs e) {
@@ -430,6 +431,24 @@ namespace dnSpy.Debugger.DbgUI {
 				UI(() => ShowUnhandledException_UI(e));
 			}
 		}
+
+		void DbgManager_ProcessChanged(object? sender, DbgCollectionChangedEventArgs<DbgProcess> e) {
+			UI(() => {
+				string newProcessName = e.Objects[0].Name;
+
+				if (e.Added) {
+					if (oldProcessName is not null)
+						appWindow.Value.RemoveTitleInfo(oldProcessName);
+					appWindow.Value.AddTitleInfo(newProcessName);
+					oldProcessName = newProcessName;
+				}
+				else {
+					appWindow.Value.RemoveTitleInfo(newProcessName);
+					oldProcessName = null;
+				}
+			});
+		}
+		string? oldProcessName;
 
 		void UI(Action callback) => uiDispatcher.UI(callback);
 
