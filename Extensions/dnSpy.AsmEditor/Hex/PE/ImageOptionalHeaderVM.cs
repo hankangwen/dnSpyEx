@@ -25,7 +25,7 @@ using dnSpy.Contracts.Hex.Files.PE;
 namespace dnSpy.AsmEditor.Hex.PE {
 	abstract class ImageOptionalHeaderVM : HexVM {
 		public abstract bool Is32Bit { get; }
-		public UInt16HexField MagicVM { get; }
+		public UInt16FlagsHexField MagicVM { get; }
 		public ByteHexField MajorLinkerVersionVM { get; }
 		public ByteHexField MinorLinkerVersionVM { get; }
 		public UInt32HexField SizeOfCodeVM { get; }
@@ -69,6 +69,12 @@ namespace dnSpy.AsmEditor.Hex.PE {
 		public override IEnumerable<HexField> HexFields => hexFields;
 		HexField[] hexFields;
 
+		static readonly IntegerHexBitFieldEnumInfo[] MagicInfos = new IntegerHexBitFieldEnumInfo[] {
+			new IntegerHexBitFieldEnumInfo(0x10B, "PE32"),
+			new IntegerHexBitFieldEnumInfo(0x107, "ROM image"),
+			new IntegerHexBitFieldEnumInfo(0x20B, "PE32+"),
+		};
+
 		static readonly IntegerHexBitFieldEnumInfo[] SubsystemInfos = new IntegerHexBitFieldEnumInfo[] {
 			new IntegerHexBitFieldEnumInfo(0, dnSpy_AsmEditor_Resources.Unknown),
 			new IntegerHexBitFieldEnumInfo(1, "Native"),
@@ -90,7 +96,8 @@ namespace dnSpy.AsmEditor.Hex.PE {
 		protected ImageOptionalHeaderVM(HexBuffer buffer, PeOptionalHeaderData optionalHeader)
 			: base(optionalHeader.Span) {
 			hexFields = null!;
-			MagicVM = new UInt16HexField(optionalHeader.Magic);
+			MagicVM = new UInt16FlagsHexField(optionalHeader.Magic);
+			MagicVM.Add(new IntegerHexBitField(optionalHeader.Magic.Name, 0, 16, MagicInfos));
 			MajorLinkerVersionVM = new ByteHexField(optionalHeader.MajorLinkerVersion, true);
 			MinorLinkerVersionVM = new ByteHexField(optionalHeader.MinorLinkerVersion, true);
 			SizeOfCodeVM = new UInt32HexField(optionalHeader.SizeOfCode);
