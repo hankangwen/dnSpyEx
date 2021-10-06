@@ -37,7 +37,7 @@ namespace dnSpy.Contracts.Hex.Files.PE {
 		public abstract bool Is32Bit { get; }
 
 		/// <summary>IMAGE_OPTIONAL_HEADER.Magic</summary>
-		public abstract StructField<UInt16Data> Magic { get; }
+		public abstract StructField<UInt16EnumData> Magic { get; }
 		/// <summary>IMAGE_OPTIONAL_HEADER.MajorLinkerVersion</summary>
 		public abstract StructField<ByteData> MajorLinkerVersion { get; }
 		/// <summary>IMAGE_OPTIONAL_HEADER.MinorLinkerVersion</summary>
