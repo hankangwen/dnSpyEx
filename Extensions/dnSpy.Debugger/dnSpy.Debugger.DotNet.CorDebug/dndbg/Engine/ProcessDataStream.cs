@@ -19,6 +19,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using dndbg.DotNet;
 using dnlib.IO;
@@ -34,13 +35,15 @@ namespace dndbg.Engine {
 		}
 
 		public override unsafe void ReadBytes(uint offset, void* destination, int length) {
-			Debug.Fail("NYI");
-			throw new NotImplementedException();
+			reader.Position = basePos + offset;
+			byte[] dest = new byte[length];
+			reader.Read(dest, 0, length);
+			Marshal.Copy(dest, 0, (IntPtr)destination, length);
 		}
 
 		public override void ReadBytes(uint offset, byte[] destination, int destinationIndex, int length) {
-			Debug.Fail("NYI");
-			throw new NotImplementedException();
+			reader.Position = basePos + offset;
+			reader.Read(destination, destinationIndex, length);
 		}
 
 		public override byte ReadByte(uint offset) {
@@ -74,13 +77,17 @@ namespace dndbg.Engine {
 		}
 
 		public override string ReadUtf16String(uint offset, int chars) {
-			Debug.Fail("NYI");
-			throw new NotImplementedException();
+			reader.Position = basePos + offset;
+			byte[] dest = new byte[chars * 2];
+			reader.Read(dest, 0, chars * 2);
+			return Encoding.Unicode.GetString(dest);
 		}
 
 		public override string ReadString(uint offset, int length, Encoding encoding) {
-			Debug.Fail("NYI");
-			throw new NotImplementedException();
+			reader.Position = basePos + offset;
+			byte[] dest = new byte[length];
+			reader.Read(dest, 0, length);
+			return encoding.GetString(dest);
 		}
 
 		public override bool TryGetOffsetOf(uint offset, uint endOffset, byte value, out uint valueOffset) {
