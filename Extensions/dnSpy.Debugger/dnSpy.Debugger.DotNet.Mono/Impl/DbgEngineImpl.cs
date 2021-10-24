@@ -555,7 +555,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 					if (start)
 						MonoDebugThread(() => OnDebuggerEvents());
 					foreach (var evt in eventSet.Events) {
-						if (evt.EventType == EventType.VMDisconnect)
+						if (evt.EventType == EventType.VMDisconnect || evt.EventType == EventType.Crash)
 							return;
 					}
 				}
@@ -927,6 +927,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 					break;
 
 				case EventType.VMDisconnect:
+				case EventType.Crash:
 					expectedSuspendPolicy = SuspendPolicy.None;
 					if (vmDeathExitCode is null && TryGetProcessExitCode(out exitCode))
 						vmDeathExitCode = exitCode;
