@@ -224,6 +224,15 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore all state machines.
+        /// </summary>
+        public static string DecompilerSettings_IgnoreAll {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_IgnoreAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use increment and decrement operators.
         /// </summary>
         public static string DecompilerSettings_IntroduceIncrementAndDecrement {

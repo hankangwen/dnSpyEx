@@ -218,5 +218,10 @@ namespace dnSpy.Contracts.Decompiler {
 		public static readonly Guid HexadecimalNumbers_GUID = new Guid("CFBE77DA-3139-4E8C-91DF-3D546480F535");
 		/// <summary />
 		public static readonly string HexadecimalNumbers_NAME = "hex";
+
+		/// <summary />
+		public static readonly Guid ForceIgnoreAll_GUID = new Guid("4D3EA3F4-9D39-4164-9B2C-85C815B18776");
+		/// <summary />
+		public static readonly string ForceIgnoreAll_NAME = "ignore-all";
 	}
 }

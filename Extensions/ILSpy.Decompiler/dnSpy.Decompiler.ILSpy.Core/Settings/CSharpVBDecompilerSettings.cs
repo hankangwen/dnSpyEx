@@ -228,6 +228,11 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_HexadecimalNumbers,
 				Name = DecompilerOptionConstants.HexadecimalNumbers_NAME,
 			};
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.ForceIgnoreAll_GUID,
+				() => decompilerSettings.ForceIgnoreAll, a => decompilerSettings.ForceIgnoreAll = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ShowCompilerGeneratedTypes,
+				Name = DecompilerOptionConstants.ForceIgnoreAll_NAME,
+			};
 		}
 
 		string GetMemberOrder() =>

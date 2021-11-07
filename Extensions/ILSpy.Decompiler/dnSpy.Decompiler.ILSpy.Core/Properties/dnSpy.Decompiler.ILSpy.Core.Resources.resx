@@ -171,6 +171,9 @@
   <data name="DecompilerSettings_HexadecimalNumbers" xml:space="preserve">
     <value>Hexadecimal numbers</value>
   </data>
+  <data name="DecompilerSettings_IgnoreAll" xml:space="preserve">
+    <value>Ignore all state machines</value>
+  </data>
   <data name="DecompilerSettings_IntroduceIncrementAndDecrement" xml:space="preserve">
     <value>Use increment and decrement operators</value>
   </data>
