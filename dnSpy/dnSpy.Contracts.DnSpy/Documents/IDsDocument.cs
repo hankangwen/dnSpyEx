@@ -56,6 +56,11 @@ namespace dnSpy.Contracts.Documents {
 		IPEImage? PEImage { get; }
 
 		/// <summary>
+		/// Gets the single file bundle descriptor or null if it's not a single file bundle.
+		/// </summary>
+		SingleFileBundle? SingleFileBundle { get; }
+
+		/// <summary>
 		/// Gets/sets the filename
 		/// </summary>
 		string Filename { get; set; }

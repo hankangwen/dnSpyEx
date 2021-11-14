@@ -39,6 +39,8 @@ namespace dnSpy.Contracts.Documents {
 		public virtual ModuleDef? ModuleDef => null;
 		/// <inheritdoc/>
 		public virtual IPEImage? PEImage => (ModuleDef as ModuleDefMD)?.Metadata?.PEImage;
+		/// <inheritdoc/>
+		public virtual SingleFileBundle? SingleFileBundle => null;
 
 		/// <inheritdoc/>
 		public string Filename {
@@ -322,7 +324,7 @@ namespace dnSpy.Contracts.Documents {
 		/// <summary>
 		/// The bundle represented by this document.
 		/// </summary>
-		public SingleFileBundle Bundle { get; }
+		public override SingleFileBundle? SingleFileBundle { get; }
 
 		ModuleCreationOptions opts;
 
@@ -334,16 +336,17 @@ namespace dnSpy.Contracts.Documents {
 		public DsBundleDocument(IPEImage peImage, SingleFileBundle bundle, ModuleCreationOptions options) {
 			PEImage = peImage;
 			Filename = peImage.Filename ?? string.Empty;
-			Bundle = bundle;
+			SingleFileBundle = bundle;
 			opts = options;
 		}
 
 		/// <inheritdoc/>
 		protected override TList<IDsDocument> CreateChildren() {
 			var list = new TList<IDsDocument>();
-			foreach (var entry in Bundle.Entries) {
+			foreach (var entry in SingleFileBundle!.Entries) {
 				if (entry.Type == BundleFileType.Assembly) {
-					list.Add(DsDotNetDocument.CreateAssembly(DsDocumentInfo.CreateInMemory(() => (entry.Data, true), null), ModuleDefMD.Load(entry.Data, opts), true));
+					list.Add(DsDotNetDocument.CreateAssembly(DsDocumentInfo.CreateInMemory(() => (entry.Data, true), null),
+						ModuleDefMD.Load(entry.Data, opts), true));
 				}
 			}
 
