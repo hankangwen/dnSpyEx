@@ -170,6 +170,9 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 
 				case DmdImageFileMachine.IA64:
 					return DmdAssemblyNameFlags.PA_IA64;
+
+				case DmdImageFileMachine.ARM64:
+					return DmdAssemblyNameFlags.PA_ARM64;
 				}
 			}
 

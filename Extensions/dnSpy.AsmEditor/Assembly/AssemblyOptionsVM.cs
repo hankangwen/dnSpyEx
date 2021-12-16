@@ -34,7 +34,7 @@ namespace dnSpy.AsmEditor.Assembly {
 		IA64 = (int)((uint)AssemblyAttributes.PA_IA64 >> (int)AssemblyAttributes.PA_Shift),
 		AMD64 = (int)((uint)AssemblyAttributes.PA_AMD64 >> (int)AssemblyAttributes.PA_Shift),
 		ARM = (int)((uint)AssemblyAttributes.PA_ARM >> (int)AssemblyAttributes.PA_Shift),
-		Reserved = 6,
+		ARM64 = (int)((uint)AssemblyAttributes.PA_ARM64 >> (int)AssemblyAttributes.PA_Shift),
 		NoPlatform = (int)((uint)AssemblyAttributes.PA_NoPlatform >> (int)AssemblyAttributes.PA_Shift),
 	}
 
