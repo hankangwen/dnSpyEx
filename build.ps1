@@ -2,7 +2,7 @@ param([string]$buildtfm = 'all', [switch]$NoMsbuild)
 $ErrorActionPreference = 'Stop'
 
 $netframework_tfm = 'net48'
-$net_tfm = 'net5.0-windows'
+$net_tfm = 'net6.0-windows'
 $configuration = 'Release'
 $net_baseoutput = "dnSpy\dnSpy\bin\$configuration"
 $apphostpatcher_dir = "Build\AppHostPatcher"

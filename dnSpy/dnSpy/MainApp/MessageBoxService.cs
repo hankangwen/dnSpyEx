@@ -152,7 +152,7 @@ namespace dnSpy.MainApp {
 
 		Func<string, T> CreateDefaultConverter<T>() {
 			var c = TypeDescriptor.GetConverter(typeof(T));
-			return s => (T)c.ConvertFromInvariantString(s);
+			return s => (T)c.ConvertFromInvariantString(s)!;
 		}
 
 		Func<string, string?> CreateDefaultVerifier<T>() {

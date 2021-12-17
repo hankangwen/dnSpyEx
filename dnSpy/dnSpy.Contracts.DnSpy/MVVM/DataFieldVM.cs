@@ -1706,13 +1706,13 @@ namespace dnSpy.Contracts.MVVM {
 			: base(onUpdated) => SetValueFromConstructor(value);
 
 		/// <inheritdoc/>
-		protected override string OnNewValue(T value) => (string)converter.ConvertTo(null, CultureInfo.InvariantCulture, value, typeof(string));
+		protected override string OnNewValue(T value) => (string)converter.ConvertTo(null, CultureInfo.InvariantCulture, value, typeof(string))!;
 
 		/// <inheritdoc/>
 		protected override string? ConvertToValue(out T value) {
 			string error;
 			try {
-				value = (T)converter.ConvertFrom(null, CultureInfo.InvariantCulture, StringValue);
+				value = (T)converter.ConvertFrom(null, CultureInfo.InvariantCulture, StringValue)!;
 				error = string.Empty;
 			}
 			catch (Exception ex) {

@@ -28,6 +28,7 @@
 
   <ItemGroup Condition=" '$(IsDotNetFramework)' == 'true' ">
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
 </Project>

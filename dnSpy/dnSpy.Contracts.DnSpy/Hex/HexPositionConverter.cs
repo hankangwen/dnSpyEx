@@ -27,25 +27,25 @@ namespace dnSpy.Contracts.Hex {
 	/// </summary>
 	public sealed class HexPositionConverter : TypeConverter {
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="sourceType"></param>
 		/// <returns></returns>
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+		public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
 			sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="culture"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) {
+		public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) {
 			if (value is string s)
 				return HexPosition.Parse(s);
-			return base.ConvertFrom(context, culture, value);
+			return base.ConvertFrom(context, culture, value)!;
 		}
 	}
 }

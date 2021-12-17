@@ -32,7 +32,7 @@ namespace dnSpy.Search {
 			var ary = ((string)parameter).Split(sep);
 			var s = (bool)value ? ary[0] : ary[1];
 			var c = TypeDescriptor.GetConverter(typeof(Thickness));
-			return c.ConvertFrom(null, culture, s);
+			return c.ConvertFrom(null, culture, s)!;
 		}
 		static readonly char[] sep = new char[] { '|' };
 
