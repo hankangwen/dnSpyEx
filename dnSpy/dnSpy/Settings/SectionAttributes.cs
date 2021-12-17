@@ -53,7 +53,7 @@ namespace dnSpy.Settings {
 
 			var c = TypeDescriptor.GetConverter(typeof(T));
 			try {
-				return (T)c.ConvertFromInvariantString(stringValue);
+				return (T)c.ConvertFromInvariantString(stringValue)!;
 			}
 			catch (FormatException) {
 			}
@@ -68,7 +68,7 @@ namespace dnSpy.Settings {
 				throw new ArgumentNullException(nameof(name));
 
 			var c = TypeDescriptor.GetConverter(typeof(T));
-			var stringValue = c.ConvertToInvariantString(value);
+			var stringValue = c.ConvertToInvariantString(value)!;
 			lock (lockObj)
 				attributes[name] = stringValue;
 		}
