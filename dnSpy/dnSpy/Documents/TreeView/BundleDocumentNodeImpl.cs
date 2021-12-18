@@ -14,8 +14,8 @@ namespace dnSpy.Documents.TreeView {
 		public BundleDocumentNodeImpl(IDsDocument document) : base(document) { }
 
 		public override Guid Guid => new Guid(DocumentTreeViewConstants.BUNDLE_NODE_GUID);
-
 		protected override ImageReference GetIcon(IDotNetImageService dnImgMgr) => dnImgMgr.GetImageReference(Document.PEImage!);
+		public override void Initialize() => TreeNode.LazyLoading = true;
 
 		public override IEnumerable<TreeNodeData> CreateChildren() {
 			Debug2.Assert(Document.SingleFileBundle is not null);

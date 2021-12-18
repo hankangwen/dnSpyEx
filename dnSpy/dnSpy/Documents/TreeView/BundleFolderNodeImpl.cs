@@ -13,6 +13,7 @@ namespace dnSpy.Documents.TreeView {
 		protected override ImageReference GetIcon(IDotNetImageService dnImgMgr) => DsImages.FolderClosed;
 		protected override ImageReference? GetExpandedIcon(IDotNetImageService dnImgMgr) => DsImages.FolderOpened;
 		public override NodePathName NodePathName => new NodePathName(Guid);
+		public override void Initialize() => TreeNode.LazyLoading = true;
 
 		readonly BundleFolder bundleFolder;
 		readonly BundleDocumentNode owner;
