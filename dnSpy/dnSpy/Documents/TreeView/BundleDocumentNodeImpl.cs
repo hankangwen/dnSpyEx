@@ -19,8 +19,19 @@ namespace dnSpy.Documents.TreeView {
 
 		public override IEnumerable<TreeNodeData> CreateChildren() {
 			Debug2.Assert(Document.SingleFileBundle is not null);
-			foreach (var document in Document.Children)
-				yield return Context.DocumentTreeView.CreateNode(this, document);
+
+			// Ensure docuemt children are initialized.
+			// This is needed as loading the Children of the docment will assign the Document property of BundleEntry objects.
+			var _ = Document.Children;
+
+			foreach (var bundleFolder in Document.SingleFileBundle.TopLevelFolders) {
+				yield return new BundleFolderNodeImpl(this, bundleFolder);
+			}
+
+			foreach (var entry in Document.SingleFileBundle.TopLevelEntries) {
+				if (entry.Document is not null)
+					yield return Context.DocumentTreeView.CreateNode(this, entry.Document);
+			}
 
 			// TODO: return all bundle entries
 		}

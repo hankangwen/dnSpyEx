@@ -19,13 +19,23 @@ namespace dnSpy.Contracts.Documents {
 		public string RelativePath { get; }
 
 		/// <summary>
+		/// The file name of the entry.
+		/// </summary>
+		public string? FileName { get; internal set; }
+
+		/// <summary>
+		/// Docuemnt assosciated with this entry.
+		/// </summary>
+		public IDsDocument? Document { get; internal set; }
+
+		/// <summary>
 		/// The raw data of the entry.
 		/// </summary>
 		public byte[] Data { get; }
 
 		BundleEntry(BundleFileType type, string relativePath, byte[] data) {
 			Type = type;
-			RelativePath = relativePath;
+			RelativePath = relativePath.Replace('/', '\\');
 			Data = data;
 		}
 

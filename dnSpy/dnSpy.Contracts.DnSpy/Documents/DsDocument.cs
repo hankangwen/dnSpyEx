@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using dnlib.DotNet;
 using dnlib.PE;
 using dnSpy.Contracts.Utilities;
@@ -326,16 +327,19 @@ namespace dnSpy.Contracts.Documents {
 		/// </summary>
 		public override SingleFileBundle? SingleFileBundle { get; }
 
-		ModuleCreationOptions opts;
+		readonly ModuleCreationOptions opts;
+		readonly string directoryOfBundle;
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="peImage">PE image</param>
 		/// <param name="bundle">Parsed bundle</param>
+		/// <param name="options">Module creation options</param>
 		public DsBundleDocument(IPEImage peImage, SingleFileBundle bundle, ModuleCreationOptions options) {
 			PEImage = peImage;
 			Filename = peImage.Filename ?? string.Empty;
+			directoryOfBundle = Path.GetDirectoryName(Filename) ?? string.Empty;
 			SingleFileBundle = bundle;
 			opts = options;
 		}
@@ -345,8 +349,14 @@ namespace dnSpy.Contracts.Documents {
 			var list = new TList<IDsDocument>();
 			foreach (var entry in SingleFileBundle!.Entries) {
 				if (entry.Type == BundleFileType.Assembly) {
-					list.Add(DsDotNetDocument.CreateAssembly(DsDocumentInfo.CreateInMemory(() => (entry.Data, true), null),
-						ModuleDefMD.Load(entry.Data, opts), true));
+					var mod = ModuleDefMD.Load(entry.Data, opts);
+					mod.Location = Path.Combine(directoryOfBundle, entry.RelativePath);
+
+					var document = entry.Document = DsDotNetDocument.CreateAssembly(
+						DsDocumentInfo.CreateInMemory(() => (entry.Data, true), mod.Location),
+						mod, true);
+
+					list.Add(document);
 				}
 			}
 
@@ -365,7 +375,7 @@ namespace dnSpy.Contracts.Documents {
 		/// Disable memory mapped I/O
 		/// </summary>
 		/// <param name="document">Document</param>
-		public static void DisableMemoryMappedIO(IDsDocument document) {
+		public static void DisableMemoryMappedIO(IDsDocument? document) {
 			if (document is null)
 				return;
 			DisableMemoryMappedIO(document.PEImage);

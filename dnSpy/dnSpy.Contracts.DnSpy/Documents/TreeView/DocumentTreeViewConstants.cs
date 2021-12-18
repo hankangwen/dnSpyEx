@@ -48,6 +48,9 @@ namespace dnSpy.Contracts.Documents.TreeView {
 		/// <summary><see cref="BundleDocumentNode"/></summary>
 		public const string BUNDLE_NODE_GUID = "56ADC6DE-146D-4967-AE15-1F561CB61DFC";
 
+		/// <summary><see cref="BundleFolderNode"/></summary>
+		public const string BUNDLE_FOLDER_NODE_GUID = "BCF6AA92-94FF-4837-9E55-0C770FCB3BB4";
+
 		/// <summary><see cref="ResourcesFolderNode"/></summary>
 		public const string RESOURCES_FOLDER_NODE_GUID = "1DD75445-9DED-482F-B6EB-4FD13E4A2197";
 

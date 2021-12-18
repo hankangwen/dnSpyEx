@@ -296,8 +296,15 @@ namespace dnSpy.Documents.Tabs {
 					timestampLine += $"{dnSpy_Resources.UnknownValue} ({ts:X8})";
 				decompiler.WriteCommentLine(output, timestampLine);
 			}
-
-			//TODO: Write information about the bundle.
+			var bundle = node.Document.SingleFileBundle;
+			if (bundle is not null) {
+				output.WriteLine();
+				// TODO: Localize these strings.
+				decompiler.WriteCommentLine(output, ".NET Bundle:");
+				decompiler.WriteCommentLine(output, $"Format Version: {bundle.MajorVersion}.{bundle.MinorVersion}");
+				decompiler.WriteCommentLine(output, $"ID: {bundle.BundleID}");
+				decompiler.WriteCommentLine(output, $"Entry Count: {bundle.Entries.Count}");
+			}
 		}
 
 		static NodeType GetNodeType(DocumentTreeNodeData node) {

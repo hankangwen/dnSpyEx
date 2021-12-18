@@ -69,9 +69,19 @@ namespace dnSpy.Contracts.Documents {
 		public ulong Flags { get; }
 
 		/// <summary>
-		/// The entries present in the bundle
+		/// All of the entries present in the bundle
 		/// </summary>
 		public IReadOnlyList<BundleEntry> Entries { get; }
+
+		/// <summary>
+		/// The top level entries present in the bundle
+		/// </summary>
+		public IReadOnlyList<BundleEntry> TopLevelEntries { get; }
+
+		/// <summary>
+		/// The top level folders present in the bundle.
+		/// </summary>
+		public IReadOnlyList<BundleFolder> TopLevelFolders { get; }
 
 		SingleFileBundle(DataReader reader, uint major, uint minor) {
 			MajorVersion = major;
@@ -87,6 +97,31 @@ namespace dnSpy.Contracts.Documents {
 			}
 
 			Entries = BundleEntry.ReadEntries(reader, EntryCount, MajorVersion >= 6);
+
+			var rootFolder = new BundleFolder("");
+			var folders = new Dictionary<string, BundleFolder> { { "", rootFolder } };
+			foreach (var entry in Entries) {
+				(string dirname, string filename) = SeperateFileName(entry.RelativePath);
+				entry.FileName = filename;
+				GetFolder(dirname).Entries.Add(entry);
+			}
+			TopLevelEntries = rootFolder.Entries;
+			TopLevelFolders = rootFolder.Folders;
+
+			static (string directory, string file) SeperateFileName(string filename) {
+				int pos = filename.LastIndexOfAny(new[] { '/', '\\' });
+				return pos == -1 ? ("", filename) : (filename.Substring(0, pos), filename.Substring(pos + 1));
+			}
+
+			BundleFolder GetFolder(string name) {
+				if (folders.TryGetValue(name, out var result))
+					return result;
+				(string dirname, string basename) = SeperateFileName(name);
+				result = new BundleFolder(basename);
+				GetFolder(dirname).Folders.Add(result);
+				folders.Add(name, result);
+				return result;
+			}
 		}
 
 		/// <summary>
