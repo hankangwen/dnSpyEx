@@ -477,7 +477,7 @@ namespace dnSpy.Documents.TreeView {
 			// Check for bundles
 			foreach (var n in TopNodes.OfType<BundleDocumentNode>()) {
 				n.TreeNode.EnsureChildrenLoaded();
-				foreach (var a in n.TreeNode.DataChildren.OfType<AssemblyDocumentNode>()) {
+				foreach (var a in GetAllBundleAssemblies(n)) {
 					if (a.Document.AssemblyDef == asm)
 						return a;
 				}
@@ -506,8 +506,7 @@ namespace dnSpy.Documents.TreeView {
 
 			// Check for bundles
 			foreach (var n in TopNodes.OfType<BundleDocumentNode>()) {
-				n.TreeNode.EnsureChildrenLoaded();
-				foreach (var a in n.TreeNode.DataChildren.OfType<AssemblyDocumentNode>()) {
+				foreach (var a in GetAllBundleAssemblies(n)) {
 					a.TreeNode.EnsureChildrenLoaded();
 					foreach (var m in a.TreeNode.DataChildren.OfType<ModuleDocumentNode>()) {
 						if (m.Document.ModuleDef == mod)
@@ -517,6 +516,18 @@ namespace dnSpy.Documents.TreeView {
 			}
 
 			return null;
+		}
+
+		static IEnumerable<AssemblyDocumentNode> GetAllBundleAssemblies(DocumentTreeNodeData bundleNode) {
+			bundleNode.TreeNode.EnsureChildrenLoaded();
+			foreach (var a in bundleNode.TreeNode.DataChildren.OfType<AssemblyDocumentNode>()) {
+				yield return a;
+			}
+			foreach (var b in bundleNode.TreeNode.DataChildren.OfType<BundleFolderNode>()) {
+				b.TreeNode.EnsureChildrenLoaded();
+				foreach (var a in GetAllBundleAssemblies(b))
+					yield return a;
+			}
 		}
 
 		public TypeNode? FindNode(TypeDef? td) {
@@ -683,8 +694,7 @@ namespace dnSpy.Documents.TreeView {
 				}
 
 				if (node is BundleDocumentNode bundleNode) {
-					bundleNode.TreeNode.EnsureChildrenLoaded();
-					foreach (var a in bundleNode.TreeNode.DataChildren.OfType<AssemblyDocumentNode>()) {
+					foreach (var a in GetAllBundleAssemblies(bundleNode)) {
 						a.TreeNode.EnsureChildrenLoaded();
 						foreach (var m in a.TreeNode.DataChildren.OfType<ModuleDocumentNode>()) {
 							yield return m;
