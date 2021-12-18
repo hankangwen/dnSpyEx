@@ -163,6 +163,13 @@ namespace dnSpy.Documents {
 				foreach (var info in documents) {
 					if (comparer.Equals(info.Document.AssemblyDef, assembly))
 						return info.Document;
+
+					if (info.Document is DsBundleDocument) {
+						foreach (var documentChild in info.Document.Children) {
+							if (comparer.Equals(documentChild.AssemblyDef, assembly))
+								return documentChild;
+						}
+					}
 				}
 				foreach (var info in documents) {
 					if (info.IsAlternativeAssemblyName(assembly))
@@ -224,6 +231,13 @@ namespace dnSpy.Documents {
 			foreach (var info in documents) {
 				if (key.Equals(info.Document.Key))
 					return info;
+
+				if (info.Document is DsBundleDocument) {
+					foreach (var documentChild in info.Document.Children) {
+						if (key.Equals(documentChild.Key))
+							return new DocumentInfo(documentChild);
+					}
+				}
 			}
 			return default;
 		}
