@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using dnlib.IO;
 
 namespace dnSpy.Contracts.Documents {
@@ -8,6 +9,9 @@ namespace dnSpy.Contracts.Documents {
 	/// Represents one entry in a <see cref="SingleFileBundle"/>
 	/// </summary>
 	public sealed class BundleEntry {
+		byte[]? data;
+		DataReader reader;
+
 		/// <summary>
 		/// Type of the entry <seealso cref="BundleFileType"/>
 		/// </summary>
@@ -31,12 +35,25 @@ namespace dnSpy.Contracts.Documents {
 		/// <summary>
 		/// The raw data of the entry.
 		/// </summary>
-		public byte[] Data { get; }
+		public byte[] Data {
+			get {
+				if (data is not null)
+					return data;
+				Interlocked.CompareExchange(ref data, reader.ReadRemainingBytes(), null);
+				return data;
+			}
+		}
 
 		BundleEntry(BundleFileType type, string relativePath, byte[] data) {
 			Type = type;
 			RelativePath = relativePath.Replace('/', '\\');
-			Data = data;
+			this.data = data;
+		}
+
+		BundleEntry(BundleFileType type, string relativePath, DataReader reader) {
+			Type = type;
+			RelativePath = relativePath.Replace('/', '\\');
+			this.reader = reader;
 		}
 
 		internal static IReadOnlyList<BundleEntry> ReadEntries(DataReader reader, int count, bool allowCompression) {
@@ -49,18 +66,16 @@ namespace dnSpy.Contracts.Documents {
 				var type = (BundleFileType)reader.ReadByte();
 				string path = reader.ReadSerializedString();
 
-				res[i] = new BundleEntry(type, path, ReadEntryData(reader, offset, size, compSize));
+				if (compSize == 0)
+					res[i] = new BundleEntry(type, path, reader.Slice((uint)offset, (uint)size));
+				else
+					res[i] = new BundleEntry(type, path, ReadCompressedEntryData(reader, offset, size, compSize));
 			}
 
 			return res;
 		}
 
-		static byte[] ReadEntryData(DataReader reader, long offset, long size, long compSize) {
-			if (compSize == 0) {
-				reader.Position = (uint)offset;
-				return reader.ReadBytes((int)size);
-			}
-
+		static byte[] ReadCompressedEntryData(DataReader reader, long offset, long size, long compSize) {
 			using (var decompressedStream = new MemoryStream((int)size)) {
 				using (var compressedStream = reader.Slice((uint)offset, (uint)compSize).AsStream()) {
 					using (var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress)) {
