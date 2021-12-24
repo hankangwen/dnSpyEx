@@ -31,6 +31,20 @@ namespace dnSpy.Documents.TreeView {
 			foreach (var entry in Document.SingleFileBundle.TopLevelEntries) {
 				if (entry.Document is not null)
 					yield return Context.DocumentTreeView.CreateNode(this, entry.Document);
+				else {
+					switch (entry.Type) {
+					case BundleFileType.Unknown:
+					case BundleFileType.Symbols:
+						yield return new UnknownBundleEntryNodeImpl(entry);
+						break;
+					case BundleFileType.DepsJson:
+					case BundleFileType.RuntimeConfigJson:
+						yield return new JsonBundleEntryNodeImpl(entry);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+					}
+				}
 			}
 
 			// TODO: return all bundle entries

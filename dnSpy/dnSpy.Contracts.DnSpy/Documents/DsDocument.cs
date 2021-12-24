@@ -359,7 +359,7 @@ namespace dnSpy.Contracts.Documents {
 					list.Add(document);
 				}
 				else if (entry.Type == BundleFileType.NativeBinary)
-					list.Add(new DsPEDocument(new PEImage(entry.Data, Path.Combine(directoryOfBundle, entry.RelativePath))));
+					list.Add(entry.Document = new DsPEDocument(new PEImage(entry.Data, Path.Combine(directoryOfBundle, entry.RelativePath))));
 			}
 
 			return list;

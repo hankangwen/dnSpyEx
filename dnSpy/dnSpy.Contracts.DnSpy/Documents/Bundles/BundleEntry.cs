@@ -23,6 +23,16 @@ namespace dnSpy.Contracts.Documents {
 		public string RelativePath { get; }
 
 		/// <summary>
+		/// The offset of the entry's data.
+		/// </summary>
+		public long Offset { get; }
+
+		/// <summary>
+		/// The size of the entry's data.
+		/// </summary>
+		public long Size { get; }
+
+		/// <summary>
 		/// The file name of the entry.
 		/// </summary>
 		public string? FileName { get; internal set; }
@@ -44,15 +54,19 @@ namespace dnSpy.Contracts.Documents {
 			}
 		}
 
-		BundleEntry(BundleFileType type, string relativePath, byte[] data) {
+		BundleEntry(BundleFileType type, string relativePath, long offset, long size, byte[] data) {
 			Type = type;
 			RelativePath = relativePath.Replace('/', '\\');
+			Offset = offset;
+			Size = size;
 			this.data = data;
 		}
 
-		BundleEntry(BundleFileType type, string relativePath, DataReader reader) {
+		BundleEntry(BundleFileType type, string relativePath, long offset, long size, DataReader reader) {
 			Type = type;
 			RelativePath = relativePath.Replace('/', '\\');
+			Offset = offset;
+			Size = size;
 			this.reader = reader;
 		}
 
@@ -67,9 +81,9 @@ namespace dnSpy.Contracts.Documents {
 				string path = reader.ReadSerializedString();
 
 				if (compSize == 0)
-					res[i] = new BundleEntry(type, path, reader.Slice((uint)offset, (uint)size));
+					res[i] = new BundleEntry(type, path, offset, size, reader.Slice((uint)offset, (uint)size));
 				else
-					res[i] = new BundleEntry(type, path, ReadCompressedEntryData(reader, offset, size, compSize));
+					res[i] = new BundleEntry(type, path, offset, size, ReadCompressedEntryData(reader, offset, size, compSize));
 			}
 
 			return res;
