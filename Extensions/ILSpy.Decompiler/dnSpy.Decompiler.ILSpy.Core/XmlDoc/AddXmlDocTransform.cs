@@ -43,7 +43,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.XmlDoc {
 					dnlib.DotNet.IMemberRef? mr;
 					switch (symbol) {
 					case IMember member:
-						mr = member.MetadataToken;
+						mr = member.MetadataToken as IMemberRef;
 						break;
 					case ICSharpCode.Decompiler.TypeSystem.IType type:
 						mr = type.GetDefinition()?.MetadataToken;

@@ -89,7 +89,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		public void Run(AstNode compilationUnit, TransformContext context) {
 			foreach (var en in compilationUnit.Descendants.OfType<EntityDeclaration>()) {
 				var symbol = en.GetSymbol();
-				dnlib.DotNet.IMemberRef? def;
+				dnlib.DotNet.IMDTokenProvider? def;
 				switch (symbol) {
 				case ICSharpCode.Decompiler.TypeSystem.IMember member:
 					def = member.MetadataToken;

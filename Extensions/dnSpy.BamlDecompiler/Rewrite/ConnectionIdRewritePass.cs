@@ -223,7 +223,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 							}
 							else if (call.Arguments.Count == 2) {
 								var add = call.Method;
-								var ev = add.MetadataToken?.DeclaringType.Events.FirstOrDefault(e =>
+								var ev = add.MetadataToken?.DeclaringType.Resolve().Events.FirstOrDefault(e =>
 									e.AddMethod == add.MetadataToken);
 
 								if (ev is null || !MatchEventHandlerCreation(call.Arguments[1], out var handlerName)) {
