@@ -88,18 +88,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 
 		public void Run(AstNode compilationUnit, TransformContext context) {
 			foreach (var en in compilationUnit.Descendants.OfType<EntityDeclaration>()) {
-				var symbol = en.GetSymbol();
-				dnlib.DotNet.IMDTokenProvider? def;
-				switch (symbol) {
-				case ICSharpCode.Decompiler.TypeSystem.IMember member:
-					def = member.MetadataToken;
-					break;
-				case ICSharpCode.Decompiler.TypeSystem.IType type:
-					def = type.GetDefinition()?.MetadataToken;
-					break;
-				default:
-					continue;
-				}
+				var def = en.Annotation<IMemberDef>();
 				Debug2.Assert(def is not null);
 				if (def is null)
 					continue;
