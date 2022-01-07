@@ -341,5 +341,23 @@ namespace dnSpy.Documents {
 
 			return null;
 		}
+
+		public bool TryGetLatestNetStandardCompatibleVersion(Version netStandardVersion, out Version? netCoreVersion) {
+			netCoreVersion = null;
+
+			if (!HasDotNet)
+				return false;
+
+			bool foundMatch = false;
+			foreach (var info in netPaths) {
+				if (info.IsCompatibleWithNetStandard(netStandardVersion) &&
+					(netCoreVersion is null || info.SystemVersion > netCoreVersion)) {
+					foundMatch = true;
+					netCoreVersion = info.SystemVersion;
+				}
+			}
+
+			return foundMatch;
+		}
 	}
 }
