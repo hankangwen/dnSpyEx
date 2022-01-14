@@ -822,7 +822,7 @@ namespace dnSpy.Decompiler.CSharp {
 				return;
 			var namespaces = ns.Split(nsSep);
 			for (int i = 0; i < namespaces.Length; i++) {
-				OutputWrite(namespaces[i], BoxedTextColor.Namespace);
+				OutputWrite(IdentifierEscaper.Escape(namespaces[i]), BoxedTextColor.Namespace);
 				WritePeriod();
 			}
 		}
@@ -1107,7 +1107,7 @@ namespace dnSpy.Decompiler.CSharp {
 			for (int i = 0; i < parts.Length; i++) {
 				if (i > 0)
 					OutputWrite(".", BoxedTextColor.Operator);
-				OutputWrite(parts[i], BoxedTextColor.Namespace);
+				OutputWrite(IdentifierEscaper.Escape(parts[i]), BoxedTextColor.Namespace);
 			}
 		}
 		static readonly char[] namespaceSeparators = new char[] { '.' };
