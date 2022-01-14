@@ -1227,6 +1227,18 @@ Are you sure you want to expand it?</value>
   <data name="StartDebuggingCommand" xml:space="preserve">
     <value>Start Debugging</value>
   </data>
+  <data name="StartDebuggingWarning_UnknownBitness" xml:space="preserve">
+    <value>The target file's bitness could not be determined. Debugging may cause unwanted/uncontroled execution of the image.
+
+Do you wish to continue?</value>
+  </data>
+  <data name="StartDebuggingWarning_IncorrectBitness" xml:space="preserve">
+    <value>The target file's bitness does not match with the current dnSpy version. Debugging may cause unwanted/uncontroled execution of the image.
+
+It is recommended to use 32-bit dnSpy to debug 32-bit images and 64-bit dnSpy to debug 64-bit images.
+
+Do you wish to continue?</value>
+  </data>
   <data name="Breakpoint_Tracepoint_BreakPrintMessage" xml:space="preserve">
     <value>Break and print message '{0}'</value>
   </data>
