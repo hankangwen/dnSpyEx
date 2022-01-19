@@ -73,11 +73,11 @@ $buildNetX64 = $buildtfm -eq 'all' -or $buildtfm -eq 'net-x64'
 
 if ($buildNetX86 -or $buildNetX64) {
 	if ($NoMsbuild) {
-		dotnet build -v:m -c $configuration -f $netframework_tfm $apphostpatcher_dir\AppHostPatcher.csproj
+		dotnet build -v:m -c $configuration -f $netframework_tfm -p:PublishReadyToRun=true $apphostpatcher_dir\AppHostPatcher.csproj
 		if ($LASTEXITCODE) { exit $LASTEXITCODE }
 	}
 	else {
-		msbuild -v:m -m -restore -t:Build -p:Configuration=$configuration -p:TargetFramework=$netframework_tfm $apphostpatcher_dir\AppHostPatcher.csproj
+		msbuild -v:m -m -restore -t:Build -p:Configuration=$configuration -p:TargetFramework=$netframework_tfm -p:PublishReadyToRun=true $apphostpatcher_dir\AppHostPatcher.csproj
 		if ($LASTEXITCODE) { exit $LASTEXITCODE }
 	}
 }
