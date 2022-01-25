@@ -46,11 +46,11 @@ function Build-Net {
 	$publishDir = "$outdir\publish"
 
 	if ($NoMsbuild) {
-		dotnet publish -v:m -c $configuration -f $net_tfm -r $rid --self-contained
+		dotnet publish -v:m -c $configuration -f $net_tfm -r $rid --self-contained -p:PublishReadyToRun=true
 		if ($LASTEXITCODE) { exit $LASTEXITCODE }
 	}
 	else {
-		msbuild -v:m -m -restore -t:Publish -p:Configuration=$configuration -p:TargetFramework=$net_tfm -p:RuntimeIdentifier=$rid -p:SelfContained=True
+		msbuild -v:m -m -restore -t:Publish -p:Configuration=$configuration -p:TargetFramework=$net_tfm -p:RuntimeIdentifier=$rid -p:SelfContained=True -p:PublishReadyToRun=true
 		if ($LASTEXITCODE) { exit $LASTEXITCODE }
 	}
 
