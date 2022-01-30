@@ -824,6 +824,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		static BreakProcessKind GetBreakProcessKind(string? breakKind) {
 			if (breakKind == PredefinedBreakKinds.EntryPoint)
 				return BreakProcessKind.EntryPoint;
+			if (breakKind == PredefinedBreakKinds.ModuleCctorOrEntryPoint)
+				return BreakProcessKind.ModuleCctorOrEntryPoint;
 			return BreakProcessKind.None;
 		}
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -137,6 +137,9 @@
   </data>
   <data name="DbgBreak_Dont" xml:space="preserve">
     <value>Don't Break</value>
+  </data>
+  <data name="DbgBreak_ModuleClassConstructorOrEntryPoint" xml:space="preserve">
+    <value>Module .cctor or Entry Point</value>
   </data>
   <data name="DbgBreak_EntryPoint" xml:space="preserve">
     <value>Entry Point</value>

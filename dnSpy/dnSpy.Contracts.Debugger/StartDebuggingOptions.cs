@@ -56,6 +56,11 @@ namespace dnSpy.Contracts.Debugger {
 		public const string CreateProcess = nameof(CreateProcess);
 
 		/// <summary>
+		/// Module static constructor or Entry point
+		/// </summary>
+		public const string ModuleCctorOrEntryPoint = nameof(ModuleCctorOrEntryPoint);
+
+		/// <summary>
 		/// Entry point
 		/// </summary>
 		public const string EntryPoint = nameof(EntryPoint);
