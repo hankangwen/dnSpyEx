@@ -411,7 +411,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		void TypeToString(IDecompilerOutput output, ConvertTypeOptions options, ITypeDefOrRef? type, IHasCustomAttribute? typeAttributes = null) {
 			if (type is null)
 				return;
-			AstType astType = ICSharpCode.Decompiler.CSharp.CSharpDecompiler.ConvertType(type.ToTypeSig(), typeAttributes, options);
+			AstType astType = ICSharpCode.Decompiler.CSharp.CSharpDecompiler.ConvertType(type, new StringBuilder(), typeAttributes, options);
 
 			if (WriteRefIfByRef(output, type.TryGetByRefSig(), typeAttributes as ParamDef)) {
 				if (astType is ComposedType && ((ComposedType)astType).PointerRank > 0)
@@ -477,7 +477,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			if (type is null)
 				throw new ArgumentNullException(nameof(type));
 
-			TypeToString(output, ConvertTypeOptions.DoNotUsePrimitiveTypeNames | ConvertTypeOptions.IncludeTypeParameterDefinitions, type);
+			TypeToString(output, ConvertTypeOptions.DoNotUsePrimitiveTypeNames | ConvertTypeOptions.IncludeTypeParameterDefinitions | ConvertTypeOptions.DoNotIncludeEnclosingType, type);
 		}
 
 		internal static bool ShowMember(IMemberRef member, bool showAllMembers, DecompilerSettings settings) {
