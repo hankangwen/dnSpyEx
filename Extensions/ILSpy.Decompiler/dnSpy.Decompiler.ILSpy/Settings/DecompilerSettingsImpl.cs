@@ -21,6 +21,7 @@ using System;
 using System.ComponentModel.Composition;
 using dnSpy.Contracts.Settings;
 using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.CSharp;
 
 namespace dnSpy.Decompiler.ILSpy.Settings {
 	[Export]
@@ -30,7 +31,7 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 		readonly ISettingsService settingsService;
 
 		[ImportingConstructor]
-		DecompilerSettingsImpl(ISettingsService settingsService) {
+		DecompilerSettingsImpl(ISettingsService settingsService) : base(LanguageVersion.CSharp9_0) {
 			this.settingsService = settingsService;
 
 			disableSave = true;

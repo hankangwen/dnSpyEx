@@ -30,7 +30,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 	/// is not thread safe and must only be accessed by the owner thread.
 	/// </summary>
 	sealed class AstBuilderState {
-		public readonly ICSharpCode.Decompiler.CSharp.CSharpDecompiler AstBuilder;
+		public readonly ICSharpCode.Decompiler.CSharp.CSharpAstBuilder AstBuilder;
 
 		/// <summary>
 		/// <see cref="StringBuilder"/> instance used by XML doc code. This is always in a random
@@ -43,7 +43,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		bool lastModuleResult;
 
 		public AstBuilderState(int settingsVersion) {
-			AstBuilder = new ICSharpCode.Decompiler.CSharp.CSharpDecompiler();
+			AstBuilder = new ICSharpCode.Decompiler.CSharp.CSharpAstBuilder(new DecompilerContext(settingsVersion, null, null, true));
 			XmlDoc_StringBuilder = new StringBuilder();
 			hasXmlDocFile = new Dictionary<ModuleDef, bool>();
 		}
@@ -69,9 +69,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		/// Called to re-use this instance for another decompilation. Only the fields that need
 		/// resetting will be reset.
 		/// </summary>
-		public void Reset() {
-			//TODO:
-		}
+		public void Reset() => AstBuilder.Reset();
 	}
 
 	/// <summary>

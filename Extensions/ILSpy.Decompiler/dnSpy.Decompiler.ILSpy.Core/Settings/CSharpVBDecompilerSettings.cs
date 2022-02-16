@@ -25,6 +25,7 @@ using dnSpy.Contracts.Decompiler;
 using dnSpy.Decompiler.ILSpy.Core.Properties;
 using dnSpy.Decompiler.Settings;
 using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.CSharp;
 
 namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 	sealed class CSharpVBDecompilerSettings : DecompilerSettingsBase {
@@ -35,7 +36,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 		public override event EventHandler? VersionChanged;
 
 		public CSharpVBDecompilerSettings(DecompilerSettings? decompilerSettings = null) {
-			this.decompilerSettings = decompilerSettings ?? new DecompilerSettings();
+			this.decompilerSettings = decompilerSettings ?? new DecompilerSettings(LanguageVersion.CSharp9_0);
 			options = CreateOptions().ToArray();
 			this.decompilerSettings.SettingsVersionChanged += DecompilerSettings_SettingsVersionChanged;
 		}
