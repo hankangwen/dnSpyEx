@@ -40,7 +40,6 @@ jobs:
           .\clean-all.cmd
           
       - uses: actions/upload-artifact@v2
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
           name: dnSpy-netframework
           path: C:\builtfiles\dnSpy-netframework.zip
@@ -55,7 +54,6 @@ jobs:
           .\clean-all.cmd
 
       - uses: actions/upload-artifact@v2
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
           name: dnSpy-net-win32
           path: C:\builtfiles\dnSpy-net-win32.zip
@@ -70,7 +68,6 @@ jobs:
           .\clean-all.cmd
 
       - uses: actions/upload-artifact@v2
-        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
         with:
           name: dnSpy-net-win64
           path: C:\builtfiles\dnSpy-net-win64.zip
