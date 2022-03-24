@@ -1437,6 +1437,9 @@ Do you wish to continue?</value>
   <data name="ExceptionMessage" xml:space="preserve">
     <value>Message: {0}</value>
   </data>
+  <data name="ExceptionHResult" xml:space="preserve">
+    <value>HResult: 0x{0:X8}</value>
+  </data>
   <data name="ExceptionName" xml:space="preserve">
     <value>Exception: {0}</value>
   </data>
