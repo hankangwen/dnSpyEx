@@ -103,7 +103,7 @@ Namespace Global.Microsoft.CodeAnalysis.Editor.VisualBasic.QuickInfo
 				Return Nothing
 			End If
 
-			Dim semantics = Await document.GetSemanticModelForNodeAsync(token.Parent, cancellationToken).ConfigureAwait(False)
+			Dim semantics = Await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(False)
 
 			Dim types = dnSpy.Roslyn.Utilities2.EnumerableExtensions2.WhereNotNull(declarators.SelectMany(Function(d) d.Names).Select(
 				Function(n)
@@ -143,7 +143,7 @@ Namespace Global.Microsoft.CodeAnalysis.Editor.VisualBasic.QuickInfo
 
 			builder.AddRange(documentation.PrefixParts)
 
-			Dim semanticModel = Await document.GetSemanticModelForNodeAsync(expression, cancellationToken).ConfigureAwait(False)
+			Dim semanticModel = Await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(False)
 
 			Dim position = expression.SpanStart
 
@@ -156,7 +156,7 @@ Namespace Global.Microsoft.CodeAnalysis.Editor.VisualBasic.QuickInfo
 				Dim typeNameToBind = documentation.TryGetTypeNameParameter(expression, i)
 
 				If typeNameToBind IsNot Nothing Then
-					' We'll try to bind the type name 
+					' We'll try to bind the type name
 					Dim typeInfo = semanticModel.GetTypeInfo(typeNameToBind, cancellationToken)
 
 					If typeInfo.Type IsNot Nothing Then

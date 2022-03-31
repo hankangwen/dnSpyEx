@@ -12,16 +12,19 @@ Imports Roslyn.Utilities
 Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 	Friend Class SpecialFormattingRule
-		Inherits AbstractFormattingRule
+		Inherits CompatAbstractFormattingRule
 
-		Public Sub New()
+		Private ReadOnly _indentStyle As FormattingOptions.IndentStyle
+
+		Public Sub New(indentStyle As FormattingOptions.IndentStyle)
+			_indentStyle = indentStyle
 		End Sub
 
-		Public Overrides Sub AddSuppressOperations(list As List(Of SuppressOperation), node As SyntaxNode, lastToken As SyntaxToken, optionSet As OptionSet, nextOperation As NextAction(Of SuppressOperation))
+		Public Overrides Sub AddSuppressOperationsSlow(list As List(Of SuppressOperation), node As SyntaxNode, ByRef nextOperation As NextSuppressOperationAction)
 			' don't suppress anything
 		End Sub
 
-		Public Overrides Function GetAdjustNewLinesOperation(previousToken As SyntaxToken, currentToken As SyntaxToken, optionSet As OptionSet, nextOperation As NextOperation(Of AdjustNewLinesOperation)) As AdjustNewLinesOperation
+		Public Overrides Function GetAdjustNewLinesOperationSlow(ByRef previousToken As SyntaxToken, ByRef currentToken As SyntaxToken, ByRef nextOperation As NextGetAdjustNewLinesOperation) As AdjustNewLinesOperation
 
 			' unlike regular one. force position of attribute
 			Dim attributeNode = TryCast(previousToken.Parent, AttributeListSyntax)
@@ -30,7 +33,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			End If
 
 			' no line operation. no line changes what so ever
-			Dim lineOperation = MyBase.GetAdjustNewLinesOperation(previousToken, currentToken, optionSet, nextOperation)
+			Dim lineOperation = MyBase.GetAdjustNewLinesOperationSlow(previousToken, currentToken, nextOperation)
 			If lineOperation IsNot Nothing Then
 				' basically means don't ever put new line if there isn't already one, but do
 				' indentation.
@@ -40,8 +43,8 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			Return Nothing
 		End Function
 
-		Public Overrides Function GetAdjustSpacesOperation(previousToken As SyntaxToken, currentToken As SyntaxToken, optionSet As OptionSet, nextOperation As NextOperation(Of AdjustSpacesOperation)) As AdjustSpacesOperation
-			Dim spaceOperation = MyBase.GetAdjustSpacesOperation(previousToken, currentToken, optionSet, nextOperation)
+		Public Overrides Function GetAdjustSpacesOperationSlow(ByRef previousToken As SyntaxToken, ByRef currentToken As SyntaxToken, ByRef nextOperation As NextGetAdjustSpacesOperation) As AdjustSpacesOperation
+			Dim spaceOperation = MyBase.GetAdjustSpacesOperationSlow(previousToken, currentToken,nextOperation)
 
 			' if there is force space operation, convert it to ForceSpaceIfSingleLine operation.
 			' (force space basically means remove all line breaks)
@@ -52,8 +55,8 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			Return spaceOperation
 		End Function
 
-		Public Overrides Sub AddIndentBlockOperations(list As List(Of IndentBlockOperation), node As SyntaxNode, optionSet As OptionSet, nextOperation As NextAction(Of IndentBlockOperation))
-			nextOperation.Invoke(list)
+		Public Overrides Sub AddIndentBlockOperationsSlow(list As List(Of IndentBlockOperation), node As SyntaxNode, ByRef nextOperation As NextIndentBlockOperationAction)
+			nextOperation.Invoke()
 
 			Dim singleLineLambdaFunction = TryCast(node, SingleLineLambdaExpressionSyntax)
 			If singleLineLambdaFunction IsNot Nothing Then
@@ -108,11 +111,11 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 					baseToken, startToken, endToken, TextSpan.FromBounds(baseToken.Span.End, closeBrace.Span.End), indentationDelta, IndentBlockOption.RelativePosition))
 		End Sub
 
-		Public Overrides Sub AddAlignTokensOperations(operations As List(Of AlignTokensOperation), node As SyntaxNode, optionSet As OptionSet, nextAction As NextAction(Of AlignTokensOperation))
-			MyBase.AddAlignTokensOperations(operations, node, optionSet, nextAction)
+		Public Overrides Sub AddAlignTokensOperationsSlow(operations As List(Of AlignTokensOperation), node As SyntaxNode, ByRef nextAction As NextAlignTokensOperationAction)
+			MyBase.AddAlignTokensOperationsSlow(operations, node, nextAction)
 
 			' Smart token formatting off: No token alignment
-			If optionSet.GetOption(FormattingOptions.SmartIndent, LanguageNames.VisualBasic) <> FormattingOptions.IndentStyle.Smart Then
+			If _indentStyle <> FormattingOptions.IndentStyle.Smart Then
 				Return
 			End If
 

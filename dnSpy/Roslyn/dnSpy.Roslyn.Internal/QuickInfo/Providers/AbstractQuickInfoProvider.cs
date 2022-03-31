@@ -22,26 +22,36 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
             CancellationToken cancellationToken)
         {
             var tree = await document.GetSyntaxTreeAsync(cancellationToken).ConfigureAwait(false);
-            var token = await tree.GetTouchingTokenAsync(position, cancellationToken, findInsideTrivia: true).ConfigureAwait(false);
+			var tokens = await GetTokensAsync(tree, position, cancellationToken).ConfigureAwait(false);
 
-            var state = await GetQuickInfoItemAsync(document, token, position, cancellationToken).ConfigureAwait(false);
-            if (state != null)
-            {
-                return state;
-            }
-
-            if (ShouldCheckPreviousToken(token))
-            {
-                var previousToken = token.GetPreviousToken();
-
-                if ((state = await GetQuickInfoItemAsync(document, previousToken, position, cancellationToken).ConfigureAwait(false)) != null)
-                {
-                    return state;
-                }
-            }
+			foreach (var token in tokens)
+			{
+				var info = await GetQuickInfoItemAsync(document, token, position, cancellationToken).ConfigureAwait(false);
+				if (info != null)
+					return info;
+			}
 
             return null;
         }
+
+		protected async Task<ImmutableArray<SyntaxToken>> GetTokensAsync(SyntaxTree tree, int position, CancellationToken cancellationToken) {
+			var result = new List<SyntaxToken>();
+			var token = await tree.GetTouchingTokenAsync(position, cancellationToken, findInsideTrivia: true).ConfigureAwait(false);
+			if (token != default)
+			{
+				result.Add(token);
+
+				if (ShouldCheckPreviousToken(token))
+				{
+					token = token.GetPreviousToken();
+					if (token != default && token.Span.IntersectsWith(position))
+						result.Add(token);
+				}
+			}
+
+			return result.ToImmutableArray();
+		}
+
 
         protected virtual bool ShouldCheckPreviousToken(SyntaxToken token)
         {

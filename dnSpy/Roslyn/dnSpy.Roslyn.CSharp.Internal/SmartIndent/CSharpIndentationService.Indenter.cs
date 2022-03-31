@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -23,13 +24,13 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
         internal class Indenter : AbstractIndenter
         {
             public Indenter(
-                ISyntaxFactsService syntaxFacts,
+				Document document,
                 SyntaxTree syntaxTree,
-                IEnumerable<IFormattingRule> rules,
+                IEnumerable<AbstractFormattingRule> rules,
                 OptionSet optionSet,
                 TextLine line,
                 CancellationToken cancellationToken) :
-                base(syntaxFacts, syntaxTree, rules, optionSet, line, cancellationToken)
+                base(document, syntaxTree, rules, optionSet, line, cancellationToken)
             {
             }
 
@@ -45,7 +46,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
                 else
                 {
                     // there must be trivia that contains or touch this position
-                    Contract.Assert(token.FullSpan.Contains(lastNonWhitespacePosition));
+                    Debug.Assert(token.FullSpan.Contains(lastNonWhitespacePosition));
 
                     // okay, now check whether the trivia is at the beginning of the line
                     var firstNonWhitespacePosition = previousLine.GetFirstNonWhitespacePosition();
@@ -64,7 +65,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
                         // {
                         //     // A
                         //     // B
-                        //     
+                        //
                         //     $$
                         //     return;
                         // }
@@ -83,7 +84,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
                         //                     """",
                         //                             """",/*sdfsdfsdfsdf*/
                         //                                  // dfsdfsdfsdfsdf
-                        //                                  
+                        //
                         //                             $$
                         //                 };
                         var previousToken = token.GetPreviousToken();
@@ -161,7 +162,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
                 if (token.IsSemicolonOfEmbeddedStatement() ||
                     token.IsCloseBraceOfEmbeddedBlock())
                 {
-                    Contract.Requires(
+                    Debug.Assert(
                         token.Parent != null &&
                         (token.Parent.Parent is StatementSyntax || token.Parent.Parent is ElseClauseSyntax));
 

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Formatting.Rules;
 using Microsoft.CodeAnalysis.LanguageServices;
@@ -25,7 +26,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
             protected readonly CancellationToken CancellationToken;
 
             protected readonly SyntaxTree Tree;
-            protected readonly IEnumerable<IFormattingRule> Rules;
+            protected readonly IEnumerable<AbstractFormattingRule> Rules;
             protected readonly BottomUpBaseIndentationFinder Finder;
 
             private static readonly Func<SyntaxToken, bool> s_tokenHasDirective = tk => tk.ContainsDirectives &&
@@ -33,29 +34,31 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
             private readonly ISyntaxFactsService _syntaxFacts;
 
             public AbstractIndenter(
-                ISyntaxFactsService syntaxFacts,
+				Document document,
                 SyntaxTree syntaxTree,
-                IEnumerable<IFormattingRule> rules,
+                IEnumerable<AbstractFormattingRule> rules,
                 OptionSet optionSet,
                 TextLine lineToBeIndented,
                 CancellationToken cancellationToken)
             {
                 var syntaxRoot = syntaxTree.GetRoot(cancellationToken);
 
-                this._syntaxFacts = syntaxFacts;
+				_syntaxFacts = document.GetRequiredLanguageService<ISyntaxFactsService>();
                 this.OptionSet = optionSet;
                 this.Tree = syntaxTree;
                 this.LineToBeIndented = lineToBeIndented;
                 this.TabSize = this.OptionSet.GetOption(FormattingOptions.TabSize, syntaxRoot.Language);
                 this.CancellationToken = cancellationToken;
 
+				var OptionService = document.Project.Solution.Workspace.Services.GetRequiredService<IOptionService>();
+
                 this.Rules = rules;
-                this.Finder = new BottomUpBaseIndentationFinder(
-                         new ChainedFormattingRules(this.Rules, OptionSet),
+				this.Finder = new BottomUpBaseIndentationFinder(
+                         new ChainedFormattingRules(this.Rules, OptionSet.AsAnalyzerConfigOptions(OptionService, null)), //TODO: language
                          this.TabSize,
                          this.OptionSet.GetOption(FormattingOptions.IndentationSize, syntaxRoot.Language),
                          tokenStream: null,
-                         lastToken: default);
+						 document.GetRequiredLanguageService<IHeaderFactsService>());
             }
 
             public IndentationResult? GetDesiredIndentation(Document document)
@@ -71,7 +74,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
                 // regions and inactive code.
                 var previousLineOpt = GetPreviousNonBlankOrPreprocessorLine();
 
-                // it is beginning of the file, there is no previous line exists. 
+                // it is beginning of the file, there is no previous line exists.
                 // in that case, indentation 0 is our base indentation.
                 if (previousLineOpt == null)
                 {
@@ -81,7 +84,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
                 var previousNonWhitespaceOrPreprocessorLine = previousLineOpt.Value;
 
                 // If the user wants block indentation, then we just return the indentation
-                // of the last piece of real code.  
+                // of the last piece of real code.
                 //
                 // TODO(cyrusn): It's not clear to me that this is correct.  Block indentation
                 // should probably follow the indentation of hte last non-blank line *regardless
@@ -90,7 +93,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
                 // indentation.
                 if (indentStyle == FormattingOptions.IndentStyle.Block)
                 {
-                    // If it's block indentation, then just base 
+                    // If it's block indentation, then just base
                     return GetIndentationOfLine(previousNonWhitespaceOrPreprocessorLine);
                 }
 
@@ -185,7 +188,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
                         return sourceText.Lines[lineNumber];
                     }
 
-                    // This line is inside an inactive region. Examine the 
+                    // This line is inside an inactive region. Examine the
                     // first preceding line not in an inactive region.
                     var disabledSpan = _syntaxFacts.GetInactiveRegionSpanAroundPosition(this.Tree, actualLine.Span.Start, CancellationToken);
                     if (disabledSpan != default)

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Composition;
+using System.Diagnostics;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,15 +22,15 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
     [ExportLanguageService(typeof(ISynchronousIndentationService), LanguageNames.CSharp), Shared]
     internal partial class CSharpIndentationService : AbstractIndentationService
     {
-        private static readonly IFormattingRule s_instance = new FormattingRule();
+        private static readonly AbstractFormattingRule s_instance = new FormattingRule();
 
-        protected override IFormattingRule GetSpecializedIndentationFormattingRule()
+        protected override AbstractFormattingRule GetSpecializedIndentationFormattingRule()
         {
             return s_instance;
         }
 
         protected override AbstractIndenter GetIndenter(
-            ISyntaxFactsService syntaxFacts, SyntaxTree syntaxTree, TextLine lineToBeIndented, IEnumerable<IFormattingRule> formattingRules, OptionSet optionSet, CancellationToken cancellationToken)
+			Document syntaxFacts, SyntaxTree syntaxTree, TextLine lineToBeIndented, IEnumerable<AbstractFormattingRule> formattingRules, OptionSet optionSet, CancellationToken cancellationToken)
         {
             return new Indenter(
                 syntaxFacts, syntaxTree, formattingRules,
@@ -37,7 +38,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
         }
 
         protected override bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
-            IEnumerable<IFormattingRule> formattingRules,
+            IEnumerable<AbstractFormattingRule> formattingRules,
             SyntaxNode root,
             TextLine line,
             OptionSet optionSet,
@@ -48,7 +49,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
         }
 
         public static bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
-            IEnumerable<IFormattingRule> formattingRules,
+            IEnumerable<AbstractFormattingRule> formattingRules,
             CompilationUnitSyntax root,
             TextLine line,
             OptionSet optionSet,
@@ -89,7 +90,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
                 return false;
             }
 
-            var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet);
+            var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet.AsAnalyzerConfigOptions(null, null));
             if (lineOperation == null || lineOperation.Option == AdjustNewLinesOption.ForceLinesIfOnSingleLine)
             {
                 // no indentation operation, nothing to do for smart token formatter
@@ -103,13 +104,13 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
 
         private class FormattingRule : AbstractFormattingRule
         {
-            public override void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node, OptionSet optionSet, NextAction<IndentBlockOperation> nextOperation)
+            public override void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node, in NextIndentBlockOperationAction nextOperation)
             {
                 // these nodes should be from syntax tree from ITextSnapshot.
-                Contract.Requires(node.SyntaxTree != null);
-                Contract.Requires(node.SyntaxTree.GetText() != null);
+				Debug.Assert(node.SyntaxTree != null);
+				Debug.Assert(node.SyntaxTree.GetText() != null);
 
-                nextOperation.Invoke(list);
+                nextOperation.Invoke();
 
                 ReplaceCaseIndentationRules(list, node);
 

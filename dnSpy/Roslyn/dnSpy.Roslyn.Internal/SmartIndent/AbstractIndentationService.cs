@@ -16,9 +16,9 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
 {
     internal abstract partial class AbstractIndentationService : ISynchronousIndentationService
     {
-        protected abstract IFormattingRule GetSpecializedIndentationFormattingRule();
+        protected abstract AbstractFormattingRule GetSpecializedIndentationFormattingRule();
 
-        private IEnumerable<IFormattingRule> GetFormattingRules(Document document, int position)
+        private IEnumerable<AbstractFormattingRule> GetFormattingRules(Document document, int position)
         {
             var workspace = document.Project.Solution.Workspace;
             var formattingRuleFactory = workspace.Services.GetService<IHostDependentFormattingRuleFactoryService>();
@@ -41,7 +41,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
 
             // There are two important cases for indentation.  The first is when we're simply
             // trying to figure out the appropriate indentation on a blank line (i.e. after
-            // hitting enter at the end of a line, or after moving to a blank line).  The 
+            // hitting enter at the end of a line, or after moving to a blank line).  The
             // second is when we're trying to figure out indentation for a non-blank line
             // (i.e. after hitting enter in the middle of a line, causing tokens to move to
             // the next line).  If we're in the latter case, we defer to the Formatting engine
@@ -53,7 +53,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
             }
 
             var indenter = GetIndenter(
-                document.GetLanguageService<ISyntaxFactsService>(),
+                document,
                 root.SyntaxTree, lineToBeIndented, formattingRules,
                 documentOptions, cancellationToken);
 
@@ -61,9 +61,9 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
         }
 
         protected abstract AbstractIndenter GetIndenter(
-            ISyntaxFactsService syntaxFacts, SyntaxTree syntaxTree, TextLine lineToBeIndented, IEnumerable<IFormattingRule> formattingRules, OptionSet optionSet, CancellationToken cancellationToken);
+            Document syntaxFacts, SyntaxTree syntaxTree, TextLine lineToBeIndented, IEnumerable<AbstractFormattingRule> formattingRules, OptionSet optionSet, CancellationToken cancellationToken);
 
         protected abstract bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
-            IEnumerable<IFormattingRule> formattingRules, SyntaxNode root, TextLine line, OptionSet optionSet, CancellationToken cancellationToken);
+            IEnumerable<AbstractFormattingRule> formattingRules, SyntaxNode root, TextLine line, OptionSet optionSet, CancellationToken cancellationToken);
     }
 }

@@ -88,6 +88,8 @@ namespace dnSpy.Roslyn.Text.Classification {
 		/// <returns></returns>
 		public IEnumerable<ClassifierResult> GetColors(TextSpan textSpan) {
 			foreach (var cspan in Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace)) {
+				if (ClassificationTypeNames.AdditiveTypeNames.Contains(cspan.ClassificationType))
+					continue;
 				var color = GetClassificationType(cspan) ?? defaultColor;
 				if (color is not null)
 					yield return new ClassifierResult(Span.FromBounds(cspan.TextSpan.Start, cspan.TextSpan.End), color);
@@ -328,15 +330,23 @@ the_switch:
 				return roslynClassificationTypes.Interface;
 
 			case ClassificationTypeNames.Keyword:
+			case ClassificationTypeNames.ControlKeyword:
 				return roslynClassificationTypes.Keyword;
+
+			case ClassificationTypeNames.LabelName:
+				return roslynClassificationTypes.Label;
 
 			case ClassificationTypeNames.ModuleName:
 				return roslynClassificationTypes.Module;
+
+			case ClassificationTypeNames.NamespaceName:
+				return roslynClassificationTypes.Namespace;
 
 			case ClassificationTypeNames.NumericLiteral:
 				return roslynClassificationTypes.Number;
 
 			case ClassificationTypeNames.Operator:
+			case ClassificationTypeNames.OperatorOverloaded:
 				return roslynClassificationTypes.Operator;
 
 			case ClassificationTypeNames.PreprocessorKeyword:

@@ -4,6 +4,7 @@ Imports System.Composition
 Imports System.Threading
 Imports dnSpy.Roslyn.Internal.SmartIndent
 Imports Microsoft.CodeAnalysis
+Imports Microsoft.CodeAnalysis.Formatting
 Imports Microsoft.CodeAnalysis.Formatting.Rules
 Imports Microsoft.CodeAnalysis.Host.Mef
 Imports Microsoft.CodeAnalysis.LanguageServices
@@ -18,22 +19,22 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 	Partial Friend Class VisualBasicIndentationService
 		Inherits AbstractIndentationService
 
-		Private Shared ReadOnly s_instance As IFormattingRule = New SpecialFormattingRule()
+		Private Shared ReadOnly s_instance As AbstractFormattingRule = New SpecialFormattingRule(New FormattingOptions.IndentStyle())
 
-		Protected Overrides Function GetSpecializedIndentationFormattingRule() As IFormattingRule
+		Protected Overrides Function GetSpecializedIndentationFormattingRule() As AbstractFormattingRule
 			Return s_instance
 		End Function
 
-		Protected Overrides Function GetIndenter(syntaxFacts As ISyntaxFactsService,
+		Protected Overrides Function GetIndenter(syntaxFacts As Document,
 												 syntaxTree As SyntaxTree,
 												 lineToBeIndented As TextLine,
-												 formattingRules As IEnumerable(Of IFormattingRule),
+												 formattingRules As IEnumerable(Of AbstractFormattingRule),
 												 optionSet As OptionSet,
 												 cancellationToken As CancellationToken) As AbstractIndenter
 			Return New Indenter(syntaxFacts, syntaxTree, formattingRules, optionSet, lineToBeIndented, cancellationToken)
 		End Function
 
-		Protected Overrides Function ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules As IEnumerable(Of IFormattingRule),
+		Protected Overrides Function ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules As IEnumerable(Of AbstractFormattingRule),
 																				   root As SyntaxNode,
 																				   line As TextLine,
 																				   optionSet As OptionSet,
@@ -42,7 +43,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 		End Function
 
 		Public Overloads Shared Function ShouldUseSmartTokenFormatterInsteadOfIndenter(
-				formattingRules As IEnumerable(Of IFormattingRule),
+				formattingRules As IEnumerable(Of AbstractFormattingRule),
 				root As CompilationUnitSyntax,
 				line As TextLine,
 				optionSet As OptionSet,
@@ -63,8 +64,8 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 			' now try to gather various token information to see whether we are at an applicable position.
 			' all these are heuristic based
-			' 
-			' we need at least current and previous tokens to ask about existing line break formatting rules 
+			'
+			' we need at least current and previous tokens to ask about existing line break formatting rules
 			Dim previousToken = token.GetPreviousToken(includeZeroWidth:=True)
 
 			' only use smart token formatter when we have at least two visible tokens.
@@ -72,7 +73,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				Return False
 			End If
 
-			' check special case 
+			' check special case
 			' if previous token (or one before previous token if the previous token is statement terminator token) is missing, make sure
 			' we are a first token of a statement
 			If previousToken.IsMissing AndAlso neverUseWhenHavingMissingToken Then
@@ -88,7 +89,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			End If
 
 			' now, regular case. ask formatting rule to see whether we should use token formatter or not
-			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet)
+			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet.AsAnalyzerConfigOptions(Nothing, Nothing))
 			If lineOperation IsNot Nothing AndAlso lineOperation.Option <> AdjustNewLinesOption.ForceLinesIfOnSingleLine Then
 				Return True
 			End If
@@ -99,7 +100,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			Dim currentNode = startNode
 			Do While currentNode IsNot Nothing
 				Dim operations = FormattingOperations.GetAlignTokensOperations(
-					formattingRules, currentNode, lastToken:=Nothing, optionSet:=optionSet)
+					formattingRules, currentNode, optionSet.AsAnalyzerConfigOptions(Nothing, Nothing))
 
 				If Not operations.Any() Then
 					currentNode = currentNode.Parent

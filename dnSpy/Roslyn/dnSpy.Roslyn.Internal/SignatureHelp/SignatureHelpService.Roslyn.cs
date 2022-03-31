@@ -20,7 +20,7 @@ using SIGHLP = Microsoft.CodeAnalysis.SignatureHelp;
 namespace dnSpy.Roslyn.Internal.SignatureHelp {
 	partial class SignatureHelpService {
 		/// <summary>
-		/// Returns <code>null</code> if our work was preempted and we want to return the 
+		/// Returns <code>null</code> if our work was preempted and we want to return the
 		/// previous model we've computed.
 		/// </summary>
 		private async Task<(ISignatureHelpProvider provider, SignatureHelpItems items)> ComputeItemsAsync(
@@ -44,7 +44,8 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 
 				cancellationToken.ThrowIfCancellationRequested();
 
-				var currentItems = await provider.GetItemsAsync(document, caretPosition, triggerInfo, cancellationToken).ConfigureAwait(false);
+				//TODO: SignatureHelpOptions
+				var currentItems = await provider.GetItemsAsync(document, caretPosition, triggerInfo, new SignatureHelpOptions(false), cancellationToken).ConfigureAwait(false);
 				if (currentItems != null && currentItems.ApplicableSpan.IntersectsWith(caretPosition)) {
 					// If another provider provides sig help items, then only take them if they
 					// start after the last batch of items.  i.e. we want the set of items that
@@ -93,13 +94,13 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 		private static SignatureHelpItem GetSelectedItem(SignatureHelpItems items, ISignatureHelpProvider provider) {
 			// Try to find the most appropriate item in the list to select by default.
 
-			// If the provider specified one a selected item, then always stick with that one. 
+			// If the provider specified one a selected item, then always stick with that one.
 			if (items.SelectedItemIndex.HasValue) {
 				return items.Items[items.SelectedItemIndex.Value];
 			}
 
 			// If the provider did not pick a default, and it's the same provider as the previous
-			// model we have, then try to return the same item that we had before. 
+			// model we have, then try to return the same item that we had before.
 			//if (currentModel != null && currentModel.Provider == provider) {
 			//	return items.Items.FirstOrDefault(i => DisplayPartsMatch(i, currentModel.SelectedItem)) ?? items.Items.First();
 			//}
@@ -196,7 +197,7 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 				// An item is applicable if it has at least as many parameters as the selected
 				// parameter index.  i.e. if it has 2 parameters and we're at index 0 or 1 then it's
 				// applicable.  However, if it has 2 parameters and we're at index 2, then it's not
-				// applicable.  
+				// applicable.
 				if (item.Parameters.Length >= argumentCount) {
 					return true;
 				}

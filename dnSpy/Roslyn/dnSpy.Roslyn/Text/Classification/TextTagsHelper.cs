@@ -64,7 +64,8 @@ namespace dnSpy.Roslyn.Text.Classification {
 			case TextTags.Text:				return TextColor.Text;
 			case TextTags.TypeParameter:	return TextColor.TypeGenericParameter;
 			default:
-				Debug.Fail($"New {nameof(TextTags)} tag: {textTag}");
+				//TODO: new text tags!!!
+				//Debug.Fail($"New {nameof(TextTags)} tag: {textTag}");
 				return TextColor.Text;
 			}
 		}

@@ -169,7 +169,7 @@ namespace dnSpy.Roslyn.EditorFeatures.TextStructureNavigation
                 if (node != null)
                 {
                     // Take first child if possible, otherwise default to node itself.
-                    var firstChild = node.Value.ChildNodesAndTokens().FirstOrNullable();
+                    var firstChild = node.Value.ChildNodesAndTokens().FirstOrNull();
                     if (firstChild.HasValue)
                     {
                         node = firstChild.Value;
@@ -212,7 +212,7 @@ namespace dnSpy.Roslyn.EditorFeatures.TextStructureNavigation
                             .ChildNodesAndTokens()
                             .SkipWhile(child => child != node)
                             .Skip(1)
-                            .FirstOrNullable();
+                            .FirstOrNull();
 
                         if (nodeOrToken.HasValue)
                         {
@@ -220,7 +220,7 @@ namespace dnSpy.Roslyn.EditorFeatures.TextStructureNavigation
                         }
                         else
                         {
-                            // If this is the last node, move to the parent so that the user can continue 
+                            // If this is the last node, move to the parent so that the user can continue
                             // navigation at the higher level.
                             node = parent.Value;
                         }
@@ -264,7 +264,7 @@ namespace dnSpy.Roslyn.EditorFeatures.TextStructureNavigation
                             .Reverse()
                             .SkipWhile(child => child != node)
                             .Skip(1)
-                            .FirstOrNullable();
+                            .FirstOrNull();
 
                         if (nodeOrToken.HasValue)
                         {
@@ -272,7 +272,7 @@ namespace dnSpy.Roslyn.EditorFeatures.TextStructureNavigation
                         }
                         else
                         {
-                            // If this is the first node, move to the parent so that the user can continue 
+                            // If this is the first node, move to the parent so that the user can continue
                             // navigation at the higher level.
                             node = parent.Value;
                         }

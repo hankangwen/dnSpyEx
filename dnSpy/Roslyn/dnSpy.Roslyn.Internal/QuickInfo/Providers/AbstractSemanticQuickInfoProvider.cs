@@ -47,11 +47,11 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
             // Linked files/shared projects: imagine the following when GOO is false
             // #if GOO
             // int x = 3;
-            // #endif 
+            // #endif
             // var y = x$$;
             //
             // 'x' will bind as an error type, so we'll show incorrect information.
-            // Instead, we need to find the head in which we get the best binding, 
+            // Instead, we need to find the head in which we get the best binding,
             // which in this case is the one with no errors.
 
             var candidateProjects = new List<ProjectId>() { document.Project.Id };
@@ -100,7 +100,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
                 }
             }
 
-            var supportedPlatforms = new SupportedPlatformData(invalidProjects, candidateProjects, document.Project.Solution.Workspace);
+            var supportedPlatforms = new SupportedPlatformData(document.Project.Solution, invalidProjects, candidateProjects);
             return await CreateContentAsync(document.Project.Solution.Workspace, token, bestBinding.Item2, bestBinding.Item3, supportedPlatforms, cancellationToken).ConfigureAwait(false);
         }
 
@@ -152,10 +152,9 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
         {
             var descriptionService = workspace.Services.GetLanguageServices(token.Language).GetService<ISymbolDisplayService>();
 
-            var sections = await descriptionService.ToDescriptionGroupsAsync(workspace, semanticModel, token.SpanStart, symbols.AsImmutable(), cancellationToken).ConfigureAwait(false);
+            var sections = await descriptionService.ToDescriptionGroupsAsync(semanticModel, token.SpanStart, symbols.AsImmutable(), SymbolDescriptionOptions.Default, cancellationToken).ConfigureAwait(false);
 
-
-            var mainDescriptionBuilder = new List<TaggedText>();
+			var mainDescriptionBuilder = new List<TaggedText>();
             if (sections.TryGetValue(SymbolDescriptionGroups.MainDescription, out var parts))
             {
                 mainDescriptionBuilder.AddRange(parts);
@@ -172,7 +171,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
             }
 
             var anonymousTypesBuilder = new List<TaggedText>();
-            if (sections.TryGetValue(SymbolDescriptionGroups.AnonymousTypes, out parts))
+            if (sections.TryGetValue(SymbolDescriptionGroups.StructuralTypes, out parts))
             {
                 if (!parts.IsDefaultOrEmpty)
                 {
@@ -271,13 +270,13 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
             SyntaxToken token,
             CancellationToken cancellationToken)
         {
-            var semanticModel = await document.GetSemanticModelForNodeAsync(token.Parent, cancellationToken).ConfigureAwait(false);
+			var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
             var enclosingType = semanticModel.GetEnclosingNamedType(token.SpanStart, cancellationToken);
 
-            var symbols = semanticModel.GetSemanticInfo(token, document.Project.Solution.Workspace, cancellationToken)
+            var symbols = semanticModel.GetSemanticInfo(token, document.Project.Solution.Workspace.Services, cancellationToken)
                                        .GetSymbols(includeType: true);
 
-            var bindableParent = document.GetLanguageService<ISyntaxFactsService>().GetBindableParent(token);
+            var bindableParent = document.GetLanguageService<ISyntaxFactsService>().TryGetBindableParent(token);
             var overloads = semanticModel.GetMemberGroup(bindableParent, cancellationToken);
 
             symbols = symbols.Where(IsOk)

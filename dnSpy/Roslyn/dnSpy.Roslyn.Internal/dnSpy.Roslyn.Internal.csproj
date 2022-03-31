@@ -11,6 +11,10 @@
 
   <Import Project="$(MSBuildProjectDirectory)\..\..\..\Build\MakeEverythingPublic\MakeEverythingPublic.tasks" />
 
+  <ItemGroup Condition="$(IsDotNetFramework) == true">
+    <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="$(RoslynVersion)" />
   </ItemGroup>
