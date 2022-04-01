@@ -1403,6 +1403,13 @@ namespace dndbg.Engine {
 			DebugVerifyThread();
 			if (comModule is null)
 				return null;
+			int hr = comModule.GetSize(out var size);
+			if (hr < 0) {
+				return null;
+			}
+			if(size == 0) {
+				return null;
+			}
 
 			var appDomain = TryGetValidAppDomain(comAppDomain);
 			if (appDomain is null)
