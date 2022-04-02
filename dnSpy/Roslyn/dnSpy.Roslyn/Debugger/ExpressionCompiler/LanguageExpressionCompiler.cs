@@ -379,7 +379,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 			return builder.ToImmutableArray();
 		}
 
-		protected DbgDotNetCompilationResult CreateCompilationResult(string expression, CompileResult compileResult, ResultProperties resultProperties, string? errorMessage, DbgDotNetText name) {
+		protected DbgDotNetCompilationResult CreateCompilationResult(string expression, CompileResult? compileResult, ResultProperties resultProperties, string? errorMessage, DbgDotNetText name) {
 			if (errorMessage is not null)
 				return new DbgDotNetCompilationResult(errorMessage);
 			Debug2.Assert(compileResult is not null);
@@ -525,9 +525,9 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 				workspace.AddProject(projectInfo);
 
 				var doc = workspace.AddDocument(projectInfo.Id, "A", SourceText.From(documentText));
-				var syntaxRoot = doc.GetSyntaxRootAsync().GetAwaiter().GetResult();
-				var semanticModel = doc.GetSemanticModelAsync().GetAwaiter().GetResult();
-				var classifier = new RoslynClassifier(syntaxRoot, semanticModel, workspace, RoslynClassificationTypes.Default, null, cancellationToken);
+				var syntaxRoot = doc.GetSyntaxRootAsync(cancellationToken).GetAwaiter().GetResult();
+				var semanticModel = doc.GetSemanticModelAsync(cancellationToken).GetAwaiter().GetResult();
+				var classifier = new RoslynClassifier(syntaxRoot!, semanticModel!, workspace, RoslynClassificationTypes.Default, null, cancellationToken);
 				var textSpan = new Microsoft.CodeAnalysis.Text.TextSpan(documentTextExpressionOffset, expression.Length);
 
 				int pos = textSpan.Start;

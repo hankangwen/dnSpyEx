@@ -67,9 +67,9 @@ Namespace Global.Microsoft.CodeAnalysis.Editor.VisualBasic.QuickInfo
 					End If
 
 				Case SyntaxKind.IfKeyword
-					If parent.Kind = SyntaxKind.BinaryConditionalExpression Then
+					If parent.IsKind(SyntaxKind.BinaryConditionalExpression) Then
 						Return Await BuildContentForIntrinsicOperatorAsync(document, parent, New BinaryConditionalExpressionDocumentation(), Glyph.MethodPublic, cancellationToken).ConfigureAwait(False)
-					ElseIf parent.Kind = SyntaxKind.TernaryConditionalExpression Then
+					ElseIf parent.IsKind(SyntaxKind.TernaryConditionalExpression) Then
 						Return Await BuildContentForIntrinsicOperatorAsync(document, parent, New TernaryConditionalExpressionDocumentation(), Glyph.MethodPublic, cancellationToken).ConfigureAwait(False)
 					End If
 
@@ -85,7 +85,7 @@ Namespace Global.Microsoft.CodeAnalysis.Editor.VisualBasic.QuickInfo
 
 				Case SyntaxKind.IdentifierToken
 					If SyntaxFacts.GetContextualKeywordKind(token.ToString()) = SyntaxKind.MidKeyword Then
-						If parent.Kind = SyntaxKind.MidExpression Then
+						If parent.IsKind(SyntaxKind.MidExpression) Then
 							Return Await BuildContentForIntrinsicOperatorAsync(document, parent, New MidAssignmentDocumentation(), Glyph.MethodPublic, cancellationToken).ConfigureAwait(False)
 						End If
 					End If
@@ -119,7 +119,7 @@ Namespace Global.Microsoft.CodeAnalysis.Editor.VisualBasic.QuickInfo
 					Else
 						Return Nothing
 					End If
-				End Function)).Distinct().ToList()
+				End Function)).Distinct(SymbolEqualityComparer.Default).ToList()
 
 			If types.Count = 0 Then
 				Return Nothing

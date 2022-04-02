@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Formatting.Rules;
 using Microsoft.CodeAnalysis.LanguageServices;
@@ -33,9 +34,10 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
         {
             var root = document.GetSyntaxRootSynchronously(cancellationToken);
             var sourceText = root.SyntaxTree.GetText(cancellationToken);
-            var documentOptions = document.GetOptionsAsync(cancellationToken).WaitAndGetResult(cancellationToken);
+            OptionSet documentOptions = document.GetOptionsAsync(cancellationToken).WaitAndGetResult(cancellationToken);
+			var optionService = document.Project.Solution.Workspace.Services.GetRequiredService<IOptionService>();
 
-            var lineToBeIndented = sourceText.Lines[lineNumber];
+			var lineToBeIndented = sourceText.Lines[lineNumber];
 
             var formattingRules = GetFormattingRules(document, lineToBeIndented.Start);
 
@@ -47,7 +49,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
             // the next line).  If we're in the latter case, we defer to the Formatting engine
             // as we need it to use all its rules to determine where the appropriate location is
             // for the following tokens to go.
-            if (ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules, root, lineToBeIndented, documentOptions, cancellationToken))
+            if (ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules, root, lineToBeIndented, optionService, documentOptions, cancellationToken))
             {
                 return null;
             }
@@ -64,6 +66,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
             Document syntaxFacts, SyntaxTree syntaxTree, TextLine lineToBeIndented, IEnumerable<AbstractFormattingRule> formattingRules, OptionSet optionSet, CancellationToken cancellationToken);
 
         protected abstract bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
-            IEnumerable<AbstractFormattingRule> formattingRules, SyntaxNode root, TextLine line, OptionSet optionSet, CancellationToken cancellationToken);
+            IEnumerable<AbstractFormattingRule> formattingRules, SyntaxNode root, TextLine line, IOptionService optionService,
+			OptionSet optionSet, CancellationToken cancellationToken);
     }
 }

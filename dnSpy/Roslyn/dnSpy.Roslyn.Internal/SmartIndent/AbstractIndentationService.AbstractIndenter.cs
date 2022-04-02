@@ -54,7 +54,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent
 
                 this.Rules = rules;
 				this.Finder = new BottomUpBaseIndentationFinder(
-                         new ChainedFormattingRules(this.Rules, OptionSet.AsAnalyzerConfigOptions(OptionService, null)), //TODO: language
+                         new ChainedFormattingRules(this.Rules, OptionSet.AsAnalyzerConfigOptions(OptionService, document.Project.Language)),
                          this.TabSize,
                          this.OptionSet.GetOption(FormattingOptions.IndentationSize, syntaxRoot.Language),
                          tokenStream: null,

@@ -117,7 +117,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			else if (errorMessage is not null)
 				name = CreateErrorName(expression);
 			else
-				name = GetExpressionText(state.MetadataContext.EvaluationContext, state.MetadataContext.Compilation, expression, cancellationToken);
+				name = GetExpressionText(state.MetadataContext.EvaluationContext!, state.MetadataContext.Compilation, expression, cancellationToken);
 			return CreateCompilationResult(expression, compileResult, resultProperties, errorMessage, name);
 		}
 

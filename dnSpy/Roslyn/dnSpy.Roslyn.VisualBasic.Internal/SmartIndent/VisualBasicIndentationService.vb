@@ -4,6 +4,7 @@ Imports System.Composition
 Imports System.Threading
 Imports dnSpy.Roslyn.Internal.SmartIndent
 Imports Microsoft.CodeAnalysis
+Imports Microsoft.CodeAnalysis.Diagnostics
 Imports Microsoft.CodeAnalysis.Formatting
 Imports Microsoft.CodeAnalysis.Formatting.Rules
 Imports Microsoft.CodeAnalysis.Host.Mef
@@ -37,15 +38,17 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 		Protected Overrides Function ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules As IEnumerable(Of AbstractFormattingRule),
 																				   root As SyntaxNode,
 																				   line As TextLine,
+		                                                                           optionService As IOptionService,
 																				   optionSet As OptionSet,
 																				   cancellationToken As CancellationToken) As Boolean
-			Return ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules, DirectCast(root, CompilationUnitSyntax), line, optionSet, cancellationToken)
+			Return ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules, DirectCast(root, CompilationUnitSyntax), line, optionService, optionSet, cancellationToken)
 		End Function
 
 		Public Overloads Shared Function ShouldUseSmartTokenFormatterInsteadOfIndenter(
 				formattingRules As IEnumerable(Of AbstractFormattingRule),
 				root As CompilationUnitSyntax,
 				line As TextLine,
+				optionService As IOptionService,
 				optionSet As OptionSet,
 				CancellationToken As CancellationToken,
 				Optional neverUseWhenHavingMissingToken As Boolean = True) As Boolean
@@ -58,7 +61,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 			' enter on token only works when first token on line is first text on line
 			Dim token = root.FindToken(firstNonWhitespacePosition.Value)
-			If token.Kind = SyntaxKind.None OrElse token.SpanStart <> firstNonWhitespacePosition Then
+			If token.IsKind(SyntaxKind.None) OrElse token.SpanStart <> firstNonWhitespacePosition Then
 				Return False
 			End If
 
@@ -69,7 +72,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			Dim previousToken = token.GetPreviousToken(includeZeroWidth:=True)
 
 			' only use smart token formatter when we have at least two visible tokens.
-			If previousToken.Kind = SyntaxKind.None Then
+			If previousToken.IsKind(SyntaxKind.None) Then
 				Return False
 			End If
 
@@ -88,8 +91,10 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				Return statement.GetFirstToken() = token
 			End If
 
+			Dim analyzerOptions = optionSet.AsAnalyzerConfigOptions(optionService, LanguageNames.VisualBasic)
+
 			' now, regular case. ask formatting rule to see whether we should use token formatter or not
-			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet.AsAnalyzerConfigOptions(Nothing, Nothing))
+			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, analyzerOptions)
 			If lineOperation IsNot Nothing AndAlso lineOperation.Option <> AdjustNewLinesOption.ForceLinesIfOnSingleLine Then
 				Return True
 			End If
@@ -100,7 +105,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			Dim currentNode = startNode
 			Do While currentNode IsNot Nothing
 				Dim operations = FormattingOperations.GetAlignTokensOperations(
-					formattingRules, currentNode, optionSet.AsAnalyzerConfigOptions(Nothing, Nothing))
+					formattingRules, currentNode, analyzerOptions)
 
 				If Not operations.Any() Then
 					currentNode = currentNode.Parent

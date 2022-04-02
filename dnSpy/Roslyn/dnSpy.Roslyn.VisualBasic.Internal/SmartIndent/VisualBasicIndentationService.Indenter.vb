@@ -23,7 +23,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 			Public Sub New(syntaxFacts As ISyntaxFactsService,
 						   syntaxTree As SyntaxTree,
-						   rules As IEnumerable(Of IFormattingRule),
+						   rules As IEnumerable(Of AbstractFormattingRule),
 						   optionSet As OptionSet,
 						   line As TextLine,
 						   cancellationToken As CancellationToken)
@@ -43,16 +43,16 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 					Dim trivia = Tree.GetRoot(CancellationToken).FindTrivia(lastNonWhitespacePosition)
 
 					' preserve the indentation of the comment trivia before a case statement
-					If trivia.Kind = SyntaxKind.CommentTrivia AndAlso trivia.Token.IsKind(SyntaxKind.CaseKeyword) AndAlso trivia.Token.Parent.IsKind(SyntaxKind.CaseStatement) Then
+					If trivia.IsKind(SyntaxKind.CommentTrivia) AndAlso trivia.Token.IsKind(SyntaxKind.CaseKeyword) AndAlso trivia.Token.Parent.IsKind(SyntaxKind.CaseStatement) Then
 						Return GetIndentationOfLine(previousLine)
 					End If
 
-					If trivia.Kind = SyntaxKind.LineContinuationTrivia OrElse trivia.Kind = SyntaxKind.CommentTrivia Then
+					If trivia.IsKind(SyntaxKind.LineContinuationTrivia) OrElse trivia.IsKind(SyntaxKind.CommentTrivia) Then
 						Return GetIndentationBasedOnToken(GetTokenOnLeft(trivia), trivia)
 					End If
 
 					' if we are at invalid token (skipped token) at the end of statement, treat it like we are after line continuation
-					If trivia.Kind = SyntaxKind.SkippedTokensTrivia AndAlso trivia.Token.IsLastTokenOfStatement() Then
+					If trivia.IsKind(SyntaxKind.SkippedTokensTrivia) AndAlso trivia.Token.IsLastTokenOfStatement() Then
 						Return GetIndentationBasedOnToken(GetTokenOnLeft(trivia), trivia)
 					End If
 
@@ -63,7 +63,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 					End If
 
 					Dim firstTokenOnLine = Tree.GetRoot(CancellationToken).FindToken(firstNonWhitespacePosition.Value, findInsideTrivia:=True)
-					If firstTokenOnLine.Kind <> SyntaxKind.None AndAlso firstTokenOnLine.Span.Contains(firstNonWhitespacePosition.Value) Then
+					If firstTokenOnLine.IsKind(SyntaxKind.None) AndAlso firstTokenOnLine.Span.Contains(firstNonWhitespacePosition.Value) Then
 						'okay, beginning of the line is not trivia, use this token as the base token
 						Return GetIndentationBasedOnToken(firstTokenOnLine)
 					End If
@@ -104,7 +104,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				End If
 
 				' check one more time for query case
-				If token.Kind = SyntaxKind.IdentifierToken AndAlso token.HasMatchingText(SyntaxKind.FromKeyword) Then
+				If token.IsKind(SyntaxKind.IdentifierToken) AndAlso token.HasMatchingText(SyntaxKind.FromKeyword) Then
 					Return GetIndentationOfToken(token)
 				End If
 
@@ -133,7 +133,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 					(containingToken.IsKind(SyntaxKind.CloseBraceToken) AndAlso token.Parent.IsKind(SyntaxKind.Interpolation)) Then
 					Return IndentFromStartOfLine(0)
 				End If
-				If containingToken.Kind = SyntaxKind.StringLiteralToken AndAlso containingToken.FullSpan.Contains(position) Then
+				If containingToken.IsKind(SyntaxKind.StringLiteralToken) AndAlso containingToken.FullSpan.Contains(position) Then
 					Return IndentFromStartOfLine(0)
 				End If
 
@@ -141,8 +141,8 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			End Function
 
 			Private Function IsLineContinuable(lastVisibleTokenOnPreviousLine As SyntaxToken, trivia As SyntaxTrivia, position As Integer) As Boolean
-				If trivia.Kind = SyntaxKind.LineContinuationTrivia OrElse
-				   trivia.Kind = SyntaxKind.SkippedTokensTrivia Then
+				If trivia.IsKind(SyntaxKind.LineContinuationTrivia) OrElse
+				   trivia.IsKind(SyntaxKind.SkippedTokensTrivia) Then
 					Return True
 				End If
 
@@ -204,7 +204,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 			Private Function GetIndentationFromOperationService(token As SyntaxToken, position As Integer) As IndentationResult?
 				' check operation service to see whether we can determine indentation from it
-				If token.Kind = SyntaxKind.None Then
+				If token.IsKind(SyntaxKind.None) Then
 					Return Nothing
 				End If
 
@@ -217,8 +217,8 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				' VB has different behavior around missing alignment token. for query expression, VB prefers putting
 				' caret aligned with previous query clause, but for xml literals, it prefer them to be ignored and indented
 				' based on current indentation level.
-				If token.Kind = SyntaxKind.XmlTextLiteralToken OrElse
-				   token.Kind = SyntaxKind.XmlEntityLiteralToken Then
+				If token.IsKind(SyntaxKind.XmlTextLiteralToken) OrElse
+				   token.IsKind(SyntaxKind.XmlEntityLiteralToken) Then
 					Return GetIndentationOfLine(LineToBeIndented.Text.Lines.GetLineFromPosition(token.SpanStart))
 				End If
 
@@ -240,7 +240,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				Dim currentTokenLine = sourceText.Lines.GetLineFromPosition(token.SpanStart)
 
 				' error case where the line continuation belongs to a meaningless token such as empty token for skipped text
-				If token.Kind = SyntaxKind.EmptyToken Then
+				If token.IsKind(SyntaxKind.EmptyToken) Then
 					Dim baseLine = sourceText.Lines.GetLineFromPosition(trivia.SpanStart)
 					Return GetIndentationOfLine(baseLine)
 				End If
@@ -267,7 +267,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 				' this can happen if only token in the file is End Of File Token
 				If statement Is Nothing Then
-					If trivia.Kind <> SyntaxKind.None Then
+					If trivia.IsKind(SyntaxKind.None) Then
 						Dim triviaLine = sourceText.Lines.GetLineFromPosition(trivia.SpanStart)
 						Return GetIndentationOfLine(triviaLine, Me.OptionSet.GetOption(FormattingOptions.IndentationSize, token.Language))
 					End If
@@ -282,7 +282,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			End Function
 
 			Private Function IsCommaInParameters(token As SyntaxToken) As Boolean
-				Return token.Kind = SyntaxKind.CommaToken AndAlso
+				Return token.IsKind(SyntaxKind.CommaToken) AndAlso
 					(TypeOf token.Parent Is ParameterListSyntax OrElse
 					 TypeOf token.Parent Is ArgumentListSyntax OrElse
 					 TypeOf token.Parent Is TypeParameterListSyntax)

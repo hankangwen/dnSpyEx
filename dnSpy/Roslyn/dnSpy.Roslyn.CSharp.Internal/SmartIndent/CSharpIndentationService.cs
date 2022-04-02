@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Formatting.Rules;
 using Microsoft.CodeAnalysis.Host.Mef;
@@ -41,27 +42,29 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
             IEnumerable<AbstractFormattingRule> formattingRules,
             SyntaxNode root,
             TextLine line,
-            OptionSet optionSet,
+            IOptionService optionService,
+			OptionSet optionSet,
             CancellationToken cancellationToken)
         {
             return ShouldUseSmartTokenFormatterInsteadOfIndenter(
-                formattingRules, (CompilationUnitSyntax)root, line, optionSet, cancellationToken);
+                formattingRules, (CompilationUnitSyntax)root, line, optionService, optionSet, cancellationToken);
         }
 
         public static bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
             IEnumerable<AbstractFormattingRule> formattingRules,
             CompilationUnitSyntax root,
             TextLine line,
-            OptionSet optionSet,
+			IOptionService optionService,
+			OptionSet optionSet,
             CancellationToken cancellationToken)
         {
             Contract.ThrowIfNull(formattingRules);
             Contract.ThrowIfNull(root);
 
-            //if (!optionSet.GetOption(FeatureOnOffOptions.AutoFormattingOnReturn, LanguageNames.CSharp))
-            //{
-            //    return false;
-            //}
+            if (!optionSet.GetOption(FormattingBehaviorOptions.AutoFormattingOnReturn, LanguageNames.CSharp))
+            {
+                return false;
+            }
 
             if (optionSet.GetOption(FormattingOptions.SmartIndent, LanguageNames.CSharp) != FormattingOptions.IndentStyle.Smart)
             {
@@ -85,12 +88,12 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
             var previousToken = token.GetPreviousToken(includeZeroWidth: true);
 
             // only use smart token formatter when we have two visible tokens.
-            if (previousToken.Kind() == SyntaxKind.None || previousToken.IsMissing)
+            if (previousToken.IsKind(SyntaxKind.None) || previousToken.IsMissing)
             {
                 return false;
             }
 
-            var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet.AsAnalyzerConfigOptions(null, null));
+            var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet.AsAnalyzerConfigOptions(optionService, LanguageNames.CSharp));
             if (lineOperation == null || lineOperation.Option == AdjustNewLinesOption.ForceLinesIfOnSingleLine)
             {
                 // no indentation operation, nothing to do for smart token formatter
@@ -133,7 +136,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
 
                 // only valid if the user has started to actually type a constructor initializer
                 if (node is ConstructorInitializerSyntax constructorInitializer &&
-                    constructorInitializer.ArgumentList.OpenParenToken.Kind() != SyntaxKind.None &&
+                    !constructorInitializer.ArgumentList.OpenParenToken.IsKind(SyntaxKind.None) &&
                     !constructorInitializer.ThisOrBaseKeyword.IsMissing)
                 {
                     var text = node.SyntaxTree.GetText();

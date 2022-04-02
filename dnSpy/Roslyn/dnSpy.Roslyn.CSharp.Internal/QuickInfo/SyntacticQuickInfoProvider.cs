@@ -26,7 +26,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo.CSharp
             SyntaxToken token,
             CancellationToken cancellationToken)
         {
-            if (token.Kind() != SyntaxKind.CloseBraceToken)
+            if (!token.IsKind(SyntaxKind.CloseBraceToken))
             {
                 return Task.FromResult<QuickInfoContent>(null);
             }
@@ -38,10 +38,10 @@ namespace dnSpy.Roslyn.Internal.QuickInfo.CSharp
                 return Task.FromResult<QuickInfoContent>(null);
             }
 
-            // Now check if we can find an open brace. 
+            // Now check if we can find an open brace.
             var parent = token.Parent;
-            var openBrace = parent.ChildNodesAndTokens().FirstOrDefault(n => n.Kind() == SyntaxKind.OpenBraceToken).AsToken();
-            if (openBrace.Kind() != SyntaxKind.OpenBraceToken)
+            var openBrace = parent.ChildNodesAndTokens().FirstOrDefault(n => n.IsKind(SyntaxKind.OpenBraceToken)).AsToken();
+            if (!openBrace.IsKind(SyntaxKind.OpenBraceToken))
             {
                 return Task.FromResult<QuickInfoContent>(null);
             }

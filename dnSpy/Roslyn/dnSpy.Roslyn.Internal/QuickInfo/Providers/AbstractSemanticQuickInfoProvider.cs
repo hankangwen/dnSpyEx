@@ -94,10 +94,12 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
             foreach (var candidate in candidateResults)
             {
                 // Does the candidate have anything remotely equivalent?
+				#pragma warning disable RS1024
                 if (!candidate.Item3.Intersect(bestBinding.Item3, LinkedFilesSymbolEquivalenceComparer.Instance).Any())
                 {
                     invalidProjects.Add(candidate.Item1.ProjectId);
                 }
+				#pragma warning restore RS1024
             }
 
             var supportedPlatforms = new SupportedPlatformData(document.Project.Solution, invalidProjects, candidateProjects);
@@ -279,11 +281,13 @@ namespace dnSpy.Roslyn.Internal.QuickInfo
             var bindableParent = document.GetLanguageService<ISyntaxFactsService>().TryGetBindableParent(token);
             var overloads = semanticModel.GetMemberGroup(bindableParent, cancellationToken);
 
+			#pragma warning disable RS1024
             symbols = symbols.Where(IsOk)
                              .Where(s => IsAccessible(s, enclosingType))
                              .Concat(overloads)
                              .Distinct(SymbolEquivalenceComparer.Instance)
                              .ToImmutableArray();
+			#pragma warning restore RS1024
 
             if (symbols.Any())
             {
