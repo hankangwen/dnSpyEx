@@ -1,4 +1,6 @@
-// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 /*
 Original Roslyn files:
@@ -27,6 +29,7 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 			ISignatureHelpProvider[] providers,
 			int caretPosition,
 			SIGHLP.SignatureHelpTriggerInfo triggerInfo,
+			SignatureHelpOptions options,
 			Document document,
 			CancellationToken cancellationToken) {
 			ISignatureHelpProvider bestProvider = null;
@@ -35,17 +38,10 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 			// TODO(cyrusn): We're calling into extensions, we need to make ourselves resilient
 			// to the extension crashing.
 			foreach (var provider in providers) {
-				// If this is a retrigger command, and another retrigger command has already
-				// been issued then we can bail out immediately.
-				//if (IsNonTypeCharRetrigger(triggerInfo) &&
-				//	localRetriggerId != _retriggerId) {
-				//	return null;
-				//}
-
 				cancellationToken.ThrowIfCancellationRequested();
 
-				//TODO: SignatureHelpOptions
-				var currentItems = await provider.GetItemsAsync(document, caretPosition, triggerInfo, new SignatureHelpOptions(false), cancellationToken).ConfigureAwait(false);
+				var currentItems = await provider.GetItemsAsync(document, caretPosition, triggerInfo, options, cancellationToken)
+												 .ConfigureAwait(false);
 				if (currentItems != null && currentItems.ApplicableSpan.IntersectsWith(caretPosition)) {
 					// If another provider provides sig help items, then only take them if they
 					// start after the last batch of items.  i.e. we want the set of items that
@@ -77,14 +73,16 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 			return currentTextSpan.Start > bestItems.ApplicableSpan.Start;
 		}
 
-		SignatureHelpResult GetSignatureHelpResult((ISignatureHelpProvider provider, SignatureHelpItems items) res, Document document) {
+		SignatureHelpResult GetSignatureHelpResult((ISignatureHelpProvider provider, SignatureHelpItems items) res,
+			Document document) {
 			// Code is from the end of ComputeModelInBackgroundAsync()
 			var items = res.items;
 			if (items == null)
 				return null;
 
 			var selectedItem = GetSelectedItem(items, res.provider);
-			var syntaxFactsService = document?.Project?.LanguageServices?.GetService<Microsoft.CodeAnalysis.LanguageServices.ISyntaxFactsService>();
+			var syntaxFactsService = document?.Project?.LanguageServices
+											 ?.GetService<Microsoft.CodeAnalysis.LanguageServices.ISyntaxFactsService>();
 			var isCaseSensitive = syntaxFactsService == null || syntaxFactsService.IsCaseSensitive;
 			var selection = DefaultSignatureHelpSelector.GetSelection(items.Items,
 				selectedItem, items.ArgumentIndex, items.ArgumentCount, items.ArgumentName, isCaseSensitive);
@@ -109,12 +107,6 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 			return items.Items.First();
 		}
 
-		private static bool DisplayPartsMatch(SignatureHelpItem i1, SignatureHelpItem i2)
-			=> i1.GetAllParts().SequenceEqual(i2.GetAllParts(), CompareParts);
-
-		private static bool CompareParts(TaggedText p1, TaggedText p2)
-			=> p1.ToString() == p2.ToString();
-
 		internal struct SignatureHelpSelection {
 			private readonly SignatureHelpItem _selectedItem;
 			private readonly int? _selectedParameter;
@@ -129,8 +121,7 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 		}
 
 		internal static class DefaultSignatureHelpSelector {
-			public static SignatureHelpSelection GetSelection(
-				IList<SignatureHelpItem> items,
+			public static SignatureHelpSelection GetSelection(IList<SignatureHelpItem> items,
 				SignatureHelpItem selectedItem,
 				int argumentIndex,
 				int argumentCount,
@@ -141,7 +132,8 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 				return new SignatureHelpSelection(bestItem, selectedParameter);
 			}
 
-			private static int GetSelectedParameter(SignatureHelpItem bestItem, int parameterIndex, string parameterName, bool isCaseSensitive) {
+			private static int GetSelectedParameter(SignatureHelpItem bestItem, int parameterIndex, string parameterName,
+				bool isCaseSensitive) {
 				if (!string.IsNullOrEmpty(parameterName)) {
 					var comparer = isCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
 					var index = bestItem.Parameters.IndexOf(p => comparer.Equals(p.Name, parameterName));
@@ -153,8 +145,8 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 				return parameterIndex;
 			}
 
-			private static SignatureHelpItem GetBestItem(
-				SignatureHelpItem currentItem, IList<SignatureHelpItem> filteredItems, int selectedParameter, int argumentCount, string name, bool isCaseSensitive) {
+			private static SignatureHelpItem GetBestItem(SignatureHelpItem currentItem, IList<SignatureHelpItem> filteredItems,
+				int selectedParameter, int argumentCount, string name, bool isCaseSensitive) {
 				// If the current item is still applicable, then just keep it.
 				if (filteredItems.Contains(currentItem) &&
 					IsApplicable(currentItem, argumentCount, name, isCaseSensitive)) {
@@ -225,33 +217,6 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 			}
 
 			return -1;
-		}
-
-		public static bool SequenceEqual<T>(this IEnumerable<T> first, IEnumerable<T> second, Func<T, T, bool> comparer) {
-			Debug.Assert(comparer != null);
-
-			if (first == second) {
-				return true;
-			}
-
-			if (first == null || second == null) {
-				return false;
-			}
-
-			using (var enumerator = first.GetEnumerator())
-			using (var enumerator2 = second.GetEnumerator()) {
-				while (enumerator.MoveNext()) {
-					if (!enumerator2.MoveNext() || !comparer(enumerator.Current, enumerator2.Current)) {
-						return false;
-					}
-				}
-
-				if (enumerator2.MoveNext()) {
-					return false;
-				}
-			}
-
-			return true;
 		}
 	}
 }

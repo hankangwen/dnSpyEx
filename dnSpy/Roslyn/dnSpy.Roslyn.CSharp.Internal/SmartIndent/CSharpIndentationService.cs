@@ -1,4 +1,6 @@
-// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Composition;
@@ -18,192 +20,168 @@ using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Text;
 using Roslyn.Utilities;
 
-namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp
-{
-    [ExportLanguageService(typeof(ISynchronousIndentationService), LanguageNames.CSharp), Shared]
-    internal partial class CSharpIndentationService : AbstractIndentationService
-    {
-        private static readonly AbstractFormattingRule s_instance = new FormattingRule();
+namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
+	[ExportLanguageService(typeof(IIndentationService), LanguageNames.CSharp), Shared]
+	internal sealed partial class CSharpIndentationService : AbstractIndentationService<CompilationUnitSyntax> {
+		public static readonly CSharpIndentationService Instance = new();
 
-        protected override AbstractFormattingRule GetSpecializedIndentationFormattingRule()
-        {
-            return s_instance;
-        }
+		private static readonly AbstractFormattingRule s_instance = new FormattingRule();
 
-        protected override AbstractIndenter GetIndenter(
-			Document syntaxFacts, SyntaxTree syntaxTree, TextLine lineToBeIndented, IEnumerable<AbstractFormattingRule> formattingRules, OptionSet optionSet, CancellationToken cancellationToken)
-        {
-            return new Indenter(
-                syntaxFacts, syntaxTree, formattingRules,
-                optionSet, lineToBeIndented, cancellationToken);
-        }
+		[ImportingConstructor]
+		public CSharpIndentationService() { }
 
-        protected override bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
-            IEnumerable<AbstractFormattingRule> formattingRules,
-            SyntaxNode root,
-            TextLine line,
-            IOptionService optionService,
-			OptionSet optionSet,
-            CancellationToken cancellationToken)
-        {
-            return ShouldUseSmartTokenFormatterInsteadOfIndenter(
-                formattingRules, (CompilationUnitSyntax)root, line, optionService, optionSet, cancellationToken);
-        }
+		protected override AbstractFormattingRule GetSpecializedIndentationFormattingRule(
+			FormattingOptions.IndentStyle indentStyle) => s_instance;
 
-        public static bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
-            IEnumerable<AbstractFormattingRule> formattingRules,
-            CompilationUnitSyntax root,
-            TextLine line,
+		public static bool ShouldUseSmartTokenFormatterInsteadOfIndenter(IEnumerable<AbstractFormattingRule> formattingRules,
+			CompilationUnitSyntax root,
+			TextLine line,
 			IOptionService optionService,
 			OptionSet optionSet,
-            CancellationToken cancellationToken)
-        {
-            Contract.ThrowIfNull(formattingRules);
-            Contract.ThrowIfNull(root);
+			out SyntaxToken token) {
+			Contract.ThrowIfNull(formattingRules);
+			Contract.ThrowIfNull(root);
 
-            if (!optionSet.GetOption(FormattingBehaviorOptions.AutoFormattingOnReturn, LanguageNames.CSharp))
-            {
-                return false;
-            }
+			token = default;
+			if (!optionSet.GetOption(FormattingBehaviorOptions.AutoFormattingOnReturn, LanguageNames.CSharp)) {
+				return false;
+			}
 
-            if (optionSet.GetOption(FormattingOptions.SmartIndent, LanguageNames.CSharp) != FormattingOptions.IndentStyle.Smart)
-            {
-                return false;
-            }
+			if (optionSet.GetOption(FormattingOptions.SmartIndent, LanguageNames.CSharp) != FormattingOptions.IndentStyle.Smart) {
+				return false;
+			}
 
-            var firstNonWhitespacePosition = line.GetFirstNonWhitespacePosition();
-            if (!firstNonWhitespacePosition.HasValue)
-            {
-                return false;
-            }
+			var firstNonWhitespacePosition = line.GetFirstNonWhitespacePosition();
+			if (!firstNonWhitespacePosition.HasValue) {
+				return false;
+			}
 
-            var token = root.FindToken(firstNonWhitespacePosition.Value);
-            if (token.IsKind(SyntaxKind.None) ||
-                token.SpanStart != firstNonWhitespacePosition)
-            {
-                return false;
-            }
+			token = root.FindToken(firstNonWhitespacePosition.Value);
+			if (IsInvalidToken(token)) {
+				return false;
+			}
 
-            // first see whether there is a line operation for current token
-            var previousToken = token.GetPreviousToken(includeZeroWidth: true);
+			if (token.IsKind(SyntaxKind.None) ||
+				token.SpanStart != firstNonWhitespacePosition) {
+				return false;
+			}
 
-            // only use smart token formatter when we have two visible tokens.
-            if (previousToken.IsKind(SyntaxKind.None) || previousToken.IsMissing)
-            {
-                return false;
-            }
+			// first see whether there is a line operation for current token
+			var previousToken = token.GetPreviousToken(includeZeroWidth: true);
 
-            var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet.AsAnalyzerConfigOptions(optionService, LanguageNames.CSharp));
-            if (lineOperation == null || lineOperation.Option == AdjustNewLinesOption.ForceLinesIfOnSingleLine)
-            {
-                // no indentation operation, nothing to do for smart token formatter
-                return false;
-            }
+			// only use smart token formatter when we have two visible tokens.
+			if (previousToken.IsKind(SyntaxKind.None) || previousToken.IsMissing) {
+				return false;
+			}
 
-            // We're pressing enter between two tokens, have the formatter figure out hte appropriate
-            // indentation.
-            return true;
-        }
+			var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token,
+				optionSet.AsAnalyzerConfigOptions(optionService, LanguageNames.CSharp));
+			if (lineOperation == null || lineOperation.Option == AdjustNewLinesOption.ForceLinesIfOnSingleLine) {
+				// no indentation operation, nothing to do for smart token formatter
+				return false;
+			}
 
-        private class FormattingRule : AbstractFormattingRule
-        {
-            public override void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node, in NextIndentBlockOperationAction nextOperation)
-            {
-                // these nodes should be from syntax tree from ITextSnapshot.
+			// We're pressing enter between two tokens, have the formatter figure out hte appropriate
+			// indentation.
+			return true;
+		}
+
+		private static bool IsInvalidToken(SyntaxToken token) {
+			// invalid token to be formatted
+			return token.IsKind(SyntaxKind.None) ||
+				   token.IsKind(SyntaxKind.EndOfDirectiveToken) ||
+				   token.IsKind(SyntaxKind.EndOfFileToken);
+		}
+
+		private class FormattingRule : AbstractFormattingRule {
+			public override void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node,
+				in NextIndentBlockOperationAction nextOperation) {
+				// these nodes should be from syntax tree from ITextSnapshot.
 				Debug.Assert(node.SyntaxTree != null);
 				Debug.Assert(node.SyntaxTree.GetText() != null);
 
-                nextOperation.Invoke();
+				nextOperation.Invoke();
 
-                ReplaceCaseIndentationRules(list, node);
+				ReplaceCaseIndentationRules(list, node);
 
-                if (node is BaseParameterListSyntax ||
-                    node is TypeArgumentListSyntax ||
-                    node is TypeParameterListSyntax ||
-                    node.IsKind(SyntaxKind.Interpolation))
-                {
-                    AddIndentBlockOperations(list, node);
-                    return;
-                }
+				if (node is BaseParameterListSyntax ||
+					node is TypeArgumentListSyntax ||
+					node is TypeParameterListSyntax ||
+					node.IsKind(SyntaxKind.Interpolation)) {
+					AddIndentBlockOperations(list, node);
+					return;
+				}
 
-                if (node is BaseArgumentListSyntax argument &&
-                    argument.Parent.Kind() != SyntaxKind.ThisConstructorInitializer &&
-                    !IsBracketedArgumentListMissingBrackets(argument as BracketedArgumentListSyntax))
-                {
-                    AddIndentBlockOperations(list, argument);
-                    return;
-                }
+				if (node is BaseArgumentListSyntax argument &&
+					!argument.Parent.IsKind(SyntaxKind.ThisConstructorInitializer) &&
+					!IsBracketedArgumentListMissingBrackets(argument as BracketedArgumentListSyntax)) {
+					AddIndentBlockOperations(list, argument);
+					return;
+				}
 
-                // only valid if the user has started to actually type a constructor initializer
-                if (node is ConstructorInitializerSyntax constructorInitializer &&
-                    !constructorInitializer.ArgumentList.OpenParenToken.IsKind(SyntaxKind.None) &&
-                    !constructorInitializer.ThisOrBaseKeyword.IsMissing)
-                {
-                    var text = node.SyntaxTree.GetText();
+				// only valid if the user has started to actually type a constructor initializer
+				if (node is ConstructorInitializerSyntax constructorInitializer &&
+					!constructorInitializer.ArgumentList.OpenParenToken.IsKind(SyntaxKind.None) &&
+					!constructorInitializer.ThisOrBaseKeyword.IsMissing) {
+					var text = node.SyntaxTree.GetText();
 
-                    // 3 different cases
-                    // first case : this or base is the first token on line
-                    // second case : colon is the first token on line
-                    var colonIsFirstTokenOnLine = !constructorInitializer.ColonToken.IsMissing && constructorInitializer.ColonToken.IsFirstTokenOnLine(text);
-                    var thisOrBaseIsFirstTokenOnLine = !constructorInitializer.ThisOrBaseKeyword.IsMissing && constructorInitializer.ThisOrBaseKeyword.IsFirstTokenOnLine(text);
+					// 3 different cases
+					// first case : this or base is the first token on line
+					// second case : colon is the first token on line
+					var colonIsFirstTokenOnLine = !constructorInitializer.ColonToken.IsMissing &&
+												  constructorInitializer.ColonToken.IsFirstTokenOnLine(text);
+					var thisOrBaseIsFirstTokenOnLine = !constructorInitializer.ThisOrBaseKeyword.IsMissing &&
+													   constructorInitializer.ThisOrBaseKeyword.IsFirstTokenOnLine(text);
 
-                    if (colonIsFirstTokenOnLine || thisOrBaseIsFirstTokenOnLine)
-                    {
-                        list.Add(FormattingOperations.CreateRelativeIndentBlockOperation(
-                            constructorInitializer.ThisOrBaseKeyword,
-                            constructorInitializer.ArgumentList.OpenParenToken.GetNextToken(includeZeroWidth: true),
-                            constructorInitializer.ArgumentList.CloseParenToken.GetPreviousToken(includeZeroWidth: true),
-                            indentationDelta: 1,
-                            option: IndentBlockOption.RelativePosition));
-                    }
-                    else
-                    {
-                        // third case : none of them are the first token on the line
-                        AddIndentBlockOperations(list, constructorInitializer.ArgumentList);
-                    }
-                }
-            }
+					if (colonIsFirstTokenOnLine || thisOrBaseIsFirstTokenOnLine) {
+						list.Add(FormattingOperations.CreateRelativeIndentBlockOperation(
+							constructorInitializer.ThisOrBaseKeyword,
+							constructorInitializer.ArgumentList.OpenParenToken.GetNextToken(includeZeroWidth: true),
+							constructorInitializer.ArgumentList.CloseParenToken.GetPreviousToken(includeZeroWidth: true),
+							indentationDelta: 1,
+							option: IndentBlockOption.RelativePosition));
+					}
+					else {
+						// third case : none of them are the first token on the line
+						AddIndentBlockOperations(list, constructorInitializer.ArgumentList);
+					}
+				}
+			}
 
-            private bool IsBracketedArgumentListMissingBrackets(BracketedArgumentListSyntax node)
-            {
-                return node != null && node.OpenBracketToken.IsMissing && node.CloseBracketToken.IsMissing;
-            }
+			private static bool IsBracketedArgumentListMissingBrackets(BracketedArgumentListSyntax node) =>
+				node != null && node.OpenBracketToken.IsMissing && node.CloseBracketToken.IsMissing;
 
-            private void ReplaceCaseIndentationRules(List<IndentBlockOperation> list, SyntaxNode node)
-            {
-                var section = node as SwitchSectionSyntax;
-                if (section == null || section.Statements.Count == 0)
-                {
-                    return;
-                }
+			private static void ReplaceCaseIndentationRules(List<IndentBlockOperation> list, SyntaxNode node) {
+				if (node is not SwitchSectionSyntax section || section.Statements.Count == 0) {
+					return;
+				}
 
-                var startToken = section.Statements.First().GetFirstToken(includeZeroWidth: true);
-                var endToken = section.Statements.Last().GetLastToken(includeZeroWidth: true);
+				var startToken = section.Statements.First().GetFirstToken(includeZeroWidth: true);
+				var endToken = section.Statements.Last().GetLastToken(includeZeroWidth: true);
 
-                for (int i = 0; i < list.Count; i++)
-                {
-                    var operation = list[i];
-                    if (operation.StartToken == startToken && operation.EndToken == endToken)
-                    {
-                        // replace operation
-                        list[i] = FormattingOperations.CreateIndentBlockOperation(startToken, endToken, indentationDelta: 1, option: IndentBlockOption.RelativePosition);
-                    }
-                }
-            }
+				for (var i = 0; i < list.Count; i++) {
+					var operation = list[i];
+					if (operation.StartToken == startToken && operation.EndToken == endToken) {
+						// replace operation
+						list[i] = FormattingOperations.CreateIndentBlockOperation(startToken, endToken, indentationDelta: 1,
+							option: IndentBlockOption.RelativePosition);
+					}
+				}
+			}
 
-            private static void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node)
-            {
-                // only add indent block operation if the base token is the first token on line
-                var text = node.SyntaxTree.GetText();
-                var baseToken = node.Parent.GetFirstToken(includeZeroWidth: true);
+			private static void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node) {
+				RoslynDebug.AssertNotNull(node.Parent);
 
-                list.Add(FormattingOperations.CreateRelativeIndentBlockOperation(
-                    baseToken,
-                    node.GetFirstToken(includeZeroWidth: true).GetNextToken(includeZeroWidth: true),
-                    node.GetLastToken(includeZeroWidth: true).GetPreviousToken(includeZeroWidth: true),
-                    indentationDelta: 1,
-                    option: IndentBlockOption.RelativeToFirstTokenOnBaseTokenLine));
-            }
-        }
-    }
+				// only add indent block operation if the base token is the first token on line
+				var baseToken = node.Parent.GetFirstToken(includeZeroWidth: true);
+
+				list.Add(FormattingOperations.CreateRelativeIndentBlockOperation(
+					baseToken,
+					node.GetFirstToken(includeZeroWidth: true).GetNextToken(includeZeroWidth: true),
+					node.GetLastToken(includeZeroWidth: true).GetPreviousToken(includeZeroWidth: true),
+					indentationDelta: 1,
+					option: IndentBlockOption.RelativeToFirstTokenOnBaseTokenLine));
+			}
+		}
+	}
 }

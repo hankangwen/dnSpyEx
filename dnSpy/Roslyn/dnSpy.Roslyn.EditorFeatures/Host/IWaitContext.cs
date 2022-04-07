@@ -1,24 +1,23 @@
-// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Threading;
 using Microsoft.CodeAnalysis.Shared.Utilities;
 
-namespace dnSpy.Roslyn.EditorFeatures.Host
-{
-    internal enum WaitIndicatorResult
-    {
-        Completed,
-        Canceled,
-    }
+namespace dnSpy.Roslyn.EditorFeatures.Host {
+	internal enum WaitIndicatorResult {
+		Completed,
+		Canceled,
+	}
 
-    internal interface IWaitContext : IDisposable
-    {
-        CancellationToken CancellationToken { get; }
+	internal interface IWaitContext : IDisposable {
+		CancellationToken CancellationToken { get; }
 
-        bool AllowCancel { get; set; }
-        string Message { get; set; }
+		bool AllowCancel { get; set; }
+		string Message { get; set; }
 
-        IProgressTracker ProgressTracker { get; }
-    }
+		IProgressTracker ProgressTracker { get; }
+	}
 }

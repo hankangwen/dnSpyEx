@@ -38,7 +38,10 @@ namespace dnSpy.Roslyn.Internal.QuickInfo {
 		public ImmutableArray<TaggedText> UsageText { get; }
 		public ImmutableArray<TaggedText> ExceptionText { get; }
 
-		public InformationQuickInfoContent(Glyph? symbolGlyph, Glyph? warningGlyph, ImmutableArray<TaggedText> mainDescription, ImmutableArray<TaggedText> documentation, ImmutableArray<TaggedText> typeParameterMap, ImmutableArray<TaggedText> anonymousTypes, ImmutableArray<TaggedText> usageText, ImmutableArray<TaggedText> exceptionText) {
+		public InformationQuickInfoContent(Glyph? symbolGlyph, Glyph? warningGlyph, ImmutableArray<TaggedText> mainDescription,
+			ImmutableArray<TaggedText> documentation, ImmutableArray<TaggedText> typeParameterMap,
+			ImmutableArray<TaggedText> anonymousTypes, ImmutableArray<TaggedText> usageText,
+			ImmutableArray<TaggedText> exceptionText) {
 			SymbolGlyph = symbolGlyph;
 			WarningGlyph = warningGlyph;
 			MainDescription = mainDescription.IsDefault ? ImmutableArray<TaggedText>.Empty : mainDescription;

@@ -1,11 +1,13 @@
-// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Globalization;
 
 namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 	static class GeneratedNames {
 		// Extracts the slot index from a name of a field that stores hoisted variables or awaiters.
-		// Such a name ends with "__{slot index + 1}". 
+		// Such a name ends with "__{slot index + 1}".
 		// Returned slot index is >= 0.
 		internal static bool TryParseSlotIndex(string fieldName, out int slotIndex) {
 			int lastUnder = fieldName.LastIndexOf('_');
