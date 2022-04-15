@@ -99,8 +99,8 @@ namespace dnSpy.Roslyn.Internal {
 			case MSCA.Glyph.CompletionWarning: return Glyph.CompletionWarning;
 			case MSCA.Glyph.AddReference: return Glyph.AddReference;
 			case MSCA.Glyph.NuGet: return Glyph.NuGet;
+			case MSCA.Glyph.TargetTypeMatch: return Glyph.TargetTypeMatch;
 			default:
-				//TODO: MSCA.Glyph.TargetTypeMatch
 				Debug.Fail($"New Glyph: {glyph}");
 				return Glyph.Error;
 			}

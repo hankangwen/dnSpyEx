@@ -110,6 +110,7 @@ namespace dnSpy.Roslyn.Internal {
 		CompletionWarning,
 
 		AddReference,
-		NuGet
+		NuGet,
+		TargetTypeMatch
 	}
 }
