@@ -63,6 +63,11 @@ namespace dnSpy.Contracts.Debugger.Exceptions {
 		public abstract string? Message { get; }
 
 		/// <summary>
+		/// Exception HResult or null if none
+		/// </summary>
+		public abstract int? HResult { get; }
+
+		/// <summary>
 		/// Thread where exception was thrown or null if it's not known
 		/// </summary>
 		public abstract DbgThread? Thread { get; }

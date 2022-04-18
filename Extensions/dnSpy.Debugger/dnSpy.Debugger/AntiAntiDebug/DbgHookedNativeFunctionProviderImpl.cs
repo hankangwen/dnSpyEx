@@ -41,7 +41,13 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 			public ExportedFunctions? ExportedFunctions { get; set; }
 
 			public ModuleInfo(ProcessModule module) {
-				Name = Path.GetFileName(module.FileName) ?? "???";
+				try {
+					Name = Path.GetFileName(module.FileName) ?? "???";
+				}
+				catch (ArgumentException) {
+					// .NET Framework throws on invalid path instead of returning null like .NET Core does.
+					Name = "???";
+				}
 				Filename = module.FileName ?? "???";
 				Address = (ulong)module.BaseAddress.ToInt64();
 				EndAddress = Address + (uint)module.ModuleMemorySize;

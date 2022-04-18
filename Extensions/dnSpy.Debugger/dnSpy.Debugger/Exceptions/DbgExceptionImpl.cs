@@ -27,18 +27,20 @@ namespace dnSpy.Debugger.Exceptions {
 		public override DbgExceptionId Id { get; }
 		public override DbgExceptionEventFlags Flags { get; }
 		public override string? Message { get; }
+		public override int? HResult { get; }
 		public override DbgThread? Thread { get; }
 		public override DbgModule? Module { get; }
 
 		DbgDispatcher Dispatcher => Process.DbgManager.Dispatcher;
 
-		public DbgExceptionImpl(DbgRuntime runtime, DbgExceptionId id, DbgExceptionEventFlags flags, string? message, DbgThread? thread, DbgModule? module) {
+		public DbgExceptionImpl(DbgRuntime runtime, DbgExceptionId id, DbgExceptionEventFlags flags, string? message, int? hResult, DbgThread? thread, DbgModule? module) {
 			if (id.IsDefaultId)
 				throw new ArgumentException();
 			Runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
 			Id = id;
 			Flags = flags;
 			Message = message;
+			HResult = hResult;
 			Thread = thread;
 			Module = module;
 		}

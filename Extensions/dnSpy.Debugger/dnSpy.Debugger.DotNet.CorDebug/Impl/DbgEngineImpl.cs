@@ -38,6 +38,7 @@ using dnSpy.Contracts.Debugger.DotNet.Metadata.Internal;
 using dnSpy.Contracts.Debugger.DotNet.Steppers.Engine;
 using dnSpy.Contracts.Debugger.Engine;
 using dnSpy.Contracts.Debugger.Engine.Steppers;
+using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Exceptions;
 using dnSpy.Contracts.Metadata;
 using dnSpy.Debugger.DotNet.CorDebug.CallStack;
@@ -189,18 +190,21 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				try {
 					string? exName = null;
 					string? exMessage = null;
+					int? hResult = null;
 					if (exObj is not null) {
 						if (reflectionAppDomain is not null)
 							dnExObj = CreateDotNetValue_CorDebug(exObj, reflectionAppDomain, false) as DbgDotNetValueImpl;
 						if (dnExObj is not null) {
 							exName = TryGetExceptionName(dnExObj);
 							exMessage = TryGetExceptionMessage(dnExObj);
+							hResult = TryGetExceptionHResult(dnExObj);
 						}
 
 						exName ??= TryGetExceptionName(exObj);
 						exMessage ??= TryGetExceptionMessage(exObj);
+						hResult ??= TryGetExceptionHResult(exObj);
 					}
-					objectFactory.CreateException(new DbgExceptionId(PredefinedExceptionCategories.DotNet, exName ?? "???"), exFlags, exMessage ?? dnSpy_Debugger_DotNet_CorDebug_Resources.ExceptionMessageIsNull, TryGetThread(e2.CorThread), module, GetMessageFlags());
+					objectFactory.CreateException(new DbgExceptionId(PredefinedExceptionCategories.DotNet, exName ?? "???"), exFlags, exMessage ?? dnSpy_Debugger_DotNet_CorDebug_Resources.ExceptionMessageIsNull, hResult, TryGetThread(e2.CorThread), module, GetMessageFlags());
 					e.AddPauseReason(DebuggerPauseReason.Other);
 				}
 				finally {
@@ -315,6 +319,26 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return val?.String;
 		}
 
+		static int? TryGetExceptionHResult(CorValue? exObj) {
+			exObj = GetDereferencedValue(exObj);
+			if (exObj is null)
+				return null;
+
+			if (!GetFieldByName(exObj.ExactType, KnownMemberNames.Exception_HResult_FieldName, out var ownerType, out var token))
+				return null;
+
+			var val = GetDereferencedValue(exObj.GetFieldValue(ownerType.Class, token.Value));
+
+			if (val?.ExactType?.ElementType != CorElementType.I4)
+				return null;
+
+			var data = val.ReadGenericValue();
+			if (data is null)
+				return null;
+
+			return BitConverter.ToInt32(data, 0);
+		}
+
 		static CorValue? GetDereferencedValue(CorValue? value) {
 			if (value is null)
 				return null;
@@ -360,6 +384,15 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			if (res is null || !res.Value.HasRawValue)
 				return null;
 			return res.Value.RawValue as string;
+		}
+
+		int? TryGetExceptionHResult(DbgDotNetValueImpl? exObj) {
+			if (exObj is null)
+				return null;
+			var res = ReadField_CorDebug(exObj, KnownMemberNames.Exception_HResult_FieldName, null);
+			if (res is null || !res.Value.HasRawValue || res.Value.ValueType != DbgSimpleValueType.Int32)
+				return null;
+			return (int)res.Value.RawValue!;
 		}
 
 		internal DbgThread? TryGetThread(CorThread? thread) {

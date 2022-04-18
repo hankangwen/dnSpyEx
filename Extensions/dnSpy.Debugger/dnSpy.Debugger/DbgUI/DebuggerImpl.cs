@@ -459,6 +459,10 @@ namespace dnSpy.Debugger.DbgUI {
 			sb.AppendLine(string.Format(dnSpy_Debugger_Resources.ExceptionName, dbgExceptionFormatterService.Value.ToString(exm.Exception.Id)));
 			sb.AppendLine();
 			sb.AppendLine(string.Format(dnSpy_Debugger_Resources.ExceptionMessage, exm.Exception.Message ?? dnSpy_Debugger_Resources.ExceptionMessageIsNull));
+			if (exm.Exception.HResult.HasValue) {
+				sb.AppendLine();
+				sb.AppendLine(string.Format(dnSpy_Debugger_Resources.ExceptionHResult, exm.Exception.HResult.Value));
+			}
 			ShowError_UI(sb.ToString());
 		}
 

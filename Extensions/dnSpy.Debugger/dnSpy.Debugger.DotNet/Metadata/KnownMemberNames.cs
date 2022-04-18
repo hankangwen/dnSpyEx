@@ -54,6 +54,7 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		// System.Exception
 		public const string Exception_Message_FieldName = "_message";
 		public const string Exception_Message_FieldName_Mono = "message";
+		public const string Exception_HResult_FieldName = "_HResult";
 
 		// System.Threading.Thread
 		public const string Thread_ManagedThreadId_FieldName1 = "m_ManagedThreadId";

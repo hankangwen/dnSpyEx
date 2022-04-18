@@ -163,7 +163,21 @@ namespace dnSpy.Contracts.Debugger.Engine {
 		/// <param name="messageFlags">Message flags</param>
 		/// <returns></returns>
 		public DbgException CreateException(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags) =>
-			CreateException<object>(id, flags, message, thread, module, messageFlags, null, null);
+			CreateException<object>(id, flags, message, thread, module, messageFlags, null);
+
+		/// <summary>
+		/// Creates an exception. The engine has paused the program.
+		/// </summary>
+		/// <param name="id">Exception id</param>
+		/// <param name="flags">Exception event flags</param>
+		/// <param name="message">Exception message or null if it's not available</param>
+		/// <param name="hResult">Exception HResult or null if it's not available</param>
+		/// <param name="thread">Thread where exception was thrown or null if it's unknown</param>
+		/// <param name="module">Module where exception was thrown or null if it's unknown</param>
+		/// <param name="messageFlags">Message flags</param>
+		/// <returns></returns>
+		public DbgException CreateException(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, int? hResult, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags) =>
+			CreateException<object>(id, flags, message, hResult, thread, module, messageFlags, null);
 
 		/// <summary>
 		/// Creates an exception. The engine has paused the program.
@@ -178,7 +192,24 @@ namespace dnSpy.Contracts.Debugger.Engine {
 		/// <param name="data">Data to add to the <see cref="DbgException"/> or null if nothing gets added</param>
 		/// <param name="onCreated">Called right after creating the exception but before adding it to internal data structures. This can be null.</param>
 		/// <returns></returns>
-		public abstract DbgException CreateException<T>(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags, T? data, Action<DbgException>? onCreated = null) where T : class;
+		public DbgException CreateException<T>(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags, T? data, Action<DbgException>? onCreated = null) where T : class =>
+			CreateException(id, flags, message, null, thread, module, messageFlags, data, onCreated);
+
+		/// <summary>
+		/// Creates an exception. The engine has paused the program.
+		/// </summary>
+		/// <typeparam name="T">Type of data</typeparam>
+		/// <param name="id">Exception id</param>
+		/// <param name="flags">Exception event flags</param>
+		/// <param name="message">Exception message or null if it's not available</param>
+		/// <param name="hResult">Exception HResult or null if it's not available</param>
+		/// <param name="thread">Thread where exception was thrown or null if it's unknown</param>
+		/// <param name="module">Module where exception was thrown or null if it's unknown</param>
+		/// <param name="messageFlags">Message flags</param>
+		/// <param name="data">Data to add to the <see cref="DbgException"/> or null if nothing gets added</param>
+		/// <param name="onCreated">Called right after creating the exception but before adding it to internal data structures. This can be null.</param>
+		/// <returns></returns>
+		public abstract DbgException CreateException<T>(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, int? hResult, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags, T? data, Action<DbgException>? onCreated = null) where T : class;
 
 		/// <summary>
 		/// Value used when the bound breakpoint's address isn't known
@@ -187,7 +218,7 @@ namespace dnSpy.Contracts.Debugger.Engine {
 
 		/// <summary>
 		/// Creates a bound breakpoint. This method returns null if there was no breakpoint matching <paramref name="location"/>.
-		/// 
+		///
 		/// To get notified when a bound breakpoint gets deleted, add custom data that implements <see cref="IDisposable"/>.
 		/// </summary>
 		/// <param name="location">Breakpoint location</param>
@@ -200,7 +231,7 @@ namespace dnSpy.Contracts.Debugger.Engine {
 
 		/// <summary>
 		/// Creates a bound breakpoint. This method returns null if there was no breakpoint matching <paramref name="location"/>.
-		/// 
+		///
 		/// To get notified when a bound breakpoint gets deleted, add custom data that implements <see cref="IDisposable"/>.
 		/// </summary>
 		/// <typeparam name="T">Type of data</typeparam>
@@ -216,7 +247,7 @@ namespace dnSpy.Contracts.Debugger.Engine {
 		/// <summary>
 		/// Creates bound breakpoints. Locations that don't match an existing breakpoint are ignored, and all user data
 		/// are disposed if they implement <see cref="IDisposable"/>.
-		/// 
+		///
 		/// To get notified when a bound breakpoint gets deleted, add custom data that implements <see cref="IDisposable"/>.
 		/// </summary>
 		/// <typeparam name="T">Type of data</typeparam>
