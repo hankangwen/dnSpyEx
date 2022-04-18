@@ -32,7 +32,7 @@ namespace dnSpy.Roslyn.Text.Tagging {
 		public Workspace? Workspace { get; private set; }
 		public List<ITagSpan<IClassificationTag>> TagsList { get; } = new List<ITagSpan<IClassificationTag>>();
 
-		public void Initialize(SyntaxNode syntaxRoot, SemanticModel semanticModel, Workspace workspace) {
+		public void Initialize(SyntaxNode? syntaxRoot, SemanticModel? semanticModel, Workspace? workspace) {
 			if (IsInitialized)
 				return;
 

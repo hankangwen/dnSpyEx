@@ -73,6 +73,7 @@ namespace dnSpy.Contracts.Images {
 		public const string ConstantShortcut = nameof(ConstantShortcut);
 		public const string Copy = nameof(Copy);
 		public const string CopyItem = nameof(CopyItem);
+		public const string CorrelationScope = nameof(CorrelationScope);
 		public const string CSFileNode = nameof(CSFileNode);
 		public const string CSInteractiveWindow = nameof(CSInteractiveWindow);
 		public const string CSProjectNode = nameof(CSProjectNode);

@@ -60,7 +60,7 @@ namespace dnSpy.Roslyn.Text {
 		/// </summary>
 		/// <param name="buffer">Text buffer</param>
 		/// <returns></returns>
-		public static Workspace TryGetWorkspace(this ITextBuffer buffer) {
+		public static Workspace? TryGetWorkspace(this ITextBuffer buffer) {
 			Workspace.TryGetWorkspace(buffer.AsTextContainer(), out var ws);
 			return ws;
 		}

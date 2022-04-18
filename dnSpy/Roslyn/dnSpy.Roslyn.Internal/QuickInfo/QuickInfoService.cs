@@ -27,6 +27,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.Shared.Utilities;
+using Microsoft.CodeAnalysis.LanguageServices;
 
 namespace dnSpy.Roslyn.Internal.QuickInfo {
 	[ExportLanguageServiceFactory(typeof(QuickInfoService), LanguageNames.CSharp), Shared]
@@ -85,8 +86,9 @@ namespace dnSpy.Roslyn.Internal.QuickInfo {
 		}
 
 		public async Task<QuickInfoItem> GetItemAsync(Document document, int position, CancellationToken cancellationToken = default(CancellationToken)) {
+			var ctx = new QuickInfoContext(document, position, SymbolDescriptionOptions.From(document.Project), cancellationToken);
 			foreach (var p in quickInfoProviders) {
-				var item = await p.GetItemAsync(document, position, cancellationToken);
+				var item = await p.GetQuickInfoAsync(ctx);
 				if (item != null)
 					return item;
 			}

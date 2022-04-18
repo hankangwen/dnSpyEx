@@ -1,9 +1,13 @@
-' Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+' Licensed to the .NET Foundation under one or more agreements.
+' The .NET Foundation licenses this file to you under the MIT license.
+' See the LICENSE file in the project root for more information.
 
 Imports System.Composition
 Imports System.Threading
 Imports dnSpy.Roslyn.Internal.SmartIndent
 Imports Microsoft.CodeAnalysis
+Imports Microsoft.CodeAnalysis.Diagnostics
+Imports Microsoft.CodeAnalysis.Formatting
 Imports Microsoft.CodeAnalysis.Formatting.Rules
 Imports Microsoft.CodeAnalysis.Host.Mef
 Imports Microsoft.CodeAnalysis.LanguageServices
@@ -14,40 +18,39 @@ Imports Microsoft.CodeAnalysis.VisualBasic
 Imports Microsoft.CodeAnalysis.VisualBasic.Syntax
 
 Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
-	<ExportLanguageService(GetType(ISynchronousIndentationService), LanguageNames.VisualBasic), [Shared]>
-	Partial Friend Class VisualBasicIndentationService
-		Inherits AbstractIndentationService
+	<ExportLanguageService(GetType(IIndentationService), LanguageNames.VisualBasic), [Shared]>
+	Partial Friend NotInheritable Class VisualBasicIndentationService
+		Inherits AbstractIndentationService(Of CompilationUnitSyntax)
 
-		Private Shared ReadOnly s_instance As IFormattingRule = New SpecialFormattingRule()
+		Public Shared ReadOnly WithoutParameterAlignmentInstance As New VisualBasicIndentationService(NoOpFormattingRule.Instance)
 
-		Protected Overrides Function GetSpecializedIndentationFormattingRule() As IFormattingRule
-			Return s_instance
-		End Function
+		Private ReadOnly _specializedIndentationRule As AbstractFormattingRule
 
-		Protected Overrides Function GetIndenter(syntaxFacts As ISyntaxFactsService,
-												 syntaxTree As SyntaxTree,
-												 lineToBeIndented As TextLine,
-												 formattingRules As IEnumerable(Of IFormattingRule),
-												 optionSet As OptionSet,
-												 cancellationToken As CancellationToken) As AbstractIndenter
-			Return New Indenter(syntaxFacts, syntaxTree, formattingRules, optionSet, lineToBeIndented, cancellationToken)
-		End Function
+		<ImportingConstructor>
+		<Obsolete(MefConstruction.ImportingConstructorMessage, True)>
+		Public Sub New()
+			Me.New(Nothing)
+		End Sub
 
-		Protected Overrides Function ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules As IEnumerable(Of IFormattingRule),
-																				   root As SyntaxNode,
-																				   line As TextLine,
-																				   optionSet As OptionSet,
-																				   cancellationToken As CancellationToken) As Boolean
-			Return ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules, DirectCast(root, CompilationUnitSyntax), line, optionSet, cancellationToken)
+		Private Sub New(specializedIndentationRule As AbstractFormattingRule)
+			_specializedIndentationRule = specializedIndentationRule
+		End Sub
+
+		Protected Overrides Function GetSpecializedIndentationFormattingRule(indentStyle As FormattingOptions.IndentStyle) _
+			As AbstractFormattingRule
+			Return If(_specializedIndentationRule, New SpecialFormattingRule(indentStyle))
 		End Function
 
 		Public Overloads Shared Function ShouldUseSmartTokenFormatterInsteadOfIndenter(
-				formattingRules As IEnumerable(Of IFormattingRule),
-				root As CompilationUnitSyntax,
-				line As TextLine,
-				optionSet As OptionSet,
-				CancellationToken As CancellationToken,
-				Optional neverUseWhenHavingMissingToken As Boolean = True) As Boolean
+		                                                                               formattingRules As _
+			                                                                              IEnumerable(Of AbstractFormattingRule),
+		                                                                               root As CompilationUnitSyntax,
+		                                                                               line As TextLine,
+		                                                                               optionService As IOptionService,
+		                                                                               optionSet As OptionSet,
+		                                                                               ByRef token As SyntaxToken,
+		                                                                               Optional neverUseWhenHavingMissingToken As _
+			                                                                              Boolean = True) As Boolean
 
 			' find first text on line
 			Dim firstNonWhitespacePosition = line.GetFirstNonWhitespacePosition()
@@ -56,29 +59,33 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			End If
 
 			' enter on token only works when first token on line is first text on line
-			Dim token = root.FindToken(firstNonWhitespacePosition.Value)
-			If token.Kind = SyntaxKind.None OrElse token.SpanStart <> firstNonWhitespacePosition Then
+			token = root.FindToken(firstNonWhitespacePosition.Value)
+			If IsInvalidToken(token) Then
+				Return False
+			End If
+
+			If token.IsKind(SyntaxKind.None) OrElse token.SpanStart <> firstNonWhitespacePosition Then
 				Return False
 			End If
 
 			' now try to gather various token information to see whether we are at an applicable position.
 			' all these are heuristic based
-			' 
-			' we need at least current and previous tokens to ask about existing line break formatting rules 
-			Dim previousToken = token.GetPreviousToken(includeZeroWidth:=True)
+			'
+			' we need at least current and previous tokens to ask about existing line break formatting rules
+			Dim previousToken = token.GetPreviousToken(includeZeroWidth := True)
 
 			' only use smart token formatter when we have at least two visible tokens.
-			If previousToken.Kind = SyntaxKind.None Then
+			If previousToken.IsKind(SyntaxKind.None) Then
 				Return False
 			End If
 
-			' check special case 
+			' check special case
 			' if previous token (or one before previous token if the previous token is statement terminator token) is missing, make sure
 			' we are a first token of a statement
 			If previousToken.IsMissing AndAlso neverUseWhenHavingMissingToken Then
 				Return False
 			ElseIf previousToken.IsMissing Then
-				Dim statement = token.GetAncestor(Of StatementSyntax)()
+				Dim statement = token.GetAncestor (Of StatementSyntax)()
 				If statement Is Nothing Then
 					Return False
 				End If
@@ -87,8 +94,10 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				Return statement.GetFirstToken() = token
 			End If
 
+			Dim options = optionSet.AsAnalyzerConfigOptions(optionService, root.Language)
+
 			' now, regular case. ask formatting rule to see whether we should use token formatter or not
-			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, optionSet)
+			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, options)
 			If lineOperation IsNot Nothing AndAlso lineOperation.Option <> AdjustNewLinesOption.ForceLinesIfOnSingleLine Then
 				Return True
 			End If
@@ -97,9 +106,10 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			Dim startNode = token.Parent
 
 			Dim currentNode = startNode
+			Dim localToken = token
 			Do While currentNode IsNot Nothing
 				Dim operations = FormattingOperations.GetAlignTokensOperations(
-					formattingRules, currentNode, lastToken:=Nothing, optionSet:=optionSet)
+					formattingRules, currentNode, options)
 
 				If Not operations.Any() Then
 					currentNode = currentNode.Parent
@@ -107,7 +117,7 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				End If
 
 				' make sure we have the given token as one of tokens to be aligned to the base token
-				Dim match = operations.FirstOrDefault(Function(o) o.Tokens.Contains(token))
+				Dim match = operations.FirstOrDefault(Function(o) o.Tokens.Contains(localToken))
 				If match IsNot Nothing Then
 					Return True
 				End If
@@ -117,6 +127,12 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 
 			' no indentation operation, nothing to do for smart token formatter
 			Return False
+		End Function
+
+		Private Shared Function IsInvalidToken(token As SyntaxToken) As Boolean
+			' invalid token to be formatted
+			Return token.IsKind(SyntaxKind.None) OrElse
+			       token.IsKind(SyntaxKind.EndOfFileToken)
 		End Function
 	End Class
 End Namespace

@@ -338,7 +338,7 @@ namespace dnSpy.Scripting.Roslyn.Common {
 				return Task.CompletedTask;
 
 			using (var workspace = new AdhocWorkspace(RoslynMefHostServices.DefaultServices)) {
-				var classifier = new RoslynClassifier(sem.SyntaxTree.GetRoot(), sem, workspace, roslynClassificationTypes, defaultClassificationType, cancellationToken);
+				var classifier = new RoslynClassifier(sem.SyntaxTree.GetRoot(cancellationToken), sem, workspace, roslynClassificationTypes, defaultClassificationType, cancellationToken);
 				foreach (var info in classifier.GetColors(new TextSpan(0, command.Input.Length)))
 					command.AddClassification(info.Span.Start, info.Span.Length, (IClassificationType)info.Color);
 			}

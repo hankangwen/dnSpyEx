@@ -35,7 +35,7 @@ namespace dnSpy.Roslyn.Debugger {
 		readonly LanguageExpressionCompiler language;
 		readonly MethodDef sourceMethod;
 		/*readonly*/ ImmutableArray<string> localVariableNames;
-		/*readonly*/ ImmutableArray<string> parameterNames;
+		/*readonly*/ ImmutableArray<string?> parameterNames;
 		readonly List<DSEELocalAndMethod> localAndMethodBuilder;
 		readonly ModuleDefUser? generatedModule;
 		readonly TypeDef? getLocalsType;
@@ -46,7 +46,7 @@ namespace dnSpy.Roslyn.Debugger {
 		const string getLocalsTypeName = "<>x";
 		const string methodNamePrefix = "<>m";
 
-		public GetLocalsAssemblyBuilder(LanguageExpressionCompiler language, MethodDef method, ImmutableArray<string> localVariableNames, ImmutableArray<string> parameterNames) {
+		public GetLocalsAssemblyBuilder(LanguageExpressionCompiler language, MethodDef method, ImmutableArray<string> localVariableNames, ImmutableArray<string?> parameterNames) {
 			this.language = language;
 			sourceMethod = method;
 			this.localVariableNames = localVariableNames;
@@ -121,14 +121,14 @@ namespace dnSpy.Roslyn.Debugger {
 		string GetName(Parameter p) {
 			if (p.IsHiddenThisParameter)
 				return "this";
-			string name;
+			string? name;
 			if (!parameterNames.IsDefault && (uint)p.Index < (uint)parameterNames.Length) {
 				name = parameterNames[p.Index];
-				if (!string.IsNullOrEmpty(name))
+				if (!string2.IsNullOrEmpty(name))
 					return name;
 			}
 			name = p.Name;
-			if (!string.IsNullOrEmpty(name))
+			if (!string2.IsNullOrEmpty(name))
 				return name;
 			return "A_" + p.Index.ToString();
 		}

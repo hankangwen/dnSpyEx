@@ -73,7 +73,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			GetCompilationState<CSharpEvalContextState>(evalInfo, references, out var langDebugInfo, out var method, out var methodToken, out var localVarSigTok, out var state, out var metadataBlocks, out var methodVersion);
 
 			var getMethodDebugInfo = CreateGetMethodDebugInfo(state, langDebugInfo);
-			var evalCtx = EvaluationContext.CreateMethodContext(state.MetadataContext, metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
+			var evalCtx = EvaluationContext.CreateMethodContext(metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
 			state.MetadataContext = new CSharpMetadataContext(evalCtx.Compilation, evalCtx);
 
 			var compileResult = evalCtx.CompileAssignment(target, expression, CreateAliases(aliases), out var resultProperties, out var errorMessage);
@@ -84,7 +84,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			GetCompilationState<CSharpEvalContextState>(evalInfo, references, out var langDebugInfo, out var method, out var methodToken, out var localVarSigTok, out var state, out var metadataBlocks, out var methodVersion);
 
 			var getMethodDebugInfo = CreateGetMethodDebugInfo(state, langDebugInfo);
-			var evalCtx = EvaluationContext.CreateMethodContext(state.MetadataContext, metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
+			var evalCtx = EvaluationContext.CreateMethodContext(metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
 			state.MetadataContext = new CSharpMetadataContext(evalCtx.Compilation, evalCtx);
 
 			if ((options & DbgEvaluationOptions.RawLocals) == 0) {
@@ -100,7 +100,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			GetCompilationState<CSharpEvalContextState>(evalInfo, references, out var langDebugInfo, out var method, out var methodToken, out var localVarSigTok, out var state, out var metadataBlocks, out var methodVersion);
 
 			var getMethodDebugInfo = CreateGetMethodDebugInfo(state, langDebugInfo);
-			var evalCtx = EvaluationContext.CreateMethodContext(state.MetadataContext, metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
+			var evalCtx = EvaluationContext.CreateMethodContext(metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
 
 			return CompileExpressionCore(aliases, expression, options, state, evalCtx, evalInfo.CancellationToken);
 		}
@@ -117,7 +117,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			else if (errorMessage is not null)
 				name = CreateErrorName(expression);
 			else
-				name = GetExpressionText(state.MetadataContext.EvaluationContext, state.MetadataContext.Compilation, expression, cancellationToken);
+				name = GetExpressionText(state.MetadataContext.EvaluationContext!, state.MetadataContext.Compilation, expression, cancellationToken);
 			return CreateCompilationResult(expression, compileResult, resultProperties, errorMessage, name);
 		}
 

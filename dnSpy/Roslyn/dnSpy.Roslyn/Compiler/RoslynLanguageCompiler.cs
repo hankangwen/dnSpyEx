@@ -149,7 +149,7 @@ namespace dnSpy.Roslyn.Compiler {
 			if (isDisposed)
 				return;
 			if (e.Kind == WorkspaceChangeKind.DocumentChanged) {
-				if (!loadedDocuments.Add(e.DocumentId))
+				if (e.DocumentId is null || !loadedDocuments.Add(e.DocumentId))
 					return;
 				RefreshTextViews();
 			}

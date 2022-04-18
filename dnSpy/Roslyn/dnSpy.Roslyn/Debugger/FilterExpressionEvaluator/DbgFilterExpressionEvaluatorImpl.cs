@@ -134,7 +134,7 @@ namespace dnSpy.Roslyn.Debugger.FilterExpressionEvaluator {
 
 				var syntaxRoot = doc.GetSyntaxRootAsync().GetAwaiter().GetResult();
 				var semanticModel = doc.GetSemanticModelAsync().GetAwaiter().GetResult();
-				var classifier = new RoslynClassifier(syntaxRoot, semanticModel, workspace, RoslynClassificationTypes.Default, null, CancellationToken.None);
+				var classifier = new RoslynClassifier(syntaxRoot!, semanticModel!, workspace, RoslynClassificationTypes.Default, null, CancellationToken.None);
 				var textSpan = new TextSpan(exprOffset, expr.Length);
 
 				int pos = textSpan.Start;
