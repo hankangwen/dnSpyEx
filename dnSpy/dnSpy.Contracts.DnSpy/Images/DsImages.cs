@@ -77,6 +77,7 @@ namespace dnSpy.Contracts.Images {
 		public static ImageReference ConstantShortcut { get; } = new ImageReference(assembly, DsImageStrings.ConstantShortcut);
 		public static ImageReference Copy { get; } = new ImageReference(assembly, DsImageStrings.Copy);
 		public static ImageReference CopyItem { get; } = new ImageReference(assembly, DsImageStrings.CopyItem);
+		public static ImageReference CorrelationScope { get; } = new ImageReference(assembly, DsImageStrings.CorrelationScope);
 		public static ImageReference CSFileNode { get; } = new ImageReference(assembly, DsImageStrings.CSFileNode);
 		public static ImageReference CSInteractiveWindow { get; } = new ImageReference(assembly, DsImageStrings.CSInteractiveWindow);
 		public static ImageReference CSProjectNode { get; } = new ImageReference(assembly, DsImageStrings.CSProjectNode);

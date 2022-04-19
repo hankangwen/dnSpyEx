@@ -62,6 +62,12 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				else
 					flags |= ValueFlags.IsNull;
 			}
+			else if (value is PointerValue ptr && (Type.IsPointer || Type.IsFunctionPointer) && ptr.Address == 0L) {
+				if (Type.IsByRef)
+					flags |= ValueFlags.IsNullByRef;
+				else
+					flags |= ValueFlags.IsNull;
+			}
 			this.flags = flags;
 		}
 		static readonly object boxed0L = 0L;

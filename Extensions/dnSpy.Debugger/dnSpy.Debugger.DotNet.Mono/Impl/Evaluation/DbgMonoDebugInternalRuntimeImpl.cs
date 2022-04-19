@@ -377,11 +377,14 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				case ElementType.R8:		return (double)pv.Value == 0;
 				case ElementType.I:
 				case ElementType.U:
+				case ElementType.FnPtr:
 				case ElementType.Ptr:		return (long)pv.Value == 0;
 				case ElementType.Object:	return true;// It's a null value
 				default:					throw new InvalidOperationException();
 				}
 			}
+			if (value is PointerValue ptr)
+				return ptr.Address == 0;
 			if (value is StructMirror sm) {
 				foreach (var f in sm.Fields) {
 					if (!IsZero(f, recursionCounter + 1))

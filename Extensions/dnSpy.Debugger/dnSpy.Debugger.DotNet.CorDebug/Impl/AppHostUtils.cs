@@ -205,7 +205,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				return null;
 			if (data[(int)(offset + size - 1)] != lastByte)
 				return null;
-			using (var sha1 = new SHA1Managed())
+			using (var sha1 = SHA1.Create())
 				return sha1.ComputeHash(data, (int)offset, (int)size);
 		}
 

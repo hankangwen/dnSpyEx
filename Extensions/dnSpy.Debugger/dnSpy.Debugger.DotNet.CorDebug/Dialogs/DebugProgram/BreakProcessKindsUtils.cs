@@ -27,6 +27,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Dialogs.DebugProgram {
 			new EnumVM(PredefinedBreakKinds.DontBreak, dnSpy_Debugger_DotNet_CorDebug_Resources.DbgBreak_Dont),
 			new EnumVM(PredefinedBreakKinds.CreateProcess, dnSpy_Debugger_DotNet_CorDebug_Resources.DbgBreak_CreateProcessEvent),
 			new EnumVM(PredefinedBreakKinds.EntryPoint, dnSpy_Debugger_DotNet_CorDebug_Resources.DbgBreak_EntryPoint),
+			new EnumVM(PredefinedBreakKinds.ModuleCctorOrEntryPoint, dnSpy_Debugger_DotNet_CorDebug_Resources.DbgBreak_ModuleClassConstructorOrEntryPoint),
 		};
 	}
 }

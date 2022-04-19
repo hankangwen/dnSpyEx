@@ -81,7 +81,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 			if (value is null)
 				return new SyntheticNullValue(realTypeOpt ?? reflectionAppDomain.System_Object);
 			DmdType type;
-			if (value is PrimitiveValue pv)
+			if (value is PrimitiveValue pv || value is PointerValue ptr)
 				type = MonoValueTypeCreator.CreateType(this, value, reflectionAppDomain.System_Object);
 			else if (value is StructMirror sm)
 				type = GetReflectionType(reflectionAppDomain, sm.Type, realTypeOpt);
@@ -551,8 +551,11 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 			var type = field.FieldType;
 			if (!type.IsValueType)
 				return new PrimitiveValue(vm, ElementType.Object, null);
-			if (type.IsPointer || type.IsFunctionPointer)
+			if (type.IsPointer || type.IsFunctionPointer) {
+				if (vm?.Version.AtLeast(2, 46) == true)
+					return new PointerValue(vm, GetType(evalInfo, type), 0L);
 				return new PrimitiveValue(vm, ElementType.Ptr, 0L);
+			}
 			if (!type.IsEnum) {
 				switch (DmdType.GetTypeCode(type)) {
 				case TypeCode.Boolean:		return new PrimitiveValue(vm, ElementType.Boolean, false);

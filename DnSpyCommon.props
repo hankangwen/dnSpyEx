@@ -5,7 +5,7 @@
         - build.ps1
         - .github/workflows/build.yml
     NOTE: Update the ABOVE files when TargetFrameworks is updated -->
-    <TargetFrameworks>net48;net5.0-windows</TargetFrameworks>
+    <TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
     <IsDotNetFramework>false</IsDotNetFramework>
     <IsDotNet>false</IsDotNet>
     <IsSelfContainedDotNet>false</IsSelfContainedDotNet>
@@ -30,22 +30,23 @@
     <DnSpyAssemblyCopyright>Copyright (C) 2014-2020 de4dot@gmail.com</DnSpyAssemblyCopyright>
 
     <!-- AD0001: buggy Roslyn analyzer(s) crash, disable that warning -->
-    <NoWarn>NU1701;AD0001</NoWarn>
+    <!-- WFAC010: Prevent warning about app.manifest properties -->
+    <NoWarn>NU1701;AD0001;WFAC010</NoWarn>
     <NoWarn Condition=" '$(IsDotNetFramework)' == 'true' ">$(NoWarn);CS8767</NoWarn>
 
     <!-- Update app.config whenever some of these versions change (eg. dnlib version) -->
     <DiaSymReaderVersion>1.7.0</DiaSymReaderVersion>
-    <DnlibVersion>3.3.4</DnlibVersion>
-    <IcedVersion>1.13.0</IcedVersion>
-    <MSBuildNuGetVersion>16.10.0</MSBuildNuGetVersion>
+    <DnlibVersion>3.5.0</DnlibVersion>
+    <IcedVersion>1.17.0</IcedVersion>
+    <MSBuildNuGetVersion>17.1.0</MSBuildNuGetVersion>
     <MSDiagRuntimeVersion>1.1.142101</MSDiagRuntimeVersion>
     <MSVSCompositionVersion>16.9.20</MSVSCompositionVersion>
     <MSVSIntellisenseVersion>15.5.27130</MSVSIntellisenseVersion>
     <MSVSTextVersion>15.5.27130</MSVSTextVersion>
     <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
-    <OokiiDialogsWpfVersion>3.1.0</OokiiDialogsWpfVersion>
-    <RoslynVersion>2.10.0</RoslynVersion>
-    <SCCompositionVersion>5.0.0</SCCompositionVersion>
+    <OokiiDialogsWpfVersion>5.0.1</OokiiDialogsWpfVersion>
+    <RoslynVersion>4.1.0</RoslynVersion>
+    <SCCompositionVersion>6.0.0</SCCompositionVersion>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Build\ConvertToNetstandardReferences\ConvertToNetstandardReferences.tasks" Condition=" '$(IsDotNet)' == 'true' " />

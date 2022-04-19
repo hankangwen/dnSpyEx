@@ -27,51 +27,51 @@ namespace dnSpy.Contracts.Images {
 	/// </summary>
 	public sealed class ImageReferenceConverter : TypeConverter {
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="sourceType"></param>
 		/// <returns></returns>
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+		public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
 			sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="destinationType"></param>
 		/// <returns></returns>
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) =>
+		public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType) =>
 			destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="culture"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) {
+		public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) {
 			if (value is string s) {
 				if (ImageReference.TryParse(s, out var imageReference))
 					return imageReference;
 
 			}
-			return base.ConvertFrom(context, culture, value);
+			return base.ConvertFrom(context, culture, value)!;
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="culture"></param>
 		/// <param name="value"></param>
 		/// <param name="destinationType"></param>
 		/// <returns></returns>
-		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
+		public override object ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType) {
 			if (destinationType == typeof(string) && value is ImageReference)
 				return ((ImageReference)value).ToString();
-			return base.ConvertTo(context, culture, value, destinationType);
+			return base.ConvertTo(context, culture, value, destinationType)!;
 		}
 	}
 }

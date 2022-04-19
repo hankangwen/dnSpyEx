@@ -196,7 +196,7 @@ namespace dnSpy.Decompiler.CSharp {
 				OutputWrite("System", BoxedTextColor.Namespace);
 				WritePeriod();
 			}
-			OutputWrite(name, BoxedTextColor.Type);
+			OutputWrite(name, isValueType ? BoxedTextColor.ValueType : BoxedTextColor.Type);
 		}
 
 		void WriteToken(IMDTokenProvider tok) {
@@ -697,6 +697,23 @@ namespace dnSpy.Decompiler.CSharp {
 			}
 			WriteIdentifier(evt.Name, CSharpMetadataTextColorProvider.Instance.GetColor(evt));
 			WriteToken(evt);
+
+			if (writeAccessors) {
+				WriteSpace();
+				OutputWrite("{", BoxedTextColor.Punctuation);
+				if (evt.AddMethod is not null) {
+					WriteSpace();
+					OutputWrite(Keyword_add, BoxedTextColor.Keyword);
+					OutputWrite(";", BoxedTextColor.Punctuation);
+				}
+				if (evt.RemoveMethod is not null) {
+					WriteSpace();
+					OutputWrite(Keyword_remove, BoxedTextColor.Keyword);
+					OutputWrite(";", BoxedTextColor.Punctuation);
+				}
+				WriteSpace();
+				OutputWrite("}", BoxedTextColor.Punctuation);
+			}
 		}
 
 		void WriteToolTip(GenericParam? gp) {
@@ -822,7 +839,7 @@ namespace dnSpy.Decompiler.CSharp {
 				return;
 			var namespaces = ns.Split(nsSep);
 			for (int i = 0; i < namespaces.Length; i++) {
-				OutputWrite(namespaces[i], BoxedTextColor.Namespace);
+				OutputWrite(IdentifierEscaper.Escape(namespaces[i]), BoxedTextColor.Namespace);
 				WritePeriod();
 			}
 		}
@@ -1107,7 +1124,7 @@ namespace dnSpy.Decompiler.CSharp {
 			for (int i = 0; i < parts.Length; i++) {
 				if (i > 0)
 					OutputWrite(".", BoxedTextColor.Operator);
-				OutputWrite(parts[i], BoxedTextColor.Namespace);
+				OutputWrite(IdentifierEscaper.Escape(parts[i]), BoxedTextColor.Namespace);
 			}
 		}
 		static readonly char[] namespaceSeparators = new char[] { '.' };

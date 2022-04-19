@@ -12,12 +12,12 @@ on:
     types: released
 
 env:
-  CI_REQ_DOTNET_SDK_VER: 5.0.100
+  CI_REQ_DOTNET_SDK_VER: 6.0.100
 
 jobs:
   build:
     name: Build
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
         run: |
           .\build.ps1 net-x86
           New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
-          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net5.0-windows\win-x86\publish\* -DestinationPath C:\builtfiles\dnSpy-net-win32.zip
+          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net6.0-windows\win-x86\publish\* -DestinationPath C:\builtfiles\dnSpy-net-win32.zip
           .\clean-all.cmd
 
       - uses: actions/upload-artifact@v2
@@ -64,7 +64,7 @@ jobs:
         run: |
           .\build.ps1 net-x64
           New-Item -ItemType Directory -Path C:\builtfiles -Force > $null
-          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net5.0-windows\win-x64\publish\* -DestinationPath C:\builtfiles\dnSpy-net-win64.zip
+          Compress-Archive -Path dnSpy\dnSpy\bin\Release\net6.0-windows\win-x64\publish\* -DestinationPath C:\builtfiles\dnSpy-net-win64.zip
           .\clean-all.cmd
 
       - uses: actions/upload-artifact@v2

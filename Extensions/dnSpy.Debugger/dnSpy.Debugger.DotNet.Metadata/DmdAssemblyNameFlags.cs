@@ -34,6 +34,7 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		PA_IA64						= 0x0030,
 		PA_AMD64					= 0x0040,
 		PA_ARM						= 0x0050,
+		PA_ARM64					= 0x0060,
 		PA_NoPlatform				= 0x0070,
 		PA_Specified				= 0x0080,
 		PA_Mask						= 0x0070,

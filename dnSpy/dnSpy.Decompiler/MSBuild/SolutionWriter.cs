@@ -122,8 +122,16 @@ namespace dnSpy.Decompiler.MSBuild {
 				case ProjectVersion.VS2019:
 					writer.Write("Microsoft Visual Studio Solution File, Format Version 12.00" + crlf);
 					writer.Write("# Visual Studio Version 16" + crlf);
-					// https://docs.microsoft.com/en-us/visualstudio/install/visual-studio-build-numbers-and-release-dates
+					// https://docs.microsoft.com/en-us/visualstudio/install/visual-studio-build-numbers-and-release-dates?view=vs-2019
 					writer.Write("VisualStudioVersion = 16.0.28729.10" + crlf);
+					writer.Write("MinimumVisualStudioVersion = 10.0.40219.1" + crlf);
+					break;
+
+				case ProjectVersion.VS2022:
+					writer.Write("Microsoft Visual Studio Solution File, Format Version 12.00" + crlf);
+					writer.Write("# Visual Studio Version 17" + crlf);
+					// https://docs.microsoft.com/en-us/visualstudio/install/visual-studio-build-numbers-and-release-dates
+					writer.Write("VisualStudioVersion = 17.0.31903.59" + crlf);
 					writer.Write("MinimumVisualStudioVersion = 10.0.40219.1" + crlf);
 					break;
 

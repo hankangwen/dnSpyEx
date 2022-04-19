@@ -1,5 +1,6 @@
-// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
-
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 using System.Globalization;
 
 namespace dnSpy.Roslyn.Utilities
@@ -112,7 +113,7 @@ namespace dnSpy.Roslyn.Utilities
         private static bool IsLetterChar(UnicodeCategory cat)
         {
             // letter-character:
-            //   A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nl 
+            //   A Unicode character of classes Lu, Ll, Lt, Lm, Lo, or Nl
             //   A Unicode-escape-sequence representing a character of classes Lu, Ll, Lt, Lm, Lo, or Nl
 
             switch (cat)
@@ -132,7 +133,7 @@ namespace dnSpy.Roslyn.Utilities
         private static bool IsCombiningChar(UnicodeCategory cat)
         {
             // combining-character:
-            //   A Unicode character of classes Mn or Mc 
+            //   A Unicode character of classes Mn or Mc
             //   A Unicode-escape-sequence representing a character of classes Mn or Mc
 
             switch (cat)
@@ -148,7 +149,7 @@ namespace dnSpy.Roslyn.Utilities
         private static bool IsDecimalDigitChar(UnicodeCategory cat)
         {
             // decimal-digit-character:
-            //   A Unicode character of the class Nd 
+            //   A Unicode character of the class Nd
             //   A unicode-escape-sequence representing a character of the class Nd
 
             return cat == UnicodeCategory.DecimalDigitNumber;
@@ -156,7 +157,7 @@ namespace dnSpy.Roslyn.Utilities
 
         private static bool IsConnectingChar(UnicodeCategory cat)
         {
-            // connecting-character:  
+            // connecting-character:
             //   A Unicode character of the class Pc
             //   A unicode-escape-sequence representing a character of the class Pc
 
@@ -180,7 +181,7 @@ namespace dnSpy.Roslyn.Utilities
         /// <param name="cat">The Unicode character.</param>
         private static bool IsFormattingChar(UnicodeCategory cat)
         {
-            // formatting-character:  
+            // formatting-character:
             //   A Unicode character of the class Cf
             //   A unicode-escape-sequence representing a character of the class Cf
 

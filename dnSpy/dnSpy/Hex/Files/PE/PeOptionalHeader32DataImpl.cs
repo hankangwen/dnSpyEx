@@ -25,7 +25,7 @@ using dnSpy.Contracts.Hex.Files.PE;
 
 namespace dnSpy.Hex.Files.PE {
 	sealed class PeOptionalHeader32DataImpl : PeOptionalHeader32Data {
-		public override StructField<UInt16Data> Magic { get; }
+		public override StructField<UInt16EnumData> Magic { get; }
 		public override StructField<ByteData> MajorLinkerVersion { get; }
 		public override StructField<ByteData> MinorLinkerVersion { get; }
 		public override StructField<UInt32Data> SizeOfCode { get; }
@@ -58,6 +58,12 @@ namespace dnSpy.Hex.Files.PE {
 		public override StructField<ArrayData<DataDirectoryData>> DataDirectory { get; }
 
 		protected override BufferField[] Fields { get; }
+
+		internal static readonly ReadOnlyCollection<EnumFieldInfo> magicEnumFieldInfos = new ReadOnlyCollection<EnumFieldInfo>(new EnumFieldInfo[] {
+			new EnumFieldInfo(0x10B, "PE32"),
+			new EnumFieldInfo(0x107, "ROM image"),
+			new EnumFieldInfo(0x20B, "PE32+"),
+		});
 
 		internal static readonly ReadOnlyCollection<EnumFieldInfo> subsystemEnumFieldInfos = new ReadOnlyCollection<EnumFieldInfo>(new EnumFieldInfo[] {
 			new EnumFieldInfo(0, "UNKNOWN"),
@@ -100,7 +106,7 @@ namespace dnSpy.Hex.Files.PE {
 			: base(span) {
 			var buffer = span.Buffer;
 			var pos = span.Start.Position;
-			Magic = new StructField<UInt16Data>("Magic", new UInt16Data(buffer, pos));
+			Magic = new StructField<UInt16EnumData>("Magic", new UInt16EnumData(buffer, pos, magicEnumFieldInfos));
 			MajorLinkerVersion = new StructField<ByteData>("MajorLinkerVersion", new ByteData(buffer, pos + 2));
 			MinorLinkerVersion = new StructField<ByteData>("MinorLinkerVersion", new ByteData(buffer, pos + 3));
 			SizeOfCode = new StructField<UInt32Data>("SizeOfCode", new UInt32Data(buffer, pos + 4));

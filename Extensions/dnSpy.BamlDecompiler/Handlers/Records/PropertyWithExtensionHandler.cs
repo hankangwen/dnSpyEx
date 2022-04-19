@@ -42,7 +42,12 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var ext = new XamlExtension(extType);
 			if (valTypeExt || extTypeId == (short)KnownTypes.TypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
-				ext.Initializer = new object[] { ctx.ToString(parent.Xaml, value) };
+
+				object[] initializer = new object[] { ctx.ToString(parent.Xaml, value) };
+				if (valTypeExt)
+					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfd4d)) { Initializer = initializer } }; // Known type - TypeExtension
+
+				ext.Initializer = initializer;
 			}
 			else if (extTypeId == (short)KnownTypes.TemplateBindingExtension) {
 				var value = ctx.ResolveProperty(record.ValueId);
@@ -85,7 +90,12 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 					attrName = ctx.ToString(parent.Xaml, xName);
 				}
-				ext.Initializer = new object[] { attrName };
+
+				object[] initializer = new object[] { attrName };
+				if (valStaticExt)
+					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfda6)) { Initializer = initializer } }; // Known type - StaticExtension
+
+				ext.Initializer = initializer;
 			}
 			else {
 				ext.Initializer = new object[] { XamlUtils.Escape(ctx.ResolveString(record.ValueId)) };

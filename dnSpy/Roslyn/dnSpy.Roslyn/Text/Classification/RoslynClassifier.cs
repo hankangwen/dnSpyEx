@@ -23,6 +23,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 
@@ -87,18 +88,39 @@ namespace dnSpy.Roslyn.Text.Classification {
 		/// <param name="textSpan">Span to classify</param>
 		/// <returns></returns>
 		public IEnumerable<ClassifierResult> GetColors(TextSpan textSpan) {
-			foreach (var cspan in Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace)) {
+			// The non osbolete API requires us to pass in a Document which we don't always have.
+			#pragma warning disable CS0618
+			foreach (var cspan in Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace, cancellationToken)) {
+				if (IsAdditiveClassification(cspan.ClassificationType))
+					continue;
 				var color = GetClassificationType(cspan) ?? defaultColor;
 				if (color is not null)
 					yield return new ClassifierResult(Span.FromBounds(cspan.TextSpan.Start, cspan.TextSpan.End), color);
 			}
+			#pragma warning restore CS0618
+		}
+
+		static bool IsAdditiveClassification(string classification) {
+			if (ClassificationTypeNames.AdditiveTypeNames.Contains(classification))
+				return true;
+
+			return classification == ClassificationTypeNames.RegexComment ||
+				   classification == ClassificationTypeNames.RegexCharacterClass ||
+				   classification == ClassificationTypeNames.RegexAnchor ||
+				   classification == ClassificationTypeNames.RegexQuantifier ||
+				   classification == ClassificationTypeNames.RegexGrouping ||
+				   classification == ClassificationTypeNames.RegexAlternation ||
+				   classification == ClassificationTypeNames.RegexText ||
+				   classification == ClassificationTypeNames.RegexSelfEscapedCharacter ||
+				   classification == ClassificationTypeNames.RegexOtherEscape ||
+				   classification == ClassificationTypeNames.StringEscapeCharacter;
 		}
 
 		readonly struct SymbolResult {
 			public readonly ISymbol? Symbol;
 			public readonly object? Color;
 
-			public SymbolResult(ISymbol symbol) {
+			public SymbolResult(ISymbol? symbol) {
 				Symbol = symbol;
 				Color = null;
 			}
@@ -328,15 +350,23 @@ the_switch:
 				return roslynClassificationTypes.Interface;
 
 			case ClassificationTypeNames.Keyword:
+			case ClassificationTypeNames.ControlKeyword:
 				return roslynClassificationTypes.Keyword;
+
+			case ClassificationTypeNames.LabelName:
+				return roslynClassificationTypes.Label;
 
 			case ClassificationTypeNames.ModuleName:
 				return roslynClassificationTypes.Module;
+
+			case ClassificationTypeNames.NamespaceName:
+				return roslynClassificationTypes.Namespace;
 
 			case ClassificationTypeNames.NumericLiteral:
 				return roslynClassificationTypes.Number;
 
 			case ClassificationTypeNames.Operator:
+			case ClassificationTypeNames.OperatorOverloaded:
 				return roslynClassificationTypes.Operator;
 
 			case ClassificationTypeNames.PreprocessorKeyword:

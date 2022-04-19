@@ -31,7 +31,7 @@ namespace dnSpy.Roslyn.Text.Classification {
 		/// </summary>
 		/// <param name="textTag">One of the text tags found in <see cref="TextTags"/></param>
 		/// <returns></returns>
-		public static TextColor ToTextColor(string textTag) {
+		public static TextColor ToTextColor(string? textTag) {
 			if (textTag is null)
 				return TextColor.Text;
 			switch (textTag) {
@@ -39,10 +39,13 @@ namespace dnSpy.Roslyn.Text.Classification {
 			case TextTags.AnonymousTypeIndicator:return TextColor.Text; // AnonymousType or Tuple
 			case TextTags.Assembly:			return TextColor.Assembly;
 			case TextTags.Class:			return TextColor.Type;
+			case TextTags.Constant:			return TextColor.LiteralField;
 			case TextTags.Delegate:			return TextColor.Delegate;
 			case TextTags.Enum:				return TextColor.Enum;
+			case TextTags.EnumMember:		return TextColor.EnumField;
 			case TextTags.ErrorType:		return TextColor.Error;
 			case TextTags.Event:			return TextColor.InstanceEvent;
+			case TextTags.ExtensionMethod:	return TextColor.ExtensionMethod;
 			case TextTags.Field:			return TextColor.InstanceField;
 			case TextTags.Interface:		return TextColor.Interface;
 			case TextTags.Keyword:			return TextColor.Keyword;
@@ -58,11 +61,17 @@ namespace dnSpy.Roslyn.Text.Classification {
 			case TextTags.Property:			return TextColor.InstanceProperty;
 			case TextTags.Punctuation:		return TextColor.Punctuation;
 			case TextTags.RangeVariable:	return TextColor.Local;
+			case TextTags.Record:			return TextColor.Type;
+			case TextTags.RecordStruct:		return TextColor.ValueType;
 			case TextTags.Space:			return TextColor.Text;
 			case TextTags.StringLiteral:	return TextColor.String;
 			case TextTags.Struct:			return TextColor.ValueType;
 			case TextTags.Text:				return TextColor.Text;
 			case TextTags.TypeParameter:	return TextColor.TypeGenericParameter;
+			case "ContainerStart":			return TextColor.Text;
+			case "ContainerEnd":			return TextColor.Text;
+			case "CodeBlockStart":			return TextColor.Text;
+			case "CodeBlockEnd":			return TextColor.Text;
 			default:
 				Debug.Fail($"New {nameof(TextTags)} tag: {textTag}");
 				return TextColor.Text;

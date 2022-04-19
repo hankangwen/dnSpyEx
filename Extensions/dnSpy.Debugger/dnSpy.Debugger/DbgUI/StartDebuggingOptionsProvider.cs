@@ -24,6 +24,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using dnlib.DotNet.MD;
+using dnlib.PE;
 using dnSpy.Contracts.App;
 using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.StartDebugging;
@@ -31,6 +33,7 @@ using dnSpy.Contracts.Debugger.StartDebugging.Dialog;
 using dnSpy.Contracts.Documents.Tabs;
 using dnSpy.Contracts.Documents.TreeView;
 using dnSpy.Debugger.Dialogs.DebugProgram;
+using dnSpy.Debugger.Properties;
 
 namespace dnSpy.Debugger.DbgUI {
 	[Export(typeof(StartDebuggingOptionsProvider))]
@@ -111,8 +114,65 @@ namespace dnSpy.Debugger.DbgUI {
 			if (res != true)
 				return default;
 			var info = vm.StartDebuggingOptions;
+			if (info.Filename is not null) {
+				var isCompatible = IsCompatibleWithCurrentArchitecture(info.Filename);
+				string? message = null;
+				if (isCompatible is null)
+					message = dnSpy_Debugger_Resources.StartDebuggingWarning_UnknownBitness;
+				else if (!isCompatible.Value) 
+					message = dnSpy_Debugger_Resources.StartDebuggingWarning_IncorrectBitness;
+
+				if (message is not null) {
+					var result = MsgBox.Instance.Show(message, MsgBoxButton.Yes | MsgBoxButton.No);
+					if (result != MsgBoxButton.Yes)
+						return default;
+				}
+			}
+
 			mru.Add(info.Filename!, info.Options, vm.SelectedPageGuid);
 			return (info.Options, info.Flags);
+		}
+
+		static bool? IsCompatibleWithCurrentArchitecture(string fileName) {
+			int? bitness = null;
+			try {
+				using (var peImage = new PEImage(fileName, false)) {
+					var machine = peImage.ImageNTHeaders.FileHeader.Machine;
+					if (machine.IsAMD64())
+						bitness = 64;
+					else if (machine.IsI386()) {
+						var dotNetDir = peImage.ImageNTHeaders.OptionalHeader.DataDirectories[14];
+						bool isDotNet = dotNetDir.VirtualAddress != 0;
+						if (isDotNet) {
+							var cor20HeaderReader = peImage.CreateReader(dotNetDir.VirtualAddress, 0x48);
+							var cor20Header = new ImageCor20Header(ref cor20HeaderReader, false);
+
+							var bit32Required = (cor20Header.Flags & ComImageFlags.Bit32Required) != 0;
+							var bit32Preferred = (cor20Header.Flags & ComImageFlags.Bit32Preferred) != 0;
+							var ilOnly = (cor20Header.Flags & ComImageFlags.ILOnly) != 0;
+
+							if (bit32Required)
+								bitness = 32;
+							else if (!bit32Preferred) {
+								if (ilOnly)
+									bitness = Environment.Is64BitOperatingSystem ? 64 : 32;
+								else
+									bitness = 32;
+							}
+						}
+						else
+							bitness = 32;
+					}
+				}
+			}
+			catch {
+				return null;
+			}
+
+			if (bitness is null)
+				return null;
+
+			return bitness == IntPtr.Size * 8;
 		}
 
 		static StartDebuggingOptions WithBreakKind(StartDebuggingOptions options, string? breakKind) {

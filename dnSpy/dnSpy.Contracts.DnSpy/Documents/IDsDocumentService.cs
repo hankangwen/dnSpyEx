@@ -164,6 +164,7 @@ namespace dnSpy.Contracts.Documents {
 	/// <summary>
 	/// Find assembly options
 	/// </summary>
+	[Flags]
 	public enum FindAssemblyOptions {
 		/// <summary>
 		/// No option is enabled

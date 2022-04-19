@@ -41,7 +41,7 @@ namespace dnSpy.Contracts.MVVM {
 		protected void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
 
 		string IDataErrorInfo.Error { get { throw new NotImplementedException(); } }
-		string? IDataErrorInfo.this[string columnName] => Verify(columnName);
+		string IDataErrorInfo.this[string columnName] => Verify(columnName)!;
 
 		/// <summary>
 		/// true if there's an error

@@ -19,7 +19,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
@@ -81,7 +80,7 @@ namespace dnSpy.Documents {
 			return 0;
 		}
 
-		public int CompareTo([AllowNull] FrameworkPaths other) {
+		public int CompareTo(FrameworkPaths? other) {
 			if (other is null)
 				return 1;
 			int c = Version.CompareTo(other.Version);
@@ -106,6 +105,20 @@ namespace dnSpy.Documents {
 		}
 
 		internal bool HasDotNetAppPath { get; }
+
+		public bool IsCompatibleWithNetStandard(Version netStandardVersion) {
+			// All .NET Core versions are compatible with .NET Standard versions under 2.0
+			if (netStandardVersion.Major != 2)
+				return true;
+
+			// .NET Standard 2.0 is compatible with .NET Core 2.0 and later
+			// .NET Standard 2.1 is compatible with .NET Core 3.0 and later
+			return netStandardVersion.Minor switch {
+				0 => SystemVersion.Major >= 2,
+				1 => SystemVersion.Major >= 3,
+				_ => true
+			};
+		}
 	}
 
 	// It's a class since very few of these are created

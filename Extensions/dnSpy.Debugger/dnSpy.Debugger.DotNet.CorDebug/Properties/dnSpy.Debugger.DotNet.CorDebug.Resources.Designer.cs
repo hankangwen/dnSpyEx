@@ -152,6 +152,15 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Module .cctor or Entry Point.
+        /// </summary>
+        public static string DbgBreak_ModuleClassConstructorOrEntryPoint {
+            get {
+                return ResourceManager.GetString("DbgBreak_ModuleClassConstructorOrEntryPoint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A CLR debugger error occurred. Terminate the debugged process and try again.
         ///
         ///HR: 0x{0:X8}

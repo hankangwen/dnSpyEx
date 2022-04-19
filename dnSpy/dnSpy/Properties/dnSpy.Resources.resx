@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -161,6 +161,9 @@
   </data>
   <data name="Button_Save" xml:space="preserve">
     <value>_Save...</value>
+  </data>
+  <data name="Button_SaveCode" xml:space="preserve">
+    <value>_Save Code...</value>
   </data>
   <data name="Button_Yes" xml:space="preserve">
     <value>_Yes</value>
@@ -497,6 +500,9 @@
   </data>
   <data name="SaveResourceButton" xml:space="preserve">
     <value>Save</value>
+  </data>
+  <data name="SavingCode" xml:space="preserve">
+    <value>Saving...</value>
   </data>
   <data name="SearchAbortedMessage" xml:space="preserve">
     <value>Search aborted, more than {0:n0} results found.</value>

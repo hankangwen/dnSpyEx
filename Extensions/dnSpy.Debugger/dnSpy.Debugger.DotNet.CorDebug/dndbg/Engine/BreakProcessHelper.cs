@@ -19,6 +19,8 @@
 
 using System;
 using System.Diagnostics;
+using dndbg.COM.MetaData;
+using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using dnlib.PE;
 
@@ -39,6 +41,7 @@ namespace dndbg.Engine {
 			case BreakProcessKind.None:
 				break;
 
+			case BreakProcessKind.ModuleCctorOrEntryPoint:
 			case BreakProcessKind.EntryPoint:
 				breakpoint = debugger.CreateBreakpoint(DebugEventBreakpointKind.LoadModule, OnLoadModule);
 				break;
@@ -64,17 +67,25 @@ namespace dndbg.Engine {
 			var mod = lmArgs.CorModule;
 			if (mod is null || mod.IsDynamic || mod.IsInMemory)
 				return false;
-			var filename = mod.Name;
-			uint epToken = GetEntryPointToken(filename);
-			if ((Table)(epToken >> 24) != Table.Method || (epToken & 0x00FFFFFF) == 0)
-				return false;
+
+			uint memberToken = 0;
+			if (type == BreakProcessKind.ModuleCctorOrEntryPoint)
+				memberToken = GetGlobalStaticConstructor(mod.GetMetaDataInterface<IMetaDataImport>());
+
+			if (memberToken == 0) {
+				var filename = mod.Name;
+				uint epToken = GetEntryPointToken(filename);
+				if ((Table)(epToken >> 24) != Table.Method || (epToken & 0x00FFFFFF) == 0)
+					return false;
+				memberToken = epToken;
+			}
 
 			debugger.RemoveBreakpoint(breakpoint!);
 			breakpoint = null;
 			Debug.Assert(!mod.IsDynamic && !mod.IsInMemory);
 			// It's not a dyn/in-mem module so id isn't used
 			var moduleId = mod.GetModuleId(uint.MaxValue);
-			SetILBreakpoint(moduleId, epToken);
+			SetILBreakpoint(moduleId, memberToken);
 			return false;
 		}
 
@@ -97,6 +108,25 @@ namespace dndbg.Engine {
 			}
 			catch {
 			}
+			return 0;
+		}
+
+		static uint GetGlobalStaticConstructor(IMetaDataImport? mdi) {
+			var mdTokens = MDAPI.GetMethodTokens(mdi, 0x02000001);
+			foreach (uint mdToken in mdTokens) {
+				string? name = MDAPI.GetMethodName(mdi, mdToken);
+				if (name is null || name != ".cctor")
+					continue;
+				if (!MDAPI.GetMethodAttributes(mdi, mdToken, out var attrs, out _))
+					continue;
+				if ((attrs & MethodAttributes.RTSpecialName) == 0)
+					continue;
+				if ((attrs & MethodAttributes.Static) == 0)
+					continue;
+
+				return mdToken;
+			}
+
 			return 0;
 		}
 	}

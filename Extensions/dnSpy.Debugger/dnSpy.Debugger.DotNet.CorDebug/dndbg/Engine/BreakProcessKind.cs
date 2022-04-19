@@ -20,6 +20,7 @@
 namespace dndbg.Engine {
 	enum BreakProcessKind {
 		None,
+		ModuleCctorOrEntryPoint,
 		EntryPoint,
 	}
 }

@@ -14,6 +14,8 @@
 [submodule "dnSpy/Roslyn/Roslyn.ExpressionCompiler"]
 	path = dnSpy/Roslyn/Roslyn.ExpressionCompiler
 	url = https://github.com/dnSpyEx/Roslyn.ExpressionCompiler.git
+	branch = dnSpy
 [submodule "Extensions/dnSpy.Debugger/Mono.Debugger.Soft"]
 	path = Extensions/dnSpy.Debugger/Mono.Debugger.Soft
 	url = https://github.com/dnSpyEx/Mono.Debugger.Soft.git
+	branch = dnSpy

@@ -1990,6 +1990,15 @@ namespace dnSpy.Debugger.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HResult: 0x{0:X8}.
+        /// </summary>
+        public static string ExceptionHResult {
+            get {
+                return ResourceManager.GetString("ExceptionHResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Message: {0}.
         /// </summary>
         public static string ExceptionMessage {
@@ -3591,6 +3600,30 @@ namespace dnSpy.Debugger.Properties {
         public static string StartDebuggingCommand {
             get {
                 return ResourceManager.GetString("StartDebuggingCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The target file&apos;s bitness does not match with the current dnSpy version. Debugging may cause unwanted/uncontrolled execution of the image.
+        ///
+        ///It is recommended to use 32-bit dnSpy to debug 32-bit images and 64-bit dnSpy to debug 64-bit images.
+        ///
+        ///Do you wish to continue?.
+        /// </summary>
+        public static string StartDebuggingWarning_IncorrectBitness {
+            get {
+                return ResourceManager.GetString("StartDebuggingWarning_IncorrectBitness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The target file&apos;s bitness could not be determined. Debugging may cause unwanted/uncontrolled execution of the image.
+        ///
+        ///Do you wish to continue?.
+        /// </summary>
+        public static string StartDebuggingWarning_UnknownBitness {
+            get {
+                return ResourceManager.GetString("StartDebuggingWarning_UnknownBitness", resourceCulture);
             }
         }
         

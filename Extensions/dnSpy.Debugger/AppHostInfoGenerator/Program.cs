@@ -25,8 +25,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using dnSpy.Debugger.DotNet.CorDebug.Impl;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -517,7 +519,7 @@ namespace AppHostInfoGenerator {
 			int hashDataSizeEnd = hashDataOffset + hashDataSize;
 			int relPathOffsetEnd = relPathOffset + AppHostInfo.MaxAppHostRelPathLength;
 			if ((hashDataOffset >= relPathOffsetEnd || hashDataSizeEnd <= relPathOffset) && hashDataSize >= MinHashSize) {
-				using (var sha1 = new SHA1Managed())
+				using (var sha1 = SHA1.Create())
 					hash = sha1.ComputeHash(appHostData, hashDataOffset, hashDataSize);
 				lastByte = appHostData[hashDataOffset + hashDataSize - 1];
 				return true;
@@ -619,8 +621,15 @@ namespace AppHostInfoGenerator {
 			}
 			var url = string.Format(formatString, packageName, version);
 			Console.WriteLine($"Downloading {url}");
-			using (var wc = new WebClient())
-				return wc.DownloadData(url);
+			return DownloadData(url).GetAwaiter().GetResult();
+		}
+
+		static async Task<byte[]> DownloadData(string url) {
+			using (var httpClient = new HttpClient()) {
+				using (var resp = await httpClient.GetAsync(url)) {
+					return await resp.Content.ReadAsByteArrayAsync();
+				}
+			}
 		}
 
 		static bool TryDownloadNuGetPackage(string packageName, string version, NuGetSource nugetSource, [NotNullWhen(true)] out byte[]? data) {

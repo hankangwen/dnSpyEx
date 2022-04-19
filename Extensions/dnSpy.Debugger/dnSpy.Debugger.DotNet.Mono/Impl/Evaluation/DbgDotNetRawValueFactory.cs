@@ -82,6 +82,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 					return new DbgDotNetRawValue(DbgSimpleValueType.Ptr64, (ulong)(long)pv.Value!);
 
 				case ElementType.Ptr:
+				case ElementType.FnPtr:
 					ulong pval = (ulong)(long)pv.Value!;
 					if (pval == 0)
 						return new DbgDotNetRawValue(DbgSimpleValueType.Other, null);
@@ -96,6 +97,15 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				default:
 					throw new InvalidOperationException();
 				}
+
+			case PointerValue ptr: {
+				ulong pval = (ulong)ptr.Address!;
+				if (pval == 0)
+					return new DbgDotNetRawValue(DbgSimpleValueType.Other, null);
+				if (type.AppDomain.Runtime.PointerSize == 4)
+					return new DbgDotNetRawValue(DbgSimpleValueType.Ptr32, (uint)pval);
+				return new DbgDotNetRawValue(DbgSimpleValueType.Ptr64, pval);
+			}
 
 			case EnumMirror em:
 				if (em.Fields.Length == 1)
@@ -175,10 +185,18 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 					}
 				}
 				if (type == type.AppDomain.System_IntPtr || type == type.AppDomain.System_UIntPtr) {
-					if (sm.Fields.Length == 1 && sm.Fields[0] is PrimitiveValue pv && pv.Value is long) {
+					long? address = null;
+					if (sm.Fields.Length == 1) {
+						if (sm.Fields[0] is PrimitiveValue pv && pv.Value is long)
+							address = (long)pv.Value;
+						else if (sm.Fields[0] is PointerValue ptr)
+							address = ptr.Address;
+					}
+
+					if (address.HasValue) {
 						if (type.AppDomain.Runtime.PointerSize == 4)
-							return new DbgDotNetRawValue(DbgSimpleValueType.Ptr32, (uint)(long)pv.Value);
-						return new DbgDotNetRawValue(DbgSimpleValueType.Ptr64, (ulong)(long)pv.Value);
+							return new DbgDotNetRawValue(DbgSimpleValueType.Ptr32, (uint)address.Value);
+						return new DbgDotNetRawValue(DbgSimpleValueType.Ptr64, (ulong)address.Value);
 					}
 					return GetRawValueDefault(value, type);
 				}
