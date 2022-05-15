@@ -910,7 +910,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 							exFlags = DbgExceptionEventFlags.FirstChance;
 						}
 						var exObj = ee.Exception;
-						objectFactory!.CreateException(new DbgExceptionId(PredefinedExceptionCategories.DotNet, TryGetExceptionName(exObj) ?? "???"), exFlags, EvalReflectionUtils.TryGetExceptionMessage(exObj), TryGetThread(ee.Thread), TryGetModule(ee.Thread), GetMessageFlags());
+						objectFactory!.CreateException(new DbgExceptionId(PredefinedExceptionCategories.DotNet, TryGetExceptionName(exObj) ?? "???"), exFlags, EvalReflectionUtils.TryGetExceptionMessage(exObj), EvalReflectionUtils.TryGetExceptionHResult(exObj), TryGetThread(ee.Thread), TryGetModule(ee.Thread), GetMessageFlags());
 					}));
 					break;
 
