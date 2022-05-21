@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Xml;
 using dnlib.DotNet;
 using dnlib.PE;
 using dnSpy.Contracts.DnSpy.Metadata;
@@ -667,6 +668,15 @@ namespace dnSpy.Documents {
 					return (document, false);
 			}
 
+			var configProbePaths = GetConfigProbePaths(sourceModule, sourceModuleDir);
+			if (configProbePaths is not null) {
+				foreach (var path in configProbePaths) {
+					document = TryFindFromDir(asmName, dirPath: path);
+					if (document is not null)
+						return (document, false);
+				}
+			}
+
 			string[]? dotNetPaths;
 			if (dotNetCoreAppVersion is not null) {
 				int bitness = (sourceModule?.GetPointerSize(IntPtr.Size) ?? IntPtr.Size) * 8;
@@ -687,6 +697,15 @@ namespace dnSpy.Documents {
 				if (document is not null)
 					return (document, true);
 			}
+
+			if (configProbePaths is not null) {
+				foreach (var path in configProbePaths) {
+					document = TryLoadFromDir(asmName, checkVersion: false, checkPublicKeyToken: false, dirPath: path);
+					if (document is not null)
+						return (document, true);
+				}
+			}
+
 			if (dotNetPaths is not null) {
 				foreach (var path in dotNetPaths) {
 					document = TryLoadFromDir(asmName, checkVersion: false, checkPublicKeyToken: false, dirPath: path);
@@ -696,6 +715,51 @@ namespace dnSpy.Documents {
 			}
 
 			return default;
+		}
+
+		static IList<string>? GetConfigProbePaths(ModuleDef? module, string? sourceModuleDir) {
+			var imageName = module?.Assembly?.ManifestModule?.Location;
+			if (string2.IsNullOrEmpty(imageName) || string2.IsNullOrEmpty(sourceModuleDir))
+				return null;
+
+			var configName = imageName + ".config";
+			if (!File.Exists(configName))
+				return null;
+
+			try {
+				using (var xmlStream = new FileStream(configName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+					var doc = new XmlDocument();
+					doc.Load(XmlReader.Create(xmlStream));
+
+					var searchPaths = new List<string>();
+
+					foreach (var tmp in doc.GetElementsByTagName("probing")) {
+						if (tmp is not XmlElement probingElem)
+							continue;
+						var privatePath = probingElem.GetAttribute("privatePath");
+						if (string2.IsNullOrEmpty(privatePath))
+							continue;
+						foreach (var tmp2 in privatePath.Split(';')) {
+							var path = tmp2.Trim();
+							if (string2.IsNullOrEmpty(path))
+								continue;
+							var newPath = Path.GetFullPath(Path.Combine(sourceModuleDir, path));
+							if (Directory.Exists(newPath) && FileUtils.IsFileInDir(sourceModuleDir, newPath))
+								searchPaths.Add(newPath);
+						}
+					}
+
+					return searchPaths;
+				}
+			}
+			catch (ArgumentException) {
+			}
+			catch (IOException) {
+			}
+			catch (XmlException) {
+			}
+
+			return null;
 		}
 
 		IDsDocument? TryFindFromDir(IAssembly asmName, string dirPath) {

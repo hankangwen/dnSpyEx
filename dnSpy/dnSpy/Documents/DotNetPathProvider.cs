@@ -248,8 +248,9 @@ namespace dnSpy.Documents {
 					yield return Path.Combine(progDirX86, dotnetDirName);
 			}
 			else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-				yield return "/usr/share/dotnet/shared";
-				yield return "/opt/dotnet/shared/";
+				yield return "/usr/share/dotnet/";
+				yield return "/usr/local/share/dotnet/";
+				yield return "/opt/dotnet/";
 			}
 
 			if (NetCoreRuntimePattern.Match(RuntimeInformation.FrameworkDescription).Success) {
