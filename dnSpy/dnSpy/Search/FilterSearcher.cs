@@ -502,7 +502,11 @@ namespace dnSpy.Search {
 		}
 
 		bool CheckMatch(MethodDef method) {
-			if (IsMatch(method.Name, method))
+			if (IsMatch(IdentifierEscaper.Escape(method.FullName, true), method) ||
+				IsMatch(method.FullName, method))
+				return true;
+			if (IsMatch(IdentifierEscaper.Escape(method.Name), method) ||
+				IsMatch(method.Name, method))
 				return true;
 			if (IsMatch(FixTypeName(method.DeclaringType.FullName) + "." + method.Name.String, method) ||
 				IsMatch(FixTypeName(method.DeclaringType.FullName) + "::" + method.Name.String, method))
@@ -642,7 +646,11 @@ namespace dnSpy.Search {
 		}
 
 		bool CheckMatch(FieldDef field) {
-			if (IsMatch(field.Name, field))
+			if (IsMatch(IdentifierEscaper.Escape(field.FullName, true), field) ||
+				IsMatch(field.FullName, field))
+				return true;
+			if (IsMatch(IdentifierEscaper.Escape(field.Name), field) ||
+				IsMatch(field.Name, field))
 				return true;
 			if (IsMatch(FixTypeName(field.DeclaringType.FullName) + "." + field.Name.String, field) ||
 				IsMatch(FixTypeName(field.DeclaringType.FullName) + "::" + field.Name.String, field))
@@ -676,7 +684,11 @@ namespace dnSpy.Search {
 		}
 
 		bool CheckMatch(PropertyDef prop) {
-			if (IsMatch(prop.Name, prop))
+			if (IsMatch(IdentifierEscaper.Escape(prop.FullName, true), prop) ||
+				IsMatch(prop.FullName, prop))
+				return true;
+			if (IsMatch(IdentifierEscaper.Escape(prop.Name), prop) ||
+				IsMatch(prop.Name, prop))
 				return true;
 			if (IsMatch(FixTypeName(prop.DeclaringType.FullName) + "." + prop.Name.String, prop) ||
 				IsMatch(FixTypeName(prop.DeclaringType.FullName) + "::" + prop.Name.String, prop))
@@ -705,7 +717,11 @@ namespace dnSpy.Search {
 		}
 
 		bool CheckMatch(EventDef evt) {
-			if (IsMatch(evt.Name, evt))
+			if (IsMatch(IdentifierEscaper.Escape(evt.FullName, true), evt) ||
+				IsMatch(evt.FullName, evt))
+				return true;
+			if (IsMatch(IdentifierEscaper.Escape(evt.Name), evt) ||
+				IsMatch(evt.Name, evt))
 				return true;
 			if (IsMatch(FixTypeName(evt.DeclaringType.FullName) + "." + evt.Name.String, evt) ||
 				IsMatch(FixTypeName(evt.DeclaringType.FullName) + "::" + evt.Name.String, evt))

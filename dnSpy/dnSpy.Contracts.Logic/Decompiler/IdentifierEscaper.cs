@@ -54,7 +54,15 @@ namespace dnSpy.Contracts.Decompiler {
 		/// </summary>
 		/// <param name="id">Identifier</param>
 		/// <returns></returns>
-		public static string Escape(string? id) => Escape(id, MAX_IDENTIFIER_LENGTH, allowSpaces: false);
+		public static string Escape(string? id) => Escape(id, false);
+
+		/// <summary>
+		/// Escapes an identifier
+		/// </summary>
+		/// <param name="id">Identifier</param>
+		/// <param name="allowSpaces">true to allow spaces</param>
+		/// <returns></returns>
+		public static string Escape(string? id, bool allowSpaces) => Escape(id, MAX_IDENTIFIER_LENGTH, allowSpaces);
 
 		/// <summary>
 		/// Escapes an identifier
