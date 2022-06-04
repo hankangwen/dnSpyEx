@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\..\DnSpyCommon.props" />
+  <Import Project="..\..\..\DnSpyRoslyn.props" />
 
   <PropertyGroup>
     <SignAssembly>True</SignAssembly>
