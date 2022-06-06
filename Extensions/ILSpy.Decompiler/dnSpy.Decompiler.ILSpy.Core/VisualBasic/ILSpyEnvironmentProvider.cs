@@ -1,14 +1,14 @@
 // Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -141,7 +141,7 @@ return loader.ReadTypeReference(annotation, entity: current).Resolve(context);*/
 			var propInfo = property.Annotation<PropertyDef>();
 
 			if (propInfo is null)
-				return new ICSharpCode.NRefactory.CSharp.ParameterDeclaration[0];
+				return Array.Empty<ICSharpCode.NRefactory.CSharp.ParameterDeclaration>();
 
 			sb.Clear();
 			var getMethod = propInfo.GetMethod;
@@ -154,7 +154,7 @@ return loader.ReadTypeReference(annotation, entity: current).Resolve(context);*/
 					return ps.Take(ps.Length - 1).Select(p => new ICSharpCode.NRefactory.CSharp.ParameterDeclaration(AstBuilder.ConvertType(p.Type, sb), p.Name, GetModifiers(p))).ToArray();
 			}
 
-			return new ICSharpCode.NRefactory.CSharp.ParameterDeclaration[0];
+			return Array.Empty<ICSharpCode.NRefactory.CSharp.ParameterDeclaration>();
 		}
 
 		ICSharpCode.NRefactory.CSharp.ParameterModifier GetModifiers(Parameter p) {

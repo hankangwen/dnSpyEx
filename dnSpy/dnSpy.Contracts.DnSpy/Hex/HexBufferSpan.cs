@@ -311,7 +311,7 @@ namespace dnSpy.Contracts.Hex {
 			}
 			if (tooMuchData)
 				sb.Append(ellipsis);
-			sb.Append("'");
+			sb.Append('\'');
 			return sb.ToString();
 		}
 	}
