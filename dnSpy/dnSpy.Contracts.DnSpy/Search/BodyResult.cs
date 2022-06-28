@@ -28,9 +28,18 @@ namespace dnSpy.Contracts.Search {
 		public uint ILOffset { get; }
 
 		/// <summary>
+		/// Operand of instruction referencing the constant
+		/// </summary>
+		public object Operand { get; }
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="ilOffset">IL offset of instruction</param>
-		public BodyResult(uint ilOffset) => ILOffset = ilOffset;
+		/// <param name="operand">Operand of instruction</param>
+		public BodyResult(uint ilOffset, object operand) {
+			ILOffset = ilOffset;
+			Operand = operand;
+		}
 	}
 }

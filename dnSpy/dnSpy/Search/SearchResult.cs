@@ -66,24 +66,7 @@ namespace dnSpy.Search {
 			OnPropertyChanged(nameof(ToolTip));
 		}
 
-		public string? ToolTip {
-			get {
-				var dsDocument = Document;
-				if (dsDocument is null)
-					return null;
-				var module = dsDocument.ModuleDef;
-				if (module is null)
-					return dsDocument.Filename;
-				if (!string.IsNullOrWhiteSpace(module.Location))
-					return module.Location;
-				if (!string.IsNullOrWhiteSpace(module.Name))
-					return module.Name;
-				if (module.Assembly is not null && !string.IsNullOrWhiteSpace(module.Assembly.Name))
-					return module.Assembly.Name;
-				return null;
-			}
-		}
-
+		public object ToolTip => CreateToolTipUI(NameObject);
 		public object NameUI => CreateUI(NameObject, false);
 		public object? LocationUI => CreateUI(LocationObject, true);
 
@@ -190,6 +173,83 @@ namespace dnSpy.Search {
 			}
 
 			Debug2.Assert(o is null);
+		}
+
+		object CreateToolTipUI(object? o) {
+			var writer = Cache.GetWriter();
+			try {
+				CreateToolTipUI(writer, o);
+				var context = new TextClassifierContext(writer.Text, string.Empty, Context.SyntaxHighlight, writer.Colors);
+				return Context.TextElementProvider.CreateTextElement(Context.ClassificationFormatMap, context, ContentTypes.Search, TextElementFlags.None);
+			}
+			finally {
+				Cache.FreeWriter(writer);
+			}
+		}
+
+		void CreateToolTipUI(ITextColorWriter output, object? o) {
+			if (o is NamespaceSearchResult ns)
+				output.WriteNamespace(ns.Namespace);
+			else if (o is TypeDef td) {
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.WriteType(output, td, false);
+			}
+			else if (o is IMemberDef md) {
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.WriteToolTip(output, md, md.DeclaringType);
+				if (ObjectInfo is BodyResult bodyResult) {
+					output.WriteLine();
+					// TODO: better printing of floating point operands.
+					var operandColor = Context.Decompiler.MetadataTextColorProvider.GetColor(bodyResult.Operand);
+					output.Write(operandColor, IdentifierEscaper.Escape(bodyResult.Operand.ToString()));
+					// TODO: localize
+					output.Write(BoxedTextColor.Text, " at ");
+					output.Write(BoxedTextColor.Label, "IL_");
+					output.Write(BoxedTextColor.Label, bodyResult.ILOffset.ToString("X4"));
+				}
+			}
+			else if (o is AssemblyDef asm)
+				output.Write(asm);
+			else if (o is ModuleDef mod)
+				output.WriteModule(mod.FullName);
+			else if (o is AssemblyRef asmRef)
+				output.Write(asmRef);
+			else if (o is ModuleRef modRef)
+				output.WriteModule(modRef.FullName);
+			else if (o is ParamDef paramDef)
+				output.Write(BoxedTextColor.Parameter, IdentifierEscaper.Escape(paramDef.Name));
+			else if (o is IDsDocument document) // non-.NET file
+				output.Write(BoxedTextColor.Text, document.GetShortName());
+			else if (o is ResourceNode resNode)
+				output.WriteFilename(resNode.Name);
+			else if (o is ResourceElementNode resElNode)
+				output.WriteFilename(resElNode.Name);
+			else if (o is ErrorMessage em)
+				output.Write(em.Color, em.Text);
+			else
+				Debug2.Assert(o is null);
+
+			var asmLocation = GetAssemblyLocation();
+			if (asmLocation is not null) {
+				output.WriteLine();
+				output.WriteFilename(asmLocation);
+			}
+		}
+
+		string? GetAssemblyLocation() {
+			var dsDocument = Document;
+			if (dsDocument is null)
+				return null;
+			var module = dsDocument.ModuleDef;
+			if (module is null)
+				return dsDocument.Filename;
+			if (!string.IsNullOrWhiteSpace(module.Location))
+				return module.Location;
+			if (!string.IsNullOrWhiteSpace(module.Name))
+				return module.Name;
+			if (module.Assembly is not null && !string.IsNullOrWhiteSpace(module.Assembly.Name))
+				return module.Assembly.Name;
+			return null;
 		}
 
 		public static SearchResult CreateMessage(SearchResultContext context, string msg, object color, bool first) =>

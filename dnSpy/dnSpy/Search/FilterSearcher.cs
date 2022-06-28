@@ -639,7 +639,7 @@ namespace dnSpy.Search {
 						LocationObject = type,
 						LocationImageReference = options.DotNetImageService.GetImageReference(type),
 						Document = ownerModule,
-						ObjectInfo = new BodyResult(instr.Offset),
+						ObjectInfo = new BodyResult(instr.Offset, operand),
 					});
 					break;
 				}
