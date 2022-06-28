@@ -664,6 +664,9 @@ namespace dnSpy.Search {
 					return true;
 			}
 
+			if (field.Constant is not null && IsMatch(null, field.Constant.Value))
+				return true;
+
 			return false;
 		}
 
