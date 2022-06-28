@@ -111,6 +111,8 @@ namespace dnSpy.Search {
 			}
 		}
 
+		const FormatterOptions DefaultFormatterOptions = FormatterOptions.Default & ~(FormatterOptions.ShowParameterNames | FormatterOptions.ShowDeclaringTypes | FormatterOptions.ShowFieldLiteralValues);
+
 		void CreateUI(ITextColorWriter output, object? o, bool includeNamespace) {
 			if (o is NamespaceSearchResult ns) {
 				output.WriteNamespace(ns.Namespace);
@@ -124,29 +126,20 @@ namespace dnSpy.Search {
 			}
 
 			if (o is MethodDef md) {
-				var methodNameColor = Context.Decompiler.MetadataTextColorProvider.GetColor(md);
-				output.Write(methodNameColor, IdentifierEscaper.Escape(md.Name));
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.Write(output, md, DefaultFormatterOptions);
 				if (md.ImplMap is ImplMap implMap && !UTF8String.IsNullOrEmpty(implMap.Name) && implMap.Name != md.Name) {
 					output.WriteSpace();
 					output.Write(BoxedTextColor.Punctuation, "(");
-					output.Write(methodNameColor, IdentifierEscaper.Escape(implMap.Name));
+					output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(md), IdentifierEscaper.Escape(implMap.Name));
 					output.Write(BoxedTextColor.Punctuation, ")");
 				}
 				return;
 			}
 
-			if (o is FieldDef fd) {
-				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(fd), IdentifierEscaper.Escape(fd.Name));
-				return;
-			}
-
-			if (o is PropertyDef pd) {
-				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(pd), IdentifierEscaper.Escape(pd.Name));
-				return;
-			}
-
-			if (o is EventDef ed) {
-				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(ed), IdentifierEscaper.Escape(ed.Name));
+			if (o is IMemberDef memberDef) {
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.Write(output, memberDef, DefaultFormatterOptions);
 				return;
 			}
 
