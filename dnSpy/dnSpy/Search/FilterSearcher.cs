@@ -85,8 +85,17 @@ namespace dnSpy.Search {
 
 		bool CheckCA(IDsDocument file, IHasCustomAttribute hca, object? parent, CAArgument o) {
 			var value = o.Value;
-			var u = value as UTF8String;
-			if (u is not null)
+			if (value is IList<CAArgument> array) {
+				foreach (var caArgument in array) {
+					if (CheckCA(file, hca, parent, caArgument))
+						return true;
+				}
+			}
+			else if (value is CAArgument boxed) {
+				if (CheckCA(file, hca, parent, boxed))
+					return true;
+			}
+			else if (value is UTF8String u)
 				value = u.String;
 			if (!IsMatch(null, value))
 				return false;
