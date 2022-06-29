@@ -199,13 +199,13 @@ namespace dnSpy.Search {
 				Context.Decompiler.WriteToolTip(output, md, md.DeclaringType);
 				if (ObjectInfo is BodyResult bodyResult) {
 					output.WriteLine();
-					// TODO: better printing of floating point operands.
-					var operandColor = Context.Decompiler.MetadataTextColorProvider.GetColor(bodyResult.Operand);
-					output.Write(operandColor, IdentifierEscaper.Escape(bodyResult.Operand.ToString()));
-					// TODO: localize
-					output.Write(BoxedTextColor.Text, " at ");
 					output.Write(BoxedTextColor.Label, "IL_");
 					output.Write(BoxedTextColor.Label, bodyResult.ILOffset.ToString("X4"));
+					output.Write(BoxedTextColor.Punctuation, ":");
+					output.WriteSpace();
+					output.Write(BoxedTextColor.OpCode, bodyResult.OpCode.Name);
+					output.WriteSpace();
+					WriteOperand(output, bodyResult.Operand);
 				}
 			}
 			else if (o is AssemblyDef asm)
@@ -234,6 +234,47 @@ namespace dnSpy.Search {
 				output.WriteLine();
 				output.WriteFilename(asmLocation);
 			}
+		}
+
+		void WriteOperand(ITextColorWriter output, object? operand) {
+			if (operand is null)
+				return;
+			if (operand is string str)
+				output.Write(BoxedTextColor.String, "\"" + IdentifierEscaper.Escape(str, true) + "\"");
+			else if (operand is float floatVal) {
+				if (floatVal == 0) {
+					// negative zero is a special case
+					output.Write(BoxedTextColor.Number, 1 / floatVal == float.NegativeInfinity ? "-0.0" : "0.0");
+				}
+				else if (float.IsInfinity(floatVal) || float.IsNaN(floatVal)) {
+					byte[] data = BitConverter.GetBytes(floatVal);
+					for (int i = 0; i < data.Length; i++) {
+						if (i > 0)
+							output.WriteSpace();
+						output.Write(BoxedTextColor.Number, data[i].ToString("X2"));
+					}
+				}
+				else
+					output.Write(BoxedTextColor.Number, floatVal.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+			}
+			else if (operand is double doubleVal) {
+				if (doubleVal == 0) {
+					// negative zero is a special case
+					output.Write(BoxedTextColor.Number, 1 / doubleVal == double.NegativeInfinity ? "-0.0" : "0.0");
+				}
+				else if (double.IsInfinity(doubleVal) || double.IsNaN(doubleVal)) {
+					byte[] data = BitConverter.GetBytes(doubleVal);
+					for (int i = 0; i < data.Length; i++) {
+						if (i > 0)
+							output.WriteSpace();
+						output.Write(BoxedTextColor.Number, data[i].ToString("X2"));
+					}
+				}
+				else
+					output.Write(BoxedTextColor.Number, doubleVal.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+			}
+			else
+				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(operand), operand.ToString());
 		}
 
 		string? GetAssemblyLocation() {

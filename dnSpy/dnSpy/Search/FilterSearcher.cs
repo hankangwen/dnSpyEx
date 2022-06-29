@@ -648,7 +648,7 @@ namespace dnSpy.Search {
 						LocationObject = type,
 						LocationImageReference = options.DotNetImageService.GetImageReference(type),
 						Document = ownerModule,
-						ObjectInfo = new BodyResult(instr.Offset, operand),
+						ObjectInfo = new BodyResult(instr.Offset, instr.OpCode, instr.Operand),
 					});
 					break;
 				}
