@@ -85,8 +85,17 @@ namespace dnSpy.Search {
 
 		bool CheckCA(IDsDocument file, IHasCustomAttribute hca, object? parent, CAArgument o) {
 			var value = o.Value;
-			var u = value as UTF8String;
-			if (u is not null)
+			if (value is IList<CAArgument> array) {
+				foreach (var caArgument in array) {
+					if (CheckCA(file, hca, parent, caArgument))
+						return true;
+				}
+			}
+			else if (value is CAArgument boxed) {
+				if (CheckCA(file, hca, parent, boxed))
+					return true;
+			}
+			else if (value is UTF8String u)
 				value = u.String;
 			if (!IsMatch(null, value))
 				return false;
@@ -639,7 +648,7 @@ namespace dnSpy.Search {
 						LocationObject = type,
 						LocationImageReference = options.DotNetImageService.GetImageReference(type),
 						Document = ownerModule,
-						ObjectInfo = new BodyResult(instr.Offset),
+						ObjectInfo = new BodyResult(instr.Offset, instr.OpCode, instr.Operand),
 					});
 					break;
 				}
@@ -663,6 +672,9 @@ namespace dnSpy.Search {
 				if (IsMatch(im.Name, im) || IsMatch(im.Module?.Name, null))
 					return true;
 			}
+
+			if (field.Constant is not null && IsMatch(null, field.Constant.Value))
+				return true;
 
 			return false;
 		}
