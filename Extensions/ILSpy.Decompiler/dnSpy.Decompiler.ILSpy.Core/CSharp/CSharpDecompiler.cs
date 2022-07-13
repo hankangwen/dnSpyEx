@@ -51,10 +51,10 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 
 		public IEnumerable<IDecompiler> Create() {
 			yield return new CSharpDecompiler(decompilerSettingsService.CSharpVBDecompilerSettings, DecompilerConstants.CSHARP_ILSPY_ORDERUI);
-#if DEBUG
+//#if DEBUG
 			foreach (var l in CSharpDecompiler.GetDebugDecompilers(decompilerSettingsService.CSharpVBDecompilerSettings))
 				yield return l;
-#endif
+//#endif
 		}
 	}
 
@@ -77,7 +77,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			OrderUI = orderUI;
 		}
 
-#if DEBUG
+//#if DEBUG
 		internal static IEnumerable<CSharpDecompiler> GetDebugDecompilers(CSharpVBDecompilerSettings langSettings) {
 			var dummy = new ModuleDefUser("Dummy");
 			dummy.Kind = ModuleKind.Dll;
@@ -101,7 +101,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 				showAllMembers = true
 			};
 		}
-#endif
+//#endif
 
 		public override string ContentTypeString => ContentTypesInternal.CSharpILSpy;
 		public override string GenericNameUI => DecompilerConstants.GENERIC_NAMEUI_CSHARP;
@@ -433,7 +433,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 				return true;
 			if (member is MethodDef md && (md.IsGetter || md.IsSetter || md.IsAddOn || md.IsRemoveOn))
 				return true;
-			return !ICSharpCode.Decompiler.CSharp.CSharpDecompiler.MemberIsHidden(member, settings);
+			return !CSharpAstBuilder.MemberIsHidden(member, settings);
 		}
 
 		public override bool ShowMember(IMemberRef member) => ShowMember(member, showAllMembers, langSettings.Settings);
@@ -503,7 +503,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			//s.RemoveEmptyDefaultConstructors = false;
 			if (!showAll) {
 				// Inline all field initialization code
-				//s.AllowFieldInitializers = false;
+				s.AllowFieldInitializers = false;
 			}
 			return s;
 		}

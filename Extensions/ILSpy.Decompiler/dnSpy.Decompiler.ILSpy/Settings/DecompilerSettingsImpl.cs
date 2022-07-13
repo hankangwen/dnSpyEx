@@ -60,22 +60,22 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			//ObjectOrCollectionInitializers = sect.Attribute<bool?>(nameof(ObjectOrCollectionInitializers)) ?? ObjectOrCollectionInitializers;
 			ShowXmlDocumentation = sect.Attribute<bool?>(nameof(ShowXmlDocumentation)) ?? ShowXmlDocumentation;
 			//RemoveEmptyDefaultConstructors = sect.Attribute<bool?>(nameof(RemoveEmptyDefaultConstructors)) ?? RemoveEmptyDefaultConstructors;
-			//IntroduceIncrementAndDecrement = sect.Attribute<bool?>(nameof(IntroduceIncrementAndDecrement)) ?? IntroduceIncrementAndDecrement;
-			//MakeAssignmentExpressions = sect.Attribute<bool?>(nameof(MakeAssignmentExpressions)) ?? MakeAssignmentExpressions;
+			IntroduceIncrementAndDecrement = sect.Attribute<bool?>(nameof(IntroduceIncrementAndDecrement)) ?? IntroduceIncrementAndDecrement;
+			MakeAssignmentExpressions = sect.Attribute<bool?>(nameof(MakeAssignmentExpressions)) ?? MakeAssignmentExpressions;
 			//AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject = sect.Attribute<bool?>(nameof(AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject)) ?? AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject;
-			// ShowTokenAndRvaComments = sect.Attribute<bool?>(nameof(ShowTokenAndRvaComments)) ?? ShowTokenAndRvaComments;
-			// SortMembers = sect.Attribute<bool?>(nameof(SortMembers)) ?? SortMembers;
-			// ForceShowAllMembers = sect.Attribute<bool?>(nameof(ForceShowAllMembers)) ?? ForceShowAllMembers;
-			// SortSystemUsingStatementsFirst = sect.Attribute<bool?>(nameof(SortSystemUsingStatementsFirst)) ?? SortSystemUsingStatementsFirst;
+			ShowTokenAndRvaComments = sect.Attribute<bool?>(nameof(ShowTokenAndRvaComments)) ?? ShowTokenAndRvaComments;
+			SortMembers = sect.Attribute<bool?>(nameof(SortMembers)) ?? SortMembers;
+			ForceShowAllMembers = sect.Attribute<bool?>(nameof(ForceShowAllMembers)) ?? ForceShowAllMembers;
+			SortSystemUsingStatementsFirst = sect.Attribute<bool?>(nameof(SortSystemUsingStatementsFirst)) ?? SortSystemUsingStatementsFirst;
 			//MaxArrayElements = sect.Attribute<int?>(nameof(MaxArrayElements)) ?? MaxArrayElements;
-			// SortCustomAttributes = sect.Attribute<bool?>(nameof(SortCustomAttributes)) ?? SortCustomAttributes;
-			// UseSourceCodeOrder = sect.Attribute<bool?>(nameof(UseSourceCodeOrder)) ?? UseSourceCodeOrder;
-			// AllowFieldInitializers = sect.Attribute<bool?>(nameof(AllowFieldInitializers)) ?? AllowFieldInitializers;
-			// OneCustomAttributePerLine = sect.Attribute<bool?>(nameof(OneCustomAttributePerLine)) ?? OneCustomAttributePerLine;
+			SortCustomAttributes = sect.Attribute<bool?>(nameof(SortCustomAttributes)) ?? SortCustomAttributes;
+			UseSourceCodeOrder = sect.Attribute<bool?>(nameof(UseSourceCodeOrder)) ?? UseSourceCodeOrder;
+			AllowFieldInitializers = sect.Attribute<bool?>(nameof(AllowFieldInitializers)) ?? AllowFieldInitializers;
+			OneCustomAttributePerLine = sect.Attribute<bool?>(nameof(OneCustomAttributePerLine)) ?? OneCustomAttributePerLine;
 			// TypeAddInternalModifier = sect.Attribute<bool?>(nameof(TypeAddInternalModifier)) ?? TypeAddInternalModifier;
 			// MemberAddPrivateModifier = sect.Attribute<bool?>(nameof(MemberAddPrivateModifier)) ?? MemberAddPrivateModifier;
-			//RemoveNewDelegateClass = sect.Attribute<bool?>(nameof(RemoveNewDelegateClass)) ?? RemoveNewDelegateClass;
-			//HexadecimalNumbers = sect.Attribute<bool?>(nameof(HexadecimalNumbers)) ?? HexadecimalNumbers;
+			// RemoveNewDelegateClass = sect.Attribute<bool?>(nameof(RemoveNewDelegateClass)) ?? RemoveNewDelegateClass;
+			HexadecimalNumbers = sect.Attribute<bool?>(nameof(HexadecimalNumbers)) ?? HexadecimalNumbers;
 			//TODO: CSharpFormattingOptions
 			disableSave = false;
 		}
@@ -110,22 +110,22 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			//sect.Attribute(nameof(ObjectOrCollectionInitializers), ObjectOrCollectionInitializers);
 			sect.Attribute(nameof(ShowXmlDocumentation), ShowXmlDocumentation);
 			//sect.Attribute(nameof(RemoveEmptyDefaultConstructors), RemoveEmptyDefaultConstructors);
-			//sect.Attribute(nameof(IntroduceIncrementAndDecrement), IntroduceIncrementAndDecrement);
-			//sect.Attribute(nameof(MakeAssignmentExpressions), MakeAssignmentExpressions);
+			sect.Attribute(nameof(IntroduceIncrementAndDecrement), IntroduceIncrementAndDecrement);
+			sect.Attribute(nameof(MakeAssignmentExpressions), MakeAssignmentExpressions);
 			//sect.Attribute(nameof(AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject), AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject);
-			//sect.Attribute(nameof(ShowTokenAndRvaComments), ShowTokenAndRvaComments);
-			//sect.Attribute(nameof(SortMembers), SortMembers);
-			//sect.Attribute(nameof(ForceShowAllMembers), ForceShowAllMembers);
-			//sect.Attribute(nameof(SortSystemUsingStatementsFirst), SortSystemUsingStatementsFirst);
+			sect.Attribute(nameof(ShowTokenAndRvaComments), ShowTokenAndRvaComments);
+			sect.Attribute(nameof(SortMembers), SortMembers);
+			sect.Attribute(nameof(ForceShowAllMembers), ForceShowAllMembers);
+			sect.Attribute(nameof(SortSystemUsingStatementsFirst), SortSystemUsingStatementsFirst);
 			//sect.Attribute(nameof(MaxArrayElements), MaxArrayElements);
-			//sect.Attribute(nameof(SortCustomAttributes), SortCustomAttributes);
-			//sect.Attribute(nameof(UseSourceCodeOrder), UseSourceCodeOrder);
-			//sect.Attribute(nameof(AllowFieldInitializers), AllowFieldInitializers);
-			//sect.Attribute(nameof(OneCustomAttributePerLine), OneCustomAttributePerLine);
+			sect.Attribute(nameof(SortCustomAttributes), SortCustomAttributes);
+			sect.Attribute(nameof(UseSourceCodeOrder), UseSourceCodeOrder);
+			sect.Attribute(nameof(AllowFieldInitializers), AllowFieldInitializers);
+			sect.Attribute(nameof(OneCustomAttributePerLine), OneCustomAttributePerLine);
 			//sect.Attribute(nameof(TypeAddInternalModifier), TypeAddInternalModifier);
 			//sect.Attribute(nameof(MemberAddPrivateModifier), MemberAddPrivateModifier);
 			//sect.Attribute(nameof(RemoveNewDelegateClass), RemoveNewDelegateClass);
-			//sect.Attribute(nameof(HexadecimalNumbers), HexadecimalNumbers);
+			sect.Attribute(nameof(HexadecimalNumbers), HexadecimalNumbers);
 			//TODO: CSharpFormattingOptions
 		}
 	}

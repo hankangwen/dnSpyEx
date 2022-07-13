@@ -25,10 +25,15 @@ using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Text;
 using dnSpy.Decompiler.ILSpy.Core.Settings;
 using dnSpy.Decompiler.ILSpy.Core.Text;
+using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.CSharp;
 using ICSharpCode.Decompiler.Disassembler;
 using ICSharpCode.Decompiler.IL;
+using ICSharpCode.Decompiler.IL.Transforms;
+using ICSharpCode.Decompiler.Metadata;
+using ICSharpCode.Decompiler.TypeSystem;
 
-/*
+
 namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 	sealed class DecompilerProvider : IDecompilerProvider {
 		readonly DecompilerSettingsService decompilerSettingsService;
@@ -59,8 +64,6 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 	sealed class ILAstDecompiler : DecompilerBase {
 		readonly string uniqueNameUI;
 		Guid uniqueGuid;
-		bool inlineVariables = true;
-		ILAstOptimizationStep? abortBeforeStep;
 
 		public override DecompilerSettingsBase Settings { get; }
 		const int settingsVersion = 1;
@@ -91,112 +94,45 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 
 			var bodyInfo = StartKeywordBlock(output, ".body", method);
 
-			ILAstBuilder astBuilder = new ILAstBuilder();
-			ILBlock ilMethod = new ILBlock(CodeBracesRangeFlags.MethodBraces);
-			DecompilerContext context = new DecompilerContext(settingsVersion, method.Module, MetadataTextColorProvider) {
-				CurrentType = method.DeclaringType,
-				CurrentMethod = method,
-				CalculateILSpans = ctx.CalculateILSpans,
-			};
-			ilMethod.Body = astBuilder.Build(method, inlineVariables, context);
+			var ts = new DecompilerTypeSystem(new PEFile(method.Module), TypeSystemOptions.Default);
+			var reader = new ILReader(ts.MainModule);
+			var il = reader.ReadIL(method, kind: ILFunctionKind.TopLevelFunction, cancellationToken: ctx.CancellationToken);
 
-			var stateMachineKind = StateMachineKind.None;
-			MethodDef? inlinedMethod = null;
-			AsyncMethodDebugInfo? asyncInfo = null;
-			string? compilerName = null;
-			if (abortBeforeStep is not null) {
-				var optimizer = new ILAstOptimizer();
-				optimizer.Optimize(context, ilMethod, out stateMachineKind, out inlinedMethod, out asyncInfo, abortBeforeStep.Value);
-				compilerName = optimizer.CompilerName;
-			}
+			var settings = new DecompilerSettings(LanguageVersion.Latest);
+			var run = new CSharpDecompiler(ts, settings);
+			var context = run.CreateILTransformContext(il);
 
-			if (context.CurrentMethodIsYieldReturn) {
-				output.Write("yield", BoxedTextColor.Keyword);
-				output.Write(" ", BoxedTextColor.Text);
-				output.WriteLine("return", BoxedTextColor.Keyword);
-			}
-			if (context.CurrentMethodIsAsync) {
-				output.Write("async", BoxedTextColor.Keyword);
-				output.Write("/", BoxedTextColor.Punctuation);
-				output.WriteLine("await", BoxedTextColor.Keyword);
-			}
+			//context.Stepper.StepLimit = options.StepLimit;
+			context.Stepper.IsDebug = Debugger.IsAttached;
 
-			var allVariables = ilMethod.GetSelfAndChildrenRecursive<ILExpression>().Select(e => e.Operand as ILVariable)
-				.Where(v => v is not null && !v.IsParameter).Distinct();
-			foreach (var v in allVariables) {
-				Debug2.Assert(v is not null);
-				output.Write(IdentifierEscaper.Escape(v.Name), v.GetTextReferenceObject(), DecompilerReferenceFlags.Local | DecompilerReferenceFlags.Definition, v.IsParameter ? BoxedTextColor.Parameter : BoxedTextColor.Local);
-				if (v.Type is not null) {
-					output.Write(" ", BoxedTextColor.Text);
-					output.Write(":", BoxedTextColor.Punctuation);
-					output.Write(" ", BoxedTextColor.Text);
-					if (v.IsPinned) {
-						output.Write("pinned", BoxedTextColor.Keyword);
-						output.Write(" ", BoxedTextColor.Text);
-					}
-					v.Type.WriteTo(output, ILNameSyntax.ShortTypeName);
-				}
-				if (v.GeneratedByDecompiler) {
-					output.Write(" ", BoxedTextColor.Text);
-					var start = output.NextPosition;
-					output.Write("[", BoxedTextColor.Punctuation);
-					output.Write("generated", BoxedTextColor.Keyword);
-					var end = output.NextPosition;
-					output.Write("]", BoxedTextColor.Punctuation);
-					output.AddBracePair(new TextSpan(start, 1), new TextSpan(end, 1), CodeBracesRangeFlags.SquareBrackets);
-				}
+
+			try
+			{
+				il.RunTransforms(run.ILTransforms, context);
+			}
+			catch (StepLimitReachedException)
+			{
+			}
+			catch (Exception ex)
+			{
+				output.Write(ex.ToString(), BoxedTextColor.Text);
+				output.WriteLine();
+				output.WriteLine();
+				output.Write("ILAst after the crash:", BoxedTextColor.Text);
 				output.WriteLine();
 			}
-
-			var localVariables = new HashSet<ILVariable>(GetVariables(ilMethod));
-			var builder = new MethodDebugInfoBuilder(settingsVersion, stateMachineKind, inlinedMethod ?? method, inlinedMethod is not null ? method : null, CreateSourceLocals(localVariables), CreateSourceParameters(localVariables), asyncInfo);
-			builder.CompilerName = compilerName;
-			foreach (ILNode node in ilMethod.Body) {
-				node.WriteTo(output, builder);
-				if (!node.WritesNewLine)
-					output.WriteLine();
+			finally
+			{
+				// update stepper even if a transform crashed unexpectedly
+				// if (options.StepLimit == int.MaxValue)
+				// {
+				// 	Stepper = context.Stepper;
+				// 	OnStepperUpdated(new EventArgs());
+				// }
 			}
-			output.AddDebugInfo(builder.Create());
-			EndKeywordBlock(output, bodyInfo, CodeBracesRangeFlags.MethodBraces, addLineSeparator: true);
-		}
+			output.WriteLine();
 
-		IEnumerable<ILVariable> GetVariables(ILBlock ilMethod) {
-			foreach (var n in ilMethod.GetSelfAndChildrenRecursive(new List<ILNode>())) {
-				var expr = n as ILExpression;
-				if (expr is not null) {
-					var v = expr.Operand as ILVariable;
-					if (v is not null)
-						yield return v;
-					continue;
-				}
-				var cb = n as ILTryCatchBlock.CatchBlockBase;
-				if (cb is not null && cb.ExceptionVariable is not null)
-					yield return cb.ExceptionVariable;
-			}
-		}
-
-		readonly List<SourceLocal> sourceLocalsList = new List<SourceLocal>();
-		SourceLocal[] CreateSourceLocals(HashSet<ILVariable> variables) {
-			foreach (var v in variables) {
-				if (v.Kind == VariableKind.Parameter)
-					continue;
-				sourceLocalsList.Add(v.GetSourceLocal());
-			}
-			var array = sourceLocalsList.ToArray();
-			sourceLocalsList.Clear();
-			return array;
-		}
-
-		readonly List<SourceParameter> sourceParametersList = new List<SourceParameter>();
-		SourceParameter[] CreateSourceParameters(HashSet<ILVariable> variables) {
-			foreach (var v in variables) {
-				if (v.Kind != VariableKind.Parameter)
-					continue;
-				sourceParametersList.Add(v.GetSourceParameter());
-			}
-			var array = sourceParametersList.ToArray();
-			sourceParametersList.Clear();
-			return array;
+			il.WriteTo(output, new ILAstWritingOptions());
 		}
 
 		struct BraceInfo {
@@ -363,18 +299,9 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 		internal static IEnumerable<ILAstDecompiler> GetDebugDecompilers(DecompilerSettingsService decompilerSettingsService) {
 			double orderUI = DecompilerConstants.ILAST_ILSPY_DEBUG_ORDERUI;
 			uint id = 0x64A926A5;
-			yield return new ILAstDecompiler(decompilerSettingsService.ILAstDecompilerSettings, orderUI++, "ILAst (unoptimized)") {
+			yield return new ILAstDecompiler(decompilerSettingsService.ILAstDecompilerSettings, orderUI++, "ILAst") {
 				uniqueGuid = new Guid($"CB470049-6AFB-4BDB-93DC-1BB9{id++:X8}"),
-				inlineVariables = false
 			};
-			// string nextName = "ILAst (variable splitting)";
-			// foreach (ILAstOptimizationStep step in (ILAstOptimizationStep[])Enum.GetValues(typeof(ILAstOptimizationStep))) {
-			// 	yield return new ILAstDecompiler(decompilerSettingsService.ILAstDecompilerSettings, orderUI++, nextName) {
-			// 		uniqueGuid = new Guid($"CB470049-6AFB-4BDB-93DC-1BB9{id++:X8}"),
-			// 		abortBeforeStep = step
-			// 	};
-			// 	nextName = "ILAst (after " + step + ")";
-			// }
 		}
 
 		public override string FileExtension => ".il";
@@ -384,4 +311,3 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 	}
 #endif
 }
-*/

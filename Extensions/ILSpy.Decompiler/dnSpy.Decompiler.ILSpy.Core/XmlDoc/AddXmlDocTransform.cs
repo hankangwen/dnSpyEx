@@ -40,7 +40,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.XmlDoc {
 			try {
 				foreach (var entity in node.DescendantsAndSelf.OfType<EntityDeclaration>()) {
 					var symbol = entity.GetSymbol();
-					dnlib.DotNet.IMemberRef? mr;
+					IMemberRef? mr;
 					switch (symbol) {
 					case IMember member:
 						mr = member.MetadataToken as IMemberRef;
@@ -76,7 +76,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.XmlDoc {
 					stringBuilder.Append(' ');
 					info.Value.WriteTo(stringBuilder);
 				}
-				node.Parent.InsertChildBefore(node, new Comment(stringBuilder.ToString(), CommentType.Documentation), Roles.Comment);
+				node.Parent!.InsertChildBefore(node, new Comment(stringBuilder.ToString(), CommentType.Documentation), Roles.Comment);
 			}
 		}
 	}
