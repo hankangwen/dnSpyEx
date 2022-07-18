@@ -250,6 +250,57 @@ namespace dnSpy.Debugger.Settings {
 		}
 		bool enableManagedDebuggingAssistants = true;
 
+		public override bool EnableJustMyCodeDebugging {
+			get {
+				lock (lockObj)
+					return enableJustMyCodeDebugging;
+			}
+			set {
+				bool modified;
+				lock (lockObj) {
+					modified = enableJustMyCodeDebugging != value;
+					enableJustMyCodeDebugging = value;
+				}
+				if (modified)
+					OnPropertyChanged(nameof(EnableJustMyCodeDebugging));
+			}
+		}
+		bool enableJustMyCodeDebugging = false;
+
+		public override bool StepOverCodeInSystemModules {
+			get {
+				lock (lockObj)
+					return stepOverCodeInSystemModules;
+			}
+			set {
+				bool modified;
+				lock (lockObj) {
+					modified = stepOverCodeInSystemModules != value;
+					stepOverCodeInSystemModules = value;
+				}
+				if (modified)
+					OnPropertyChanged(nameof(StepOverCodeInSystemModules));
+			}
+		}
+		bool stepOverCodeInSystemModules = false;
+
+		public override bool OnlyStepIntoCodeInPrimaryModule {
+			get {
+				lock (lockObj)
+					return onlyStepIntoCodeInPrimaryModule;
+			}
+			set {
+				bool modified;
+				lock (lockObj) {
+					modified = onlyStepIntoCodeInPrimaryModule != value;
+					onlyStepIntoCodeInPrimaryModule = value;
+				}
+				if (modified)
+					OnPropertyChanged(nameof(OnlyStepIntoCodeInPrimaryModule));
+			}
+		}
+		bool onlyStepIntoCodeInPrimaryModule = false;
+
 		public override bool HighlightChangedVariables {
 			get {
 				lock (lockObj)
@@ -640,6 +691,9 @@ namespace dnSpy.Debugger.Settings {
 			other.IgnoreBreakInstructions = IgnoreBreakInstructions;
 			other.BreakAllProcesses = BreakAllProcesses;
 			other.EnableManagedDebuggingAssistants = EnableManagedDebuggingAssistants;
+			other.EnableJustMyCodeDebugging = EnableJustMyCodeDebugging;
+			other.StepOverCodeInSystemModules = StepOverCodeInSystemModules;
+			other.OnlyStepIntoCodeInPrimaryModule = OnlyStepIntoCodeInPrimaryModule;
 			other.HighlightChangedVariables = HighlightChangedVariables;
 			other.ShowRawStructureOfObjects = ShowRawStructureOfObjects;
 			other.SortParameters = SortParameters;
@@ -691,6 +745,9 @@ namespace dnSpy.Debugger.Settings {
 			IgnoreBreakInstructions = sect.Attribute<bool?>(nameof(IgnoreBreakInstructions)) ?? IgnoreBreakInstructions;
 			BreakAllProcesses = sect.Attribute<bool?>(nameof(BreakAllProcesses)) ?? BreakAllProcesses;
 			EnableManagedDebuggingAssistants = sect.Attribute<bool?>(nameof(EnableManagedDebuggingAssistants)) ?? EnableManagedDebuggingAssistants;
+			EnableJustMyCodeDebugging = sect.Attribute<bool?>(nameof(EnableJustMyCodeDebugging)) ?? EnableJustMyCodeDebugging;
+			StepOverCodeInSystemModules = sect.Attribute<bool?>(nameof(StepOverCodeInSystemModules)) ?? StepOverCodeInSystemModules;
+			OnlyStepIntoCodeInPrimaryModule = sect.Attribute<bool?>(nameof(OnlyStepIntoCodeInPrimaryModule)) ?? OnlyStepIntoCodeInPrimaryModule;
 			HighlightChangedVariables = sect.Attribute<bool?>(nameof(HighlightChangedVariables)) ?? HighlightChangedVariables;
 			ShowRawStructureOfObjects = sect.Attribute<bool?>(nameof(ShowRawStructureOfObjects)) ?? ShowRawStructureOfObjects;
 			SortParameters = sect.Attribute<bool?>(nameof(SortParameters)) ?? SortParameters;
@@ -731,6 +788,9 @@ namespace dnSpy.Debugger.Settings {
 			sect.Attribute(nameof(IgnoreBreakInstructions), IgnoreBreakInstructions);
 			sect.Attribute(nameof(BreakAllProcesses), BreakAllProcesses);
 			sect.Attribute(nameof(EnableManagedDebuggingAssistants), EnableManagedDebuggingAssistants);
+			sect.Attribute(nameof(EnableJustMyCodeDebugging), EnableJustMyCodeDebugging);
+			sect.Attribute(nameof(StepOverCodeInSystemModules), StepOverCodeInSystemModules);
+			sect.Attribute(nameof(OnlyStepIntoCodeInPrimaryModule), OnlyStepIntoCodeInPrimaryModule);
 			sect.Attribute(nameof(HighlightChangedVariables), HighlightChangedVariables);
 			sect.Attribute(nameof(ShowRawStructureOfObjects), ShowRawStructureOfObjects);
 			sect.Attribute(nameof(SortParameters), SortParameters);

@@ -812,6 +812,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				Debug2.Assert(dbgOptions.Filename is not null);
 
 				dbgOptions.DebugOptions.IgnoreBreakInstructions = false;
+				dbgOptions.DebugOptions.StepperJMC = debuggerSettings.EnableJustMyCodeDebugging;
 
 				// Disable NGEN image loading for Windows 8.x store apps. No effect on desktop apps.
 				if (debuggerSettings.SuppressJITOptimization_SystemModules)
