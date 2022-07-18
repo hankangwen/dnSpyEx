@@ -810,7 +810,13 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 					Environment = env.Environment,
 				};
 				Debug2.Assert(dbgOptions.Filename is not null);
+
 				dbgOptions.DebugOptions.IgnoreBreakInstructions = false;
+
+				// Disable NGEN image loading for Windows 8.x store apps. No effect on desktop apps.
+				if (debuggerSettings.SuppressJITOptimization_SystemModules)
+					dbgOptions.DebugOptions.NGENPolicy = CorDebugNGENPolicy.DISABLE_LOCAL_NIC;
+
 				dbgOptions.DebugOptions.DebugOptionsProvider = new DebugOptionsProviderImpl(debuggerSettings);
 				if (debuggerSettings.RedirectGuiConsoleOutput && PortableExecutableFileHelpers.IsGuiApp(options.Filename))
 					dbgOptions.RedirectConsoleOutput = true;
