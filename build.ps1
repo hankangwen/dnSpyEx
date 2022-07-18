@@ -1,4 +1,8 @@
-param([string]$buildtfm = 'all', [switch]$NoMsbuild)
+param(
+	[ValidateSet("all","netframework","net-x86","net-x64")]
+	[string]$buildtfm = 'all',
+	[switch]$NoMsbuild
+	)
 $ErrorActionPreference = 'Stop'
 
 $netframework_tfm = 'net48'
