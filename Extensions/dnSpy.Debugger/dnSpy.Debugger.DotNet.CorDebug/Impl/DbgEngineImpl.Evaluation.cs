@@ -130,36 +130,44 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		}
 
 		DbgDotNetRawValue? ReadField_CorDebug(DbgDotNetValueImpl obj, string fieldName1, string? fieldName2) {
+			DbgDotNetValue? dnValue = null;
+			try {
+				(_, dnValue) = GetValueField_CorDebug(obj, fieldName1, fieldName2);
+
+				if (dnValue is null)
+					return null;
+				return dnValue.GetRawValue();
+			}
+			finally {
+				dnValue?.Dispose();
+			}
+		}
+		(CorValue? corValue, DbgDotNetValue? dbgDotNetValue) GetValueField_CorDebug(DbgDotNetValueImpl obj, string fieldName1, string? fieldName2, bool allowTypeVarianceOnPrivateFields=false) {
 			const DmdBindingFlags fieldFlags = DmdBindingFlags.Public | DmdBindingFlags.NonPublic | DmdBindingFlags.Instance;
-			var field = obj.Type.GetField(fieldName1, fieldFlags);
+			var field = obj.Type.GetField(fieldName1, fieldFlags, allowTypeVarianceOnPrivateFields);
 			if (field is null && fieldName2 is not null)
-				field = obj.Type.GetField(fieldName2, fieldFlags);
+				field = obj.Type.GetField(fieldName2, fieldFlags, allowTypeVarianceOnPrivateFields);
 			Debug2.Assert(field is not null);
 			if (field is null)
-				return null;
+				return (null, null);
 
 			var dnAppDomain = ((DbgCorDebugInternalAppDomainImpl)obj.Type.AppDomain.GetDebuggerAppDomain().InternalAppDomain).DnAppDomain;
 			var corFieldDeclType = GetType(dnAppDomain.CorAppDomain, field.DeclaringType!);
 			var objValue = DbgCorDebugInternalRuntimeImpl.TryGetObjectOrPrimitiveValue(obj.TryGetCorValue(), out int hr);
 			if (objValue is null)
-				return null;
+				return (null, null);
 			if (objValue.IsObject) {
 				// This isn't a generic read-field method, so we won't try to load any classes by calling cctors.
 
 				var fieldValue = objValue.GetFieldValue(corFieldDeclType.Class, (uint)field.MetadataToken, out hr);
 				if (fieldValue is null)
-					return null;
-				DbgDotNetValue? dnValue = null;
-				try {
-					dnValue = CreateDotNetValue_CorDebug(fieldValue, field.AppDomain, tryCreateStrongHandle: false);
-					return dnValue.GetRawValue();
-				}
-				finally {
-					dnValue?.Dispose();
-				}
+					return (null, null);
+				return (fieldValue, CreateDotNetValue_CorDebug(fieldValue, field.AppDomain, tryCreateStrongHandle: false));
+				
 			}
-			return null;
+			return (null, null);
 		}
+
 
 		CorType GetType(CorAppDomain appDomain, DmdType type) => CorDebugTypeCreator.GetType(this, appDomain, type);
 
