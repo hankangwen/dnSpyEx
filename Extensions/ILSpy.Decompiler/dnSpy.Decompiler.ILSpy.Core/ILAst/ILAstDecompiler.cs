@@ -95,12 +95,13 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 			var bodyInfo = StartKeywordBlock(output, ".body", method);
 
 			var ts = new DecompilerTypeSystem(new PEFile(method.Module), TypeSystemOptions.Default);
-			var reader = new ILReader(ts.MainModule);
+			var reader = new ILReader(ts.MainModule) { CalculateILSpans = true };
 			var il = reader.ReadIL(method, kind: ILFunctionKind.TopLevelFunction, cancellationToken: ctx.CancellationToken);
 
 			var settings = new DecompilerSettings(LanguageVersion.Latest);
 			var run = new CSharpDecompiler(ts, settings);
 			var context = run.CreateILTransformContext(il);
+			context.CalculateILSpans = true;
 
 			//context.Stepper.StepLimit = options.StepLimit;
 			context.Stepper.IsDebug = Debugger.IsAttached;
