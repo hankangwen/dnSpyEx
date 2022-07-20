@@ -44,6 +44,12 @@ namespace dnSpy.Search {
 
 		bool IsMatch(string? text, object? obj) => options.SearchComparer.IsMatch(text, obj);
 
+		bool IsCompilerGenerated(IMemberRef member) {
+			if (options.SearchCompilerGeneratedMembers)
+				return false;
+			return !options.Context.Decompiler.ShowMember(member);
+		}
+
 		public void SearchAssemblies(IEnumerable<DsDocumentNode> fileNodes) {
 			foreach (var fileNode in fileNodes) {
 				options.CancellationToken.ThrowIfCancellationRequested();
@@ -417,6 +423,8 @@ namespace dnSpy.Search {
 			var res = options.Filter.GetResult(type);
 			if (res.FilterType == FilterType.Hide)
 				return;
+			if (IsCompilerGenerated(type))
+				return;
 
 			if (res.IsMatch && (IsMatch(FixTypeName(type.FullName), type) || IsMatch(FixTypeName(type.Name), type))) {
 				options.OnMatch(new SearchResult {
@@ -473,6 +481,8 @@ namespace dnSpy.Search {
 
 			var res = options.Filter.GetResult(type);
 			if (res.FilterType == FilterType.Hide)
+				return;
+			if (IsCompilerGenerated(type))
 				return;
 
 			if (res.IsMatch && (IsMatch(FixTypeName(type.FullName), type) || IsMatch(FixTypeName(type.Name), type))) {
@@ -534,6 +544,9 @@ namespace dnSpy.Search {
 			var res = options.Filter.GetResult(method);
 			if (res.FilterType == FilterType.Hide)
 				return;
+			if (IsCompilerGenerated(method))
+				return;
+
 			CheckCustomAttributes(ownerModule, method, type);
 
 			if (res.IsMatch && CheckMatch(method)) {
@@ -683,6 +696,9 @@ namespace dnSpy.Search {
 			var res = options.Filter.GetResult(field);
 			if (res.FilterType == FilterType.Hide)
 				return;
+			if (IsCompilerGenerated(field))
+				return;
+
 			CheckCustomAttributes(ownerModule, field, type);
 
 			if (res.IsMatch && CheckMatch(field)) {
@@ -718,6 +734,9 @@ namespace dnSpy.Search {
 			var res = options.Filter.GetResult(prop);
 			if (res.FilterType == FilterType.Hide)
 				return;
+			if (IsCompilerGenerated(prop))
+				return;
+
 			CheckCustomAttributes(ownerModule, prop, type);
 
 			if (res.IsMatch && CheckMatch(prop)) {
@@ -753,6 +772,9 @@ namespace dnSpy.Search {
 			var res = options.Filter.GetResult(evt);
 			if (res.FilterType == FilterType.Hide)
 				return;
+			if (IsCompilerGenerated(evt))
+				return;
+
 			CheckCustomAttributes(ownerModule, evt, type);
 
 			if (res.IsMatch && CheckMatch(evt)) {

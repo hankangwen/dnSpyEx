@@ -36,6 +36,7 @@ namespace dnSpy.Search {
 		public SearchResultContext Context { get; set; }
 		public CancellationToken CancellationToken { get; set; }
 		public bool SearchDecompiledData { get; set; }
+		public bool SearchCompilerGeneratedMembers { get; set; }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 	}
 }

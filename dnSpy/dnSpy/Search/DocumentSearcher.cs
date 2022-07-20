@@ -77,6 +77,7 @@ namespace dnSpy.Search {
 				Context = searchResultContext,
 				CancellationToken = cancellationToken,
 				SearchDecompiledData = options.SearchDecompiledData,
+				SearchCompilerGeneratedMembers = options.SearchCompilerGeneratedMembers,
 			};
 		}
 
