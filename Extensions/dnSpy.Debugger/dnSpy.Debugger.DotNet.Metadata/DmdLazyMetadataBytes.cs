@@ -18,6 +18,8 @@
 */
 
 using System;
+using System.Runtime.InteropServices;
+using dnSpy.Debugger.DotNet.Metadata.Impl.COMD;
 
 namespace dnSpy.Debugger.DotNet.Metadata {
 	/// <summary>
@@ -151,4 +153,15 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 			Dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
 		}
 	}
-}
+	/// <summary>
+	/// Net 6 Hack
+	/// </summary>
+	public sealed class DmdLazyMetadataBytesNull : DmdLazyMetadataBytes {
+		public string Info { get;set; }
+		public DmdLazyMetadataBytesNull() {
+			Info = "NET 6 Hack";
+		}
+	}
+
+
+	}

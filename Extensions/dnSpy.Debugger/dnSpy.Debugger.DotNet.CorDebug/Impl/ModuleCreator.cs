@@ -92,10 +92,18 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		static Func<DmdLazyMetadataBytes> CreateDynamicGetMetadataDelegate(DbgEngineImpl engine, DnModule dnModule) {
 			Debug.Assert(dnModule.IsDynamic);
 			var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
-			if (comMetadata is null)
-				throw new InvalidOperationException();
-			var result = new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
-			return () => result;
+			if (comMetadata == null) {
+				if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major != 6) {
+					throw new InvalidOperationException();
+				}
+				else if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major == 6) //Net 6 hack
+					return () => new DmdLazyMetadataBytesNull();
+			}
+			else {
+				var result = new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
+				return () => result;
+			}
+			return null;
 		}
 
 		static Func<DmdLazyMetadataBytes> CreateNormalGetMetadataDelegate(DbgEngineImpl engine, DbgRuntime runtime, DnModule dnModule, ClosedListenerCollection closedListenerCollection, DbgImageLayout imageLayout) {
