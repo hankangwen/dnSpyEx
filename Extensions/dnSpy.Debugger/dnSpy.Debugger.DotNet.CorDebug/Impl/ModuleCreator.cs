@@ -96,7 +96,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major != 6) {
 					throw new InvalidOperationException();
 				}
-				else if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major == 6) //Net 6 hack
+				else if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major == 6) //Net 6 hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
 					return () => new DmdLazyMetadataBytesNull();
 			}
 			else {
