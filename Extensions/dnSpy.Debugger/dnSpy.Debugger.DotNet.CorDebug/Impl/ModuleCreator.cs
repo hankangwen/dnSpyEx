@@ -93,10 +93,10 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			Debug.Assert(dnModule.IsDynamic);
 			var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
 			if (comMetadata == null) {
-				if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major != 6) {
+				if (dnModule.Process.CorProcess.CLRVersion.Major != 6) {
 					throw new InvalidOperationException();
 				}
-				else if (comMetadata is null && dnModule.Process.CorProcess.CLRVersion.Major == 6) //Net 6 hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
+				else  //Net 6 hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
 					return () => new DmdLazyMetadataBytesNull();
 			}
 			else {
