@@ -93,11 +93,14 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			Debug.Assert(dnModule.IsDynamic);
 			var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
 			if (comMetadata is null) {
-				if (dnModule.Process.CorProcess.CLRVersion.Major != 6) {
-					throw new InvalidOperationException();
+				if (dnModule.Process.CorProcess.CLRVersion.Major == 6) {
+					// Workaround for a .NET 6 bug where dynamic modules don't have a IMetaDataImport2 interface when a debugger is attached
+					// see https://github.com/dnSpyEx/dnSpy/issues/96
+					var nullResult = new DmdLazyMetadataBytesNull();
+					return () => nullResult;
 				}
-				else  //Net 6 hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
-					return () => new DmdLazyMetadataBytesNull();
+
+				throw new InvalidOperationException();
 			}
 
 			var result = new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
