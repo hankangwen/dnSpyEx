@@ -164,4 +164,4 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 	}
 
 
-	}
+}
