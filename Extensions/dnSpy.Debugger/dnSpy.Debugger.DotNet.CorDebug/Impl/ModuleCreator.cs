@@ -92,7 +92,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		static Func<DmdLazyMetadataBytes> CreateDynamicGetMetadataDelegate(DbgEngineImpl engine, DnModule dnModule) {
 			Debug.Assert(dnModule.IsDynamic);
 			var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
-			if (comMetadata == null) {
+			if (comMetadata is null) {
 				if (dnModule.Process.CorProcess.CLRVersion.Major != 6) {
 					throw new InvalidOperationException();
 				}
