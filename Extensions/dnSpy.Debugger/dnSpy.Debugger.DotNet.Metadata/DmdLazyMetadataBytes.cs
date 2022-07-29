@@ -18,8 +18,6 @@
 */
 
 using System;
-using System.Runtime.InteropServices;
-using dnSpy.Debugger.DotNet.Metadata.Impl.COMD;
 
 namespace dnSpy.Debugger.DotNet.Metadata {
 	/// <summary>
