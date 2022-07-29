@@ -99,11 +99,9 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				else  //Net 6 hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
 					return () => new DmdLazyMetadataBytesNull();
 			}
-			else {
-				var result = new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
-				return () => result;
-			}
-			return null;
+
+			var result = new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
+			return () => result;
 		}
 
 		static Func<DmdLazyMetadataBytes> CreateNormalGetMetadataDelegate(DbgEngineImpl engine, DbgRuntime runtime, DnModule dnModule, ClosedListenerCollection closedListenerCollection, DbgImageLayout imageLayout) {
