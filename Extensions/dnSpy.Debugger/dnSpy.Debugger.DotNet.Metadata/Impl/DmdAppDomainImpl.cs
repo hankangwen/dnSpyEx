@@ -105,6 +105,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 				throw new ArgumentNullException(nameof(lzmd));
 			try {
 				switch (lzmd) {
+				case DmdLazyMetadataBytesNull:				return new DmdNullMetadataReader(module);
 				case DmdLazyMetadataBytesPtr lzmdPtr:		return MD.DmdEcma335MetadataReader.Create(module, lzmdPtr.Address, lzmdPtr.Size, lzmdPtr.IsFileLayout);
 				case DmdLazyMetadataBytesArray lzmdArray:	return MD.DmdEcma335MetadataReader.Create(module, lzmdArray.Bytes, lzmdArray.IsFileLayout);
 				case DmdLazyMetadataBytesFile lzmdFile:		return MD.DmdEcma335MetadataReader.Create(module, lzmdFile.Filename, lzmdFile.IsFileLayout);
