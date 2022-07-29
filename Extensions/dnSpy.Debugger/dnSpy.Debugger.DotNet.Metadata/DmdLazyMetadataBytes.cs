@@ -155,10 +155,10 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 	/// Net 6 Hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
 	/// </summary>
 	public sealed class DmdLazyMetadataBytesNull : DmdLazyMetadataBytes {
-		public string Info { get;set; }
-		public DmdLazyMetadataBytesNull() {
-			Info = "NET 6 Hack";
-		}
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		public DmdLazyMetadataBytesNull() { }
 	}
 
 
