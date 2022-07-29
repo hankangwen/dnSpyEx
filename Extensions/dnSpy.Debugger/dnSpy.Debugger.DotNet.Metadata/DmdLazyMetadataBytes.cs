@@ -152,7 +152,7 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		}
 	}
 	/// <summary>
-	/// Net 6 Hack for Issue: https://github.com/dnSpyEx/dnSpy/issues/96
+	/// No metadata
 	/// </summary>
 	public sealed class DmdLazyMetadataBytesNull : DmdLazyMetadataBytes {
 		/// <summary>
