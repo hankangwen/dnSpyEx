@@ -160,6 +160,4 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		/// </summary>
 		public DmdLazyMetadataBytesNull() { }
 	}
-
-
 }
