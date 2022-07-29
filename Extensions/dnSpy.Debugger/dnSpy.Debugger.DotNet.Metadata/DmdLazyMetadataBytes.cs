@@ -151,6 +151,7 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 			Dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
 		}
 	}
+
 	/// <summary>
 	/// No metadata
 	/// </summary>
