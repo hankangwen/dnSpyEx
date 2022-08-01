@@ -464,6 +464,21 @@ namespace dnSpy.Decompiler {
 			}
 			return false;
 		}
+
+		public static bool HasDynamicAttribute(IHasCustomAttribute? attributeProvider, int typeIndex) {
+			if (attributeProvider is null)
+				return false;
+			foreach (var a in attributeProvider.CustomAttributes) {
+				if (a.AttributeType?.FullName != "System.Runtime.CompilerServices.DynamicAttribute")
+					continue;
+				if (a.ConstructorArguments.Count == 0)
+					return true;
+				if (a.ConstructorArguments.Count == 1 && a.ConstructorArguments[0].Value is IList<CAArgument> values && typeIndex < values.Count &&
+					values[typeIndex].Value is bool b)
+					return b;
+			}
+			return false;
+		}
 	}
 
 	enum AccessorKind {
