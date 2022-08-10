@@ -134,6 +134,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 			output.WriteLine();
 
 			il.WriteTo(output, new ILAstWritingOptions());
+
+			EndKeywordBlock(output, bodyInfo, CodeBracesRangeFlags.MethodBraces, true);
 		}
 
 		struct BraceInfo {
