@@ -79,7 +79,7 @@ namespace dnSpy.Contracts.Decompiler {
 			Scope = new MethodDebugScopeBuilder();
 			Scope.Span = ILSpan.FromBounds(0, (uint)method.Body.GetCodeSize());
 			if (method == kickoffMethod)
-				throw new ArgumentException();
+				throw new ArgumentException("Method and kickoffMethod must be different");
 		}
 
 		/// <summary>

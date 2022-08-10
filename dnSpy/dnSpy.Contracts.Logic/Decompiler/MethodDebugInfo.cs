@@ -104,6 +104,7 @@ namespace dnSpy.Contracts.Decompiler {
 			if (statements.Length > 1)
 				Array.Sort(statements, SourceStatement.SpanStartComparer);
 			DecompilerSettingsVersion = decompilerSettingsVersion;
+			StateMachineKind = stateMachineKind;
 			Statements = statements;
 			Scope = scope ?? throw new ArgumentNullException(nameof(scope));
 			Span = methodSpan ?? CalculateMethodSpan(statements) ?? new TextSpan(0, 0);
