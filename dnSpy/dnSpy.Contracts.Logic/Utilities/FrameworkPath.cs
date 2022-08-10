@@ -22,7 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace dnSpy.Documents {
+namespace dnSpy.Contracts.Utilities {
 	// It's a class since very few of these are created
 	[DebuggerDisplay("{Bitness,d}-bit {Version,nq} {DebuggerPaths,nq}")]
 	sealed class FrameworkPaths : IComparable<FrameworkPaths> {
@@ -30,10 +30,11 @@ namespace dnSpy.Documents {
 		public readonly int Bitness;
 		public readonly FrameworkVersion Version;
 		public readonly Version SystemVersion;
+		public readonly bool IsReferencePath;
 
 		string DebuggerPaths => string.Join(Path.PathSeparator.ToString(), Paths);
 
-		public FrameworkPaths(FrameworkPath[] paths) {
+		public FrameworkPaths(FrameworkPath[] paths, bool isRef) {
 			var firstPath = paths[0];
 #if DEBUG
 			for (int i = 1; i < paths.Length; i++) {
@@ -52,9 +53,10 @@ namespace dnSpy.Documents {
 			Bitness = firstPath.Bitness;
 			Version = firstPath.Version;
 			SystemVersion = new Version(firstPath.Version.Major, firstPath.Version.Minor, firstPath.Version.Patch, 0);
+			IsReferencePath = isRef;
 
 			foreach (var p in Paths) {
-				if (StringComparer.OrdinalIgnoreCase.Equals(Path.GetFileName(Path.GetDirectoryName(p)), DotNetAppDir)) {
+				if (StringComparer.OrdinalIgnoreCase.Equals(Path.GetFileName(Path.GetDirectoryName(p)), IsReferencePath ? DotNetAppRefDir : DotNetAppDir)) {
 					HasDotNetAppPath = true;
 					break;
 				}
@@ -67,18 +69,17 @@ namespace dnSpy.Documents {
 		// There are other dupe assemblies, eg. Microsoft.Win32.Registry.dll exists both in
 		// Microsoft.NETCore.App and Microsoft.WindowsDesktop.App.
 		const string DotNetAppDir = "Microsoft.NETCore.App";
-		static int SortPaths(string x, string y) {
+		const string DotNetAppRefDir = "Microsoft.NETCore.App.Ref";
+		int SortPaths(string x, string y) {
 			int c = GetPathGroupOrder(x) - GetPathGroupOrder(y);
-			if (c != 0)
-				return c;
-			return StringComparer.OrdinalIgnoreCase.Compare(x, y);
+			return c != 0 ? c : StringComparer.OrdinalIgnoreCase.Compare(x, y);
 		}
 
-		static int GetPathGroupOrder(string path) {
-			if (StringComparer.OrdinalIgnoreCase.Equals(Path.GetFileName(Path.GetDirectoryName(path)), DotNetAppDir))
-				return int.MaxValue;
-			return 0;
-		}
+		int GetPathGroupOrder(string path) =>
+			StringComparer.OrdinalIgnoreCase.Equals(Path.GetFileName(Path.GetDirectoryName(path)),
+				IsReferencePath ? DotNetAppRefDir : DotNetAppDir)
+				? int.MaxValue
+				: 0;
 
 		public int CompareTo(FrameworkPaths? other) {
 			if (other is null)

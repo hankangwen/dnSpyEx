@@ -27,11 +27,18 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-namespace dnSpy.Documents {
-	sealed class DotNetPathProvider {
-		readonly FrameworkPaths[] netPaths;
+namespace dnSpy.Contracts.Utilities {
+	/// <summary>
+	/// Locates .NET Core instalation directories
+	/// </summary>
+	public sealed class DotNetPathProvider {
+		readonly FrameworkPaths[] netPathsShared;
+		readonly FrameworkPaths[] netPathsRef;
 
-		public bool HasDotNet => netPaths.Length != 0;
+		/// <summary>
+		/// Returns true if .NET Core was found on the system, false otherwise.
+		/// </summary>
+		public bool HasDotNet => netPathsShared.Length != 0;
 
 		readonly struct DotNetPathInfo {
 			public readonly string Directory;
@@ -62,48 +69,86 @@ namespace dnSpy.Documents {
 			public override int GetHashCode() => version.Major ^ version.Minor ^ version.Patch ^ (version.Extra.Length == 0 ? 0 : -1);
 		}
 
+		/// <summary>
+		/// Constructor
+		/// </summary>
 		public DotNetPathProvider() {
-			var list = new List<FrameworkPath>();
-			foreach (var info in GetDotNetBaseDirs())
-				list.AddRange(GetDotNetPaths(info.Directory, info.Bitness));
+			var sharedPaths = new List<FrameworkPath>();
+			var refPaths = new List<FrameworkPath>();
+			foreach (var info in GetDotNetBaseDirs()) {
+				sharedPaths.AddRange(GetDotNetPathsShared(info.Directory, info.Bitness));
+				refPaths.AddRange(GetDotNetPathsRef(info.Directory, info.Bitness));
+			}
 
+			netPathsShared = CreateAndSortFrameworkPaths(sharedPaths, false);
+			netPathsRef = CreateAndSortFrameworkPaths(refPaths, true);
+		}
+
+		static FrameworkPaths[] CreateAndSortFrameworkPaths(IEnumerable<FrameworkPath> list, bool isRef) {
 			var paths = from p in list
 						group p by new { Path = (Path.GetDirectoryName(Path.GetDirectoryName(p.Path)) ?? string.Empty).ToUpperInvariant(), p.Bitness, Version = new FrameworkVersionIgnoreExtra(p.Version) } into g
 						where !string.IsNullOrEmpty(g.Key.Path)
-						select new FrameworkPaths(g.ToArray());
+						select new FrameworkPaths(g.ToArray(), isRef);
 			var array = paths.ToArray();
 			Array.Sort(array);
-			netPaths = array;
+			return array;
 		}
 
-		public string[]? TryGetDotNetPaths(Version version, int bitness) {
+		/// <summary>
+		/// Returns the .NET Core installation directories found on the system.
+		/// </summary>
+		/// <param name="version">Preferred .NET Core version</param>
+		/// <param name="bitness">Preferred bitness</param>
+		/// <returns>.NET Core installation directories, null if not found</returns>
+		public string[]? TryGetSharedDotNetPaths(Version version, int bitness) {
 			Debug.Assert(bitness == 32 || bitness == 64);
 			int bitness2 = bitness ^ 0x60;
-			FrameworkPaths? info;
 
-			info = TryGetDotNetPathsCore(version.Major, version.Minor, bitness) ??
-				TryGetDotNetPathsCore(version.Major, version.Minor, bitness2);
+			var info = TryGetDotNetPathsCore(version.Major, version.Minor, bitness, netPathsShared) ??
+					   TryGetDotNetPathsCore(version.Major, version.Minor, bitness2, netPathsShared);
 			if (info is not null)
 				return info.Paths;
 
-			info = TryGetDotNetPathsCore(version.Major, bitness) ??
-				TryGetDotNetPathsCore(version.Major, bitness2);
+			info = TryGetDotNetPathsCore(version.Major, bitness, netPathsShared) ??
+				TryGetDotNetPathsCore(version.Major, bitness2, netPathsShared);
 			if (info is not null)
 				return info.Paths;
 
-			info = TryGetDotNetPathsCore(bitness) ??
-				TryGetDotNetPathsCore(bitness2);
-			if (info is not null)
-				return info.Paths;
-
-			return null;
+			info = TryGetDotNetPathsCore(bitness, netPathsShared) ??
+				TryGetDotNetPathsCore(bitness2, netPathsShared);
+			return info?.Paths;
 		}
 
-		FrameworkPaths? TryGetDotNetPathsCore(int major, int minor, int bitness) {
+		/// <summary>
+		/// Returns the .NET Core installation directories found on the system.
+		/// </summary>
+		/// <param name="version">Preferred .NET Core version</param>
+		/// <param name="bitness">Preferred bitness</param>
+		/// <returns>.NET Core installation directories, null if not found</returns>
+		public string[]? TryGetReferenceDotNetPaths(Version version, int bitness) {
+			Debug.Assert(bitness == 32 || bitness == 64);
+			int bitness2 = bitness ^ 0x60;
+
+			var info = TryGetDotNetPathsCore(version.Major, version.Minor, bitness, netPathsRef) ??
+					   TryGetDotNetPathsCore(version.Major, version.Minor, bitness2, netPathsRef);
+			if (info is not null)
+				return info.Paths;
+
+			info = TryGetDotNetPathsCore(version.Major, bitness, netPathsRef) ??
+				   TryGetDotNetPathsCore(version.Major, bitness2, netPathsRef);
+			if (info is not null)
+				return info.Paths;
+
+			info = TryGetDotNetPathsCore(bitness, netPathsRef) ??
+				   TryGetDotNetPathsCore(bitness2, netPathsRef);
+			return info?.Paths;
+		}
+
+		static FrameworkPaths? TryGetDotNetPathsCore(int major, int minor, int bitness, FrameworkPaths[] pathsArray) {
 			FrameworkPaths? fpMajor = null;
 			FrameworkPaths? fpMajorMinor = null;
-			for (int i = netPaths.Length - 1; i >= 0; i--) {
-				var info = netPaths[i];
+			for (int i = pathsArray.Length - 1; i >= 0; i--) {
+				var info = pathsArray[i];
 				if (info.Bitness == bitness && info.Version.Major == major) {
 					if (fpMajor is null)
 						fpMajor = info;
@@ -112,8 +157,7 @@ namespace dnSpy.Documents {
 					if (info.Version.Minor == minor) {
 						if (info.HasDotNetAppPath)
 							return info;
-						if (fpMajorMinor is null)
-							fpMajorMinor = info;
+						fpMajorMinor ??= info;
 					}
 				}
 			}
@@ -129,9 +173,7 @@ namespace dnSpy.Documents {
 				return b;
 			if (!string.IsNullOrEmpty(b.Version.Extra))
 				return a;
-			if (!string.IsNullOrEmpty(a.Version.Extra))
-				return b;
-			return a;
+			return string.IsNullOrEmpty(a.Version.Extra) ? a : b;
 		}
 
 		// Any ver < minVer is worse than any ver >= minVer
@@ -141,29 +183,27 @@ namespace dnSpy.Documents {
 			return 0x80000000 + (uint)minVer - (uint)ver - 1;
 		}
 
-		FrameworkPaths? TryGetDotNetPathsCore(int major, int bitness) {
+		static FrameworkPaths? TryGetDotNetPathsCore(int major, int bitness, FrameworkPaths[] pathsArray) {
 			FrameworkPaths? fpMajor = null;
-			for (int i = netPaths.Length - 1; i >= 0; i--) {
-				var info = netPaths[i];
+			for (int i = pathsArray.Length - 1; i >= 0; i--) {
+				var info = pathsArray[i];
 				if (info.Bitness == bitness && info.Version.Major == major) {
 					if (info.HasDotNetAppPath)
 						return info;
-					if (fpMajor is null)
-						fpMajor = info;
+					fpMajor ??= info;
 				}
 			}
 			return fpMajor;
 		}
 
-		FrameworkPaths? TryGetDotNetPathsCore(int bitness) {
+		static FrameworkPaths? TryGetDotNetPathsCore(int bitness, FrameworkPaths[] pathsArray) {
 			FrameworkPaths? best = null;
-			for (int i = netPaths.Length - 1; i >= 0; i--) {
-				var info = netPaths[i];
+			for (int i = pathsArray.Length - 1; i >= 0; i--) {
+				var info = pathsArray[i];
 				if (info.Bitness == bitness) {
 					if (info.HasDotNetAppPath)
 						return info;
-					if (best is null)
-						best = info;
+					best ??= info;
 				}
 			}
 			return best;
@@ -215,7 +255,7 @@ namespace dnSpy.Documents {
 		static IEnumerable<string> GetDotNetBaseDirCandidates() {
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
 				// Microsoft tools don't check the PATH env var, only the default locations (eg. ProgramFiles)
-				var envVars = new string[] {
+				var envVars = new[] {
 					"PATH",
 					"DOTNET_ROOT(x86)",
 					"DOTNET_ROOT",
@@ -274,7 +314,7 @@ namespace dnSpy.Documents {
 			}
 		}
 
-		static IEnumerable<FrameworkPath> GetDotNetPaths(string basePath, int bitness) {
+		static IEnumerable<FrameworkPath> GetDotNetPathsShared(string basePath, int bitness) {
 			if (!Directory.Exists(basePath))
 				yield break;
 			var sharedDir = Path.Combine(basePath, "shared");
@@ -283,21 +323,47 @@ namespace dnSpy.Documents {
 			// Known dirs: Microsoft.NETCore.App, Microsoft.WindowsDesktop.App, Microsoft.AspNetCore.All, Microsoft.AspNetCore.App
 			foreach (var versionsDir in GetDirectories(sharedDir)) {
 				foreach (var dir in GetDirectories(versionsDir)) {
-					var name = Path.GetFileName(dir);
-					var m = Regex.Match(name, @"^(\d+)\.(\d+)\.(\d+)$");
-					if (m.Groups.Count == 4) {
-						var g = m.Groups;
-						yield return new FrameworkPath(dir, bitness, ToFrameworkVersion(g[1].Value, g[2].Value, g[3].Value, string.Empty));
-					}
-					else {
-						m = Regex.Match(name, @"^(\d+)\.(\d+)\.(\d+)-(.*)$");
-						if (m.Groups.Count == 5) {
-							var g = m.Groups;
-							yield return new FrameworkPath(dir, bitness, ToFrameworkVersion(g[1].Value, g[2].Value, g[3].Value, g[4].Value));
-						}
-					}
+					var frameWorkPath = CreateFrameworkPath(dir, bitness);
+					if (frameWorkPath is not null)
+						yield return frameWorkPath;
 				}
 			}
+		}
+
+		static IEnumerable<FrameworkPath> GetDotNetPathsRef(string basePath, int bitness) {
+			if (!Directory.Exists(basePath))
+				yield break;
+			var packsDir = Path.Combine(basePath, "packs");
+			if (!Directory.Exists(packsDir))
+				yield break;
+			// Known dirs: Microsoft.NETCore.App.Ref, Microsoft.WindowsDesktop.App.Ref, Microsoft.AspNetCore.App.Ref
+			foreach (var packDirs in GetDirectories(packsDir)) {
+				// Exclude app host packs
+				if (!packDirs.EndsWith(".Ref", StringComparison.Ordinal))
+					continue;
+				foreach (var versionDir in GetDirectories(packDirs)) {
+					var frameWorkPath = CreateFrameworkPath(versionDir, bitness);
+					if (frameWorkPath is not null)
+						yield return frameWorkPath;
+				}
+			}
+		}
+
+		static FrameworkPath? CreateFrameworkPath(string dir, int bitness) {
+			var name = Path.GetFileName(dir);
+			var m = Regex.Match(name, @"^(\d+)\.(\d+)\.(\d+)$");
+			if (m.Groups.Count == 4) {
+				var g = m.Groups;
+				return new FrameworkPath(dir, bitness, ToFrameworkVersion(g[1].Value, g[2].Value, g[3].Value, string.Empty));
+			}
+
+			m = Regex.Match(name, @"^(\d+)\.(\d+)\.(\d+)-(.*)$");
+			if (m.Groups.Count == 5) {
+				var g = m.Groups;
+				return new FrameworkPath(dir, bitness, ToFrameworkVersion(g[1].Value, g[2].Value, g[3].Value, g[4].Value));
+			}
+
+			return null;
 		}
 
 		static int ParseInt32(string s) => int.TryParse(s, out var res) ? res : 0;
@@ -324,18 +390,23 @@ namespace dnSpy.Documents {
 					return -1;
 				f.Position += 0x14;
 				ushort magic = r.ReadUInt16();
-				if (magic == 0x10B)
-					return 32;
-				if (magic == 0x20B)
-					return 64;
-				return -1;
+				return magic switch {
+					0x10B => 32,
+					0x20B => 64,
+					_ => -1
+				};
 			}
 		}
 
+		/// <summary>
+		/// Gets the .NET Core version of the specified runtime assembly.
+		/// </summary>
+		/// <param name="filename">Path to the runtime assembly</param>
+		/// <returns>.NET Core version, null if not found</returns>
 		public Version? TryGetDotNetVersion(string filename) {
-			foreach (var info in netPaths) {
+			foreach (var info in netPathsShared) {
 				foreach (var path in info.Paths) {
-					if (FileUtils.IsFileInDir(path, filename))
+					if (IsFileInDir(path, filename))
 						return info.SystemVersion;
 				}
 			}
@@ -343,6 +414,29 @@ namespace dnSpy.Documents {
 			return null;
 		}
 
+		static bool IsFileInDir(string dir, string file) {
+			Debug.Assert(dir.Length != 0);
+			if (dir.Length >= file.Length)
+				return false;
+			var c = file[dir.Length];
+			if (c != Path.DirectorySeparatorChar && c != Path.AltDirectorySeparatorChar)
+				return false;
+			if (!file.StartsWith(dir, StringComparison.OrdinalIgnoreCase))
+				return false;
+			return file.IndexOfAny(dirSeps, dir.Length + 1) < 0;
+		}
+
+		static readonly char[] dirSeps = Path.DirectorySeparatorChar == Path.AltDirectorySeparatorChar ?
+			new[] { Path.DirectorySeparatorChar } :
+			new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+
+		/// <summary>
+		/// Gets the latest compatible .NET Core version for the specified .NET Standard version
+		/// </summary>
+		/// <param name="netStandardVersion">.NET Standard version</param>
+		/// <param name="netCoreVersion">Latest compatible .NET Core version</param>
+		/// <returns>false if a compatible .NET Standard version could not be found, false otherwise.</returns>
 		public bool TryGetLatestNetStandardCompatibleVersion(Version netStandardVersion, out Version? netCoreVersion) {
 			netCoreVersion = null;
 
@@ -350,7 +444,7 @@ namespace dnSpy.Documents {
 				return false;
 
 			bool foundMatch = false;
-			foreach (var info in netPaths) {
+			foreach (var info in netPathsShared) {
 				if (info.IsCompatibleWithNetStandard(netStandardVersion) &&
 					(netCoreVersion is null || info.SystemVersion > netCoreVersion)) {
 					foundMatch = true;

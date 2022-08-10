@@ -680,7 +680,7 @@ namespace dnSpy.Documents {
 			string[]? dotNetPaths;
 			if (dotNetCoreAppVersion is not null) {
 				int bitness = (sourceModule?.GetPointerSize(IntPtr.Size) ?? IntPtr.Size) * 8;
-				dotNetPaths = dotNetPathProvider.TryGetDotNetPaths(dotNetCoreAppVersion, bitness);
+				dotNetPaths = dotNetPathProvider.TryGetSharedDotNetPaths(dotNetCoreAppVersion, bitness);
 			}
 			else
 				dotNetPaths = null;
