@@ -33,10 +33,10 @@ namespace dnSpy.AsmEditor.MethodBody {
 				return null;
 			if (context.CreatorObject.Guid != new Guid(MenuConstants.GUIDOBJ_DOCUMENTVIEWERCONTROL_GUID))
 				return null;
-			var documentViewer = context.Find<IDocumentViewer>();
+			var documentViewer = context.Find<IDocumentViewer?>();
 			if (documentViewer is null)
 				return null;
-			var pos = context.Find<TextEditorPosition>();
+			var pos = context.Find<TextEditorPosition?>();
 			if (pos is null)
 				return null;
 			return GetStatements(documentViewer, pos.Position, options);
@@ -51,9 +51,7 @@ namespace dnSpy.AsmEditor.MethodBody {
 		}
 
 		public static uint[]? GetInstructionOffsets(MethodDef? method, IList<MethodSourceStatement> list) {
-			if (method is null)
-				return null;
-			var body = method.Body;
+			var body = method?.Body;
 			if (body is null)
 				return null;
 
