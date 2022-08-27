@@ -18,6 +18,7 @@
 */
 
 using System.ComponentModel.Composition;
+using System.Text;
 using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Text;
@@ -30,7 +31,7 @@ namespace dnSpy.Decompiler.ILSpy.IL {
 		double ISimpleILPrinter.Order => -100;
 
 		bool ISimpleILPrinter.Write(IDecompilerOutput output, IMemberRef? member) => ILDecompilerUtils.Write(output, member);
-		void ISimpleILPrinter.Write(IDecompilerOutput output, MethodSig? sig) => output.Write(sig);
-		void ISimpleILPrinter.Write(IDecompilerOutput output, TypeSig? type) => type.WriteTo(output);
+		void ISimpleILPrinter.Write(IDecompilerOutput output, MethodSig? sig) => output.Write(new StringBuilder(), sig);
+		void ISimpleILPrinter.Write(IDecompilerOutput output, TypeSig? type) => type.WriteTo(output, new StringBuilder());
 	}
 }

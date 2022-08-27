@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System.Text;
 using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
 using ICSharpCode.Decompiler.Disassembler;
@@ -25,12 +26,12 @@ namespace dnSpy.Decompiler.ILSpy.Core.IL {
 	static class ILDecompilerUtils {
 		public static bool Write(IDecompilerOutput output, IMemberRef? member) {
 			if (member is IMethod method && method.IsMethod) {
-				method.WriteMethodTo(output);
+				method.WriteMethodTo(output, new StringBuilder());
 				return true;
 			}
 
 			if (member is IField field && field.IsField) {
-				field.WriteFieldTo(output);
+				field.WriteFieldTo(output, new StringBuilder());
 				return true;
 			}
 
@@ -47,7 +48,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.IL {
 			}
 
 			if (member is ITypeDefOrRef type) {
-				type.WriteTo(output, ILNameSyntax.TypeName);
+				type.WriteTo(output, new StringBuilder(), ILNameSyntax.TypeName);
 				return true;
 			}
 
