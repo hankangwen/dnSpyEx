@@ -49,11 +49,29 @@ namespace dnSpy.AsmEditor.Event {
 			evt.Attributes = Attributes;
 			evt.Name = Name ?? UTF8String.Empty;
 			evt.EventType = EventType;
+
+			evt.AddMethod.SemanticsAttributes = 0;
+			if (AddMethod is not null)
+				AddMethod.SemanticsAttributes = MethodSemanticsAttributes.AddOn;
 			evt.AddMethod = AddMethod;
+
+			evt.InvokeMethod.SemanticsAttributes = 0;
+			if (InvokeMethod is not null)
+				InvokeMethod.SemanticsAttributes = MethodSemanticsAttributes.Fire;
 			evt.InvokeMethod = InvokeMethod;
+
+			evt.RemoveMethod.SemanticsAttributes = 0;
+			if (RemoveMethod is not null)
+				RemoveMethod.SemanticsAttributes = MethodSemanticsAttributes.RemoveOn;
 			evt.RemoveMethod = RemoveMethod;
+
+			foreach (var otherMethod in evt.OtherMethods)
+				otherMethod.SemanticsAttributes = 0;
+			foreach (var otherMethod in OtherMethods)
+				otherMethod.SemanticsAttributes = MethodSemanticsAttributes.Other;
 			evt.OtherMethods.Clear();
 			evt.OtherMethods.AddRange(OtherMethods);
+
 			evt.CustomAttributes.Clear();
 			evt.CustomAttributes.AddRange(CustomAttributes);
 			return evt;
