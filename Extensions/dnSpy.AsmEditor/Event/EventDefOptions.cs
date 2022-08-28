@@ -52,23 +52,23 @@ namespace dnSpy.AsmEditor.Event {
 
 			evt.AddMethod.SemanticsAttributes = 0;
 			if (AddMethod is not null)
-				AddMethod.SemanticsAttributes = MethodSemanticsAttributes.AddOn;
+				AddMethod.SemanticsAttributes |= MethodSemanticsAttributes.AddOn;
 			evt.AddMethod = AddMethod;
 
 			evt.InvokeMethod.SemanticsAttributes = 0;
 			if (InvokeMethod is not null)
-				InvokeMethod.SemanticsAttributes = MethodSemanticsAttributes.Fire;
+				InvokeMethod.SemanticsAttributes |= MethodSemanticsAttributes.Fire;
 			evt.InvokeMethod = InvokeMethod;
 
 			evt.RemoveMethod.SemanticsAttributes = 0;
 			if (RemoveMethod is not null)
-				RemoveMethod.SemanticsAttributes = MethodSemanticsAttributes.RemoveOn;
+				RemoveMethod.SemanticsAttributes |= MethodSemanticsAttributes.RemoveOn;
 			evt.RemoveMethod = RemoveMethod;
 
 			foreach (var otherMethod in evt.OtherMethods)
 				otherMethod.SemanticsAttributes = 0;
 			foreach (var otherMethod in OtherMethods)
-				otherMethod.SemanticsAttributes = MethodSemanticsAttributes.Other;
+				otherMethod.SemanticsAttributes |= MethodSemanticsAttributes.Other;
 			evt.OtherMethods.Clear();
 			evt.OtherMethods.AddRange(OtherMethods);
 

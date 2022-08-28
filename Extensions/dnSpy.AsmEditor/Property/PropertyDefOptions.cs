@@ -51,17 +51,17 @@ namespace dnSpy.AsmEditor.Property {
 			prop.PropertySig = PropertySig;
 			prop.Constant = Constant;
 
-			UpdateSemanticsAttributes(prop.GetMethods, MethodSemanticsAttributes.None);
+			ResetSemanticsAttributes(prop.GetMethods);
 			UpdateSemanticsAttributes(GetMethods, MethodSemanticsAttributes.Getter);
 			prop.GetMethods.Clear();
 			prop.GetMethods.AddRange(GetMethods);
 
-			UpdateSemanticsAttributes(prop.SetMethods, MethodSemanticsAttributes.None);
+			ResetSemanticsAttributes(prop.SetMethods);
 			UpdateSemanticsAttributes(SetMethods, MethodSemanticsAttributes.Setter);
 			prop.SetMethods.Clear();
 			prop.SetMethods.AddRange(SetMethods);
 
-			UpdateSemanticsAttributes(prop.OtherMethods, MethodSemanticsAttributes.None);
+			ResetSemanticsAttributes(prop.OtherMethods);
 			UpdateSemanticsAttributes(OtherMethods, MethodSemanticsAttributes.Other);
 			prop.OtherMethods.Clear();
 			prop.OtherMethods.AddRange(OtherMethods);
@@ -71,9 +71,14 @@ namespace dnSpy.AsmEditor.Property {
 			return prop;
 		}
 
+		static void ResetSemanticsAttributes(IEnumerable<MethodDef> methods) {
+			foreach (var methodDef in methods)
+				methodDef.SemanticsAttributes = 0;
+		}
+
 		static void UpdateSemanticsAttributes(IEnumerable<MethodDef> methods, MethodSemanticsAttributes attribute) {
 			foreach (var methodDef in methods)
-				methodDef.SemanticsAttributes = attribute;
+				methodDef.SemanticsAttributes |= attribute;
 		}
 
 		public PropertyDef CreatePropertyDef(ModuleDef ownerModule) => ownerModule.UpdateRowId(CopyTo(new PropertyDefUser()));
