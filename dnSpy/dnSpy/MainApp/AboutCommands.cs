@@ -26,7 +26,6 @@ using dnSpy.Properties;
 namespace dnSpy.MainApp {
 	static class AboutHelpers {
 		public const string BASE_URL = @"https://github.com/dnSpyEx/dnSpy/";
-		public const string BUILD_URL = @"https://github.com/dnSpyEx/dnSpy/actions";
 
 		public static void OpenWebPage(string url, IMessageBoxService messageBoxService) {
 			try {
@@ -57,10 +56,10 @@ namespace dnSpy.MainApp {
 		OpenLatestBuildUrlCommand(IMessageBoxService messageBoxService) => this.messageBoxService = messageBoxService;
 
 		public override void Execute(IMenuItemContext context) =>
-			AboutHelpers.OpenWebPage(AboutHelpers.BUILD_URL, messageBoxService);
+			AboutHelpers.OpenWebPage(AboutHelpers.BASE_URL + @"actions", messageBoxService);
 	}
 
-	//[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_HELP_GUID, Header = "res:About_Issues", Group = MenuConstants.GROUP_APP_MENU_HELP_LINKS, Order = 20)]
+	[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_HELP_GUID, Header = "res:About_Issues", Group = MenuConstants.GROUP_APP_MENU_HELP_LINKS, Order = 20)]
 	sealed class OpenIssuesUrlCommand : MenuItemBase {
 		readonly IMessageBoxService messageBoxService;
 
@@ -71,7 +70,7 @@ namespace dnSpy.MainApp {
 			AboutHelpers.OpenWebPage(AboutHelpers.BASE_URL + @"issues", messageBoxService);
 	}
 
-	//[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_HELP_GUID, Header = "res:About_Wiki", Group = MenuConstants.GROUP_APP_MENU_HELP_LINKS, Order = 30)]
+	[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_HELP_GUID, Header = "res:About_Wiki", Group = MenuConstants.GROUP_APP_MENU_HELP_LINKS, Order = 30)]
 	sealed class OpenWikiUrlCommand : MenuItemBase {
 		readonly IMessageBoxService messageBoxService;
 
@@ -82,7 +81,7 @@ namespace dnSpy.MainApp {
 			AboutHelpers.OpenWebPage(AboutHelpers.BASE_URL + @"wiki", messageBoxService);
 	}
 
-	//[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_HELP_GUID, Header = "res:About_SourceCode", Group = MenuConstants.GROUP_APP_MENU_HELP_LINKS, Order = 40)]
+	[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_HELP_GUID, Header = "res:About_SourceCode", Group = MenuConstants.GROUP_APP_MENU_HELP_LINKS, Order = 40)]
 	sealed class OpenSourceCodeUrlCommand : MenuItemBase {
 		readonly IMessageBoxService messageBoxService;
 
