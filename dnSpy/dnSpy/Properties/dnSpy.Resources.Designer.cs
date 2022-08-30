@@ -2009,6 +2009,15 @@ namespace dnSpy.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Use SDK style project format.
+        /// </summary>
+        public static string ExportToProject_UseSDKStyleProjectFormat {
+            get {
+                return ResourceManager.GetString("ExportToProject_UseSDKStyleProjectFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Export to Pro_ject....
         /// </summary>
         public static string ExportToProjectCommand {

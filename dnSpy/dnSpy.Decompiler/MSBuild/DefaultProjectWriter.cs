@@ -19,31 +19,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using dnlib.DotNet;
-using dnlib.PE;
 using dnSpy.Contracts.Decompiler;
-using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.Decompiler.MSBuild {
-	sealed class ProjectWriter {
-		readonly Project project;
-		readonly ProjectVersion projectVersion;
-		readonly IList<Project> allProjects;
-		readonly IList<string> userGACPaths;
+	sealed class DefaultProjectWriter : ProjectWriterBase {
+		public DefaultProjectWriter(Project project, ProjectVersion projectVersion, IList<Project> allProjects,
+			IList<string> userGACPaths) : base(project, projectVersion, allProjects, userGACPaths) { }
 
-		public ProjectWriter(Project project, ProjectVersion projectVersion, IList<Project> allProjects, IList<string> userGACPaths) {
-			this.project = project;
-			this.projectVersion = projectVersion;
-			this.allProjects = allProjects;
-			this.userGACPaths = userGACPaths;
-		}
-
-		public void Write() {
+		public override void Write() {
 			project.OnWrite();
 			var settings = new XmlWriterSettings {
 				Encoding = Encoding.UTF8,
@@ -225,17 +212,6 @@ namespace dnSpy.Decompiler.MSBuild {
 			}
 		}
 
-		static string GetRelativePath(string sourceDir, string destFile) {
-			var s = FilenameUtils.GetRelativePath(sourceDir, destFile);
-			if (Path.DirectorySeparatorChar != '\\')
-				s = s.Replace(Path.DirectorySeparatorChar, '\\');
-			if (Path.AltDirectorySeparatorChar != '\\')
-				s = s.Replace(Path.AltDirectorySeparatorChar, '\\');
-			return s;
-		}
-
-		string GetRelativePath(string filename) => GetRelativePath(project.Directory, filename);
-
 		void Write(XmlWriter writer, BuildAction buildAction) {
 			var files = project.Files.Where(a => a.BuildAction == buildAction).OrderBy(a => a.Filename, StringComparer.OrdinalIgnoreCase).ToArray();
 			if (files.Length == 0)
@@ -265,19 +241,6 @@ namespace dnSpy.Decompiler.MSBuild {
 			writer.WriteEndElement();
 		}
 
-		static string ToString(BuildAction buildAction) {
-			switch (buildAction) {
-			case BuildAction.None:					return "None";
-			case BuildAction.Compile:				return "Compile";
-			case BuildAction.EmbeddedResource:		return "EmbeddedResource";
-			case BuildAction.ApplicationDefinition:	return "ApplicationDefinition";
-			case BuildAction.Page:					return "Page";
-			case BuildAction.Resource:				return "Resource";
-			case BuildAction.SplashScreen:			return "SplashScreen";
-			default: throw new InvalidOperationException();
-			}
-		}
-
 		string? GetToolsVersion() {
 			switch (projectVersion) {
 			case ProjectVersion.VS2005: return null;
@@ -290,53 +253,6 @@ namespace dnSpy.Decompiler.MSBuild {
 			case ProjectVersion.VS2019: return "15.0";
 			case ProjectVersion.VS2022: return "15.0";
 			default: throw new InvalidOperationException();
-			}
-		}
-
-		string GetPlatformString() {
-			var machine = project.Module.Machine;
-			if (machine.IsI386()) {
-				int c = (project.Module.Is32BitRequired ? 2 : 0) + (project.Module.Is32BitPreferred ? 1 : 0);
-				switch (c) {
-				case 0: // no special meaning, MachineType and ILONLY flag determine image requirements
-					if (!project.Module.IsILOnly)
-						return "x86";
-					return "AnyCPU";
-				case 1: // illegal, reserved for future use
-					break;
-				case 2: // image is x86-specific
-					return "x86";
-				case 3: // image is project.Platform neutral and prefers to be loaded 32-bit when possible
-					return "AnyCPU";
-				}
-				return "AnyCPU";
-			}
-			else if (machine.IsAMD64())
-				return "x64";
-			else if (machine == Machine.IA64)
-				return "Itanium";
-			else if (machine.IsARMNT())
-				return "ARM";
-			else if (machine.IsARM64())
-				return "ARM64";
-			else {
-				Debug.Fail("Unknown machine");
-				return machine.ToString();
-			}
-		}
-
-		string GetOutputType() {
-			if (project.Module.IsWinMD)
-				return "WinMDObj";
-			switch (project.Module.Kind) {
-			case ModuleKind.Console:	return "Exe";
-			case ModuleKind.Windows:	return "WinExe";
-			case ModuleKind.Dll:		return "Library";
-			case ModuleKind.NetModule:	return "Module";
-
-			default:
-				Debug.Fail("Unknown module kind: " + project.Module.Kind);
-				return "Library";
 			}
 		}
 
@@ -354,20 +270,6 @@ namespace dnSpy.Decompiler.MSBuild {
 			return null;
 		}
 
-		string GetRootNamespace() {
-			if (!string.IsNullOrEmpty(project.DefaultNamespace))
-				return project.DefaultNamespace;
-			return GetAssemblyName();
-		}
-
-		string GetAssemblyName() => project.AssemblyName;
-
-		string GetFileAlignment() {
-			if (project.Module is ModuleDefMD mod)
-				return mod.Metadata.PEImage.ImageNTHeaders.OptionalHeader.FileAlignment.ToString();
-			return "512";
-		}
-
 		string GetLanguageTargets() {
 			if (project.Options.Decompiler.GenericGuid == DecompilerConstants.LANGUAGE_CSHARP)
 				return @"$(MSBuildToolsPath)\Microsoft.CSharp.targets";
@@ -375,33 +277,5 @@ namespace dnSpy.Decompiler.MSBuild {
 				return @"$(MSBuildToolsPath)\Microsoft.VisualBasic.targets";
 			return @"$(MSBuildToolsPath)\Microsoft.CSharp.targets";
 		}
-
-		string? GetHintPath(AssemblyDef? asm) {
-			if (asm is null)
-				return null;
-			if (IsGacPath(asm.ManifestModule.Location))
-				return null;
-			if (ExistsInProject(asm.ManifestModule.Location))
-				return null;
-
-			return GetRelativePath(asm.ManifestModule.Location);
-		}
-
-		bool IsGacPath(string file) => GacInfo.IsGacPath(file) || IsUserGacPath(file);
-
-		bool IsUserGacPath(string file) {
-			file = file.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-			foreach (var dir in userGACPaths) {
-				if (file.StartsWith(dir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-					return true;
-			}
-			return false;
-		}
-
-		bool ExistsInProject(string filename) => FindOtherProject(filename) is not null;
-		bool AssemblyExistsInProject(string asmSimpleName) =>
-			allProjects.Any(a => StringComparer.OrdinalIgnoreCase.Equals(a.AssemblyName, asmSimpleName));
-		Project? FindOtherProject(string filename) =>
-			allProjects.FirstOrDefault(f => StringComparer.OrdinalIgnoreCase.Equals(Path.GetFullPath(f.Module.Location), Path.GetFullPath(filename)));
 	}
 }

@@ -789,6 +789,9 @@
   <data name="ExportToProject_Language" xml:space="preserve">
     <value>_Language</value>
   </data>
+  <data name="ExportToProject_UseSDKStyleProjectFormat" xml:space="preserve">
+    <value>_Use SDK style project format</value>
+  </data>
   <data name="ExportToProject_OpenProjectInVisualStudio" xml:space="preserve">
     <value>_Open project in Visual Studio</value>
   </data>
