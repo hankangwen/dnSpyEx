@@ -164,12 +164,12 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 			}
 			return methods?.ToArray() ?? Array.Empty<DmdMethodInfo>();
 		}
-
-		public sealed override DmdFieldInfo? GetField(string name, DmdBindingFlags bindingAttr) {
+		public sealed override DmdFieldInfo? GetField(string name, DmdBindingFlags bindingAttr) => GetField(name, bindingAttr, false);
+		public sealed override DmdFieldInfo? GetField(string name, DmdBindingFlags bindingAttr, bool allowTypeVarianceOnPrivateFields) {
 			if (name is null)
 				throw new ArgumentNullException(nameof(name));
 			foreach (var field in GetFields(ToGetMemberOptions(bindingAttr))) {
-				if (DmdMemberInfoComparer.IsMatch(field, name, bindingAttr) && DmdMemberInfoComparer.IsMatch(field, bindingAttr))
+				if (DmdMemberInfoComparer.IsMatch(field, name, bindingAttr) && DmdMemberInfoComparer.IsMatch(field, bindingAttr, allowTypeVarianceOnPrivateFields))
 					return field;
 			}
 			return null;

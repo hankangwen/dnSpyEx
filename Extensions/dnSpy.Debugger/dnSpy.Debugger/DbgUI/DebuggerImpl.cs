@@ -551,9 +551,20 @@ namespace dnSpy.Debugger.DbgUI {
 				case DbgMessageKind.ExceptionThrown:
 					var ex = ((DbgMessageExceptionThrownEventArgs)e).Exception;
 					var exMsg = ex.IsUnhandled ? dnSpy_Debugger_Resources.Debug_EventDescription_UnhandledException : dnSpy_Debugger_Resources.Debug_EventDescription_Exception;
+					string innerExceptionStr = "";
+					var loopExp = ex;
+					while (loopExp?.HasData<DbgException>() == true) {//innerException
+						loopExp = loopExp.GetData<DbgException>();
+						innerExceptionStr += $"\n\tInnerException: {GetExceptionName(loopExp)}";
+						if (!string.IsNullOrEmpty(loopExp.Message))
+							innerExceptionStr += $" : {loopExp.Message}";
+					}
+					innerExceptionStr = innerExceptionStr.Trim();
 					exMsg += $" : pid={ex.Process.Id}({GetProcessName(ex.Process)}), {GetExceptionName(ex)}";
 					if (!string.IsNullOrEmpty(ex.Message))
 						exMsg += $" : {ex.Message}";
+					if (!string.IsNullOrEmpty(innerExceptionStr))
+						exMsg += $"\n\t{innerExceptionStr}\n";
 					return exMsg;
 
 				case DbgMessageKind.BoundBreakpoint:

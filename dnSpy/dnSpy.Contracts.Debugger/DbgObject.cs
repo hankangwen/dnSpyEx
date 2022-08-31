@@ -81,8 +81,10 @@ namespace dnSpy.Contracts.Debugger {
 				data = dataList is null || dataList.Count == 0 ? Array.Empty<(RuntimeTypeHandle, object)>() : dataList.ToArray();
 				dataList?.Clear();
 			}
-			foreach (var kv in data)
+			foreach (var kv in data) {
+				(kv.data as Exceptions.DbgException)?.Close(dispatcher);
 				(kv.data as IDisposable)?.Dispose();
+			}
 
 #if DEBUG
 			GC.SuppressFinalize(this);
@@ -163,7 +165,7 @@ namespace dnSpy.Contracts.Debugger {
 						return (T)kv.data;
 				}
 				var value = create();
-				Debug.Assert(!(value is DbgObject));
+				Debug.Assert(!(value is DbgObject && value is not Exceptions.DbgException));
 				dataList.Add((type, value));
 				return value;
 			}

@@ -208,8 +208,9 @@ namespace dnSpy.Contracts.Debugger.Engine {
 		/// <param name="messageFlags">Message flags</param>
 		/// <param name="data">Data to add to the <see cref="DbgException"/> or null if nothing gets added</param>
 		/// <param name="onCreated">Called right after creating the exception but before adding it to internal data structures. This can be null.</param>
+		/// <param name="doNotAddExceptionToRuntime">Do not add this exception to the main runtime through the dispatcher</param>
 		/// <returns></returns>
-		public abstract DbgException CreateException<T>(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, int? hResult, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags, T? data, Action<DbgException>? onCreated = null) where T : class;
+		public abstract DbgException CreateException<T>(DbgExceptionId id, DbgExceptionEventFlags flags, string? message, int? hResult, DbgThread? thread, DbgModule? module, DbgEngineMessageFlags messageFlags, T? data, Action<DbgException>? onCreated = null, bool doNotAddExceptionToRuntime=false) where T : class;
 
 		/// <summary>
 		/// Value used when the bound breakpoint's address isn't known

@@ -31,7 +31,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 			return (attr & bindingAttr) == attr;
 		}
 
-		public static bool IsMatch(DmdMethodBase method, DmdBindingFlags bindingAttr) {
+		public static bool IsMatch(DmdMethodBase method, DmdBindingFlags bindingAttr, bool allowTypeVarianceOnPrivateFields = false) {
 			var attr = DmdBindingFlags.Default;
 			if (method.IsPublic)
 				attr |= DmdBindingFlags.Public;
@@ -48,14 +48,14 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 					attr |= DmdBindingFlags.FlattenHierarchy;
 				}
 				else {
-					if (!(method.IsVirtual || method.IsAbstract) && method.IsPrivate)
+					if (!(method.IsVirtual || method.IsAbstract) && method.IsPrivate && !allowTypeVarianceOnPrivateFields)
 						return false;
 				}
 			}
 			return (attr & bindingAttr) == attr;
 		}
 
-		public static bool IsMatch(DmdFieldInfo field, DmdBindingFlags bindingAttr) {
+		public static bool IsMatch(DmdFieldInfo field, DmdBindingFlags bindingAttr, bool allowTypeVarianceOnPrivateFields=false) {
 			var attr = DmdBindingFlags.Default;
 			if (field.IsPublic)
 				attr |= DmdBindingFlags.Public;
@@ -72,7 +72,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 					attr |= DmdBindingFlags.FlattenHierarchy;
 				}
 				else {
-					if (field.IsPrivate)
+					if (field.IsPrivate && !allowTypeVarianceOnPrivateFields)
 						return false;
 				}
 			}
@@ -106,7 +106,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 			return (attr & bindingAttr) == attr;
 		}
 
-		public static bool IsMatch(DmdPropertyInfo property, DmdBindingFlags bindingAttr) {
+		public static bool IsMatch(DmdPropertyInfo property, DmdBindingFlags bindingAttr, bool allowTypeVarianceOnPrivateFields = false) {
 			var attr = DmdBindingFlags.Default;
 			if (property.GetMethod?.IsPublic == true || property.SetMethod?.IsPublic == true)
 				attr |= DmdBindingFlags.Public;
@@ -125,7 +125,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 						attr |= DmdBindingFlags.FlattenHierarchy;
 					}
 					else {
-						if (!(method.IsVirtual || method.IsAbstract) && method.IsPrivate)
+						if (!(method.IsVirtual || method.IsAbstract) && method.IsPrivate && ! allowTypeVarianceOnPrivateFields)
 							return false;
 					}
 				}

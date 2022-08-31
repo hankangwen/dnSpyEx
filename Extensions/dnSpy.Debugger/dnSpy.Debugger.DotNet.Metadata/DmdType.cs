@@ -772,6 +772,16 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		public abstract DmdFieldInfo? GetField(string name, DmdBindingFlags bindingAttr);
 
 		/// <summary>
+		/// Gets a field
+		/// </summary>
+		/// <param name="name">Name</param>
+		/// <param name="bindingAttr">Binding flags</param>
+		/// <param name="allowTypeVarianceOnPrivateFields">Allow the reflected type to not equal the declared type</param>
+		/// 
+		/// <returns></returns>
+		public abstract DmdFieldInfo? GetField(string name, DmdBindingFlags bindingAttr, bool allowTypeVarianceOnPrivateFields);
+
+		/// <summary>
 		/// Gets a public static or instance field
 		/// </summary>
 		/// <param name="name">Name</param>
