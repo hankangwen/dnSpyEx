@@ -32,7 +32,6 @@ using dnSpy.Contracts.Debugger.DotNet.Code;
 using dnSpy.Contracts.Debugger.DotNet.CorDebug.Code;
 using dnSpy.Contracts.Debugger.Engine;
 using dnSpy.Contracts.Debugger.Engine.CallStack;
-using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Metadata;
 using dnSpy.Debugger.DotNet.CorDebug.CallStack;
 using dnSpy.Debugger.DotNet.CorDebug.DAC;
@@ -77,10 +76,10 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			// If we should read the name, it means the CLR thread object is available so we
 			// should also read the managed ID.
 			if (managedId is null && forceReadName)
-				managedId = GetManagedId(thread, appDomain);
+				managedId = GetManagedId(thread);
 
 			// If it's a new thread, it has no name (m_Name is null)
-			var name = forceReadName ? GetThreadName(thread, appDomain) : oldProperties?.Name;
+			var name = forceReadName ? GetThreadName(thread) : oldProperties?.Name;
 
 			int suspendedCount = thread.CorThread.IsSuspended ? 1 : 0;
 			var userState = thread.CorThread.UserState;
@@ -98,15 +97,27 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return threadObj;
 		}
 
-		ulong? GetManagedId(DnThread thread, DbgAppDomain? appDomain) {
-			var res = ReadField_CorDebug(TryGetThreadObject(thread), appDomain, KnownMemberNames.Thread_ManagedThreadId_FieldName1, KnownMemberNames.Thread_ManagedThreadId_FieldName2);
-			if (res is null || !res.HasValue)
+		static ulong? GetManagedId(DnThread thread) {
+			var threadObj = TryGetThreadObject(thread);
+			if (threadObj is null)
 				return null;
-			if (res.Value.ValueType == DbgSimpleValueType.Int32)
-				return (uint)(int?)res.Value.RawValue!;
-			if (res.Value.ValueType == DbgSimpleValueType.UInt32)
-				return (uint?)res.Value.RawValue;
-			return null;
+
+			if (!GetFieldByName(threadObj.ExactType, KnownMemberNames.Thread_ManagedThreadId_FieldName1, KnownMemberNames.Thread_ManagedThreadId_FieldName2, out var ownerType, out var token))
+				return null;
+
+			var value = threadObj.GetFieldValue(ownerType.Class, token.Value);
+			if (value is null || value.Size != 4)
+				return null;
+
+			var rawValue = value.ReadGenericValue();
+			if (rawValue is null)
+				return null;
+
+			return value.ElementType switch {
+				CorElementType.I4 => (uint)BitConverter.ToInt32(rawValue, 0),
+				CorElementType.U4 => BitConverter.ToUInt32(rawValue, 0),
+				_ => null
+			};
 		}
 
 		ulong? GetManagedId_ClrDac(DnThread thread) {
@@ -117,13 +128,16 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return (uint)info.Value.ManagedThreadId;
 		}
 
-		string? GetThreadName(DnThread thread, DbgAppDomain? appDomain) {
-			var res = ReadField_CorDebug(TryGetThreadObject(thread), appDomain, KnownMemberNames.Thread_Name_FieldName1, KnownMemberNames.Thread_Name_FieldName2);
-			if (res is null || !res.HasValue)
+		static string? GetThreadName(DnThread thread) {
+			var threadObj = TryGetThreadObject(thread);
+			if (threadObj is null)
 				return null;
-			if (res.Value.ValueType == DbgSimpleValueType.StringUtf16)
-				return (string?)res.Value.RawValue;
-			return null;
+
+			if (!GetFieldByName(threadObj.ExactType, KnownMemberNames.Thread_Name_FieldName1, KnownMemberNames.Thread_Name_FieldName2, out var ownerType, out var token))
+				return null;
+
+			var value = GetDereferencedValue(threadObj.GetFieldValue(ownerType.Class, token.Value));
+			return value?.IsString == true ? value.String : null;
 		}
 
 		string GetThreadKind(DnThread thread, bool isMainThread) {
