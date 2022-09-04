@@ -343,6 +343,8 @@ namespace dnSpy.Search {
 						var val = builtin.Data;
 						if (builtin.Code == ResourceTypeCode.TimeSpan)
 							val = ((TimeSpan)val).Ticks;
+						else if (builtin.Code == ResourceTypeCode.DateTime)
+							val = ((DateTime)val).Ticks;
 						m = IsMatch(val as string, val);
 					}
 				}
