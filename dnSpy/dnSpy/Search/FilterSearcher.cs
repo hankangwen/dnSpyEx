@@ -729,6 +729,9 @@ namespace dnSpy.Search {
 				IsMatch(FixTypeName(declTypeFullName) + "::" + prop.Name.String, prop))
 				return true;
 
+			if (prop.Constant is not null && IsMatch(null, prop.Constant.Value))
+				return true;
+
 			return false;
 		}
 
