@@ -1384,9 +1384,19 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl.Evaluation {
 		}
 
 		public DbgDotNetValue? GetObjectValueAtAddress(DbgEvaluationInfo evalInfo, ulong address) {
+			if (engine.CheckCorDebugThread())
+				return GetObjectValueAtAddress_CorDebug(evalInfo, address);
+			return engine.InvokeCorDebugThread(() => GetObjectValueAtAddress_CorDebug(evalInfo, address));
+		}
+
+		DbgDotNetValue? GetObjectValueAtAddress_CorDebug(DbgEvaluationInfo evalInfo, ulong address) {
+			engine.VerifyCorDebugThread();
+			evalInfo.CancellationToken.ThrowIfCancellationRequested();
+
 			var value = engine.GetThread(evalInfo.Frame.Thread).Process.CorProcess.GetObject(address);
 			if (value is null)
 				return null;
+
 			var appDomain = evalInfo.Frame.Module?.GetReflectionModule()?.AppDomain ?? throw new InvalidOperationException();
 			return engine.CreateDotNetValue_CorDebug(value, appDomain, true);
 		}
