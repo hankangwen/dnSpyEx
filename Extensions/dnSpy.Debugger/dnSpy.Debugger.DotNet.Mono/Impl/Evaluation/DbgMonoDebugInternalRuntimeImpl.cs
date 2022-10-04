@@ -1280,6 +1280,8 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 			return false;
 		}
 
+		public DbgDotNetValue? GetObjectValueAtAddress(DbgEvaluationInfo evalInfo, ulong address) => null; // Not supported on Mono.
+
 		protected override void CloseCore(DbgDispatcher dispatcher) { }
 	}
 }

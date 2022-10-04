@@ -1383,6 +1383,14 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl.Evaluation {
 			return GetEquatableValue(a.Type, a.TryGetCorValue()).Equals3(GetEquatableValue(b.Type, b.TryGetCorValue()));
 		}
 
+		public DbgDotNetValue? GetObjectValueAtAddress(DbgEvaluationInfo evalInfo, ulong address) {
+			var value = engine.GetThread(evalInfo.Frame.Thread).Process.CorProcess.GetObject(address);
+			if (value is null)
+				return null;
+			var appDomain = evalInfo.Frame.Module?.GetReflectionModule()?.AppDomain ?? throw new InvalidOperationException();
+			return engine.CreateDotNetValue_CorDebug(value, appDomain, true);
+		}
+
 		protected override void CloseCore(DbgDispatcher dispatcher) { }
 	}
 }

@@ -927,8 +927,10 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		}
 
 		DbgDotNetValue IDebuggerRuntime.GetObjectAtAddress(ulong address) {
-			//TODO:
-			throw new InterpreterMessageException(dnSpy_Debugger_DotNet_Resources.NoDotNetObjectFoundAtAddress);
+			var value = runtime.GetObjectValueAtAddress(evalInfo, address);
+			if (value is null)
+				throw new InterpreterMessageException(dnSpy_Debugger_DotNet_Resources.NoDotNetObjectFoundAtAddress);
+			return value;
 		}
 
 		void IDebuggerRuntime.CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[] customTypeInfoPayload) {
