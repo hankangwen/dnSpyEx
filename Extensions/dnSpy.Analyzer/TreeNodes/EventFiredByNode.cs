@@ -60,22 +60,22 @@ namespace dnSpy.Analyzer.TreeNodes {
 
 		IEnumerable<AnalyzerTreeNodeData> FindReferencesInType(TypeDef type) {
 			// HACK: in lieu of proper flow analysis, I'm going to use a simple heuristic
-			// If the method accesses the event's backing field, and calls invoke on a delegate 
+			// If the method accesses the event's backing field, and calls invoke on a delegate
 			// with the same signature, then it is (most likely) raise the given event.
 
-			foreach (MethodDef method in type.Methods) {
-				bool readBackingField = false;
+			foreach (var method in type.Methods) {
 				if (!method.HasBody)
 					continue;
 				Instruction? foundInstr = null;
-				foreach (Instruction instr in method.Body.Instructions) {
-					Code code = instr.OpCode.Code;
-					if ((code == Code.Ldfld || code == Code.Ldflda || code == Code.Ldtoken) && instr.Operand is IField fr && fr.IsField) {
+				bool readBackingField = false;
+				foreach (var instr in method.Body.Instructions) {
+					var code = instr.OpCode.Code;
+					if ((code == Code.Ldfld || code == Code.Ldflda || code == Code.Ldsfld || code == Code.Ldsflda || code == Code.Ldtoken) && instr.Operand is IField fr && fr.IsField) {
 						if (CheckEquals(fr.ResolveFieldDef(), eventBackingField)) {
 							readBackingField = true;
 						}
 					}
-					if (readBackingField && (code == Code.Callvirt || code == Code.Call)) {
+					else if (readBackingField && (code == Code.Callvirt || code == Code.Call)) {
 						if (instr.Operand is IMethod mr && eventFiringMethod is not null && mr.Name == eventFiringMethod.Name && CheckEquals(mr.ResolveMethodDef(), eventFiringMethod)) {
 							foundInstr = instr;
 							break;
