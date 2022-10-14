@@ -117,7 +117,10 @@
                                 <CheckBox Grid.Row="5" Grid.Column="0" Margin="0 5 0 0" Content="Metho_dSpec" IsChecked="{Binding MetadataOptions.PreserveMethodSpecRids}" />
                             </Grid>
                         </GroupBox>
-                        <GroupBox Header="{x:Static p:dnSpy_AsmEditor_Resources.SaveModule_PreserveHeapOffsets}" IsEnabled="{Binding CanSaveMixedModeModule}" Margin="0 5 0 0" >
+                        <GroupBox IsEnabled="{Binding CanSaveMixedModeModule}" Margin="0 5 0 0" >
+                            <GroupBox.Header>
+                                <CheckBox IsThreeState="False" IsChecked="{Binding MetadataOptions.PreseveAllHeapOffsets}" Content="{x:Static p:dnSpy_AsmEditor_Resources.SaveModule_PreserveHeapOffsets}" />
+                            </GroupBox.Header>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition />
@@ -133,7 +136,10 @@
                                 <CheckBox Grid.Row="0" Grid.Column="2" Margin="5 0 0 0" Content="#_Blob" IsChecked="{Binding MetadataOptions.PreserveBlobOffsets}" />
                             </Grid>
                         </GroupBox>
-                        <GroupBox Header="{x:Static p:dnSpy_AsmEditor_Resources.SaveModule_CreateHeapEvenIfEmpty}" Margin="0 5 0 0" >
+                        <GroupBox Margin="0 5 0 0" >
+                            <GroupBox.Header>
+                                <CheckBox IsThreeState="False" IsChecked="{Binding MetadataOptions.AlwaysCreateAllHeaps}" Content="{x:Static p:dnSpy_AsmEditor_Resources.SaveModule_CreateHeapEvenIfEmpty}" />
+                            </GroupBox.Header>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition />

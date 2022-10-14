@@ -868,17 +868,42 @@ namespace dnSpy.AsmEditor.SaveModule {
 
 		public bool PreserveStringsOffsets {
 			get => GetFlagValue(MetadataFlags.PreserveStringsOffsets);
-			set => SetFlagValue(MetadataFlags.PreserveStringsOffsets, value, nameof(PreserveStringsOffsets));
+			set => SetFlagValue(MetadataFlags.PreserveStringsOffsets, value, nameof(PreseveAllHeapOffsets), nameof(PreserveStringsOffsets));
 		}
 
 		public bool PreserveUSOffsets {
 			get => GetFlagValue(MetadataFlags.PreserveUSOffsets);
-			set => SetFlagValue(MetadataFlags.PreserveUSOffsets, value, nameof(PreserveUSOffsets));
+			set => SetFlagValue(MetadataFlags.PreserveUSOffsets, value, nameof(PreseveAllHeapOffsets), nameof(PreserveUSOffsets));
 		}
 
 		public bool PreserveBlobOffsets {
 			get => GetFlagValue(MetadataFlags.PreserveBlobOffsets);
-			set => SetFlagValue(MetadataFlags.PreserveBlobOffsets, value, nameof(PreserveBlobOffsets));
+			set => SetFlagValue(MetadataFlags.PreserveBlobOffsets, value, nameof(PreseveAllHeapOffsets), nameof(PreserveBlobOffsets));
+		}
+
+		const MetadataFlags preseveAllHeapOffsetsFlags = MetadataFlags.PreserveStringsOffsets | MetadataFlags.PreserveUSOffsets | MetadataFlags.PreserveBlobOffsets;
+
+		public bool? PreseveAllHeapOffsets {
+			get {
+				var val = Flags & preseveAllHeapOffsetsFlags;
+				if (val == preseveAllHeapOffsetsFlags)
+					return true;
+				if (val == 0)
+					return false;
+				return null;
+			}
+			set {
+				if (value is not null && value != PreseveAllHeapOffsets) {
+					if (value.Value)
+						Flags |= preseveAllHeapOffsetsFlags;
+					else
+						Flags &= ~preseveAllHeapOffsetsFlags;
+					OnPropertyChanged(nameof(PreseveAllHeapOffsets));
+					OnPropertyChanged(nameof(PreserveStringsOffsets));
+					OnPropertyChanged(nameof(PreserveUSOffsets));
+					OnPropertyChanged(nameof(PreserveBlobOffsets));
+				}
+			}
 		}
 
 		public bool PreserveExtraSignatureData {
@@ -893,22 +918,48 @@ namespace dnSpy.AsmEditor.SaveModule {
 
 		public bool AlwaysCreateGuidHeap {
 			get => GetFlagValue(MetadataFlags.AlwaysCreateGuidHeap);
-			set => SetFlagValue(MetadataFlags.AlwaysCreateGuidHeap, value, nameof(AlwaysCreateGuidHeap));
+			set => SetFlagValue(MetadataFlags.AlwaysCreateGuidHeap, value, nameof(AlwaysCreateAllHeaps), nameof(AlwaysCreateGuidHeap));
 		}
 
 		public bool AlwaysCreateStringsHeap {
 			get => GetFlagValue(MetadataFlags.AlwaysCreateStringsHeap);
-			set => SetFlagValue(MetadataFlags.AlwaysCreateStringsHeap, value, nameof(AlwaysCreateStringsHeap));
+			set => SetFlagValue(MetadataFlags.AlwaysCreateStringsHeap, value, nameof(AlwaysCreateAllHeaps), nameof(AlwaysCreateStringsHeap));
 		}
 
 		public bool AlwaysCreateUSHeap {
 			get => GetFlagValue(MetadataFlags.AlwaysCreateUSHeap);
-			set => SetFlagValue(MetadataFlags.AlwaysCreateUSHeap, value, nameof(AlwaysCreateUSHeap));
+			set => SetFlagValue(MetadataFlags.AlwaysCreateUSHeap, value, nameof(AlwaysCreateAllHeaps), nameof(AlwaysCreateUSHeap));
 		}
 
 		public bool AlwaysCreateBlobHeap {
 			get => GetFlagValue(MetadataFlags.AlwaysCreateBlobHeap);
-			set => SetFlagValue(MetadataFlags.AlwaysCreateBlobHeap, value, nameof(AlwaysCreateBlobHeap));
+			set => SetFlagValue(MetadataFlags.AlwaysCreateBlobHeap, value, nameof(AlwaysCreateAllHeaps), nameof(AlwaysCreateBlobHeap));
+		}
+
+		const MetadataFlags alwaysCreateAllHeapsFlags = MetadataFlags.AlwaysCreateGuidHeap | MetadataFlags.AlwaysCreateStringsHeap | MetadataFlags.AlwaysCreateUSHeap | MetadataFlags.AlwaysCreateBlobHeap;
+
+		public bool? AlwaysCreateAllHeaps {
+			get {
+				var val = Flags & alwaysCreateAllHeapsFlags;
+				if (val == alwaysCreateAllHeapsFlags)
+					return true;
+				if (val == 0)
+					return false;
+				return null;
+			}
+			set {
+				if (value is not null && value != AlwaysCreateAllHeaps) {
+					if (value.Value)
+						Flags |= alwaysCreateAllHeapsFlags;
+					else
+						Flags &= ~alwaysCreateAllHeapsFlags;
+					OnPropertyChanged(nameof(AlwaysCreateAllHeaps));
+					OnPropertyChanged(nameof(AlwaysCreateGuidHeap));
+					OnPropertyChanged(nameof(AlwaysCreateStringsHeap));
+					OnPropertyChanged(nameof(AlwaysCreateUSHeap));
+					OnPropertyChanged(nameof(AlwaysCreateBlobHeap));
+				}
+			}
 		}
 
 		public bool PreserveOtherMetadataStreams {
@@ -979,12 +1030,14 @@ namespace dnSpy.AsmEditor.SaveModule {
 			OnPropertyChanged(nameof(PreserveStringsOffsets));
 			OnPropertyChanged(nameof(PreserveUSOffsets));
 			OnPropertyChanged(nameof(PreserveBlobOffsets));
+			OnPropertyChanged(nameof(PreseveAllHeapOffsets));
 			OnPropertyChanged(nameof(PreserveExtraSignatureData));
 			OnPropertyChanged(nameof(KeepOldMaxStack));
 			OnPropertyChanged(nameof(AlwaysCreateGuidHeap));
 			OnPropertyChanged(nameof(AlwaysCreateStringsHeap));
 			OnPropertyChanged(nameof(AlwaysCreateUSHeap));
 			OnPropertyChanged(nameof(AlwaysCreateBlobHeap));
+			OnPropertyChanged(nameof(AlwaysCreateAllHeaps));
 		}
 
 		public override bool HasError {
