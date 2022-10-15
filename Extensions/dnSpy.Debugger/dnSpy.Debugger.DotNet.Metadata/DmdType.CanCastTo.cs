@@ -340,8 +340,8 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 			case DDN.ElementType.Class:
 			case DDN.ElementType.Var:
 			case DDN.ElementType.Array:
-			case DDN.ElementType.GenericInst:
-			case DDN.ElementType.TypedByRef:	return AppDomain.Runtime.PointerSize;
+			case DDN.ElementType.GenericInst:	return AppDomain.Runtime.PointerSize;
+			case DDN.ElementType.TypedByRef:	return AppDomain.Runtime.PointerSize * 2;
 			case DDN.ElementType.ValueArray:	return -1;
 			case DDN.ElementType.I:
 			case DDN.ElementType.U:				return AppDomain.Runtime.PointerSize;
