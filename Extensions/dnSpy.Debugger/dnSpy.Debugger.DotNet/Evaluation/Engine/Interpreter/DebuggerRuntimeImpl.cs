@@ -468,8 +468,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			var methodGetType = appDomain.System_Type.GetMethod(nameof(Type.GetType), DmdSignatureCallingConvention.Default, 0, appDomain.System_Type, new[] { appDomain.System_String }, throwOnError: true)!;
 			var typeValue = RecordValue(runtime.Call(evalInfo, null, methodGetType, new[] { type.AssemblyQualifiedName }, DbgDotNetInvokeOptions.None));
 
-			var runtimeTypeHandleType = appDomain.GetWellKnownType(DmdWellKnownType.System_RuntimeTypeHandle);
-			var getTypeHandleMethod = typeValue.Type.GetMethod("get_" + nameof(Type.TypeHandle), DmdSignatureCallingConvention.Default | DmdSignatureCallingConvention.HasThis, 0, runtimeTypeHandleType, Array.Empty<DmdType>(), throwOnError: true)!;
+			var getTypeHandleMethod = typeValue.Type.GetMethod("get_" + nameof(Type.TypeHandle), DmdSignatureCallingConvention.Default | DmdSignatureCallingConvention.HasThis, 0, appDomain.System_RuntimeTypeHandle, Array.Empty<DmdType>(), throwOnError: true)!;
 			return RecordValue(runtime.Call(evalInfo, typeValue, getTypeHandleMethod, Array.Empty<object>(), DbgDotNetInvokeOptions.None));
 		}
 
@@ -847,18 +846,76 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		}
 
 		DmdType IDebuggerRuntime.ToType(ILValue value) {
-			//TODO:
-			throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			if (!canFuncEval)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.FuncEvalDisabled);
+			if (value.Type is null)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			var appDomain = value.Type.AppDomain;
+			var typeType = appDomain.System_Type;
+			if (value.Type != typeType)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+
+			var getAssemblyQualifiedNameMethod = typeType.GetMethod("get_" + nameof(Type.AssemblyQualifiedName), DmdSignatureCallingConvention.Default | DmdSignatureCallingConvention.HasThis, 0, appDomain.System_String, Array.Empty<DmdType>(), throwOnError: true)!;
+			var result = RecordValue(runtime.Call(evalInfo, TryGetDotNetValue(value, canCreateValue: false), getAssemblyQualifiedNameMethod, Array.Empty<object>(), DbgDotNetInvokeOptions.None));
+			var resultRaw = result.GetRawValue();
+			if (resultRaw.ValueType != DbgSimpleValueType.StringUtf16 || resultRaw.RawValue is not string assemblyQualifiedName)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+
+			return appDomain.GetType(assemblyQualifiedName, DmdGetTypeOptions.ThrowOnError)!;
 		}
 
 		Guid IDebuggerRuntime.ToGuid(ILValue value) {
-			//TODO:
-			throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			if (!canFuncEval)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.FuncEvalDisabled);
+			if (value.Type is null)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			var appDomain = value.Type.AppDomain;
+			var guidType = appDomain.GetWellKnownType(DmdWellKnownType.System_Guid);
+			if (value.Type != guidType)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+
+			var toByteArrayMethod = guidType.GetMethod(nameof(Guid.ToByteArray), DmdSignatureCallingConvention.Default | DmdSignatureCallingConvention.HasThis, 0, appDomain.System_Byte.MakeArrayType(), Array.Empty<DmdType>(), throwOnError: true)!;
+			var result = RecordValue(runtime.Call(evalInfo, TryGetDotNetValue(value, canCreateValue: false), toByteArrayMethod, Array.Empty<object>(), DbgDotNetInvokeOptions.None));
+			if (!result.Type.IsSZArray || result.Type.GetElementType() != appDomain.System_Byte)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			if (!result.GetArrayCount(out var arrayLength))
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+
+			var arr = new byte[arrayLength];
+			for (int i = 0; i < arrayLength; i++) {
+				var arrayElement = RecordValue(result.GetArrayElementAt((uint)i));
+				if (arrayElement is null)
+					throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+				var rawValue = arrayElement.GetRawValue();
+				if (!rawValue.HasRawValue || rawValue.ValueType != DbgSimpleValueType.UInt8)
+					throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+				arr[i] = (byte)rawValue.RawValue!;
+			}
+
+			return new Guid(arr);
 		}
 
 		byte[] IDebuggerRuntime.ToByteArray(ILValue value) {
-			//TODO:
-			throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			if (value is not ArrayILValue arrayIlValue)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			if (value.Type is null || !value.Type.IsSZArray ||
+			    value.Type.GetElementType() != value.Type.AppDomain.System_Byte)
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+			if (!arrayIlValue.GetSZArrayLength(out var arrayLength))
+				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+
+			var byteArr = new byte[arrayLength];
+			for (int i = 0; i < arrayLength; i++) {
+				var arrayElement = arrayIlValue.ReadArrayElement(i);
+				if (arrayElement is null)
+					throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+				var rawValue = arrayElement.GetRawValue();
+				if (!rawValue.HasRawValue || rawValue.ValueType != DbgSimpleValueType.UInt8)
+					throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
+				byteArr[i] = (byte)rawValue.RawValue!;
+			}
+
+			return byteArr;
 		}
 
 		DbgDotNetValue IDebuggerRuntime.ToDotNetValue(ILValue value) {
