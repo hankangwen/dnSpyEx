@@ -55,6 +55,6 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			return (cas, sas);
 		}
 
-		protected override uint GetRVA() => 0;
+		protected override uint GetRVA() => MDAPI.GetRVA(reader.MetaDataImport, 0x06000000 + Rid) ?? 0;
 	}
 }
