@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation;
 using dnSpy.Debugger.DotNet.Interpreter;
 using dnSpy.Debugger.DotNet.Metadata;
@@ -70,6 +71,28 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter.Hooks {
 		}
 
 		static bool TryGetSize(DmdType type, out int size) {
+			switch (DmdType.GetTypeCode(type)) {
+			case TypeCode.Boolean:
+			case TypeCode.SByte:
+			case TypeCode.Byte:
+				size = 1;
+				return true;
+			case TypeCode.Char:
+			case TypeCode.Int16:
+			case TypeCode.UInt16:
+				size = 2;
+				return true;
+			case TypeCode.Int32:
+			case TypeCode.UInt32:
+			case TypeCode.Single:
+				size = 4;
+				return true;
+			case TypeCode.Int64:
+			case TypeCode.UInt64:
+			case TypeCode.Double:
+				size = 8;
+				return true;
+			}
 			if (type.IsValueType) {
 				var attr = type.StructLayoutAttribute;
 				if (attr is not null && attr.Size >= 0) {
