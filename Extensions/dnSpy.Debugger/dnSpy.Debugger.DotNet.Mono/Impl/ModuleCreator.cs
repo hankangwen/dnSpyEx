@@ -93,7 +93,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 				imageLayout = moduleAddress == 0 ? DbgImageLayout.File : DbgImageLayout.Memory;
 			}
 			else {
-				isDynamic = true;
+				isDynamic = !monoModule.VirtualMachine.Version.AtLeast(2, 47) || monoModule.Assembly.IsDynamic;
 				isInMemory = true;
 				moduleAddress = 0;
 				moduleSize = 0;
@@ -169,6 +169,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 			var engine = this.engine;
 			var runtime = objectFactory.Runtime;
 			var filename = monoModule.FullyQualifiedName;
+			Func<byte[]>? getMetadataBlob = monoModule.VirtualMachine.Version.AtLeast(2, 47) ? monoModule.Assembly.GetMetadataBlob : null;
 			return () => {
 				DbgRawMetadata? rawMd = null;
 				try {
@@ -176,6 +177,8 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 						rawMd = engine.RawMetadataService.Create(runtime, imageLayout == DbgImageLayout.File, moduleAddressTmp, (int)moduleSizeTmp);
 					else if (File.Exists(filename))
 						rawMd = engine.RawMetadataService.Create(runtime, true, File.ReadAllBytes(filename));
+					else if (getMetadataBlob is not null)
+						rawMd = engine.RawMetadataService.Create(runtime, true, getMetadataBlob());
 					else {
 						//TODO:
 						rawMd = engine.RawMetadataService.Create(runtime, imageLayout == DbgImageLayout.File, Array.Empty<byte>());
