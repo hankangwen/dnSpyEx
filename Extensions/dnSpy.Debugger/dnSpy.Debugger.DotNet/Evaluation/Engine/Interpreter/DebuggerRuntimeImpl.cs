@@ -796,7 +796,9 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		public override int GetSizeOfValueType(DmdType type) {
 			Debug.Assert(type.IsValueType);
 			Debug.Assert(!type.IsPrimitive);
-			throw new NotImplementedException();//TODO:
+			if (type.TryGetSize(out int size))
+				return size;
+			throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 		}
 
 		internal int ToInt32(ILValue value) {

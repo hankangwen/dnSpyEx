@@ -53,7 +53,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter.Hooks {
 				var addr = arrayValue.GetRawAddressValue(onlyDataAddress: true);
 				if (addr is null)
 					break;
-				if (!TryGetSize(field.FieldType, out int fieldTypeSize))
+				if (!field.FieldType.TryGetSize(out int fieldTypeSize))
 					break;
 				if (addr.Value.Length != (uint)fieldTypeSize)
 					break;
@@ -68,41 +68,6 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter.Hooks {
 			}
 
 			return null;
-		}
-
-		static bool TryGetSize(DmdType type, out int size) {
-			switch (DmdType.GetTypeCode(type)) {
-			case TypeCode.Boolean:
-			case TypeCode.SByte:
-			case TypeCode.Byte:
-				size = 1;
-				return true;
-			case TypeCode.Char:
-			case TypeCode.Int16:
-			case TypeCode.UInt16:
-				size = 2;
-				return true;
-			case TypeCode.Int32:
-			case TypeCode.UInt32:
-			case TypeCode.Single:
-				size = 4;
-				return true;
-			case TypeCode.Int64:
-			case TypeCode.UInt64:
-			case TypeCode.Double:
-				size = 8;
-				return true;
-			}
-			if (type.IsValueType) {
-				var attr = type.StructLayoutAttribute;
-				if (attr is not null && attr.Size >= 0) {
-					size = attr.Size;
-					return true;
-				}
-			}
-
-			size = -1;
-			return false;
 		}
 	}
 }

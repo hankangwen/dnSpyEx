@@ -1327,6 +1327,21 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		/// <returns></returns>
 		public bool CanCastTo(Type target) => CanCastTo(DmdTypeUtilities.ToDmdType(target, AppDomain));
 
+		/// <summary>
+		/// Tries to compute the size of the type in bytes
+		/// </summary>
+		/// <param name="size">The size of the type in bytes</param>
+		/// <returns>true if the size was computed successfully, otherwise false</returns>
+		public bool TryGetSize(out int size) {
+			var result = __ComputeTypeSize(this, new GenericArgsStack());
+			if (result is not null) {
+				size = result.Value;
+				return true;
+			}
+			size = 0;
+			return false;
+		}
+
 		internal static HashSet<DmdType> GetAllInterfaces(DmdType type) {
 			DmdType? currentType = type;
 			HashSet<DmdType>? hash = ObjectPools.AllocHashSetOfType();

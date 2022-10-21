@@ -295,33 +295,10 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				return null;
 			var arrayCount = v.Length;
 			var startAddr = addr + (uint)offsetToArrayData.Value;
-			if (!TryGetSize(elementType, out var elemSize))
+			if (!elementType.TryGetSize(out var elemSize))
 				return new DbgRawAddressValue(startAddr, 0);
 			ulong totalSize = (uint)elemSize * (ulong)(uint)arrayCount;
 			return new DbgRawAddressValue(startAddr, totalSize);
-		}
-
-		static bool TryGetSize(DmdType type, out int size) {
-			if (!type.IsValueType || type.IsPointer || type.IsFunctionPointer || type == type.AppDomain.System_IntPtr || type == type.AppDomain.System_UIntPtr) {
-				size = type.AppDomain.Runtime.PointerSize;
-				return true;
-			}
-
-			switch (DmdType.GetTypeCode(type)) {
-			case TypeCode.Boolean:		size = 1; return true;
-			case TypeCode.Char:			size = 2; return true;
-			case TypeCode.SByte:		size = 1; return true;
-			case TypeCode.Byte:			size = 1; return true;
-			case TypeCode.Int16:		size = 2; return true;
-			case TypeCode.UInt16:		size = 2; return true;
-			case TypeCode.Int32:		size = 4; return true;
-			case TypeCode.UInt32:		size = 4; return true;
-			case TypeCode.Int64:		size = 8; return true;
-			case TypeCode.UInt64:		size = 8; return true;
-			case TypeCode.Single:		size = 4; return true;
-			case TypeCode.Double:		size = 8; return true;
-			default:					size = 0; return false;
-			}
 		}
 
 		public override DbgDotNetRawValue GetRawValue() => rawValue;
