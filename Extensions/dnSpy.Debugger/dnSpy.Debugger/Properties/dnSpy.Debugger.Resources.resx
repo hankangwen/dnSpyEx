@@ -309,6 +309,9 @@
   <data name="DetachAllCommand" xml:space="preserve">
     <value>Detach A_ll</value>
   </data>
+  <data name="DetachingWillCauseTerminationOfDebuggeeProcess" xml:space="preserve">
+    <value>Detaching will cause termination of the debuggee process. Do you wish to continue?</value>
+  </data>
   <data name="DisableAllBreakpointsCommand" xml:space="preserve">
     <value>Disable All Breakpoi_nts</value>
   </data>

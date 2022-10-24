@@ -150,9 +150,8 @@ namespace dnSpy.Debugger.DbgUI {
 
 		public override bool CanDetachAll => CanExecutePauseOrRunningCommand;
 		public override void DetachAll() {
-			if (!dbgManager.Value.CanDetachWithoutTerminating) {
-				//TODO: Show a msg box
-			}
+			if (!dbgManager.Value.CanDetachWithoutTerminating && messageBoxService.Value.Show(dnSpy_Debugger_Resources.DetachingWillCauseTerminationOfDebuggeeProcess, MsgBoxButton.Yes | MsgBoxButton.No) != MsgBoxButton.Yes)
+				return;
 			dbgManager.Value.DetachAll();
 		}
 

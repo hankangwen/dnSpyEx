@@ -1680,6 +1680,15 @@ namespace dnSpy.Debugger.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Detaching will cause termination of the debuggee process. Do you wish to continue?.
+        /// </summary>
+        public static string DetachingWillCauseTerminationOfDebuggeeProcess {
+            get {
+                return ResourceManager.GetString("DetachingWillCauseTerminationOfDebuggeeProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Detach Process.
         /// </summary>
         public static string DetachProcessCommand {
