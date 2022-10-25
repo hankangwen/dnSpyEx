@@ -350,6 +350,8 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 
 			if (value.Type.IsArray)
 				return new ArrayILValue(this, value);
+			if (value.Type.IsNullable)
+				return new NullableILValue(this, value);
 
 			var rawValue = value.GetRawValue();
 			var objValue = rawValue.RawValue;

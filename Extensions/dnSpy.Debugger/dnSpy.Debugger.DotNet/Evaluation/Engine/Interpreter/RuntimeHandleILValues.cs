@@ -25,7 +25,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		readonly DmdType type;
 
 		public RuntimeTypeHandleILValue(DebuggerRuntimeImpl runtime, DmdType type)
-			: base(runtime, type.AppDomain.GetWellKnownType(DmdWellKnownType.System_RuntimeTypeHandle)) {
+			: base(runtime, type.AppDomain.System_RuntimeTypeHandle) {
 			this.type = type;
 		}
 
@@ -36,7 +36,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		public DmdFieldInfo Field { get; }
 
 		public RuntimeFieldHandleILValue(DebuggerRuntimeImpl runtime, DmdFieldInfo field)
-			: base(runtime, field.AppDomain.GetWellKnownType(DmdWellKnownType.System_RuntimeFieldHandle)) {
+			: base(runtime, field.AppDomain.System_RuntimeFieldHandle) {
 			Field = field;
 		}
 
@@ -47,7 +47,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		readonly DmdMethodBase method;
 
 		public RuntimeMethodHandleILValue(DebuggerRuntimeImpl runtime, DmdMethodBase method)
-			: base(runtime, method.AppDomain.GetWellKnownType(DmdWellKnownType.System_RuntimeMethodHandle)) {
+			: base(runtime, method.AppDomain.System_RuntimeMethodHandle) {
 			this.method = method;
 		}
 
