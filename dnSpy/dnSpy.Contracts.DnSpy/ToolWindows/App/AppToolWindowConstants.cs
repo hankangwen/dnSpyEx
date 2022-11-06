@@ -61,6 +61,9 @@ namespace dnSpy.Contracts.ToolWindows.App {
 		/// <summary>Order of debugger memory tool window</summary>
 		public static readonly double DEFAULT_CONTENT_ORDER_BOTTOM_DEBUGGER_MEMORY = 20010;
 
+		/// <summary>Order of debugger static fields window</summary>
+		public static readonly double DEFAULT_CONTENT_ORDER_BOTTOM_DEBUGGER_STATIC_FIELDS = 20011;
+
 		/// <summary>Order of C# interactive window</summary>
 		public static readonly double DEFAULT_CONTENT_ORDER_BOTTOM_SCRIPTING_CSHARP = 21000;
 

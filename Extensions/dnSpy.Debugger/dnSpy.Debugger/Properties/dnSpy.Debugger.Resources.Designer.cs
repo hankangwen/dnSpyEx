@@ -3672,6 +3672,15 @@ namespace dnSpy.Debugger.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Static Fields.
+        /// </summary>
+        public static string StaticFieldsCommand {
+            get {
+                return ResourceManager.GetString("StaticFieldsCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Breakpoint.
         /// </summary>
         public static string StatusBar_BreakpointHit {
@@ -4289,6 +4298,15 @@ namespace dnSpy.Debugger.Properties {
         public static string Window_Processes {
             get {
                 return ResourceManager.GetString("Window_Processes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Static Fields.
+        /// </summary>
+        public static string Window_StaticFields {
+            get {
+                return ResourceManager.GetString("Window_StaticFields", resourceCulture);
             }
         }
         

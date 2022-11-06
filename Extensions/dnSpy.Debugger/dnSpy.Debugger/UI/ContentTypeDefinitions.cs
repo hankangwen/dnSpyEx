@@ -90,6 +90,11 @@ namespace dnSpy.Debugger.UI {
 		static readonly ContentTypeDefinition? AutosWindow;
 
 		[Export]
+		[Name(ContentTypes.StaticFieldsWindow)]
+		[BaseDefinition(ContentTypes.VariablesWindow)]
+		static readonly ContentTypeDefinition? StaticFieldsWindow;
+
+		[Export]
 		[Name(ContentTypes.WatchWindow)]
 		[BaseDefinition(ContentTypes.VariablesWindow)]
 		static readonly ContentTypeDefinition? WatchWindow;

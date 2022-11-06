@@ -38,6 +38,8 @@ namespace dnSpy.Debugger.ToolWindows {
 		public abstract void ShowAutos();
 		public abstract bool CanShowLocals { get; }
 		public abstract void ShowLocals();
+		public abstract bool CanShowStaticFields { get; }
+		public abstract void ShowStaticFields();
 		public abstract bool CanShowWatch(int index);
 		public abstract void ShowWatch(int index);
 		public abstract bool CanShowThreads { get; }
@@ -87,6 +89,8 @@ namespace dnSpy.Debugger.ToolWindows {
 		public override void ShowAutos() => toolWindowService.Show(Autos.AutosToolWindowContentProvider.THE_GUID);
 		public override bool CanShowLocals => dbgManager.Value.IsDebugging;
 		public override void ShowLocals() => toolWindowService.Show(Locals.LocalsToolWindowContentProvider.THE_GUID);
+		public override bool CanShowStaticFields => dbgManager.Value.IsDebugging;
+		public override void ShowStaticFields() => toolWindowService.Show(StaticFields.StaticFieldsToolWindowContentProvider.THE_GUID);
 		public override bool CanShowWatch(int index) => dbgManager.Value.IsDebugging;
 		public override void ShowWatch(int index) => toolWindowService.Show(watchToolWindowContentProvider.Value.GetWindowGuid(index));
 		public override bool CanShowThreads => dbgManager.Value.IsDebugging;

@@ -65,6 +65,7 @@ namespace dnSpy.Debugger.Evaluation.UI {
 			case VariablesWindowKind.None:
 			case VariablesWindowKind.Locals:
 			case VariablesWindowKind.Autos:
+			case VariablesWindowKind.StaticFields:
 				return 0;
 
 			default:
