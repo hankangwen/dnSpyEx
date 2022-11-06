@@ -18,14 +18,41 @@
 */
 
 using System;
+using System.ComponentModel;
+using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Debugger.Evaluation.UI;
 using dnSpy.Debugger.Evaluation.ViewModel;
 
 namespace dnSpy.Debugger.ToolWindows.Autos {
 	sealed class AutosVariablesWindowValueNodesProvider : VariablesWindowValueNodesProvider {
+		public override event EventHandler? NodesChanged;
+		readonly DebuggerSettings debuggerSettings;
+		bool forceRecreateAllNodes;
+
+		public AutosVariablesWindowValueNodesProvider(DebuggerSettings debuggerSettings) => this.debuggerSettings = debuggerSettings ?? throw new ArgumentNullException(nameof(debuggerSettings));
+
+		public override void Initialize(bool enable) {
+			if (enable)
+				debuggerSettings.PropertyChanged += DebuggerSettings_PropertyChanged;
+			else
+				debuggerSettings.PropertyChanged -= DebuggerSettings_PropertyChanged;
+		}
+
+		void DebuggerSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e) {
+			switch (e.PropertyName) {
+			case nameof(DebuggerSettings.ShowReturnValues):
+				forceRecreateAllNodes = true;
+				NodesChanged?.Invoke(this, EventArgs.Empty);
+				break;
+			}
+		}
+
 		public override ValueNodesProviderResult GetNodes(DbgEvaluationInfo evalInfo, DbgLanguage language, DbgEvaluationOptions evalOptions, DbgValueNodeEvaluationOptions nodeEvalOptions, DbgValueFormatterOptions nameFormatterOptions) {
-			var returnValues = language.ReturnValuesProvider.GetNodes(evalInfo, nodeEvalOptions);
+			var recreateAllNodes = forceRecreateAllNodes;
+			forceRecreateAllNodes = false;
+
+			var returnValues = debuggerSettings.ShowReturnValues ? language.ReturnValuesProvider.GetNodes(evalInfo, nodeEvalOptions) : Array.Empty<DbgValueNode>();
 			var variables = language.AutosProvider.GetNodes(evalInfo, nodeEvalOptions);
 
 			var res = new DbgValueNodeInfo[returnValues.Length + variables.Length];
@@ -35,7 +62,6 @@ namespace dnSpy.Debugger.ToolWindows.Autos {
 			for (int i = 0; i < variables.Length; i++, ri++)
 				res[ri] = new DbgValueNodeInfo(variables[i], causesSideEffects: false);
 
-			const bool recreateAllNodes = false;
 			return new ValueNodesProviderResult(res, recreateAllNodes);
 		}
 
