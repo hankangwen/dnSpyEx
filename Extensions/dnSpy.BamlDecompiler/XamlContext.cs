@@ -188,13 +188,15 @@ namespace dnSpy.BamlDecompiler {
 				Debug.Assert(attr.ConstructorArguments.Count == 2);
 				if (attr.ConstructorArguments.Count != 2)
 					continue;
-				var xmlNs = attr.ConstructorArguments[0].Value as UTF8String;
-				var typeNs = attr.ConstructorArguments[1].Value as UTF8String;
+				var xmlNsValue = attr.ConstructorArguments[0].Value;
+				var typeNsValue = attr.ConstructorArguments[1].Value;
+				var xmlNs = (xmlNsValue as UTF8String)?.String ?? xmlNsValue as string;
+				var typeNs = (typeNsValue as UTF8String)?.String ?? typeNsValue as string;
 				Debug2.Assert(xmlNs is not null && typeNs is not null);
 				if (xmlNs is null || typeNs is null)
 					continue;
 
-				if (typeNamespace == typeNs.String)
+				if (typeNamespace == typeNs)
 					possibleXmlNs.Add(xmlNs);
 			}
 

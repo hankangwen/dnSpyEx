@@ -53,7 +53,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 				var value = ctx.ResolveProperty(record.ValueId);
 
 				value.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
-				var xName = value.ToXName(ctx, parent.Xaml, false);
+				var xName = value.ToXName(ctx, parent.Xaml);
 
 				ext.Initializer = new object[] { ctx.ToString(parent.Xaml, xName) };
 			}
@@ -79,7 +79,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 						name = res.Item1 + "." + res.Item2;
 					else
 						name = res.Item1 + "." + res.Item3;
-					var xmlns = ctx.GetXmlNamespace("http://schemas.microsoft.com/winfx/2006/xaml/presentation");
+					var xmlns = ctx.GetXmlNamespace(XamlContext.KnownNamespace_Presentation);
 					attrName = ctx.ToString(parent.Xaml, xmlns.GetName(name));
 				}
 				else {

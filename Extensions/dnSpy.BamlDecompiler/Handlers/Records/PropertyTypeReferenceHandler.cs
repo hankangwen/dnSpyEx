@@ -39,9 +39,8 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var elemAttr = ctx.ResolveProperty(record.AttributeId);
 			elem.Xaml = new XElement(elemAttr.ToXName(ctx, null));
 
-			if (attr.ResolvedMember?.FullName == "System.Windows.Style.TargetType") {
+			if (attr.ResolvedMember?.FullName == "System.Windows.Style.TargetType")
 				parent.Xaml.Element.AddAnnotation(new TargetTypeAnnotation(type));
-			}
 
 			elem.Xaml.Element.AddAnnotation(elemAttr);
 			parent.Xaml.Element.Add(elem.Xaml.Element);
