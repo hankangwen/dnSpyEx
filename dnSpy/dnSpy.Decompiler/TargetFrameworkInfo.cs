@@ -93,8 +93,11 @@ namespace dnSpy.Decompiler {
 			if (arg.Type.GetElementType() != ElementType.String)
 				return null;
 			var s = arg.Value as UTF8String;
-			if (UTF8String.IsNullOrEmpty(s))
-				return null;
+			if (UTF8String.IsNullOrEmpty(s)) {
+				if (arg.Value is not string argAsString)
+					return null;
+				s = argAsString;
+			}
 
 			return TryCreateFromAttributeString(s);
 		}

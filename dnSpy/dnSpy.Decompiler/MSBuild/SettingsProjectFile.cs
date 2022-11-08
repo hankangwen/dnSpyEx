@@ -121,7 +121,7 @@ namespace dnSpy.Decompiler.MSBuild {
 				var arg = ca.ConstructorArguments[0];
 				if (arg.Type.RemovePinnedAndModifiers().GetElementType() != ElementType.String)
 					continue;
-				string defaultValue = arg.Value as UTF8String;
+				string defaultValue = arg.Value as UTF8String ?? arg.Value as string;
 				if (defaultValue is null)
 					continue;
 				bool generateDefaultValueInCode = true;
@@ -182,7 +182,7 @@ namespace dnSpy.Decompiler.MSBuild {
 					arg = ca.ConstructorArguments[0];
 					var argType = arg.Type.RemovePinnedAndModifiers();
 					if (argType.GetElementType() == ElementType.String)
-						provider = arg.Value as UTF8String;
+						provider = arg.Value as UTF8String ?? arg.Value as string;
 					else if (argType is not null && argType.FullName == "System.Type") {
 						if (arg.Value is TypeDefOrRefSig t && t.TypeDefOrRef is not null)
 							provider = t.TypeDefOrRef.ReflectionFullName;
@@ -195,7 +195,7 @@ namespace dnSpy.Decompiler.MSBuild {
 					arg = ca.ConstructorArguments[0];
 					var argType = arg.Type.RemovePinnedAndModifiers();
 					if (argType.GetElementType() == ElementType.String)
-						description = arg.Value as UTF8String;
+						description = arg.Value as UTF8String ?? arg.Value as string;
 				}
 
 				setting.Name = prop.Name;

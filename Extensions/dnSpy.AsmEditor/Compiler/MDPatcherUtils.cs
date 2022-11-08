@@ -132,7 +132,8 @@ namespace dnSpy.AsmEditor.Compiler {
 					continue;
 				if (!MDPatcherUtils.CheckTypeDefOrTypeRefName(ca.Constructor?.DeclaringType, nameSystem_Runtime_CompilerServices, nameIgnoresAccessChecksToAttribute))
 					continue;
-				var asmName = (ca.ConstructorArguments[0].Value as UTF8String)?.String;
+				var asmNameValue = ca.ConstructorArguments[0];
+				var asmName = asmNameValue.Value as UTF8String ?? asmNameValue.Value as string;
 				if (asmName is null)
 					continue;
 				int index = asmName.IndexOf(',');
@@ -162,7 +163,8 @@ namespace dnSpy.AsmEditor.Compiler {
 					continue;
 				if (!MDPatcherUtils.CheckTypeDefOrTypeRefName(ca.Constructor?.DeclaringType, nameSystem_Runtime_CompilerServices, nameInternalsVisibleToAttribute))
 					continue;
-				var asmName = (ca.ConstructorArguments[0].Value as UTF8String)?.String;
+				var asmNameValue = ca.ConstructorArguments[0];
+				var asmName = asmNameValue.Value as UTF8String ?? asmNameValue.Value as string;
 				if (asmName is null)
 					continue;
 				int index = asmName.IndexOf(',');
