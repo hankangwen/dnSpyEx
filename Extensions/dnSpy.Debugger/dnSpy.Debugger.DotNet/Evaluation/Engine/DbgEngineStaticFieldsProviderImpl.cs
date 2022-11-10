@@ -27,6 +27,7 @@ using dnSpy.Contracts.Debugger.DotNet.Evaluation.Formatters;
 using dnSpy.Contracts.Debugger.Engine.Evaluation;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
+using dnSpy.Contracts.Decompiler;
 using dnSpy.Debugger.DotNet.Metadata;
 
 namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
@@ -81,7 +82,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 
 					formatter.FormatType(evalInfo, output, field.DeclaringType!, null, DbgValueFormatterTypeOptions.IntrinsicTypeKeywords | DbgValueFormatterTypeOptions.Namespaces, null);
 					output.Write(DbgTextColor.Punctuation, ".");
-					output.Write(GetFieldColor(field), field.Name);
+					output.Write(GetFieldColor(field), IdentifierEscaper.Escape(field.Name));
 
 					var fieldExpression = output.CreateAndReset();
 
