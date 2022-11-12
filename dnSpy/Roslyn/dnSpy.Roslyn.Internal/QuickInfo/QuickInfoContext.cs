@@ -5,7 +5,7 @@
 using System;
 using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.LanguageServices;
+using Microsoft.CodeAnalysis.LanguageService;
 
 namespace dnSpy.Roslyn.Internal.QuickInfo {
 	sealed class QuickInfoContext {

@@ -180,6 +180,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 			info.ParameterNames = GetParameterNames(langDebugInfo.MethodDebugInfo.Method, methodDebugInfo.Parameters);
 			info.LocalConstants = default;
 			info.ReuseSpan = RoslynExpressionCompilerMethods.GetReuseSpan(allScopes, langDebugInfo.ILOffset);
+			info.ContainingDocumentName = null;
 
 			return info;
 		}

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.DocumentationComments;
 using Microsoft.CodeAnalysis.Host;
-using Microsoft.CodeAnalysis.LanguageServices;
+using Microsoft.CodeAnalysis.LanguageService;
 using Microsoft.CodeAnalysis.QuickInfo;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Shared.Utilities;
@@ -47,7 +47,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo {
 				return await ComputeFromLinkedDocumentsAsync(context, token, linkedDocumentIds).ConfigureAwait(false);
 
 			var semanticModel = await document.GetRequiredSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-			var services = document.Project.Solution.Workspace.Services;
+			var services = document.Project.Solution.Services;
 			var tokenInformation = BindToken(services, semanticModel, token, cancellationToken);
 			return (tokenInformation, supportedPlatforms: null);
 		}
@@ -69,7 +69,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo {
 			var cancellationToken = context.CancellationToken;
 			var document = context.Document;
 			var solution = document.Project.Solution;
-			var services = solution.Workspace.Services;
+			var services = solution.Services;
 
 			var semanticModel = await document.GetRequiredSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 			var mainTokenInformation = BindToken(services, semanticModel, token, cancellationToken);
@@ -167,7 +167,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo {
 		protected virtual NullableFlowState GetNullabilityAnalysis(SemanticModel semanticModel, ISymbol symbol, SyntaxNode node,
 			CancellationToken cancellationToken) => NullableFlowState.None;
 
-		private TokenInformation BindToken(HostWorkspaceServices services, SemanticModel semanticModel, SyntaxToken token,
+		private TokenInformation BindToken(SolutionServices services, SemanticModel semanticModel, SyntaxToken token,
 			CancellationToken cancellationToken) {
 			var languageServices = services.GetLanguageServices(semanticModel.Language);
 			var syntaxFacts = languageServices.GetRequiredService<ISyntaxFactsService>();
@@ -211,7 +211,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo {
 			return new TokenInformation(ImmutableArray<ISymbol>.Empty);
 		}
 
-		private ImmutableArray<ISymbol> GetSymbolsFromToken(SyntaxToken token, HostWorkspaceServices services,
+		private ImmutableArray<ISymbol> GetSymbolsFromToken(SyntaxToken token, SolutionServices services,
 			SemanticModel semanticModel, CancellationToken cancellationToken) {
 			if (GetBindableNodeForTokenIndicatingLambda(token, out var lambdaSyntax)) {
 				var symbol = semanticModel.GetSymbolInfo(lambdaSyntax, cancellationToken).Symbol;

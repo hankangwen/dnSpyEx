@@ -10,7 +10,7 @@ Imports Microsoft.CodeAnalysis.Diagnostics
 Imports Microsoft.CodeAnalysis.Formatting
 Imports Microsoft.CodeAnalysis.Formatting.Rules
 Imports Microsoft.CodeAnalysis.Host.Mef
-Imports Microsoft.CodeAnalysis.LanguageServices
+Imports Microsoft.CodeAnalysis.LanguageService
 Imports Microsoft.CodeAnalysis.Options
 Imports Microsoft.CodeAnalysis.Shared.Extensions
 Imports Microsoft.CodeAnalysis.Text
@@ -36,21 +36,16 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 			_specializedIndentationRule = specializedIndentationRule
 		End Sub
 
-		Protected Overrides Function GetSpecializedIndentationFormattingRule(indentStyle As FormattingOptions.IndentStyle) _
-			As AbstractFormattingRule
+		Protected Overrides Function GetSpecializedIndentationFormattingRule(indentStyle As FormattingOptions2.IndentStyle) As AbstractFormattingRule
 			Return If(_specializedIndentationRule, New SpecialFormattingRule(indentStyle))
 		End Function
 
-		Public Overloads Shared Function ShouldUseSmartTokenFormatterInsteadOfIndenter(
-		                                                                               formattingRules As _
-			                                                                              IEnumerable(Of AbstractFormattingRule),
+		Public Overloads Shared Function ShouldUseSmartTokenFormatterInsteadOfIndenter(formattingRules As IEnumerable(Of AbstractFormattingRule),
 		                                                                               root As CompilationUnitSyntax,
 		                                                                               line As TextLine,
-		                                                                               optionService As IOptionService,
-		                                                                               optionSet As OptionSet,
+		                                                                               options As SyntaxFormattingOptions,
 		                                                                               ByRef token As SyntaxToken,
-		                                                                               Optional neverUseWhenHavingMissingToken As _
-			                                                                              Boolean = True) As Boolean
+		                                                                               Optional neverUseWhenHavingMissingToken As Boolean = True) As Boolean
 
 			' find first text on line
 			Dim firstNonWhitespacePosition = line.GetFirstNonWhitespacePosition()
@@ -93,8 +88,6 @@ Namespace Global.dnSpy.Roslyn.VisualBasic.Internal.SmartIndent
 				' check whether current token is first token of a statement
 				Return statement.GetFirstToken() = token
 			End If
-
-			Dim options = optionSet.AsAnalyzerConfigOptions(optionService, root.Language)
 
 			' now, regular case. ask formatting rule to see whether we should use token formatter or not
 			Dim lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, options)

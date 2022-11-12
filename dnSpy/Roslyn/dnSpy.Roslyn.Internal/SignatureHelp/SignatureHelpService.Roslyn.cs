@@ -81,8 +81,8 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 				return null;
 
 			var selectedItem = GetSelectedItem(items, res.provider);
-			var syntaxFactsService = document?.Project?.LanguageServices
-											 ?.GetService<Microsoft.CodeAnalysis.LanguageServices.ISyntaxFactsService>();
+			var syntaxFactsService = document?.Project?.Services
+											 ?.GetService<Microsoft.CodeAnalysis.LanguageService.ISyntaxFactsService>();
 			var isCaseSensitive = syntaxFactsService == null || syntaxFactsService.IsCaseSensitive;
 			var selection = DefaultSignatureHelpSelector.GetSelection(items.Items,
 				selectedItem, items.ArgumentIndex, items.ArgumentCount, items.ArgumentName, isCaseSensitive);

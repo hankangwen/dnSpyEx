@@ -73,10 +73,10 @@ namespace dnSpy.Roslyn.Intellisense.Completions {
 				throw new ArgumentNullException(nameof(displayName));
 			if (applicableTo is null)
 				throw new ArgumentNullException(nameof(applicableTo));
-			var completions = new List<Completion>(completionList.Items.Length);
+			var completions = new List<Completion>(completionList.ItemsList.Count);
 			var remainingFilters = new List<(RoslynIntellisenseFilter filter, int index)>(RoslynIntellisenseFilters.CreateFilters().Select((a, index) => (a, index)));
 			var filters = new List<(RoslynIntellisenseFilter filter, int index)>(remainingFilters.Count);
-			foreach (var item in completionList.Items) {
+			foreach (var item in completionList.ItemsList) {
 				if (string.IsNullOrEmpty(item.DisplayText))
 					continue;
 				for (int i = remainingFilters.Count - 1; i >= 0; i--) {

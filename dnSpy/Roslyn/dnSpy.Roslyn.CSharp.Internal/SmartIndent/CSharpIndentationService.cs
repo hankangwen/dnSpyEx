@@ -3,18 +3,21 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Composition;
 using System.Diagnostics;
-using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Extensions;
+using Microsoft.CodeAnalysis.CSharp.Formatting;
+using Microsoft.CodeAnalysis.CSharp.LanguageService;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Formatting.Rules;
 using Microsoft.CodeAnalysis.Host.Mef;
-using Microsoft.CodeAnalysis.LanguageServices;
+using Microsoft.CodeAnalysis.Indentation;
+using Microsoft.CodeAnalysis.LanguageService;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Text;
@@ -25,29 +28,37 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 	internal sealed partial class CSharpIndentationService : AbstractIndentationService<CompilationUnitSyntax> {
 		public static readonly CSharpIndentationService Instance = new();
 
-		private static readonly AbstractFormattingRule s_instance = new FormattingRule();
-
 		[ImportingConstructor]
 		public CSharpIndentationService() { }
 
-		protected override AbstractFormattingRule GetSpecializedIndentationFormattingRule(
-			FormattingOptions.IndentStyle indentStyle) => s_instance;
+		protected override ISyntaxFacts SyntaxFacts
+			=> CSharpSyntaxFacts.Instance;
 
-		public static bool ShouldUseSmartTokenFormatterInsteadOfIndenter(IEnumerable<AbstractFormattingRule> formattingRules,
+		protected override IHeaderFacts HeaderFacts
+			=> CSharpHeaderFacts.Instance;
+
+		protected override ISyntaxFormatting SyntaxFormatting
+			=> CSharpSyntaxFormatting.Instance;
+
+		protected override AbstractFormattingRule GetSpecializedIndentationFormattingRule(FormattingOptions2.IndentStyle indentStyle)
+			=> CSharpIndentationFormattingRule.Instance;
+
+		public static bool ShouldUseSmartTokenFormatterInsteadOfIndenter(
+			IEnumerable<AbstractFormattingRule> formattingRules,
 			CompilationUnitSyntax root,
 			TextLine line,
-			IOptionService optionService,
-			OptionSet optionSet,
-			out SyntaxToken token) {
+			IndentationOptions options,
+			out SyntaxToken token)
+		{
 			Contract.ThrowIfNull(formattingRules);
 			Contract.ThrowIfNull(root);
 
 			token = default;
-			if (!optionSet.GetOption(FormattingBehaviorOptions.AutoFormattingOnReturn, LanguageNames.CSharp)) {
+			if (!options.AutoFormattingOptions.FormatOnReturn) {
 				return false;
 			}
 
-			if (optionSet.GetOption(FormattingOptions.SmartIndent, LanguageNames.CSharp) != FormattingOptions.IndentStyle.Smart) {
+			if (options.IndentStyle != FormattingOptions2.IndentStyle.Smart) {
 				return false;
 			}
 
@@ -61,8 +72,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 				return false;
 			}
 
-			if (token.IsKind(SyntaxKind.None) ||
-				token.SpanStart != firstNonWhitespacePosition) {
+			if (token.IsKind(SyntaxKind.None) || token.SpanStart != firstNonWhitespacePosition) {
 				return false;
 			}
 
@@ -74,8 +84,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 				return false;
 			}
 
-			var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token,
-				optionSet.AsAnalyzerConfigOptions(optionService, LanguageNames.CSharp));
+			var lineOperation = FormattingOperations.GetAdjustNewLinesOperation(formattingRules, previousToken, token, options.FormattingOptions);
 			if (lineOperation == null || lineOperation.Option == AdjustNewLinesOption.ForceLinesIfOnSingleLine) {
 				// no indentation operation, nothing to do for smart token formatter
 				return false;
@@ -93,13 +102,10 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 				   token.IsKind(SyntaxKind.EndOfFileToken);
 		}
 
-		private class FormattingRule : AbstractFormattingRule {
-			public override void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node,
-				in NextIndentBlockOperationAction nextOperation) {
-				// these nodes should be from syntax tree from ITextSnapshot.
-				Debug.Assert(node.SyntaxTree != null);
-				Debug.Assert(node.SyntaxTree.GetText() != null);
+		private class CSharpIndentationFormattingRule : AbstractFormattingRule {
+			public static readonly AbstractFormattingRule Instance = new CSharpIndentationFormattingRule();
 
+			public override void AddIndentBlockOperations(List<IndentBlockOperation> list, SyntaxNode node, in NextIndentBlockOperationAction nextOperation) {
 				nextOperation.Invoke();
 
 				ReplaceCaseIndentationRules(list, node);
@@ -128,10 +134,8 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 					// 3 different cases
 					// first case : this or base is the first token on line
 					// second case : colon is the first token on line
-					var colonIsFirstTokenOnLine = !constructorInitializer.ColonToken.IsMissing &&
-												  constructorInitializer.ColonToken.IsFirstTokenOnLine(text);
-					var thisOrBaseIsFirstTokenOnLine = !constructorInitializer.ThisOrBaseKeyword.IsMissing &&
-													   constructorInitializer.ThisOrBaseKeyword.IsFirstTokenOnLine(text);
+					var colonIsFirstTokenOnLine = !constructorInitializer.ColonToken.IsMissing && constructorInitializer.ColonToken.IsFirstTokenOnLine(text);
+					var thisOrBaseIsFirstTokenOnLine = !constructorInitializer.ThisOrBaseKeyword.IsMissing && constructorInitializer.ThisOrBaseKeyword.IsFirstTokenOnLine(text);
 
 					if (colonIsFirstTokenOnLine || thisOrBaseIsFirstTokenOnLine) {
 						list.Add(FormattingOperations.CreateRelativeIndentBlockOperation(
