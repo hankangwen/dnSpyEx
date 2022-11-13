@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using dnlib.DotNet;
@@ -96,7 +97,8 @@ namespace dnSpy.Roslyn.Debugger {
 				var name = language.GetVariableName(GetName(p), isThis: p.IsHiddenThisParameter);
 				var kind = p.IsHiddenThisParameter ? LocalAndMethodKind.This : LocalAndMethodKind.Parameter;
 				var (methodName, flags) = AddMethod(p.Type, p.Index, isLocal: false);
-				localAndMethodBuilder.Add(new DSEELocalAndMethod(name, name, methodName, flags, kind, p.Index, Guid.Empty, null));
+				var (payloadId, payload) = CreateCustomTypeInfoForParameter(p);
+				localAndMethodBuilder.Add(new DSEELocalAndMethod(name, name, methodName, flags, kind, p.Index, payloadId, payload));
 			}
 
 			var body = sourceMethod.Body;
@@ -116,6 +118,34 @@ namespace dnSpy.Roslyn.Debugger {
 			typeName = getLocalsType.ReflectionFullName;
 			errorMessage = null;
 			return memStream.ToArray();
+		}
+
+		static (Guid payloadId, ReadOnlyCollection<byte>? payload) CreateCustomTypeInfoForParameter(Parameter parameter) {
+			if (!parameter.HasParamDef)
+				return (Guid.Empty, null);
+			const string TupleAttributeFullName = "System.Runtime.CompilerServices.TupleElementNamesAttribute";
+			var attr = parameter.ParamDef.CustomAttributes.Find(TupleAttributeFullName);
+			if (attr is null)
+				return (Guid.Empty, null);
+			if (attr.ConstructorArguments.Count != 1)
+				return (Guid.Empty, null);
+			if (attr.ConstructorArguments[0].Value is not IList<CAArgument> argumentList)
+				return (Guid.Empty, null);
+
+			var array = new string?[argumentList.Count];
+			for (var i = 0; i < argumentList.Count; i++) {
+				var argValue = argumentList[i].Value;
+				if (argValue is UTF8String u8str)
+					array[i] = u8str.String;
+				else if (argValue is string str)
+					array[i] = str;
+				else if (argValue is null)
+					array[i] = null;
+				else
+					return (Guid.Empty, null);
+			}
+
+			return (CustomTypeInfo.PayloadTypeId, CustomTypeInfo.Encode(null, new ReadOnlyCollection<string?>(array)));
 		}
 
 		string GetName(Parameter p) {
@@ -250,7 +280,7 @@ namespace dnSpy.Roslyn.Debugger {
 
 			case ElementType.GenericInst:
 				var gis = (GenericInstSig)type!;
-				if (gis.GenericType.IsValueTypeSig)
+				if (gis.GenericType.RemovePinnedAndModifiers().IsValueTypeSig)
 					return Instruction.Create(OpCodes.Ldobj, generatedModule.Import(type).ToTypeDefOrRef());
 				return Instruction.Create(OpCodes.Ldind_Ref);
 
