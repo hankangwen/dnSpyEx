@@ -156,16 +156,19 @@ namespace dnSpy.Decompiler {
 				gt.TypeDefOrRef.FullName == "System.Nullable`1";
 		}
 
-		public static bool IsSystemValueTuple(GenericInstSig gis) => GetSystemValueTupleRank(gis) >= 0;
+		public static bool IsSystemValueTuple(GenericInstSig gis, out int cardinality) {
+			cardinality = GetSystemValueTupleRank(gis);
+			return cardinality > 0;
+		}
 
-		static int GetSystemValueTupleRank(GenericInstSig gis) {
-			GenericInstSig? gis2 = gis;
+		public static int GetSystemValueTupleRank(GenericInstSig gis) {
+			var gis2 = gis;
 			int rank = 0;
 			for (int i = 0; i < 1000; i++) {
 				int currentRank = GetValueTupleSimpleRank(gis2);
 				if (currentRank < 0)
 					return -1;
-				if (rank < 8)
+				if (currentRank < 8)
 					return rank + currentRank;
 				rank += currentRank - 1;
 				gis2 = gis2.GenericArguments[currentRank - 1] as GenericInstSig;
@@ -176,8 +179,7 @@ namespace dnSpy.Decompiler {
 		}
 
 		static int GetValueTupleSimpleRank(GenericInstSig gis) {
-			var gt = gis.GenericType as ValueTypeSig;
-			if (gt is null)
+			if (gis.GenericType is not ValueTypeSig gt)
 				return -1;
 			if (gt.TypeDefOrRef is null)
 				return -1;
@@ -478,6 +480,30 @@ namespace dnSpy.Decompiler {
 					return b;
 			}
 			return false;
+		}
+
+		public static string? GetTupleElementNameAtIndex(IHasCustomAttribute? attributeProvider, int index) {
+			if (attributeProvider is null)
+				return null;
+			foreach (var a in attributeProvider.CustomAttributes) {
+				if (a.AttributeType?.FullName != "System.Runtime.CompilerServices.TupleElementNamesAttribute")
+					continue;
+				if (a.ConstructorArguments.Count != 1)
+					continue;
+				if (a.ConstructorArguments[0].Value is not IList<CAArgument> argumentList)
+					continue;
+				if (index >= argumentList.Count)
+					continue;
+
+				var argValue = argumentList[index].Value;
+				if (argValue is UTF8String utf8String)
+					return utf8String.String;
+				if (argValue is string str)
+					return str;
+				return null;
+			}
+
+			return null;
 		}
 	}
 
