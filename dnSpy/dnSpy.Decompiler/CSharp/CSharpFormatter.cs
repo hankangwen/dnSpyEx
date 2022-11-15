@@ -880,6 +880,8 @@ namespace dnSpy.Decompiler.CSharp {
 			if (type.RemovePinnedAndModifiers() is ByRefSig byRef) {
 				type = byRef.Next;
 				dynamicTypeIndex++;
+				if (ownerParam is not null && ownerParam.Sequence == 0 && forceReadOnly)
+					dynamicTypeIndex++;
 			}
 			int tupleNameIndex = 0;
 			Write(type, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, attributeProvider);
@@ -1232,14 +1234,7 @@ namespace dnSpy.Decompiler.CSharp {
 					retType = info.MethodSig.RetType;
 					retParamDef = info.MethodDef?.Parameters.ReturnParameter.ParamDef;
 				}
-				if (retType.RemovePinnedAndModifiers() is ByRefSig && isReadOnly) {
-					retType = retType.RemovePinnedAndModifiers().Next;
-					OutputWrite(Keyword_ref, BoxedTextColor.Keyword);
-					WriteSpace();
-					OutputWrite(Keyword_readonly, BoxedTextColor.Keyword);
-					WriteSpace();
-				}
-				Write(retType, retParamDef, info.TypeGenericParams, info.MethodGenericParams, attributeProvider: retParamDef);
+				Write(retType, retParamDef, info.TypeGenericParams, info.MethodGenericParams, isReadOnly, attributeProvider: retParamDef);
 				if (writeSpace)
 					WriteSpace();
 			}
