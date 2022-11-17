@@ -194,11 +194,11 @@ namespace dnSpy.Roslyn.Debugger {
 				if (dynamicAttr.ConstructorArguments.Count == 0)
 					dynamicFlags = new ReadOnlyCollection<byte>(new byte[] { 1 });
 				else if (dynamicAttr.ConstructorArguments.Count == 1 && dynamicAttr.ConstructorArguments[0].Value is IList<CAArgument> flags) {
-					byte[]? array = new byte[flags.Count];
+					bool[]? array = new bool[flags.Count];
 					for (var i = 0; i < flags.Count; i++) {
 						var argValue = flags[i].Value;
 						if (argValue is bool b)
-							array[i] = b ? (byte)1 : (byte)0;
+							array[i] = b;
 						else {
 							array = null;
 							break;
@@ -206,7 +206,7 @@ namespace dnSpy.Roslyn.Debugger {
 					}
 
 					if (array is not null)
-						dynamicFlags = new ReadOnlyCollection<byte>(array);
+						dynamicFlags = DynamicFlagsCustomTypeInfo.ToBytes(array);
 				}
 			}
 
