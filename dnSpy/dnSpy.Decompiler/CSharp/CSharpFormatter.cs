@@ -1070,9 +1070,6 @@ namespace dnSpy.Decompiler.CSharp {
 					var sig = ((FnPtrSig)type).MethodSig;
 
 					dynamicTypeIndex++;
-					sb.Clear();
-					if (sig.RetType is CModReqdSig retModifier && FullNameFactory.FullName(retModifier.Modifier, false, null, sb) == "System.Runtime.InteropServices.InAttribute")
-						dynamicTypeIndex++;
 					Write(sig.RetType, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, attributeProvider);
 
 					WriteSpace();
@@ -1080,15 +1077,6 @@ namespace dnSpy.Decompiler.CSharp {
 					for (int i = 0; i < sig.Params.Count; i++) {
 						if (i > 0)
 							WriteCommaSpace();
-						var paramType = sig.Params[i];
-						if (paramType is CModReqdSig modReqdSig) {
-							sb.Clear();
-							var modifierFullName = FullNameFactory.FullName(modReqdSig.Modifier, false, null, sb);
-							if (modifierFullName == "System.Runtime.InteropServices.InAttribute")
-								dynamicTypeIndex++;
-							else if (modifierFullName == "System.Runtime.InteropServices.OutAttribute")
-								dynamicTypeIndex++;
-						}
 						dynamicTypeIndex++;
 						Write(sig.Params[i], typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, attributeProvider);
 					}
