@@ -1,14 +1,14 @@
 // Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -46,8 +46,8 @@ namespace dnSpy.Decompiler {
 
 		public void WriteName(ITextColorWriter output, TypeDef type) =>
 			FormatTypeName(TextColorWriterToDecompilerOutput.Create(output), type);
-		public void WriteType(ITextColorWriter output, ITypeDefOrRef? type, bool includeNamespace, ParamDef? pd = null) =>
-			TypeToString(TextColorWriterToDecompilerOutput.Create(output), type, includeNamespace, pd);
+		public void WriteType(ITextColorWriter output, ITypeDefOrRef? type, bool includeNamespace, IHasCustomAttribute? customAttributeProvider = null) =>
+			TypeToString(TextColorWriterToDecompilerOutput.Create(output), type, includeNamespace, customAttributeProvider);
 		public void WriteName(ITextColorWriter output, PropertyDef property, bool? isIndexer) =>
 			FormatPropertyName(TextColorWriterToDecompilerOutput.Create(output), property, isIndexer);
 		public virtual void Decompile(MethodDef method, IDecompilerOutput output, DecompilationContext ctx) =>

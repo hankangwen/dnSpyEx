@@ -366,7 +366,7 @@ namespace dnSpy.Decompiler.CSharp {
 					numGenParams = 0;
 			}
 			else if (useNamespaces && !UTF8String.IsNullOrEmpty(td.Namespace)) {
-				foreach (var ns in td.Namespace.String.Split('.')) {
+				foreach (var ns in td.Namespace.String.Split(namespaceSeparators)) {
 					WriteIdentifier(ns, BoxedTextColor.Namespace);
 					WritePeriod();
 				}
@@ -840,13 +840,12 @@ namespace dnSpy.Decompiler.CSharp {
 		void WriteNamespace(string ns) {
 			if (!ShowNamespaces || string.IsNullOrEmpty(ns))
 				return;
-			var namespaces = ns.Split(nsSep);
+			var namespaces = ns.Split(namespaceSeparators);
 			for (int i = 0; i < namespaces.Length; i++) {
 				OutputWrite(IdentifierEscaper.Escape(namespaces[i]), BoxedTextColor.Namespace);
 				WritePeriod();
 			}
 		}
-		static readonly char[] nsSep = new char[] { '.' };
 
 		string? GetTypeKeyword(ITypeDefOrRef? type) {
 			if (!ShowIntrinsicTypeKeywords)
@@ -880,8 +879,6 @@ namespace dnSpy.Decompiler.CSharp {
 			if (type.RemovePinnedAndModifiers() is ByRefSig byRef) {
 				type = byRef.Next;
 				dynamicTypeIndex++;
-				if (ownerParam is not null && ownerParam.Sequence == 0 && forceReadOnly)
-					dynamicTypeIndex++;
 			}
 			int tupleNameIndex = 0;
 			Write(type, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, attributeProvider);
@@ -1109,6 +1106,10 @@ namespace dnSpy.Decompiler.CSharp {
 
 				case ElementType.CModReqd:
 				case ElementType.CModOpt:
+					dynamicTypeIndex++;
+					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, attributeProvider);
+					break;
+
 				case ElementType.Pinned:
 					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, attributeProvider);
 					break;
@@ -1170,7 +1171,7 @@ namespace dnSpy.Decompiler.CSharp {
 				OutputWrite(IdentifierEscaper.Escape(parts[i]), BoxedTextColor.Namespace);
 			}
 		}
-		static readonly char[] namespaceSeparators = new char[] { '.' };
+		static readonly char[] namespaceSeparators = { '.' };
 
 		void Write(ModuleDef? module) {
 			try {
