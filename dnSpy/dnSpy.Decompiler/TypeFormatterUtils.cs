@@ -206,14 +206,17 @@ namespace dnSpy.Decompiler {
 			new SigComparer().Equals(td.BaseType, td.Module.CorLibTypes.GetTypeRef("System", "MulticastDelegate")) &&
 			td.BaseType.DefinitionAssembly.IsCorLib();
 
-		public static (PropertyDef? property, AccessorKind kind) TryGetProperty(MethodDef? method) {
+		public static (PropertyDef? property, AccessorKind kind) TryGetProperty(MethodDef? method, bool allowInitOnly) {
 			if (method is null)
 				return (null, AccessorKind.None);
 			foreach (var p in method.DeclaringType.Properties) {
 				if (method == p.GetMethod)
 					return (p, AccessorKind.Getter);
-				if (method == p.SetMethod)
+				if (method == p.SetMethod) {
+					if (allowInitOnly && method.ReturnType is CModReqdSig modReq && modReq.Modifier.FullName == "System.Runtime.CompilerServices.IsExternalInit")
+						return (p, AccessorKind.InitOnlySetter);
 					return (p, AccessorKind.Setter);
+				}
 			}
 			return (null, AccessorKind.None);
 		}
@@ -545,6 +548,7 @@ namespace dnSpy.Decompiler {
 		None,
 		Getter,
 		Setter,
+		InitOnlySetter,
 		Adder,
 		Remover,
 	}

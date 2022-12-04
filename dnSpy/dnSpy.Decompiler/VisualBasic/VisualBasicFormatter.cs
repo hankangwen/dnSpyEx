@@ -421,7 +421,7 @@ namespace dnSpy.Decompiler.VisualBasic {
 				return;
 			}
 
-			var propInfo = TypeFormatterUtils.TryGetProperty(method as MethodDef);
+			var propInfo = TypeFormatterUtils.TryGetProperty(method as MethodDef, false);
 			if (propInfo.kind != AccessorKind.None) {
 				Write(propInfo.property, propInfo.kind);
 				return;

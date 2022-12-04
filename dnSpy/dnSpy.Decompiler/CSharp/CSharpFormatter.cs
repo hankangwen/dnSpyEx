@@ -40,6 +40,7 @@ namespace dnSpy.Decompiler.CSharp {
 		const string Keyword_this = "this";
 		const string Keyword_get = "get";
 		const string Keyword_set = "set";
+		const string Keyword_init = "init";
 		const string Keyword_add = "add";
 		const string Keyword_remove = "remove";
 		const string Keyword_enum = "enum";
@@ -413,6 +414,9 @@ namespace dnSpy.Decompiler.CSharp {
 			case AccessorKind.Setter:
 				keyword = Keyword_set;
 				break;
+			case AccessorKind.InitOnlySetter:
+				keyword = Keyword_init;
+				break;
 			case AccessorKind.Adder:
 				keyword = Keyword_add;
 				break;
@@ -430,7 +434,7 @@ namespace dnSpy.Decompiler.CSharp {
 				return;
 			}
 
-			var propInfo = TypeFormatterUtils.TryGetProperty(method as MethodDef);
+			var propInfo = TypeFormatterUtils.TryGetProperty(method as MethodDef, true);
 			if (propInfo.kind != AccessorKind.None) {
 				Write(propInfo.property, writeAccessors: false);
 				WriteAccessor(propInfo.kind);
@@ -670,9 +674,17 @@ namespace dnSpy.Decompiler.CSharp {
 					OutputWrite(";", BoxedTextColor.Punctuation);
 				}
 				if (prop.SetMethods.Count > 0) {
-					WriteSpace();
-					OutputWrite(Keyword_set, BoxedTextColor.Keyword);
-					OutputWrite(";", BoxedTextColor.Punctuation);
+					if (prop.SetMethods.Count == 1 && prop.SetMethod.ReturnType is CModReqdSig modReq &&
+					    modReq.Modifier.FullName == "System.Runtime.CompilerServices.IsExternalInit") {
+						WriteSpace();
+						OutputWrite(Keyword_init, BoxedTextColor.Keyword);
+						OutputWrite(";", BoxedTextColor.Punctuation);
+					}
+					else {
+						WriteSpace();
+						OutputWrite(Keyword_set, BoxedTextColor.Keyword);
+						OutputWrite(";", BoxedTextColor.Punctuation);
+					}
 				}
 				WriteSpace();
 				OutputWrite("}", BoxedTextColor.Punctuation);
