@@ -317,6 +317,10 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl.Evaluation {
 					}
 					else {
 						if (IsPrimitiveValueType(objValue.ElementType)) {
+							// Most primitive types contain a 'm_value' field which store their value.
+							// When this field is requested, just return the primitive value.
+							if (field.Name == "m_value" && fieldDeclType == obj.Type)
+								return DbgDotNetValueResult.Create(engine.CreateDotNetValue_CorDebug(objValue, field.AppDomain, tryCreateStrongHandle: true));
 							//TODO:
 						}
 					}
