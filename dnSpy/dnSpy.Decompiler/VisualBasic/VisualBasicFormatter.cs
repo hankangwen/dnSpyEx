@@ -990,8 +990,9 @@ namespace dnSpy.Decompiler.VisualBasic {
 					if (TypeFormatterUtils.IsSystemNullable(gis)) {
 						Write(GenericArgumentResolver.Resolve(gis.GenericArguments[0], typeGenArgs, methGenArgs), null, null, ref tupleNameIndex, attributeProvider);
 						OutputWrite("?", BoxedTextColor.Operator);
+						break;
 					}
-					else if (TypeFormatterUtils.IsSystemValueTuple(gis, out int tupleCardinality)) {
+					if (TypeFormatterUtils.IsSystemValueTuple(gis, out int tupleCardinality)) {
 						int localtupleNameIndex = tupleNameIndex;
 						tupleNameIndex += tupleCardinality;
 						if (tupleCardinality > 1) {
