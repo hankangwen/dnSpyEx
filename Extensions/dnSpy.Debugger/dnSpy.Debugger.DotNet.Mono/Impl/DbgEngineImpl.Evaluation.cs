@@ -69,7 +69,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 			foreach (var thread in vm!.GetThreads()) {
 				if (thread.Name == FinalizerName)
 					continue;
-				var factory = new ObjectConstantsFactory(objectFactory.Process, thread);
+				var factory = new ObjectConstantsFactory(objectFactory.Process, funcEvalFactory, thread);
 				//TODO: Fails on mono when TypeLoad events are used, apparently we can't func-eval until much later and we don't get an error so it times out
 				if (factory.TryCreate(out objectConstants))
 					break;
