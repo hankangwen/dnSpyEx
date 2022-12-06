@@ -77,30 +77,39 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 		}
 
 		int? GetOffsetToArrayData() {
-			var byteType = thread.Domain.Corlib.GetType("System.Byte");
-			var arrayType = thread.Domain.Corlib.GetType("System.Array");
-			var typeType = thread.Domain.Corlib.GetType("System.Type");
-			if (byteType is null || arrayType is null || typeType is null)
-				return null;
-			var createInstanceMethod = GetCreateInstance(arrayType);
-			if (createInstanceMethod is null)
-				return null;
-			var args = new Value[2] {
-				byteType.GetTypeObject(),
-				new PrimitiveValue(thread.VirtualMachine, ElementType.I4, randomData.Length),
-			};
-			var arrayMirror = Call(createInstanceMethod, args) as ArrayMirror;
-			if (arrayMirror is null)
-				return null;
-
+			ArrayMirror? arrayMirror;
 			var threadTmp = thread;
-			arrayMirror.SetValues(0, randomData.Select(a => (Value)new PrimitiveValue(threadTmp.VirtualMachine, ElementType.U1, a)).ToArray());
+			// Later versions of Mono allow easier byte array creation.
+			if (thread.VirtualMachine.Version.AtLeast(2, 52)) {
+				arrayMirror = thread.Domain.CreateByteArray(randomData);
+				if (arrayMirror is null)
+					return null;
+			}
+			else {
+				var byteType = thread.Domain.Corlib.GetType("System.Byte");
+				var arrayType = thread.Domain.Corlib.GetType("System.Array");
+				var typeType = thread.Domain.Corlib.GetType("System.Type");
+				if (byteType is null || arrayType is null || typeType is null)
+					return null;
+				var createInstanceMethod = GetCreateInstance(arrayType);
+				if (createInstanceMethod is null)
+					return null;
+				var args = new Value[2] {
+					byteType.GetTypeObject(),
+					new PrimitiveValue(thread.VirtualMachine, ElementType.I4, randomData.Length),
+				};
+				arrayMirror = Call(createInstanceMethod, args) as ArrayMirror;
+				if (arrayMirror is null)
+					return null;
+				arrayMirror.SetValues(0, randomData.Select(a => (Value)new PrimitiveValue(threadTmp.VirtualMachine, ElementType.U1, a)).ToArray());
+			}
+
 			var arrayData = process.ReadMemory((ulong)arrayMirror.Address, randomData.Length + 0x80);
 			var res = GetIndex(arrayData, randomData);
 			arrayMirror.SetValues(0, randomData.Select(a => (Value)new PrimitiveValue(threadTmp.VirtualMachine, ElementType.U1, (byte)0)).ToArray());
 			return res;
 		}
-		static readonly byte[] randomData = new byte[] { 0x4A, 0xA3, 0x6F, 0x96, 0xB3, 0x8F, 0x4A, 0x5A, 0xB5, 0xD1, 0x8B, 0x76, 0x06, 0x37, 0xB6, 0x67 };
+		static readonly byte[] randomData = { 0x4A, 0xA3, 0x6F, 0x96, 0xB3, 0x8F, 0x4A, 0x5A, 0xB5, 0xD1, 0x8B, 0x76, 0x06, 0x37, 0xB6, 0x67 };
 
 		static int? GetIndex(byte[] data, byte[] pattern) {
 			for (int i = 0; i + pattern.Length <= data.Length; i++) {
