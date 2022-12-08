@@ -49,7 +49,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				case ElementType.R8:		return reflectionAppDomain.System_Double;
 				case ElementType.I:			return reflectionAppDomain.System_IntPtr;
 				case ElementType.U:			return reflectionAppDomain.System_UIntPtr;
-				case ElementType.FnPtr:		return slotType.IsFunctionPointer ? slotType : reflectionAppDomain.System_Void.MakePointerType(); //TODO: verify
+				case ElementType.FnPtr:		return slotType.IsFunctionPointer ? slotType : reflectionAppDomain.System_Void.MakePointerType();
 				case ElementType.Ptr:		return slotType.IsPointer ? slotType : reflectionAppDomain.System_Void.MakePointerType();
 				case ElementType.Object:	return slotType;// This is a null value
 				default:					throw new InvalidOperationException();

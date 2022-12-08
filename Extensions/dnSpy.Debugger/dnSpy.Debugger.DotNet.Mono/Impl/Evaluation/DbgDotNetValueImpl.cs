@@ -75,9 +75,9 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 		public override IDbgDotNetRuntime? TryGetDotNetRuntime() => engine.DotNetRuntime;
 
 		public override DbgDotNetValueResult LoadIndirect() {
-			if (!Type.IsByRef)
+			if (!Type.IsByRef && !Type.IsPointer)
 				return base.LoadIndirect();
-			if (IsNullByRef)
+			if (IsNullByRef || IsNull)
 				return DbgDotNetValueResult.Create(new SyntheticNullValue(Type.GetElementType()!));
 			if (engine.CheckMonoDebugThread())
 				return Dereference_MonoDebug();
@@ -85,9 +85,14 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 		}
 
 		DbgDotNetValueResult Dereference_MonoDebug() {
-			Debug.Assert(Type.IsByRef && !IsNullByRef);
+			Debug.Assert((Type.IsByRef && !IsNullByRef) || (Type.IsPointer && !IsNull));
 			engine.VerifyMonoDebugThread();
-			return DbgDotNetValueResult.Create(engine.CreateDotNetValue_MonoDebug(valueLocation.Dereference()));
+			ValueLocation vl;
+			if (value is PointerValue ptrVal && Type.IsPointer)
+				vl = new PointerValueLocation(Type.GetElementType()!, ptrVal);
+			else
+				vl = valueLocation.Dereference();
+			return DbgDotNetValueResult.Create(engine.CreateDotNetValue_MonoDebug(vl));
 		}
 
 		public override string? StoreIndirect(DbgEvaluationInfo evalInfo, object? value) {
