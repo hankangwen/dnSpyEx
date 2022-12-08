@@ -443,6 +443,9 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 
 				hProcess_debuggee = NativeMethods.OpenProcess(NativeMethods.PROCESS_QUERY_LIMITED_INFORMATION, false, (uint)vmPid);
 
+				dbgManager.WriteMessage(string.Format(dnSpy_Debugger_DotNet_Mono_Resources.MonoVMVersionMessage, vm.Version.VMVersion));
+				dbgManager.WriteMessage(string.Format(dnSpy_Debugger_DotNet_Mono_Resources.MonoDebuggerProtocolVersionMessage, vm.Version.MajorVersion, vm.Version.MinorVersion));
+
 				var eventThread = new Thread(MonoEventThread);
 				eventThread.IsBackground = true;
 				eventThread.Name = "MonoDebugEvent";
