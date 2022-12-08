@@ -284,7 +284,12 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				addr = (ulong)om.Address;
 				if (addr == 0)
 					return null;
-				return new DbgRawAddressValue(addr, 0);
+				if (!om.VirtualMachine.Version.AtLeast(2, 46))
+					return new DbgRawAddressValue(addr, 0);
+				var offsetToObjectData = (uint)Type.AppDomain.Runtime.PointerSize * 2;
+				if (onlyDataAddress)
+					return new DbgRawAddressValue(addr + offsetToObjectData, (ulong)om.Type.GetValueSize());
+				return new DbgRawAddressValue(addr, (ulong)om.Type.GetValueSize() + offsetToObjectData);
 
 			default:
 				return null;
