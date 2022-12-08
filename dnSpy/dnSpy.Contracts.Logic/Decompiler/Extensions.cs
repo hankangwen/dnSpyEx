@@ -30,7 +30,7 @@ namespace dnSpy.Contracts.Decompiler {
 	/// </summary>
 	public static class Extensions {
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -46,7 +46,7 @@ namespace dnSpy.Contracts.Decompiler {
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -61,7 +61,7 @@ namespace dnSpy.Contracts.Decompiler {
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -102,6 +102,12 @@ namespace dnSpy.Contracts.Decompiler {
 
 				if (ca.AttributeType is TypeDef td) {
 					if (td.Namespace == @namespace && td.Name == name)
+						return true;
+					continue;
+				}
+
+				if (ca.AttributeType is TypeSpec ts && ts.ScopeType is { } scopeType) {
+					if (scopeType.Namespace == @namespace && scopeType.Name == name)
 						return true;
 					continue;
 				}
