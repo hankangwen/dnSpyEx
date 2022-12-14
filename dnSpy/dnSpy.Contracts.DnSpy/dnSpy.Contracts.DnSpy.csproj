@@ -46,8 +46,7 @@
     Will probably be fixed after Microsoft.VisualStudio.Composition.NetFxAttributes and Microsoft.VisualStudio.Composition
     reference a newer System.ComponentModel.Composition nuget in which case this hack can be removed.
     -->
-    <PackageReference Include="System.ComponentModel.Composition" Version="$(SCCompositionVersion)" Condition=" '$(CopyLocalLockFileAssemblies)' == 'true' " />
-    <PackageReference Include="Microsoft.VisualStudio.Composition.NetFxAttributes" Version="$(MSVSCompositionVersion)" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="$(SCCompositionVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" Version="$(MSVSIntellisenseVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf" Version="$(MSVSTextVersion)" />
   </ItemGroup>
