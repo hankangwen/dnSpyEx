@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
 
 namespace dnSpy.Decompiler.MSBuild {
@@ -62,7 +63,8 @@ namespace dnSpy.Decompiler.MSBuild {
 
 				writer.WriteStartElement("Project");
 
-				var projectType = GetProjectType();
+				var possibleProjectTypes = GetPossibleProjectTypes();
+				var projectType = DetermineProjectType(possibleProjectTypes);
 				writer.WriteAttributeString("Sdk", GetSdkString(projectType));
 
 				writer.WriteStartElement("PropertyGroup");
@@ -72,7 +74,7 @@ namespace dnSpy.Decompiler.MSBuild {
 				writer.WriteElementString("RootNamespace", GetRootNamespace());
 				var asmName = GetAssemblyName();
 				if (!string.IsNullOrEmpty(asmName))
-					writer.WriteElementString("AssemblyName", GetAssemblyName());
+					writer.WriteElementString("AssemblyName", asmName);
 				writer.WriteElementString("GenerateAssemblyInfo", "False");
 
 				writer.WriteElementString("FileAlignment", GetFileAlignment());
@@ -83,9 +85,9 @@ namespace dnSpy.Decompiler.MSBuild {
 
 				writer.WriteElementString("TargetFramework", moniker);
 
-				if (projectType == ProjectType.Wpf)
+				if (possibleProjectTypes.Contains(ProjectType.Wpf))
 					writer.WriteElementString("UseWPF", "True");
-				else if (projectType == ProjectType.WinForms)
+				if (possibleProjectTypes.Contains(ProjectType.WinForms))
 					writer.WriteElementString("UseWindowsForms", "True");
 
 				if (project.Platform != "AnyCPU")
@@ -223,14 +225,41 @@ namespace dnSpy.Decompiler.MSBuild {
 			}
 		}
 
-		ProjectType GetProjectType() {
-			foreach (var referenceName in project.Module.GetAssemblyRefs().Select(r => r.Name)) {
-				if (referenceName.StartsWith("Microsoft.AspNetCore", StringComparison.Ordinal))
-					return ProjectType.Web;
-				if (referenceName == "PresentationFramework")
-					return ProjectType.Wpf;
-				if (referenceName == "System.Windows.Forms")
-					return ProjectType.WinForms;
+		static readonly UTF8String PresentationFrameworkString = new UTF8String("PresentationFramework");
+		static readonly UTF8String PresentationCoreString = new UTF8String("PresentationCore");
+		static readonly UTF8String WindowsBaseString = new UTF8String("WindowsBase");
+		static readonly UTF8String SystemWindowsFormsString = new UTF8String("System.Windows.Forms");
+
+		IReadOnlyCollection<ProjectType> GetPossibleProjectTypes() {
+			var hashSet = new HashSet<ProjectType>();
+
+			foreach (var assemblyRef in project.Module.GetAssemblyRefs()) {
+				if (assemblyRef.Name.StartsWith("Microsoft.AspNetCore", StringComparison.Ordinal))
+					hashSet.Add(ProjectType.Web);
+				else if (assemblyRef.Name == PresentationFrameworkString || assemblyRef.Name == PresentationCoreString ||
+						 assemblyRef.Name == WindowsBaseString)
+					hashSet.Add(ProjectType.Wpf);
+				else if (assemblyRef.Name == SystemWindowsFormsString)
+					hashSet.Add(ProjectType.WinForms);
+			}
+
+			return hashSet;
+		}
+
+		static ProjectType DetermineProjectType(IReadOnlyCollection<ProjectType> possibleProjectTypes) {
+			// If only one of the project types was detected, use it
+			if (possibleProjectTypes.Count == 1)
+				return possibleProjectTypes.Single();
+
+			ProjectType[] preferredProjectTypes = {
+				ProjectType.Wpf,
+				ProjectType.WinForms,
+				ProjectType.Web
+			};
+
+			foreach (var preferredProjectType in preferredProjectTypes) {
+				if (possibleProjectTypes.Contains(preferredProjectType))
+					return preferredProjectType;
 			}
 
 			return ProjectType.Default;
