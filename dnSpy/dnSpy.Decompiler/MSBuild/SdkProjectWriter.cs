@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright (C) 2014-2019 de4dot@gmail.com
 
     This file is part of dnSpy
@@ -132,10 +132,7 @@ namespace dnSpy.Decompiler.MSBuild {
 						writer.WriteStartElement("ProjectReference");
 						writer.WriteAttributeString("Include", GetRelativePath(otherProj.Filename));
 						writer.WriteStartElement("Project");
-						var guidString = otherProj.Guid.ToString("B");
-						if (projectVersion < ProjectVersion.VS2012)
-							guidString = guidString.ToUpperInvariant();
-						writer.WriteString(guidString);
+						writer.WriteString(otherProj.Guid.ToString("B").ToUpperInvariant());
 						writer.WriteEndElement();
 						writer.WriteStartElement("Name");
 						writer.WriteString(IdentifierEscaper.Escape(otherProj.Module.Assembly is null ? string.Empty : otherProj.Module.Assembly.Name.String));
