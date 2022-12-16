@@ -93,6 +93,10 @@ namespace dnSpy.Decompiler.MSBuild {
 				else if (project.Module.Is32BitPreferred)
 					writer.WriteElementString("Prefer32Bit", "True");
 
+				var noWarnList = GetNoWarnList();
+				if (noWarnList is not null)
+					writer.WriteElementString("NoWarn", noWarnList);
+
 				writer.WriteEndElement();
 
 				writer.WriteStartElement("PropertyGroup");

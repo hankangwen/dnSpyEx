@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using dnlib.DotNet;
 using dnlib.PE;
+using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.Decompiler.MSBuild {
@@ -107,6 +108,12 @@ namespace dnSpy.Decompiler.MSBuild {
 				Debug.Fail("Unknown module kind: " + project.Module.Kind);
 				return "Library";
 			}
+		}
+
+		protected string? GetNoWarnList() {
+			if (project.Options.Decompiler.GenericGuid == DecompilerConstants.LANGUAGE_VISUALBASIC)
+				return "41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314";
+			return null;
 		}
 
 		protected string GetRootNamespace() => string.IsNullOrEmpty(project.DefaultNamespace) ? GetAssemblyName() : project.DefaultNamespace;
