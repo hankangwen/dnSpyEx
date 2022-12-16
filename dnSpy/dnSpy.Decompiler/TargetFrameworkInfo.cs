@@ -422,7 +422,7 @@ namespace dnSpy.Decompiler {
 				return "sl" + Version[0];
 
 			case ".NETCore":
-				return "netcore" + Version.Replace(".", "");
+				return "netcore" + Version;
 
 			case "WindowsPhone":
 				var builder = new StringBuilder();
