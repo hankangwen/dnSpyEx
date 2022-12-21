@@ -306,7 +306,8 @@ namespace dnSpy.Decompiler {
 				return "Windows Universal " + Version;
 
 			case ".NETCoreApp":
-				if (Version.StartsWith("1.") || Version.StartsWith("2.") || Version.StartsWith("3.")) {
+				if (Version.StartsWith("1.", StringComparison.Ordinal) || Version.StartsWith("2.", StringComparison.Ordinal) ||
+				    Version.StartsWith("3.", StringComparison.Ordinal)) {
 					// .NET Core 1.0-3.x
 					return ".NET Core " + Version;
 				}
@@ -413,7 +414,13 @@ namespace dnSpy.Decompiler {
 				return "net" + Version.Replace(".", "");
 
 			case ".NETCoreApp":
-				return "netcoreapp" + Version;
+				if (Version.StartsWith("1.", StringComparison.Ordinal) || Version.StartsWith("2.", StringComparison.Ordinal) ||
+				    Version.StartsWith("3.", StringComparison.Ordinal)) {
+					// .NET Core 1.0-3.x
+					return "netcoreapp" + Version;
+				}
+				// .NET 5.0+
+				return "net" + Version;
 
 			case ".NETStandard":
 				return "netstandard" + Version;
