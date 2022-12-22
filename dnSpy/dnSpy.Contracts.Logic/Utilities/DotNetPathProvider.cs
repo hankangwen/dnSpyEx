@@ -29,7 +29,7 @@ using Microsoft.Win32;
 
 namespace dnSpy.Contracts.Utilities {
 	/// <summary>
-	/// Locates .NET Core instalation directories
+	/// Locates .NET Core installation directories
 	/// </summary>
 	public sealed class DotNetPathProvider {
 		readonly FrameworkPaths[] netPathsShared;
@@ -412,6 +412,36 @@ namespace dnSpy.Contracts.Utilities {
 			}
 
 			return null;
+		}
+
+		/// <summary>
+		/// Locates the assembly name in the .NET Core runtime directories.
+		/// </summary>
+		/// <param name="assemblyName">The assembly name to look up</param>
+		/// <param name="runtimeVersion">The version of the runtime</param>
+		/// <param name="bitness">The bitness of the runtime</param>
+		/// <param name="runtimePack">The runtime pack which contained the assembly</param>
+		/// <returns>Full path to the assembly</returns>
+		public bool TryGetRuntimePackOfAssembly(string assemblyName, Version runtimeVersion, int bitness, [NotNullWhen(true)] out string? runtimePack) {
+			string[]? dotNetPaths = TryGetSharedDotNetPaths(runtimeVersion, bitness);
+			if (dotNetPaths is not null) {
+				foreach (string path in dotNetPaths) {
+					string assemblyPath = Path.Combine(path, assemblyName + ".dll");
+					if (File.Exists(assemblyPath)) {
+						runtimePack = Path.GetFileName(Path.GetDirectoryName(path)!);
+						return true;
+					}
+
+					assemblyPath = Path.Combine(path, assemblyName + ".exe");
+					if (File.Exists(assemblyPath)) {
+						runtimePack = Path.GetFileName(Path.GetDirectoryName(path)!);
+						return true;
+					}
+				}
+			}
+
+			runtimePack = null;
+			return false;
 		}
 
 		static bool IsFileInDir(string dir, string file) {

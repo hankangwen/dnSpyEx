@@ -1,4 +1,4 @@
-/*
+﻿/*
     Copyright (C) 2014-2019 de4dot@gmail.com
 
     This file is part of dnSpy
@@ -25,6 +25,7 @@ using System.Text;
 using System.Xml;
 using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
+using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.Decompiler.MSBuild {
 	sealed class SdkProjectWriter : ProjectWriterBase {
@@ -49,8 +50,10 @@ namespace dnSpy.Decompiler.MSBuild {
 			Web
 		}
 
+		readonly DotNetPathProvider dotNetPathProvider;
+
 		public SdkProjectWriter(Project project, ProjectVersion projectVersion, IList<Project> allProjects,
-			IList<string> userGACPaths) : base(project, projectVersion, allProjects, userGACPaths) { }
+			IList<string> userGACPaths) : base(project, projectVersion, allProjects, userGACPaths) => dotNetPathProvider = new DotNetPathProvider();
 
 		public override void Write() {
 			project.OnWrite();
@@ -79,7 +82,8 @@ namespace dnSpy.Decompiler.MSBuild {
 
 				writer.WriteElementString("FileAlignment", GetFileAlignment());
 
-				var moniker = TargetFrameworkInfo.Create(project.Module).GetTargetFrameworkMoniker();
+				var targetFrameworkInfo = TargetFrameworkInfo.Create(project.Module);
+				var moniker = targetFrameworkInfo.GetTargetFrameworkMoniker();
 				if (moniker is null)
 					throw new NotSupportedException("This assembly cannot be decompiled to a SDK style project.");
 
@@ -142,8 +146,36 @@ namespace dnSpy.Decompiler.MSBuild {
 					writer.WriteEndElement();
 				}
 
-				var gacRefs = project.Module.GetAssemblyRefs().Where(a => !implicitReferences.Contains(a.Name)).OrderBy(a => a.Name.String, StringComparer.OrdinalIgnoreCase).ToArray();
-				var extraRefsWithoutImplicitRefs = project.ExtraAssemblyReferences.Where(a => !implicitReferences.Contains(a)).ToArray();
+				bool isNetCoreApp = targetFrameworkInfo.Framework == ".NETCoreApp";
+				var netCoreVersion = isNetCoreApp ? Version.Parse(targetFrameworkInfo.Version) : null;
+				int bitness = project.Module.GetPointerSize(IntPtr.Size) * 8;
+
+				var targetPacks = new HashSet<string>();
+
+				if (isNetCoreApp) {
+					targetPacks.Add("Microsoft.NETCore.App");
+					switch (projectType) {
+					case ProjectType.WinForms:
+					case ProjectType.Wpf:
+						targetPacks.Add("Microsoft.WindowsDesktop.App");
+						break;
+					case ProjectType.Web:
+						targetPacks.Add("Microsoft.AspNetCore.App");
+						targetPacks.Add("Microsoft.AspNetCore.All");
+						break;
+					}
+				}
+
+				bool ReferenceFilter(string refName) {
+					if (isNetCoreApp)
+						return !dotNetPathProvider.TryGetRuntimePackOfAssembly(refName, netCoreVersion!, bitness, out string? runtimePack) || !targetPacks.Contains(runtimePack);
+					if (implicitReferences.Contains(refName))
+						return false;
+					return true;
+				}
+
+				var gacRefs = project.Module.GetAssemblyRefs().Where(a => ReferenceFilter(a.Name)).OrderBy(a => a.Name.String, StringComparer.OrdinalIgnoreCase).ToArray();
+				var extraRefsWithoutImplicitRefs = project.ExtraAssemblyReferences.Where(ReferenceFilter).ToArray();
 				if (gacRefs.Length > 0 || extraRefsWithoutImplicitRefs.Length > 0) {
 					writer.WriteStartElement("ItemGroup");
 					var hash = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
