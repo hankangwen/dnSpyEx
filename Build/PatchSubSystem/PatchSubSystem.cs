@@ -31,14 +31,14 @@ namespace PatchSubSystem {
 			}
 
 			if (!Enum.TryParse<Subsystem>(TargetSubSystem, out var targetSubSystem)) {
-				Log.LogMessageFromText("Specifed SubSystem is invalid", MessageImportance.High);
+				Log.LogMessageFromText("Specified SubSystem is invalid", MessageImportance.High);
 				return false;
 			}
 
 			var exeFile = Path.ChangeExtension(OutputFile, "exe");
 
 			if (!File.Exists(exeFile)) {
-				Log.LogMessageFromText("Apphost for specified output file does not exist", MessageImportance.High);
+				Log.LogMessageFromText("AppHost for specified output file does not exist", MessageImportance.High);
 				return false;
 			}
 
