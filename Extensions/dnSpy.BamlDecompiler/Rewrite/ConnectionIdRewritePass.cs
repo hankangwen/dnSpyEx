@@ -188,7 +188,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 						switch (expr.Code) {
 						case ILCode.Stfld:
-							cb += new FieldAssignment { FieldName = ((IField)expr.Operand).Name }.Callback;
+							cb += new FieldAssignment { FieldName = IdentifierEscaper.Escape(((IField)expr.Operand).Name) }.Callback;
 							break;
 
 						case ILCode.Call:
@@ -213,7 +213,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 								cb += new EventAttachment {
 									AttachedType = reField.DeclaringType.ResolveTypeDefThrow(),
 									EventName = evName,
-									MethodName = handler.Name
+									MethodName = IdentifierEscaper.Escape(handler.Name)
 								}.Callback;
 							}
 							else {
@@ -231,7 +231,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 								cb += new EventAttachment {
 									EventName = ev.Name,
-									MethodName = handler.Name
+									MethodName = IdentifierEscaper.Escape(handler.Name)
 								}.Callback;
 							}
 							break;
@@ -301,7 +301,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			if (evName.EndsWith("Event", StringComparison.Ordinal))
 				evName = evName.Substring(0, evName.Length - 5);
 
-			@event = new EventAttachment { EventName = evName, MethodName = handlerMethod.Name };
+			@event = new EventAttachment { EventName = evName, MethodName = IdentifierEscaper.Escape(handlerMethod.Name) };
 			return true;
 		}
 
