@@ -836,11 +836,26 @@
   <data name="MemberKind_Properties" xml:space="preserve">
     <value>Properties</value>
   </data>
+  <data name="AboutScreen_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="AboutScreen_CheckingForUpdates" xml:space="preserve">
+    <value>Checking for updates...</value>
+  </data>
+  <data name="AboutScreen_FailedToRetrieveUpdateInfo" xml:space="preserve">
+    <value>Failed to retrive update information!</value>
+  </data>
   <data name="AboutScreen_LicenseInfo" xml:space="preserve">
     <value>dnSpy is licensed under GPLv3.</value>
   </data>
   <data name="AboutScreen_LoadedFiles" xml:space="preserve">
     <value>Loaded files:</value>
+  </data>
+  <data name="AboutScreen_NewUpdateAvailable" xml:space="preserve">
+    <value>A new version of dnSpy is available: {0}, Do you want to open the download page?</value>
+  </data>
+  <data name="AboutScreen_RunningLatestVersion" xml:space="preserve">
+    <value>You are running the latest version of dnSpy!</value>
   </data>
   <data name="SearchWindow_SearchFrameworkAssemblies" xml:space="preserve">
     <value>Search in framework assemblies</value>

@@ -123,6 +123,33 @@ namespace dnSpy.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Check for updates.
+        /// </summary>
+        public static string AboutScreen_CheckForUpdates {
+            get {
+                return ResourceManager.GetString("AboutScreen_CheckForUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checking for updates....
+        /// </summary>
+        public static string AboutScreen_CheckingForUpdates {
+            get {
+                return ResourceManager.GetString("AboutScreen_CheckingForUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to retrive update information!.
+        /// </summary>
+        public static string AboutScreen_FailedToRetrieveUpdateInfo {
+            get {
+                return ResourceManager.GetString("AboutScreen_FailedToRetrieveUpdateInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to dnSpy is licensed under GPLv3..
         /// </summary>
         public static string AboutScreen_LicenseInfo {
@@ -137,6 +164,24 @@ namespace dnSpy.Properties {
         public static string AboutScreen_LoadedFiles {
             get {
                 return ResourceManager.GetString("AboutScreen_LoadedFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new version of dnSpy is available: {0}, Do you want to open the download page?.
+        /// </summary>
+        public static string AboutScreen_NewUpdateAvailable {
+            get {
+                return ResourceManager.GetString("AboutScreen_NewUpdateAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are running the latest version of dnSpy!.
+        /// </summary>
+        public static string AboutScreen_RunningLatestVersion {
+            get {
+                return ResourceManager.GetString("AboutScreen_RunningLatestVersion", resourceCulture);
             }
         }
         

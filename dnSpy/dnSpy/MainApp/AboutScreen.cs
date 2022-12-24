@@ -25,6 +25,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
 using dnSpy.Contracts.App;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents.Tabs;
@@ -189,7 +191,7 @@ namespace dnSpy.MainApp {
 			}
 		}
 
-		void Write(IDecompilerOutput output) {
+		void Write(IDocumentViewerOutput output) {
 #if NETFRAMEWORK
 			const string frameworkName = ".NET Framework";
 #elif NET
@@ -201,6 +203,16 @@ namespace dnSpy.MainApp {
 			output.WriteLine();
 			output.WriteLine(dnSpy_Resources.AboutScreen_LicenseInfo, BoxedTextColor.Text);
 			output.WriteLine();
+
+			output.AddUIElement(delegate {
+				var button = new Button { Content = dnSpy_Resources.AboutScreen_CheckForUpdates };
+				button.SetResourceReference(FrameworkElement.StyleProperty, "TextEditorButton");
+				button.Click += OnUpdateButtonClick;
+				return button;
+			});
+			output.WriteLine();
+			output.WriteLine();
+
 			output.WriteLine(dnSpy_Resources.AboutScreen_LoadedFiles, BoxedTextColor.Text);
 			foreach (var info in GetInfos()) {
 				output.WriteLine();
@@ -210,6 +222,28 @@ namespace dnSpy.MainApp {
 			}
 			output.WriteLine();
 			WriteResourceFile(output, "dnSpy.LicenseInfo.CREDITS.txt");
+		}
+
+		static async void OnUpdateButtonClick(object sender, RoutedEventArgs e) {
+			e.Handled = true;
+			var button = (Button)sender;
+
+			button.IsEnabled = false;
+			button.Content = dnSpy_Resources.AboutScreen_CheckingForUpdates;
+
+			var updateResult = await UpdateChecker.CheckForUpdatesAsync();
+			if (!updateResult.Success)
+				MsgBox.Instance.Show(dnSpy_Resources.AboutScreen_FailedToRetrieveUpdateInfo);
+			else if (!updateResult.UpdateAvailable)
+				MsgBox.Instance.Show(dnSpy_Resources.AboutScreen_RunningLatestVersion);
+			else {
+				var result = MsgBox.Instance.Show(string.Format(dnSpy_Resources.AboutScreen_NewUpdateAvailable, updateResult.VersionInfo.Version), MsgBoxButton.Yes | MsgBoxButton.No);
+				if (result == MsgBoxButton.Yes)
+					AboutHelpers.OpenWebPage(updateResult.VersionInfo.DownloadUrl, MsgBox.Instance);
+			}
+
+			button.Content = dnSpy_Resources.AboutScreen_CheckForUpdates;
+			button.IsEnabled = true;
 		}
 
 		void WriteResourceFile(IDecompilerOutput output, string name, bool addNewLine = true) {
