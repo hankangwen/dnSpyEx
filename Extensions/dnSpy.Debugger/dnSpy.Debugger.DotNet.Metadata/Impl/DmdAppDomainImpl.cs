@@ -209,7 +209,13 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 				}
 			}
 
-			//TODO: Remove all its types from fullyResolvedTypes
+			lock (fullyResolvedTypesLockObj) {
+				foreach (var module in modules) {
+					foreach (var dmdType in module.GetTypes()) {
+						fullyResolvedTypes.Remove(dmdType);
+					}
+				}
+			}
 		}
 
 		internal bool GetIsLoaded(DmdAssemblyImpl assembly) {
