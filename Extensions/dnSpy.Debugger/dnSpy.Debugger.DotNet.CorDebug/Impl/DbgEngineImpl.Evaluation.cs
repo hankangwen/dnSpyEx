@@ -183,7 +183,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 						var val = converter.Convert(obj, declType, out origType);
 						if (val.ErrorMessage is not null)
 							return DbgDotNetValueResult.CreateError(val.ErrorMessage);
-						args[w++] = BoxIfNeeded(dnEval, appDomain, createdValues, val.CorValue!, declType, origType);
+						var valType = origType ?? new ReflectionTypeCreator(this, method.AppDomain).Create(val.CorValue!.ExactType);
+						args[w++] = BoxIfNeeded(dnEval, appDomain, createdValues, val.CorValue!, declType, valType);
 					}
 					for (int i = 0; i < arguments.Length; i++) {
 						var paramType = paramTypes[i];

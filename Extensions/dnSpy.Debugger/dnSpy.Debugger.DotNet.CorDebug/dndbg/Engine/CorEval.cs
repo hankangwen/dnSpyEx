@@ -63,8 +63,14 @@ namespace dndbg.Engine {
 		}
 
 		public CorValue? CreateValueForType(CorType type) {
-			if (eval2 is null)
-				return null;
+			if (eval2 is null) {
+				var et = type.ElementType;
+				if (et == CorElementType.GenericInst)
+					return null;
+				if (et == CorElementType.Class || et == CorElementType.ValueType)
+					return CreateValue(et, type.Class);
+				return CreateValue(et);
+			}
 			int hr = eval2.CreateValueForType(type.RawObject, out var value);
 			return hr < 0 || value is null ? null : new CorValue(value);
 		}
@@ -95,14 +101,20 @@ namespace dndbg.Engine {
 			return eval2.NewParameterizedObjectNoConstructor(cls.RawObject, typeArgs is null ? 0 : typeArgs.Length, typeArgs.ToCorDebugArray());
 		}
 
-		public int NewArray(CorElementType et, CorClass cls, uint[] dims, int[]? lowBounds = null) {
+		public int NewArray(CorElementType et, CorClass? cls, uint[] dims, int[]? lowBounds = null) {
 			Debug2.Assert(dims is not null && (lowBounds is null || lowBounds.Length == dims.Length));
 			return obj.NewArray(et, cls?.RawObject, dims.Length, dims, lowBounds);
 		}
 
 		public int NewParameterizedArray(CorType type, uint[] dims, int[]? lowBounds = null) {
-			if (eval2 is null)
-				return -1;
+			if (eval2 is null) {
+				var et = type.ElementType;
+				if (et == CorElementType.GenericInst)
+					return -1;
+				if (et == CorElementType.Class || et == CorElementType.ValueType)
+					return NewArray(et, type.Class, dims, lowBounds);
+				return NewArray(et, null, dims, lowBounds);
+			}
 			Debug2.Assert(dims is not null && (lowBounds is null || lowBounds.Length == dims.Length));
 			return eval2.NewParameterizedArray(type.RawObject, dims.Length, dims, lowBounds);
 		}
