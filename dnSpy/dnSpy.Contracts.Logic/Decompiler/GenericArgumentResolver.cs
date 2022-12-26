@@ -7,8 +7,8 @@ namespace dnSpy.Contracts.Decompiler {
 	/// Resolves generic arguments
 	/// </summary>
 	public struct GenericArgumentResolver {
-		IList<TypeSig> typeGenArgs;
-		IList<TypeSig> methodGenArgs;
+		readonly IList<TypeSig> typeGenArgs;
+		readonly IList<TypeSig> methodGenArgs;
 		RecursionCounter recursionCounter;
 
 		GenericArgumentResolver(IList<TypeSig>? typeGenArgs, IList<TypeSig>? methodGenArgs) {
@@ -81,31 +81,25 @@ namespace dnSpy.Contracts.Decompiler {
 			return null;
 		}
 
-		MethodSig? ResolveGenericArgs(MethodBaseSig sig) {
+		MethodBaseSig? ResolveGenericArgs(MethodBaseSig? sig) {
 			if (sig is null)
 				return null;
 			if (!recursionCounter.Increment())
 				return null;
 
-			MethodSig result = ResolveGenericArgs(new MethodSig(sig.CallingConvention), sig);
+			MethodBaseSig? result;
+			if (sig is MethodSig msig)
+				result = ResolveGenericArgs(msig);
+			else if (sig is PropertySig psig)
+				result = ResolveGenericArgs(psig);
+			else
+				result = null;
 
 			recursionCounter.Decrement();
 			return result;
 		}
 
-		MethodSig ResolveGenericArgs(MethodSig sig, MethodBaseSig old) {
-			sig.RetType = ResolveGenericArgs(old.RetType);
-			foreach (var p in old.Params)
-				sig.Params.Add(ResolveGenericArgs(p));
-			sig.GenParamCount = old.GenParamCount;
-			if (sig.ParamsAfterSentinel is not null) {
-				foreach (var p in old.ParamsAfterSentinel)
-					sig.ParamsAfterSentinel.Add(ResolveGenericArgs(p));
-			}
-			return sig;
-		}
-
-		TypeSig? ResolveGenericArgs(TypeSig typeSig) {
+		TypeSig? ResolveGenericArgs(TypeSig? typeSig) {
 			if (typeSig is null)
 				return null;
 			if (!recursionCounter.Increment())
@@ -149,22 +143,19 @@ namespace dnSpy.Contracts.Decompiler {
 				result = new PinnedSig(ResolveGenericArgs(typeSig.Next));
 				break;
 			case ElementType.FnPtr:
-				result = new FnPtrSig(ResolveGenericArgs(((FnPtrSig)typeSig).MethodSig));
+				result = new FnPtrSig(ResolveGenericArgs(((FnPtrSig)typeSig).Signature));
 				break;
-
 			case ElementType.Array:
-				ArraySig arraySig = (ArraySig)typeSig;
-				List<uint> sizes = new List<uint>(arraySig.Sizes);
-				List<int> lbounds = new List<int>(arraySig.LowerBounds);
-				result = new ArraySig(ResolveGenericArgs(typeSig.Next), arraySig.Rank, sizes, lbounds);
+				var arraySig = (ArraySig)typeSig;
+				result = new ArraySig(ResolveGenericArgs(typeSig.Next), arraySig.Rank, arraySig.Sizes, arraySig.LowerBounds);
 				break;
 			case ElementType.GenericInst:
-				GenericInstSig gis = (GenericInstSig)typeSig;
-				List<TypeSig?> genArgs = new List<TypeSig?>(gis.GenericArguments.Count);
-				foreach (TypeSig ga in gis.GenericArguments) {
-					genArgs.Add(ResolveGenericArgs(ga));
+				var gis = (GenericInstSig)typeSig;
+				var genArgs = new List<TypeSig?>(gis.GenericArguments.Count);
+				for (int i = 0; i < gis.GenericArguments.Count; i++) {
+					genArgs.Add(ResolveGenericArgs(gis.GenericArguments[i]));
 				}
-				result = new GenericInstSig(ResolveGenericArgs(gis.GenericType as TypeSig) as ClassOrValueTypeSig, genArgs);
+				result = new GenericInstSig(ResolveGenericArgs(gis.GenericType) as ClassOrValueTypeSig, genArgs);
 				break;
 
 			default:
@@ -206,7 +197,7 @@ namespace dnSpy.Contracts.Decompiler {
 		}
 
 		MethodSig ResolveGenericArgs(MethodSig sig) {
-			var msig = ResolveGenericArgs2(new MethodSig(), sig);
+			var msig = ResolveGenericArgs2(new MethodSig(sig.CallingConvention), sig);
 			msig.OriginalToken = sig.OriginalToken;
 			return msig;
 		}
@@ -225,8 +216,8 @@ namespace dnSpy.Contracts.Decompiler {
 		}
 
 		void UpdateSigList(IList<TypeSig?> inList, IList<TypeSig> outList) {
-			foreach (var arg in outList)
-				inList.Add(ResolveGenericArgs(arg));
+			for (int i = 0; i < outList.Count; i++)
+				inList.Add(ResolveGenericArgs(outList[i]));
 		}
 
 		FieldSig ResolveGenericArgs(FieldSig sig) => new FieldSig(ResolveGenericArgs(sig.Type));
