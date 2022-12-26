@@ -24,6 +24,7 @@ The workaround is to add WindowsDesktop above.
     <PlatformTarget>AnyCPU</PlatformTarget>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,8 +54,6 @@ The workaround is to add WindowsDesktop above.
       <Link>app.manifest</Link>
     </None>
   </ItemGroup>
-
-  <Import Project="$(MSBuildProjectDirectory)\..\..\Build\PatchSubSystem\PatchSubSystem.tasks" Condition=" '$(IsDotNetFramework)' != 'true' "/>
 
   <ItemGroup>
     <ProjectReference Include="..\dnSpy.Contracts.Logic\dnSpy.Contracts.Logic.csproj" />
