@@ -446,7 +446,7 @@ namespace dnSpy.Contracts.Decompiler {
 					yield return new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void), declType));
 				}
 			}
-			if (parameter.IsOptional && parameter.Constant == null) {
+			if (parameter.IsOptional && parameter.Constant is null && !parameter.CustomAttributes.IsDefined("System.Runtime.CompilerServices.DecimalConstantAttribute")) {
 				var declType = new TypeRefUser(module, systemRuntimeInteropServicesName, optionalAttributeName, GetSystemRuntimeInteropServicesAssemblyRef(module));
 				yield return new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void), declType));
 			}
