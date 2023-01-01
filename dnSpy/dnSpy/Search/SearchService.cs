@@ -121,6 +121,7 @@ namespace dnSpy.Search {
 			classificationFormatMap.ClassificationFormatMappingChanged += ClassificationFormatMap_ClassificationFormatMappingChanged;
 			searchSettings.PropertyChanged += SearchSettings_PropertyChanged;
 			documentTabService.DocumentTreeView.DocumentService.CollectionChanged += DocumentService_CollectionChanged;
+			documentTabService.DocumentModified += DocumentTabService_FileModified;
 
 			searchControl.SearchListBoxDoubleClick += (s, e) => FollowSelectedReference();
 			var cmds = wpfCommandService.GetCommands(ControlConstants.GUID_SEARCH_LISTBOX);
@@ -167,6 +168,8 @@ namespace dnSpy.Search {
 			});
 			searchControl.InputBindings.Add(new KeyBinding(command, new KeyGesture(key, ModifierKeys.Control)));
 		}
+
+		void DocumentTabService_FileModified(object? sender, DocumentModifiedEventArgs e) => vmSearch.Restart();
 
 		void DocumentService_CollectionChanged(object? sender, NotifyDocumentCollectionChangedEventArgs e) {
 			switch (e.Type) {
