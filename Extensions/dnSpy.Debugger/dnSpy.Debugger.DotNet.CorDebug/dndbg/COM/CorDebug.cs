@@ -256,7 +256,7 @@ namespace dndbg.COM.CorDebug {
 	}
 	struct COR_ARRAY_LAYOUT {
 		public COR_TYPEID componentID;
-		public uint componentType;
+		public CorElementType componentType;
 		public uint firstElementOffset;
 		public uint elementSize;
 		public uint countOffset;
@@ -268,14 +268,14 @@ namespace dndbg.COM.CorDebug {
 		public uint token;
 		public uint offset;
 		public COR_TYPEID id;
-		public uint fieldType;
+		public CorElementType fieldType;
 	}
 	struct COR_TYPE_LAYOUT {
 		public COR_TYPEID parentID;
 		public uint objectSize;
 		public uint numFields;
 		public uint boxOffset;
-		public uint type;
+		public CorElementType type;
 	}
 	struct COR_TYPEID {
 		public ulong token1;
