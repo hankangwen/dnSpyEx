@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using dnlib.DotNet;
 using dnlib.PE;
 using dnSpy.Contracts.Decompiler;
@@ -152,8 +153,30 @@ namespace dnSpy.Decompiler {
 				WriteCommentBegin(output, true);
 				output.Write(dnSpy_Decompiler_Resources.Decompile_EntryPoint + " ", BoxedTextColor.Comment);
 				if (epMethod.DeclaringType is not null) {
-					output.Write(IdentifierEscaper.Escape(epMethod.DeclaringType.FullName), epMethod.DeclaringType, DecompilerReferenceFlags.None, BoxedTextColor.Comment);
-					output.Write(".", BoxedTextColor.Comment);
+					var declTypes = new List<TypeDef>(1);
+					var declType = epMethod.DeclaringType;
+					while (declType is not null) {
+						declTypes.Add(declType);
+						declType = declType.DeclaringType;
+					}
+					declTypes.Reverse();
+
+					var ns = declTypes[0].Namespace;
+					if (ns.Length > 0) {
+						var parts = ns.String.Split('.');
+						var sb = new StringBuilder(ns.Length);
+						for (int i = 0; i < parts.Length; i++) {
+							sb.Append(parts[i]);
+							output.Write(IdentifierEscaper.Escape(parts[i]), new NamespaceReference(epMethod.Module.Assembly, sb.ToString()), DecompilerReferenceFlags.None, BoxedTextColor.Comment);
+							sb.Append('.');
+							output.Write(".", BoxedTextColor.Comment);
+						}
+					}
+
+					for (int i = 0; i < declTypes.Count; i++) {
+						output.Write(IdentifierEscaper.Escape(declTypes[i].Name), declTypes[i], DecompilerReferenceFlags.None, BoxedTextColor.Comment);
+						output.Write(".", BoxedTextColor.Comment);
+					}
 				}
 				output.Write(IdentifierEscaper.Escape(epMethod.Name), epMethod, DecompilerReferenceFlags.None, BoxedTextColor.Comment);
 				WriteCommentEnd(output, true);
