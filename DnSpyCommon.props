@@ -10,7 +10,7 @@
     <IsDotNet>false</IsDotNet>
     <IsSelfContainedDotNet>false</IsSelfContainedDotNet>
     <IsDotNetFramework Condition=" $(TargetFramework.StartsWith(net4)) ">true</IsDotNetFramework>
-    <IsDotNet Condition=" !$(TargetFramework.StartsWith(net4)) ">false</IsDotNet>
+    <IsDotNet Condition=" !$(TargetFramework.StartsWith(net4)) ">true</IsDotNet>
     <IsSelfContainedDotNet Condition=" '$(IsDotNet)' == 'true' ">true</IsSelfContainedDotNet>
     <Features>strict;nullablePublicOnly</Features>
     <LangVersion>latest</LangVersion>
