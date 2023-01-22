@@ -117,28 +117,30 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			else if (errorMessage is not null)
 				name = CreateErrorName(expression);
 			else
-				name = GetExpressionText(state.MetadataContext.EvaluationContext!, state.MetadataContext.Compilation, expression, cancellationToken);
+				name = GetExpressionText(state.MetadataContext.EvaluationContext!, state.MetadataContext.Compilation, expression, (options & DbgEvaluationOptions.Expression) == 0, cancellationToken);
 			return CreateCompilationResult(expression, compileResult, resultProperties, errorMessage, name);
 		}
 
-		DbgDotNetText GetExpressionText(EvaluationContext evaluationContext, CSharpCompilation compilation, string expression, CancellationToken cancellationToken) {
+		DbgDotNetText GetExpressionText(EvaluationContext evaluationContext, CSharpCompilation compilation, string expression, bool isStatement, CancellationToken cancellationToken) {
 			if (TryGetAliasInfo(expression, out var aliasInfo))
 				return CreateText(aliasInfo.Kind, expression);
-			var (exprSource, exprOffset) = CreateExpressionSource(evaluationContext, expression);
+			var (exprSource, exprOffset) = CreateExpressionSource(evaluationContext, expression, isStatement);
 			return GetExpressionText(LanguageNames.CSharp, csharpCompilationOptions, csharpParseOptions, expression, exprSource, exprOffset, compilation.References, cancellationToken);
 		}
 		static readonly CSharpCompilationOptions csharpCompilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
 		static readonly CSharpParseOptions csharpParseOptions = new CSharpParseOptions(LanguageVersion.Latest);
 
-		(string exprSource, int exprOffset) CreateExpressionSource(EvaluationContext evaluationContext, string expression) {
+		(string exprSource, int exprOffset) CreateExpressionSource(EvaluationContext evaluationContext, string expression, bool isStatement) {
 			var sb = ObjectCache.AllocStringBuilder();
 
 			evaluationContext.WriteImports(sb);
-			sb.Append(@"static class __C__L__A__S__S__ {");
-			sb.Append(@"static void __M__E__T__H__O__D__(");
+			sb.Append("static class __C__L__A__S__S__{");
+			sb.Append("static void __M__E__T__H__O__D__(");
 			evaluationContext.WriteParameters(sb);
-			sb.Append(") {");
+			sb.Append("){");
 			evaluationContext.WriteLocals(sb);
+			if (!isStatement)
+				sb.Append("var __L_O_C_A_L__=");
 			int exprOffset = sb.Length;
 			sb.Append(expression);
 			sb.Append(';');
