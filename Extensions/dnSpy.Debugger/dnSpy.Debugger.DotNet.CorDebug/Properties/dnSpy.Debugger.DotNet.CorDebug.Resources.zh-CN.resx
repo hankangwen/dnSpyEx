@@ -153,7 +153,7 @@
 错误：{1}</value>
   </data>
   <data name="Error_CouldNotStartDebuggerRequireAdminPrivLvl" xml:space="preserve">
-    <value>无法启动调试器。调试的程序需要管理员权限。请以管理员权限重启 dnSpy 并再试。</value>
+    <value>无法启动调试器。因为调试的目标程序需要管理员权限，请以管理员的身份运行 dnSpy 并重试。</value>
   </data>
   <data name="Error_FileDoesNotExist" xml:space="preserve">
     <value>文件不存在</value>
@@ -206,16 +206,16 @@
 错误：{0}</value>
   </data>
   <data name="Error_CouldNotAttachToProcess" xml:space="preserve">
-    <value>不能附加到进程{0}</value>
+    <value>无法附加到进程 {0}</value>
   </data>
   <data name="Error_ProcessIsAlreadyBeingDebugged" xml:space="preserve">
-    <value>其它程序正在调试进程{0}</value>
+    <value>目标程序正在被其它程序调试 {0}</value>
   </data>
   <data name="StackFrame_NativeFrame" xml:space="preserve">
     <value>本机帧 {0}</value>
   </data>
   <data name="StackFrame_AppdomainTransition" xml:space="preserve">
-    <value>程序域转换</value>
+    <value>AppDomain 转换</value>
   </data>
   <data name="StackFrame_ClassInit" xml:space="preserve">
     <value>类初始化</value>
@@ -224,7 +224,7 @@
     <value>异常</value>
   </data>
   <data name="StackFrame_FunctionEvaluation" xml:space="preserve">
-    <value>函数求值</value>
+    <value>函数计算</value>
   </data>
   <data name="StackFrame_InternalCall" xml:space="preserve">
     <value>内部调用</value>
@@ -269,7 +269,7 @@
     <value>CLR 调试器发生错误。请终止调试的进程并再试。
 
 HR: 0x{0:X8}
-错误：0x{1:X8}</value>
+错误: 0x{1:X8}</value>
   </data>
   <data name="DbgAsm_UseHostExecutable" xml:space="preserve">
     <value>使用宿主可执行文件</value>

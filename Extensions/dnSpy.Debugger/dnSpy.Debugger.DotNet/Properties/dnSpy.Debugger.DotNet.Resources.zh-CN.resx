@@ -133,7 +133,7 @@
     <value>取消(_C)</value>
   </data>
   <data name="CancelLoadingModulesMessage" xml:space="preserve">
-    <value>是否取消加载模块？</value>
+    <value>是否要取消加载模块？</value>
   </data>
   <data name="CantEvaluateWhenCurrentFrameIsNative" xml:space="preserve">
     <value>在当前栈帧为本地栈帧时无法计算表达式</value>
@@ -166,7 +166,7 @@
     <value>加载动态模块前您必须先中断此进程。</value>
   </data>
   <data name="NoDotNetObjectFoundAtAddress" xml:space="preserve">
-    <value>在给定地址未找到对象</value>
+    <value>在给定的地址中未找到对象</value>
   </data>
   <data name="NoExceptionOnTheCurrentThread" xml:space="preserve">
     <value>在当前线程上未发生异常</value>
@@ -178,10 +178,10 @@
     <value>返回值当前不可用</value>
   </data>
   <data name="StepFilter_SteppingOverOperator" xml:space="preserve">
-    <value>步入：跨越运算符 “{0}”。</value>
+    <value>步入: 逐过程运算符 “{0}”。</value>
   </data>
   <data name="StepFilter_SteppingOverProperty" xml:space="preserve">
-    <value>步入：跨越属性 “{0}”。</value>
+    <value>步入: 逐过程属性 “{0}”。</value>
   </data>
   <data name="UnknownVariableOrObjectId" xml:space="preserve">
     <value>未知变量或对象 ID</value>

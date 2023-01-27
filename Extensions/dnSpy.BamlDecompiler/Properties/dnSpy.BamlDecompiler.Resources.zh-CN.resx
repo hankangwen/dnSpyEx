@@ -139,13 +139,13 @@
     <value>附加事件 '{0}'。</value>
   </data>
   <data name="Error_IComponentConnectorConnectCannotBeParsed" xml:space="preserve">
-    <value>类 '{0}' 有 IComponentConnector.Connect 方法，但无法解析。</value>
+    <value>目标类 '{0}' 有 IComponentConnector.Connect 方法，但无法解析。</value>
   </data>
   <data name="Error_IStyleConnectorConnectCannotBeParsed" xml:space="preserve">
-    <value>类 '{0}' 有 IStyleConnector.Connect 方法，但无法解析。</value>
+    <value>目标类 '{0}' 有 IStyleConnector.Connect 方法，但无法解析。</value>
   </data>
   <data name="Error_UnknownConnectionId" xml:space="preserve">
-    <value>未知连接 ID：{0}</value>
+    <value>未知的连接 ID：{0}</value>
   </data>
   <data name="Msg_GlobalNamespace" xml:space="preserve">
     <value>'{0}' 是全局 namespace（命名空间）的前缀。</value>

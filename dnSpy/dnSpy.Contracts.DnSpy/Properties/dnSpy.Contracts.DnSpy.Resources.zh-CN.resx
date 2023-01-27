@@ -121,7 +121,7 @@
     <value>所有文件</value>
   </data>
   <data name="AnErrorOccurred" xml:space="preserve">
-    <value>发生错误：
+    <value>发生错误: 
 
 {0}</value>
   </data>
@@ -159,10 +159,10 @@
     <value>GUID 无效</value>
   </data>
   <data name="NewDataNotImageList" xml:space="preserve">
-    <value>新数据非映像列表。</value>
+    <value>新的数据不是图像列表。</value>
   </data>
   <data name="NoTypeConverter" xml:space="preserve">
-    <value>{0} 没有 TypeConverter 且无法从字符串转换。</value>
+    <value>{0} 不具有 TypeConverter 且无法从字符串转换。</value>
   </data>
   <data name="NumberOfBytes" xml:space="preserve">
     <value>{0} 字节</value>
@@ -180,13 +180,13 @@
     <value>保存资源</value>
   </data>
   <data name="Search_SearchColumnHelpText" xml:space="preserve">
-    <value>搜索列：{0}</value>
+    <value>搜索列: {0}</value>
   </data>
   <data name="Search_SearchColumnInvertMatchHelpText" xml:space="preserve">
     <value>使用 “{0}” 反转匹配，例如 {1}</value>
   </data>
   <data name="ValueMustBeType" xml:space="preserve">
     <value>目标值必须为类型 {0}。
-错误：{1}</value>
+错误: {1}</value>
   </data>
 </root>

@@ -304,7 +304,7 @@
     <value>创建类型签名</value>
   </data>
   <data name="Create_TypeSigs_N_Left" xml:space="preserve">
-    <value>{0} TypeSigs 剩余</value>
+    <value>{0} 个方法签名剩余</value>
   </data>
   <data name="Create_TypeSigs_OneLeft" xml:space="preserve">
     <value>剩余一个方法签名</value>
@@ -374,7 +374,7 @@
     <value>编辑方法声明</value>
   </data>
   <data name="EditParamDef" xml:space="preserve">
-    <value>编辑 ParamDef</value>
+    <value>编辑参数定义</value>
   </data>
   <data name="EditParameter" xml:space="preserve">
     <value>编辑参数</value>
@@ -386,7 +386,7 @@
     <value>编辑安全声明</value>
   </data>
   <data name="EnumType" xml:space="preserve">
-    <value>枚举：{0}</value>
+    <value>枚举: {0}</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>&lt;错误&gt;</value>
@@ -395,7 +395,7 @@
     <value>事件类型：{0}</value>
   </data>
   <data name="Event_ClearCharacter" xml:space="preserve">
-    <value>清除</value>
+    <value>C</value>
   </data>
   <data name="Event_ClearCharacter_ToolTip" xml:space="preserve">
     <value>设置为 Null</value>
@@ -410,7 +410,7 @@
     <value>移除(_R)...</value>
   </data>
   <data name="FieldType" xml:space="preserve">
-    <value>字段类型：{0}</value>
+    <value>字段类型: {0}</value>
   </data>
   <data name="Field_Access" xml:space="preserve">
     <value>访问</value>
@@ -449,7 +449,7 @@
     <value>类别</value>
   </data>
   <data name="GP_Kind_ToolTip" xml:space="preserve">
-    <value>只有元数据的头版本是 1.1(0x0101) 时使用，它永远不可能是 1.1 所以忽略种类</value>
+    <value>只有当元数据的头版本为 1.1 (0x0101) 时才被使用，但它永远不可能是 1.1 所以忽略</value>
   </data>
   <data name="GP_Name" xml:space="preserve">
     <value>名称(_N)</value>
@@ -623,7 +623,7 @@
     <value>初始化类至类型</value>
   </data>
   <data name="MethodCantBeNull" xml:space="preserve">
-    <value>方法不能为 null</value>
+    <value>方法不能为 Null</value>
   </data>
   <data name="MethodInstantiationTypesTab" xml:space="preserve">
     <value>方法实例类型</value>
@@ -638,7 +638,7 @@
     <value>方法参数类型</value>
   </data>
   <data name="MethodSig_NumGenerics" xml:space="preserve">
-    <value># 通用数字(_S)</value>
+    <value># 泛型参数计数(_S)</value>
   </data>
   <data name="MethodSig_ReturnType" xml:space="preserve">
     <value>返回类型(_U)...</value>
@@ -719,7 +719,7 @@
     <value>您需要选择一个正确的节点</value>
   </data>
   <data name="PickMember_TypeMustBeSelected" xml:space="preserve">
-    <value>必须选择一个类型.</value>
+    <value>必须选择一个类型</value>
   </data>
   <data name="Pick_Constructor" xml:space="preserve">
     <value>选择一个构造函数</value>
@@ -881,7 +881,7 @@
     <value>已固定的(_n)</value>
   </data>
   <data name="TypeSigCreator_Pinned_ToolTip" xml:space="preserve">
-    <value>把他变成固定变量</value>
+    <value>将其更改为固定变量</value>
   </data>
   <data name="TypeSigCreator_Pointer" xml:space="preserve">
     <value>指针(_P)</value>
@@ -917,7 +917,7 @@
     <value>未知</value>
   </data>
   <data name="UnknownBytesMsg" xml:space="preserve">
-    <value>某些被复制的字节未知，因为该方法已被编辑。只有将文件保存到磁盘并重新打开后，才会知道新的标记和字符串偏移。</value>
+    <value>由于方法已被编辑，因此某些复制的字节是未知的。只有在将文件保存到磁盘并重新打开时才能知悉新的标记和字符串偏移。</value>
   </data>
   <data name="UnknownEnum" xml:space="preserve">
     <value>未知枚举</value>
@@ -962,10 +962,10 @@
     <value>程序集中的部分代码可能会引用此类型。是否要删除此类型？</value>
   </data>
   <data name="AskExitUnsavedFile" xml:space="preserve">
-    <value>有文件尚未保存。要在退出前保存吗？</value>
+    <value>有文件尚未被保存。要在退出前保存吗？</value>
   </data>
   <data name="AskExitUnsavedFiles" xml:space="preserve">
-    <value>有 {0} 个文件尚未保存。要在退出前保存吗？</value>
+    <value>有 {0} 个文件尚未被保存。要在退出前保存吗？</value>
   </data>
   <data name="AskLoadAssembliesLoseChanges" xml:space="preserve">
     <value>是否要加载新程序集并放弃所有修改？</value>
@@ -974,7 +974,7 @@
     <value>是否要重新载入所有程序集并放弃所有修改？</value>
   </data>
   <data name="AskSaveFile" xml:space="preserve">
-    <value>有文件尚未被保存，是否要在继续之前保存它？</value>
+    <value>有文件尚未被保存，是否要在继续之前保存？</value>
   </data>
   <data name="AskSaveFiles" xml:space="preserve">
     <value>有多个文件尚未被保存，是否要在继续前保存它们？</value>
@@ -1199,7 +1199,7 @@
     <value>方法成员引用(_E)</value>
   </data>
   <data name="EditOperand_Type" xml:space="preserve">
-    <value>_Type...</value>
+    <value>类型(_T)...</value>
   </data>
   <data name="EditOperand_TypeSpec" xml:space="preserve">
     <value>类型声明(_S)...</value>
@@ -1223,10 +1223,10 @@
     <value>文件(_F)</value>
   </data>
   <data name="EditResource_Hash" xml:space="preserve">
-    <value>_Hash</value>
+    <value>哈希(_H)</value>
   </data>
   <data name="EditSwitchInstructionOperand" xml:space="preserve">
-    <value>编辑分支操作数</value>
+    <value>编辑指令操作数</value>
   </data>
   <data name="EditTypeCommand" xml:space="preserve">
     <value>编辑类型...</value>
@@ -1235,10 +1235,10 @@
     <value>编辑类型</value>
   </data>
   <data name="EH_Command1" xml:space="preserve">
-    <value>在选择之前添加新异常处理</value>
+    <value>在选择之前添加新的异常处理</value>
   </data>
   <data name="EH_Command2" xml:space="preserve">
-    <value>在选择之后添加新异常处理</value>
+    <value>在选择之后添加新的异常处理</value>
   </data>
   <data name="EH_Command3" xml:space="preserve">
     <value>添加新的异常处理(_A)</value>
@@ -1256,10 +1256,10 @@
     <value>&lt;空文件名&gt;</value>
   </data>
   <data name="Error_AssemblyFieldMustNotBeEmpty" xml:space="preserve">
-    <value>程序集不能为空.</value>
+    <value>程序集不能为空。</value>
   </data>
   <data name="Error_CouldNotFindMethod" xml:space="preserve">
-    <value>找不到方法：{0}</value>
+    <value>找不到方法: {0}</value>
   </data>
   <data name="Error_CouldNotFindTypeOrItsAssembly" xml:space="preserve">
     <value>无法找到类型或其程序集</value>
@@ -1268,7 +1268,7 @@
     <value>未能加载类型 '{0}': {1}</value>
   </data>
   <data name="Error_CouldNotSerializeImages" xml:space="preserve">
-    <value>无法序列化图片。错误：{0}</value>
+    <value>无法序列化图片。错误: {0}</value>
   </data>
   <data name="Error_DeSerializationDisabledInSettings" xml:space="preserve">
     <value>反序列化已在设置中被禁用。</value>
@@ -1283,7 +1283,7 @@
     <value>文件名不能为空。</value>
   </data>
   <data name="Error_Filename_FolderDoesNotExist" xml:space="preserve">
-    <value>文件夹 '{0}' 不存在。</value>
+    <value>目标文件夹不存在: '{0}' </value>
   </data>
   <data name="Error_Filename_FolderExists" xml:space="preserve">
     <value>与文件夹同名的文件已经存在。</value>
@@ -1304,13 +1304,13 @@
     <value>目标已经被移除</value>
   </data>
   <data name="Error_InvalidResourceData" xml:space="preserve">
-    <value>不能使用此数据 {0}</value>
+    <value>无效的资源 {0}</value>
   </data>
   <data name="Error_LocalHasBeenRemoved" xml:space="preserve">
     <value>局部变量已被移除</value>
   </data>
   <data name="Error_NewResourceDataMustBeImage" xml:space="preserve">
-    <value>新的数据必须是映像格式。错误：{0}</value>
+    <value>新的资源不是图像格式。错误: {0}</value>
   </data>
   <data name="Error_NotNetModule" xml:space="preserve">
     <value>{0} 不是一个 .Net 模块</value>
@@ -1322,10 +1322,10 @@
     <value>只能选择指令</value>
   </data>
   <data name="Error_OpenFile" xml:space="preserve">
-    <value>打开文件时出错：{0}</value>
+    <value>打开文件时出错: {0}</value>
   </data>
   <data name="Error_OpenImage" xml:space="preserve">
-    <value>无法打开文件或它不是一个图像。错误：{0}</value>
+    <value>无法打开文件或它不是一个图像。错误: {0}</value>
   </data>
   <data name="Error_OpMustBeField" xml:space="preserve">
     <value>操作数必须是一个字段</value>
@@ -1355,7 +1355,7 @@
     <value>操作数必须是类型、 方法、 字段</value>
   </data>
   <data name="Error_ReadingFiles" xml:space="preserve">
-    <value>读取文件时出错：{0}</value>
+    <value>读取文件时出错: {0}</value>
   </data>
   <data name="Error_SwitchInstrTargetHasBeenRemoved" xml:space="preserve">
     <value>分支指令目标已经被移除</value>
@@ -1379,7 +1379,7 @@
     <value>转到元数据表行</value>
   </data>
   <data name="GoToMetaDataTableRow_InvalidMetadataToken" xml:space="preserve">
-    <value>无效的元数据标记：0x{0:X8}</value>
+    <value>无效的元数据标记: 0x{0:X8}</value>
   </data>
   <data name="GoToMetaDataTableRow_MetadataToken" xml:space="preserve">
     <value>元数据标记(_M)</value>
@@ -1505,7 +1505,7 @@
     <value>编译器生成</value>
   </data>
   <data name="Local_Pinned_Character" xml:space="preserve">
-    <value>已固定</value>
+    <value>P</value>
   </data>
   <data name="Local_Pinned_Character_ToolTip" xml:space="preserve">
     <value>已固定</value>
@@ -1532,7 +1532,7 @@
     <value>标头偏移量(_F)</value>
   </data>
   <data name="MethodBody_HeaderRVA" xml:space="preserve">
-    <value>标头相对的虚拟地址(_R)</value>
+    <value>与标头相对的虚拟地址(_R)</value>
   </data>
   <data name="MethodBody_InitLocals" xml:space="preserve">
     <value>初始化局部变量(_I)</value>
@@ -1559,7 +1559,7 @@
     <value>参数</value>
   </data>
   <data name="MethodSignatureTab" xml:space="preserve">
-    <value>签名</value>
+    <value>方法签名</value>
   </data>
   <data name="Method_Name" xml:space="preserve">
     <value>名称(_N)</value>
@@ -1628,7 +1628,7 @@
     <value>粘贴 {0} 条记录 @ {1:X8}, 行ID {2} (_P)</value>
   </data>
   <data name="PropertyX" xml:space="preserve">
-    <value>属性： {0}</value>
+    <value>属性: {0}</value>
   </data>
   <data name="Property_DefaultValue" xml:space="preserve">
     <value>属性的默认值</value>
@@ -1664,7 +1664,7 @@
     <value>重做</value>
   </data>
   <data name="RemoveAndAddPopsCommand" xml:space="preserve">
-    <value>移除并添加POP操作(_E)</value>
+    <value>移除并添加 POP 操作(_E)</value>
   </data>
   <data name="RemoveNetModuleCommand" xml:space="preserve">
     <value>从程序集移除 .Net 模块</value>
@@ -1709,7 +1709,7 @@
     <value>值(_V)</value>
   </data>
   <data name="RowIdentifier" xml:space="preserve">
-    <value>行ID</value>
+    <value>行 ID</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>保存(_S)...</value>
@@ -1736,7 +1736,7 @@
     <value>关闭(_C)</value>
   </data>
   <data name="SaveModules_ErrorsInLog" xml:space="preserve">
-    <value>在日志中有错误:</value>
+    <value>在日志中有错误: </value>
   </data>
   <data name="SaveModules_FileHasErrors" xml:space="preserve">
     <value>文件 #{0} ({1}) 有错误</value>
@@ -1751,7 +1751,7 @@
     <value>发生了异常 {0}</value>
   </data>
   <data name="SaveModules_Log_FileError" xml:space="preserve">
-    <value>文件错误：{0}</value>
+    <value>文件错误: {0}</value>
   </data>
   <data name="SaveModules_Log_SaveWasCanceled" xml:space="preserve">
     <value>保存已被用户取消。</value>
@@ -1766,7 +1766,7 @@
     <value>全部保存(S)</value>
   </data>
   <data name="SaveModules_SavedFiles" xml:space="preserve">
-    <value>将保存的文件：</value>
+    <value>即将保存的文件: </value>
   </data>
   <data name="SaveModules_Title" xml:space="preserve">
     <value>保存模块</value>
@@ -1832,7 +1832,7 @@
     <value>保存 PDB 文件(_P)</value>
   </data>
   <data name="SaveResourceCommand" xml:space="preserve">
-    <value>保存{0}</value>
+    <value>保存 {0}</value>
   </data>
   <data name="SaveResourcesCommand" xml:space="preserve">
     <value>保存 {0} 资源</value>
@@ -1949,10 +1949,10 @@
     <value>撤消</value>
   </data>
   <data name="UnsavedFile" xml:space="preserve">
-    <value>还有一个未保存的文件。</value>
+    <value>存在一个尚未被保存的文件。</value>
   </data>
   <data name="UnsavedFiles" xml:space="preserve">
-    <value>有 {0} 个未保存的文件。</value>
+    <value>有 {0} 个尚未被保存的文件。</value>
   </data>
   <data name="XBytes" xml:space="preserve">
     <value>{0} 字节</value>
@@ -2021,7 +2021,7 @@
     <value>操作码</value>
   </data>
   <data name="Column_Metadata_RID" xml:space="preserve">
-    <value>列 ID</value>
+    <value>RID</value>
   </data>
   <data name="EditResource_Visibility" xml:space="preserve">
     <value>可见性(_V)</value>
@@ -2051,7 +2051,7 @@
     <value>目标机器(_M)</value>
   </data>
   <data name="Property_Flags_RTSpecialName" xml:space="preserve">
-    <value>运行时特殊名称(_R)</value>
+    <value>运行时的特殊名称(_R)</value>
   </data>
   <data name="Property_Flags_SpecialName" xml:space="preserve">
     <value>特殊名称(_S)</value>
@@ -2087,7 +2087,7 @@
     <value>版本号(_V)</value>
   </data>
   <data name="SaveModule_PE_Machine" xml:space="preserve">
-    <value>机器(_M)</value>
+    <value>目标机器(_M)</value>
   </data>
   <data name="SaveModule_PE_Subsystem" xml:space="preserve">
     <value>子系统(_S)</value>
@@ -2123,7 +2123,7 @@
     <value>-- 通过编辑选项修复错误。</value>
   </data>
   <data name="GoToMetaDataTableRow_RID" xml:space="preserve">
-    <value>行 ID(_R)</value>
+    <value>_RID</value>
   </data>
   <data name="Plugin_ShortDescription" xml:space="preserve">
     <value>程序集编辑器</value>
@@ -2186,25 +2186,25 @@
     <value>找不到被编辑的方法。请确保您没有添加或移除 ”静态(static)“ 或 ”已共享(Shared)“，或更改参数类型、返回类型或方法名称: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindField" xml:space="preserve">
-    <value>找不到字段：{0}</value>
+    <value>找不到字段: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindMethod" xml:space="preserve">
-    <value>找不到方法：{0}</value>
+    <value>找不到方法: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindMethodType" xml:space="preserve">
-    <value>找不到编辑的方法类型：{0}</value>
+    <value>找不到编辑的方法类型: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindType" xml:space="preserve">
-    <value>找不到类型：{0}</value>
+    <value>找不到类型: {0}</value>
   </data>
   <data name="ERR_IM_RenamingVirtualEventsIsNotSupported" xml:space="preserve">
-    <value>不支持重命名虚拟事件：{0}</value>
+    <value>不支持重命名虚拟事件: {0}</value>
   </data>
   <data name="ERR_IM_RenamingVirtualMethodsIsNotSupported" xml:space="preserve">
-    <value>不支持重命名虚拟方法：{0}</value>
+    <value>不支持重命名虚拟方法: {0}</value>
   </data>
   <data name="ERR_IM_RenamingVirtualPropsIsNotSupported" xml:space="preserve">
-    <value>不支持重命名虚拟属性：{0}</value>
+    <value>不支持重命名虚拟属性: {0}</value>
   </data>
   <data name="FindCommand" xml:space="preserve">
     <value>查找</value>
@@ -2246,7 +2246,7 @@
     <value>编辑类 ({0})...</value>
   </data>
   <data name="ERR_IM_CouldNotFindEditedType" xml:space="preserve">
-    <value>找不到编辑的类型：{0}</value>
+    <value>找不到编辑的类型: {0}</value>
   </data>
   <data name="CloseOldInMemoryModules" xml:space="preserve">
     <value>关闭过时的内存缓存模块</value>
@@ -2258,7 +2258,7 @@
     <value>严重程度</value>
   </data>
   <data name="ParamDef_Flags_Lcid" xml:space="preserve">
-    <value>Lcid</value>
+    <value>区域标识</value>
   </data>
   <data name="ParamDef_Flags_Retval" xml:space="preserve">
     <value>返回值(_R)</value>

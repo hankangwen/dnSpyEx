@@ -127,7 +127,7 @@
     <value>检查算术溢出/下溢</value>
   </data>
   <data name="CompilerSettings_EmbedVBRuntime" xml:space="preserve">
-    <value>始终嵌入 Visual Basic 运行时库</value>
+    <value>始终嵌入 Visual Basic 运行时</value>
   </data>
   <data name="CompilerSettings_Optimize" xml:space="preserve">
     <value>优化代码</value>

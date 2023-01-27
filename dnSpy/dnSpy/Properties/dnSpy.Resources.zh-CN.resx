@@ -166,7 +166,7 @@
     <value>是(_Y)</value>
   </data>
   <data name="CantConvertInputToType" xml:space="preserve">
-    <value>无法转换输入为所需类型：{0}</value>
+    <value>无法将输入的内容转换为所需类型: {0}</value>
   </data>
   <data name="CloseAllTabGroupsButThisCommand" xml:space="preserve">
     <value>关闭除当前外的所有标签组</value>
@@ -217,7 +217,7 @@
     <value>&lt;空&gt;</value>
   </data>
   <data name="ExceptionMessage" xml:space="preserve">
-    <value>发生意外：</value>
+    <value>发生意外: </value>
   </data>
   <data name="ExitAppCommand" xml:space="preserve">
     <value>退出(_X)</value>
@@ -256,7 +256,7 @@
     <value>输入行号</value>
   </data>
   <data name="GoToLine_InvalidLine" xml:space="preserve">
-    <value>行无效：{0}</value>
+    <value>行无效: {0}</value>
   </data>
   <data name="GoToLine_Label" xml:space="preserve">
     <value>行 [, 列] (_L)</value>
@@ -277,10 +277,10 @@
     <value>Ctrl+D</value>
   </data>
   <data name="GoToToken_CouldNotResolve" xml:space="preserve">
-    <value>无法解析程序引用标记：0x{0:X8}</value>
+    <value>无法解析程序引用标记: 0x{0:X8}</value>
   </data>
   <data name="GoToToken_InvalidToken" xml:space="preserve">
-    <value>元数据标记无效：0x{0:X8}</value>
+    <value>元数据标记无效: 0x{0:X8}</value>
   </data>
   <data name="GoToToken_Label" xml:space="preserve">
     <value>元数据标记(_M)</value>
@@ -370,7 +370,7 @@
     <value>前进</value>
   </data>
   <data name="NewDataIsNotAnImage" xml:space="preserve">
-    <value>新的数据不是映像格式。</value>
+    <value>新的数据不是图像格式。</value>
   </data>
   <data name="NewHorizontalTabGroupCommand" xml:space="preserve">
     <value>新建水平标签组(_Z)</value>
@@ -394,19 +394,19 @@
     <value>从 GAC 打开(_G)...</value>
   </data>
   <data name="OpenGAC_CreatedBy_Label" xml:space="preserve">
-    <value>创建者：</value>
+    <value>创建者: </value>
   </data>
   <data name="OpenGAC_FileVersion_Label" xml:space="preserve">
-    <value>文件版本：</value>
+    <value>文件版本: </value>
   </data>
   <data name="OpenGAC_Name_Column" xml:space="preserve">
     <value>名称</value>
   </data>
   <data name="OpenGAC_Name_Label" xml:space="preserve">
-    <value>名称：</value>
+    <value>名称: </value>
   </data>
   <data name="OpenGAC_Path_Label" xml:space="preserve">
-    <value>路径：</value>
+    <value>路径: </value>
   </data>
   <data name="OpenGAC_ShowDupes_CheckBox" xml:space="preserve">
     <value>显示重复</value>
@@ -421,7 +421,7 @@
     <value>版本</value>
   </data>
   <data name="OpenGAC_Version_Label" xml:space="preserve">
-    <value>版本:</value>
+    <value>版本: </value>
   </data>
   <data name="OpenInNewTabCommand" xml:space="preserve">
     <value>在新标签页中打开(_T)</value>
@@ -739,7 +739,7 @@
     <value>使用系统默认语言</value>
   </data>
   <data name="LanguageSwitchMessage" xml:space="preserve">
-    <value>重新启动 dnSpy 后，语言更改才会生效。</value>
+    <value>当重新启动 dnSpy 后，语言更改才会生效。</value>
   </data>
   <data name="ShortCutKeyCtrlShiftO" xml:space="preserve">
     <value>Ctrl+Shift+O</value>
@@ -769,7 +769,7 @@
     <value>创建 .resx 文件(_X)</value>
   </data>
   <data name="ExportToProject_DecompileXaml" xml:space="preserve">
-    <value>将 BAML 反编译为 XAML (_B)</value>
+    <value>将 BAML 反编译为 XAML(_B)</value>
   </data>
   <data name="ExportToProject_DestinationFolder" xml:space="preserve">
     <value>目标文件夹(_F)</value>
@@ -802,7 +802,7 @@
     <value>关闭(_C)</value>
   </data>
   <data name="ErrorExceptionOccurred" xml:space="preserve">
-    <value>发生意外：
+    <value>发生意外: 
 
 {0}</value>
   </data>
@@ -831,7 +831,7 @@
     <value>dnSpy is licensed under GPLv3.</value>
   </data>
   <data name="AboutScreen_LoadedFiles" xml:space="preserve">
-    <value>已加载的文件：</value>
+    <value>已加载的文件: </value>
   </data>
   <data name="SearchWindow_SearchFrameworkAssemblies" xml:space="preserve">
     <value>从运行时库中搜索</value>
@@ -876,7 +876,7 @@
     <value>全部清除</value>
   </data>
   <data name="Output_ShowOutputFrom" xml:space="preserve">
-    <value>显示输出来源(_S):</value>
+    <value>显示输出来源(_S): </value>
   </data>
   <data name="Output_WordWrap_ToolTip" xml:space="preserve">
     <value>切换自动换行</value>
@@ -954,7 +954,7 @@
     <value>水平偏移</value>
   </data>
   <data name="BgImgSettings_Images" xml:space="preserve">
-    <value>添加图片或图片文件夹路径，每行一个：</value>
+    <value>添加图片或图片文件夹路径，每行一个: </value>
   </data>
   <data name="BgImgSettings_Interval" xml:space="preserve">
     <value>切换间隔</value>
@@ -1095,7 +1095,7 @@
     <value>与 Windows 资源管理器集成</value>
   </data>
   <data name="AssemblyExplorerSettings_Order" xml:space="preserve">
-    <value>类成员排序（重启程序生效）</value>
+    <value>类成员排序 (重启程序生效)</value>
   </data>
   <data name="AssemblyExplorerSettings_SingleClickExpandNodes" xml:space="preserve">
     <value>单击展开节点</value>
@@ -1203,7 +1203,7 @@
     <value>C# 交互窗口</value>
   </data>
   <data name="AssemblyExplorerSettings_Filter" xml:space="preserve">
-    <value>文件拖放筛选（仅在拖放多个文件时生效）</value>
+    <value>文件拖放筛选 (仅在拖放多个文件时生效)</value>
   </data>
   <data name="DocumentFilterType_All" xml:space="preserve">
     <value>全部</value>
@@ -1215,7 +1215,7 @@
     <value>只允许 .NET 文件</value>
   </data>
   <data name="AssemblyExplorer_AllFilesFilteredOut" xml:space="preserve">
-    <value>所有文件已被都筛选掉。可以在程序集资源管理器选项中更改筛选项。</value>
+    <value>所有文件已被都筛选掉。可前往程序集资源管理器选项中更改筛选项。</value>
   </data>
   <data name="BlockStructureLineKind_DashedLines" xml:space="preserve">
     <value>虚线</value>
@@ -1248,10 +1248,10 @@
     <value>偏移　　</value>
   </data>
   <data name="HexEditorOffsetLowerCaseHex" xml:space="preserve">
-    <value>小写字母十六进制 （偏移量）</value>
+    <value>小写字母十六进制 (偏移量)</value>
   </data>
   <data name="HexEditorValuesLowerCaseHex" xml:space="preserve">
-    <value>小写字母十六进制 （值）</value>
+    <value>小写字母十六进制 (值)</value>
   </data>
   <data name="BlockStructureLineKind_None" xml:space="preserve">
     <value>无</value>
@@ -1281,7 +1281,7 @@
     <value>值必须在 {0} 和 {1} 之间</value>
   </data>
   <data name="AnErrorOccurred" xml:space="preserve">
-    <value>发生错误：
+    <value>发生错误: 
 
 {0}</value>
   </data>
@@ -1379,7 +1379,7 @@
     <value>偏移位大小(_T)</value>
   </data>
   <data name="LocalHexSettings_ShowASCII" xml:space="preserve">
-    <value>显示 ASCII (_W)</value>
+    <value>显示 ASCII(_W)</value>
   </data>
   <data name="LocalHexSettings_ShowOffset" xml:space="preserve">
     <value>显示偏移(_H)</value>
@@ -2016,7 +2016,7 @@
     <value>内存操作数逗号后的空格</value>
   </data>
   <data name="DisassemblySettings_UseHexNumbers" xml:space="preserve">
-    <value>十六进制数</value>
+    <value>始终显示十六进制数</value>
   </data>
   <data name="Disassembly_TabTitle" xml:space="preserve">
     <value>反汇编</value>
@@ -2058,10 +2058,10 @@
     <value>类型</value>
   </data>
   <data name="NumberBaseFormatString" xml:space="preserve">
-    <value>基数 {0}:</value>
+    <value>基数 {0}: </value>
   </data>
   <data name="RawValue" xml:space="preserve">
-    <value>原始值：</value>
+    <value>原始值: </value>
   </data>
   <data name="RecentFilesCommand" xml:space="preserve">
     <value>最近的文件(_F)</value>

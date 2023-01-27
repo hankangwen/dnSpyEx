@@ -121,7 +121,7 @@
     <value>添加 using 声明</value>
   </data>
   <data name="DecompilerSettings_AllowFieldInitializers" xml:space="preserve">
-    <value>允许字段初始值设定项语法</value>
+    <value>允许在字段中初始化值</value>
   </data>
   <data name="DecompilerSettings_AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject" xml:space="preserve">
     <value>在 catch 块中总是生成异常变量，除非类型为 Object</value>
@@ -133,7 +133,7 @@
     <value>反编译匿名方法 /lambda 方法</value>
   </data>
   <data name="DecompilerSettings_DecompileAsyncMethods" xml:space="preserve">
-    <value>反编译异步方法（async/await）</value>
+    <value>反编译异步方法 (async/await)</value>
   </data>
   <data name="DecompilerSettings_DecompileAutoEvents" xml:space="preserve">
     <value>反编译自动生成的事件</value>
@@ -142,10 +142,10 @@
     <value>反编译自动生成的属性</value>
   </data>
   <data name="DecompilerSettings_DecompileEnumerators" xml:space="preserve">
-    <value>反编译枚举器（yield return）</value>
+    <value>反编译枚举器 (yield return)</value>
   </data>
   <data name="DecompilerSettings_DecompileExprTrees" xml:space="preserve">
-    <value>反编译表达式树（Expression Trees）</value>
+    <value>反编译表达式树 (Expression Trees)</value>
   </data>
   <data name="DecompilerSettings_DecompileForeachStatements" xml:space="preserve">
     <value>反编译 foreach 语句</value>
@@ -169,13 +169,13 @@
     <value>将命名空间名添加到具有相同名称的类型</value>
   </data>
   <data name="DecompilerSettings_HexadecimalNumbers" xml:space="preserve">
-    <value>十六进制数</value>
+    <value>始终显示十六进制数字</value>
   </data>
   <data name="DecompilerSettings_IntroduceIncrementAndDecrement" xml:space="preserve">
     <value>使用增量和减量运算符</value>
   </data>
   <data name="DecompilerSettings_MakeAssignmentExpressions" xml:space="preserve">
-    <value>在流程控制语句中使用赋值表达式（如 while ((count = Do()) != 0) ;）</value>
+    <value>在流程控制语句中使用赋值表达式 (如 while ((count = Do()) != 0) ;)</value>
   </data>
   <data name="DecompilerSettings_MaxArrayElements" xml:space="preserve">
     <value>要显示的数组元素最大数量</value>

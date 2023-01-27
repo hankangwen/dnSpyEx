@@ -154,13 +154,13 @@
     <value>清除当前输入</value>
   </data>
   <data name="HelpKeyboardShortcuts" xml:space="preserve">
-    <value>快捷键：</value>
+    <value>快捷键: </value>
   </data>
   <data name="HelpReplCommands" xml:space="preserve">
-    <value>C# 交互命令：</value>
+    <value>C# 交互命令: </value>
   </data>
   <data name="HelpScriptDirectives" xml:space="preserve">
-    <value>脚本指令：</value>
+    <value>脚本指令: </value>
   </data>
   <data name="HelpScriptDirective_load" xml:space="preserve">
     <value>加载并执行脚本，#load "myscript.csx"</value>
