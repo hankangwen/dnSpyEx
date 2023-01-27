@@ -59,46 +59,46 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string"/>
-              <xsd:attribute name="type" type="xsd:string"/>
-              <xsd:attribute name="mimetype" type="xsd:string"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string"/>
-              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -121,7 +121,7 @@
     <value>复制 app.config ({0})</value>
   </data>
   <data name="MSBuild_CouldNotCreateDirectory2" xml:space="preserve">
-    <value>无法创建目录{0}，错误信息：{1}</value>
+    <value>无法创建目录 "{0}"，错误信息：{1}</value>
   </data>
   <data name="MSBuild_CreateApplicationIcon" xml:space="preserve">
     <value>创建应用程序图标</value>
@@ -196,7 +196,7 @@
     <value>本机入口点: 0x{0:X8}</value>
   </data>
   <data name="Decompile_Runtime" xml:space="preserve">
-    <value>运行库:</value>
+    <value>运行时:</value>
   </data>
   <data name="Decompile_ThisAssemblyContainsUnmanagedCode" xml:space="preserve">
     <value>此程序集包含非托管的代码。</value>
@@ -220,7 +220,7 @@
     <value>反编译类型 {0}</value>
   </data>
   <data name="MSBuild_CreateSettingsFile" xml:space="preserve">
-    <value>创建{0}</value>
+    <value>创建 {0}</value>
   </data>
   <data name="MSBuild_CreateSettingsDesignerTypeFile" xml:space="preserve">
     <value>创建设置文件的设计器文件</value>
@@ -229,7 +229,7 @@
     <value>创建设置文件</value>
   </data>
   <data name="MSBuild_CreateResXFile" xml:space="preserve">
-    <value>创建ResX资源文件</value>
+    <value>创建 ResX 资源文件</value>
   </data>
   <data name="UnknownValue" xml:space="preserve">
     <value>&lt;未知&gt;</value>
@@ -238,7 +238,7 @@
     <value>可等待</value>
   </data>
   <data name="CSharp_Deprecated_Member" xml:space="preserve">
-    <value>废弃的</value>
+    <value>已弃用</value>
   </data>
   <data name="CSharp_Extension_Method" xml:space="preserve">
     <value>扩展</value>
@@ -247,7 +247,7 @@
     <value>可等待</value>
   </data>
   <data name="VisualBasic_Deprecated_Member" xml:space="preserve">
-    <value>废弃的</value>
+    <value>已弃用</value>
   </data>
   <data name="VisualBasic_Extension_Method" xml:space="preserve">
     <value>扩展</value>

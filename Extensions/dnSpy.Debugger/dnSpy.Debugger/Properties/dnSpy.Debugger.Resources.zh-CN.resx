@@ -59,46 +59,46 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string"/>
-              <xsd:attribute name="type" type="xsd:string"/>
-              <xsd:attribute name="mimetype" type="xsd:string"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string"/>
-              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-              <xsd:attribute ref="xml:space"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required"/>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -124,7 +124,7 @@
     <value>添加异常(_X)</value>
   </data>
   <data name="AppDomainNotAvailable" xml:space="preserve">
-    <value>&lt; 不可用 &gt;</value>
+    <value>&lt;不可用&gt;</value>
   </data>
   <data name="AppMenu_Debug" xml:space="preserve">
     <value>调试(_D)</value>
@@ -133,7 +133,7 @@
     <value>调试中</value>
   </data>
   <data name="AskDeleteAllBreakpoints" xml:space="preserve">
-    <value>要删除所有的断点吗？</value>
+    <value>是否删除所有的断点？</value>
   </data>
   <data name="AttachToProcessCommand" xml:space="preserve">
     <value>附加到进程(_P)...</value>
@@ -142,10 +142,10 @@
     <value>附加到进程</value>
   </data>
   <data name="Attach_UseDnSpy32" xml:space="preserve">
-    <value>请改用64位dnspy 来调试64位应用程序。</value>
+    <value>请改用 64 位的 dnSpy 来调试 64 位应用程序。</value>
   </data>
   <data name="Attach_UseDnSpy64" xml:space="preserve">
-    <value>请改用32位dnspy 来调试32位应用程序。</value>
+    <value>请改用 32 位的 dnSpy 来调试 32 位应用程序。</value>
   </data>
   <data name="BreakCommand" xml:space="preserve">
     <value>全部中断(_K)</value>
@@ -160,7 +160,7 @@
     <value>取消(_C)</value>
   </data>
   <data name="Button_OK" xml:space="preserve">
-    <value>确定 (_O)</value>
+    <value>确定(_O)</value>
   </data>
   <data name="Button_Refresh" xml:space="preserve">
     <value>刷新(_R)</value>
@@ -169,19 +169,19 @@
     <value>调用堆栈(_C)</value>
   </data>
   <data name="CallStack_MaxFramesExceeded" xml:space="preserve">
-    <value>堆栈帧数量已超出dnSpy所支持的最大值。</value>
+    <value>堆栈帧数量已超出 dnSpy 所支持的最大值。</value>
   </data>
   <data name="Column_Address" xml:space="preserve">
     <value>地址</value>
   </data>
   <data name="Column_AppDomain" xml:space="preserve">
-    <value>程序域</value>
+    <value>应用程序域</value>
   </data>
   <data name="Column_DynamicModule" xml:space="preserve">
     <value>动态</value>
   </data>
   <data name="Column_InMemoryModule" xml:space="preserve">
-    <value>内存内</value>
+    <value>在内存中</value>
   </data>
   <data name="Column_Module" xml:space="preserve">
     <value>模块</value>
@@ -559,7 +559,7 @@
     <value>在内存窗口中显示</value>
   </data>
   <data name="ShowInstructionPointerCommand" xml:space="preserve">
-    <value>显示IP</value>
+    <value>显示 IP</value>
   </data>
   <data name="ShowModuleNamesCommand" xml:space="preserve">
     <value>显示模块名称(_M)</value>
@@ -640,7 +640,7 @@
     <value>工作线程</value>
   </data>
   <data name="Thread_LocationNotAvailable" xml:space="preserve">
-    <value>&lt; 不可用 &gt;</value>
+    <value>&lt;不可用&gt;</value>
   </data>
   <data name="Thread_NoName" xml:space="preserve">
     <value>&lt;无名称&gt;</value>
@@ -772,7 +772,7 @@
     <value>线程退出消息(_T)</value>
   </data>
   <data name="ShowMDAMessages" xml:space="preserve">
-    <value>MDA消息</value>
+    <value>MDA 消息</value>
   </data>
   <data name="DebugLogAdditionalInformation" xml:space="preserve">
     <value>其他信息: {0}</value>
@@ -799,7 +799,7 @@
     <value>已卸载 '{0}'</value>
   </data>
   <data name="ExceptionMessageIsNull" xml:space="preserve">
-    <value>"&lt; 没有异常消息 &gt;"</value>
+    <value>"&lt;没有异常消息&gt;"</value>
   </data>
   <data name="GlyphToolTip_Location" xml:space="preserve">
     <value>位置</value>
@@ -898,7 +898,7 @@
     <value>进程名</value>
   </data>
   <data name="AllRemainingExceptionsNotInList" xml:space="preserve">
-    <value>&lt;不在此列表中的所有 {0} &gt;</value>
+    <value>&lt;不在此列表中的所有 {0}&gt;</value>
   </data>
   <data name="Exceptions_EditConditions_ToolTip" xml:space="preserve">
     <value>编辑条件</value>
@@ -1120,7 +1120,7 @@
     <value>当 '{0}' 已更改时</value>
   </data>
   <data name="Breakpoint_Condition_WhenConditionIsTrue" xml:space="preserve">
-    <value>当'{0}'为true时</value>
+    <value>当 '{0}' 为 True 时</value>
   </data>
   <data name="Breakpoint_Filter_NoFilter" xml:space="preserve">
     <value>(无)</value>
@@ -1186,7 +1186,7 @@
     <value>当 '{0}' 已更改时</value>
   </data>
   <data name="Breakpoint_Condition_WhenConditionIsTrue2" xml:space="preserve">
-    <value>当'{0}'为 True 时</value>
+    <value>为 True</value>
   </data>
   <data name="Breakpoint_Filter_Filter" xml:space="preserve">
     <value>筛选器: '{0}'</value>
@@ -1201,7 +1201,7 @@
     <value>命中次数大于或等于 {0}</value>
   </data>
   <data name="Breakpoint_Tracepoint_PrintMessage2" xml:space="preserve">
-    <value>将消息'{0}'，打印到“输出"窗口</value>
+    <value>将消息 '{0}'，打印到 “输出" 窗口</value>
   </data>
   <data name="Breakpoints_GlyphMargin_DisableBreakpoint" xml:space="preserve">
     <value>禁用断点</value>
@@ -1279,7 +1279,7 @@
     <value>编辑标签</value>
   </data>
   <data name="Breakpoint_HitCount_CurrentHitCountValue" xml:space="preserve">
-    <value>目前 {0}</value>
+    <value>目前命中次数 {0}</value>
   </data>
   <data name="ResetBreakpointHitCountCommand" xml:space="preserve">
     <value>重置命中次数</value>
@@ -1315,7 +1315,7 @@
     <value>插入跟踪点(_T)</value>
   </data>
   <data name="UnwindToThisFrameCommand" xml:space="preserve">
-    <value>从这个框架中解开</value>
+    <value>回溯到目标栈帧</value>
   </data>
   <data name="GlyphMargin_CurrentStatementToolTip" xml:space="preserve">
     <value>这是将要执行的下一个语句。</value>
@@ -1459,7 +1459,7 @@
     <value>添加异常到列表</value>
   </data>
   <data name="AskAppWindowClosingStopDebugging" xml:space="preserve">
-    <value>要停止调试吗？</value>
+    <value>是否停止调试？</value>
   </data>
   <data name="DbgSettings_FocusActiveProcess" xml:space="preserve">
     <value>使被调试进程获得焦点</value>
@@ -1525,7 +1525,7 @@
     <value>搜索进程</value>
   </data>
   <data name="DbgSettings_FocusDebuggerWhenProcessBreaks" xml:space="preserve">
-    <value>当调试器中断时，将dnSpy带到最前</value>
+    <value>当调试器中断时，为 dnSpy 设置焦点</value>
   </data>
   <data name="Column_LoadModule" xml:space="preserve">
     <value>加载</value>
