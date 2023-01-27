@@ -209,7 +209,7 @@
     <value>无法附加到进程 {0}</value>
   </data>
   <data name="Error_ProcessIsAlreadyBeingDebugged" xml:space="preserve">
-    <value>目标程序正在被其它程序调试 {0}</value>
+    <value>目标进程正在被其它程序调试 {0}</value>
   </data>
   <data name="StackFrame_NativeFrame" xml:space="preserve">
     <value>本机帧 {0}</value>
