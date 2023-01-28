@@ -154,7 +154,7 @@
     <value>常量</value>
   </data>
   <data name="DebuggerExpressionHasNoValue" xml:space="preserve">
-    <value>已对表达式进行求值，但是没有值</value>
+    <value>已对表达式进行求值操作，但是没有值</value>
   </data>
   <data name="DebuggerVarsWindow_CSharp_StaticMembers" xml:space="preserve">
     <value>静态成员</value>

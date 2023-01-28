@@ -517,7 +517,7 @@
     <value>选项</value>
   </data>
   <data name="SearchWindow_SearchFor" xml:space="preserve">
-    <value>搜索：</value>
+    <value>搜索: </value>
   </data>
   <data name="ShowCodeCommand" xml:space="preserve">
     <value>代码(_C)</value>
@@ -1062,7 +1062,7 @@
     <value>使用正则表达式</value>
   </data>
   <data name="Search_ToggleReplaceModeToolTip" xml:space="preserve">
-    <value>切换查找模式/替换模式</value>
+    <value>在查找模式和替换模式之间切换</value>
   </data>
   <data name="Search_CloseToolTip" xml:space="preserve">
     <value>关闭</value>

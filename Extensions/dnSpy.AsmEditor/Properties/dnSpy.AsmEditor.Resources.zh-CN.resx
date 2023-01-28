@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -821,7 +821,7 @@
     <value>长度(_I)</value>
   </data>
   <data name="TypeSigCreator_Array_Sizes_ToolTip" xml:space="preserve">
-    <value>以逗号分隔的数组长度 （无符号整数）</value>
+    <value>以逗号分隔的数组长度 (无符号整数)</value>
   </data>
   <data name="TypeSigCreator_Array_ToolTip" xml:space="preserve">
     <value>将类型转换为一个多维数组</value>
@@ -950,7 +950,7 @@
     <value>是否取消保存？</value>
   </data>
   <data name="AskCancelSaveCloseWindow" xml:space="preserve">
-    <value>保存操作已经被取消。是否要关闭窗口？</value>
+    <value>保存操作已被取消。是否要关闭窗口？</value>
   </data>
   <data name="AskDeleteField" xml:space="preserve">
     <value>程序集中的部分代码可能会引用此字段。是否要删除此字段？</value>
@@ -974,7 +974,7 @@
     <value>是否要重新载入所有程序集并放弃所有修改？</value>
   </data>
   <data name="AskSaveFile" xml:space="preserve">
-    <value>有文件尚未被保存，是否要在继续之前保存？</value>
+    <value>有一个文件尚未被保存，是否要在继续之前保存？</value>
   </data>
   <data name="AskSaveFiles" xml:space="preserve">
     <value>有多个文件尚未被保存，是否要在继续前保存它们？</value>
@@ -1625,7 +1625,7 @@
     <value>填充</value>
   </data>
   <data name="PasteRecordsCommand" xml:space="preserve">
-    <value>粘贴 {0} 条记录 @ {1:X8}, 行ID {2} (_P)</value>
+    <value>粘贴 {0} 条记录 @ {1:X8}, 行 ID {2} (_P)</value>
   </data>
   <data name="PropertyX" xml:space="preserve">
     <value>属性: {0}</value>
@@ -1742,7 +1742,7 @@
     <value>文件 #{0} ({1}) 有错误</value>
   </data>
   <data name="SaveModules_Log_AccessError" xml:space="preserve">
-    <value>访问错误：{0}</value>
+    <value>访问错误: {0}</value>
   </data>
   <data name="SaveModules_Log_AllFilesWritten" xml:space="preserve">
     <value>所有文件已保存。</value>
@@ -1816,8 +1816,8 @@
     <value>共享方法体(_B)</value>
   </data>
   <data name="SaveModule_ShareMethodBodies_ToolTip" xml:space="preserve">
-    <value>有相同代码的 .NET 方法将会共享方法体。
-输出文件将会变小。</value>
+    <value>当有多个完全相同代码的 .NET 方法时将会共享方法体，
+并且输出文件将会变小。</value>
   </data>
   <data name="SaveModule_Title" xml:space="preserve">
     <value>保存模块</value>
@@ -2180,10 +2180,10 @@
     <value>编辑方法代码</value>
   </data>
   <data name="ERR_IM_AddingRemovingStaticFromEditedMethodNotSupported" xml:space="preserve">
-    <value>不支持在被编辑的方法上添加或移除 ”静态(static)“ 或 ”已共享(Shared)“: {0}</value>
+    <value>不支持在被编辑的方法上添加或移除 “静态 (static)” 或 “已共享 (Shared)”: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindEditedMethod" xml:space="preserve">
-    <value>找不到被编辑的方法。请确保您没有添加或移除 ”静态(static)“ 或 ”已共享(Shared)“，或更改参数类型、返回类型或方法名称: {0}</value>
+    <value>找不到被编辑的方法。请确保您没有添加或移除 “静态 (static)” 或 “已共享 (Shared)”，或更改参数类型、返回类型或方法名称: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindField" xml:space="preserve">
     <value>找不到字段: {0}</value>

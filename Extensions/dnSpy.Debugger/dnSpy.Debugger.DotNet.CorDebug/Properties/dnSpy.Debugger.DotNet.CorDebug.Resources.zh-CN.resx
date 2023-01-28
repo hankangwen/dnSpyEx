@@ -260,7 +260,7 @@
     <value>无法设置下一条语句。</value>
   </data>
   <data name="Error_CouldNotBreakProcess" xml:space="preserve">
-    <value>无法中断进程。错误：0x{0:X8}</value>
+    <value>无法中断进程。错误: 0x{0:X8}</value>
   </data>
   <data name="InternalDebuggerError" xml:space="preserve">
     <value>内部调试器错误</value>

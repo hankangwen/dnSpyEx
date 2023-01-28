@@ -148,7 +148,7 @@
     <value>未知的连接 ID：{0}</value>
   </data>
   <data name="Msg_GlobalNamespace" xml:space="preserve">
-    <value>'{0}' 是全局 namespace（命名空间）的前缀。</value>
+    <value>'{0}' 是全局 namespace (命名空间) 的前缀。</value>
   </data>
   <data name="Plugin_ShortDescription" xml:space="preserve">
     <value>BAML 反编译器</value>
