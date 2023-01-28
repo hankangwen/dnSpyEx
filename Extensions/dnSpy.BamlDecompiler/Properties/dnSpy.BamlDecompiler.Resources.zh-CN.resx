@@ -139,10 +139,10 @@
     <value>附加事件 '{0}'。</value>
   </data>
   <data name="Error_IComponentConnectorConnectCannotBeParsed" xml:space="preserve">
-    <value>目标类 '{0}' 有 IComponentConnector.Connect 方法，但无法解析。</value>
+    <value>目标类 '{0}' 存在 IComponentConnector.Connect 方法，但无法解析。</value>
   </data>
   <data name="Error_IStyleConnectorConnectCannotBeParsed" xml:space="preserve">
-    <value>目标类 '{0}' 有 IStyleConnector.Connect 方法，但无法解析。</value>
+    <value>目标类 '{0}' 存在 IStyleConnector.Connect 方法，但无法解析。</value>
   </data>
   <data name="Error_UnknownConnectionId" xml:space="preserve">
     <value>未知的连接 ID：{0}</value>

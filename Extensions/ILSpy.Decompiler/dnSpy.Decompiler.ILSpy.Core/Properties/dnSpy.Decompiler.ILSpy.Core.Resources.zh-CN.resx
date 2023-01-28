@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -121,7 +121,7 @@
     <value>添加 using 声明</value>
   </data>
   <data name="DecompilerSettings_AllowFieldInitializers" xml:space="preserve">
-    <value>允许在字段中初始化值</value>
+    <value>允许在字段声明时初始化值</value>
   </data>
   <data name="DecompilerSettings_AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject" xml:space="preserve">
     <value>在 catch 块中总是生成异常变量，除非类型为 Object</value>
@@ -130,7 +130,7 @@
     <value>反编译顺序</value>
   </data>
   <data name="DecompilerSettings_DecompileAnonMethods" xml:space="preserve">
-    <value>反编译匿名方法 /lambda 方法</value>
+    <value>反编译匿名方法和 lambda 方法</value>
   </data>
   <data name="DecompilerSettings_DecompileAsyncMethods" xml:space="preserve">
     <value>反编译异步方法 (async/await)</value>
@@ -211,7 +211,7 @@
     <value>显示行号和文件名（如果可用）</value>
   </data>
   <data name="DecompilerSettings_ShowTokensRvasOffsets" xml:space="preserve">
-    <value>显示标记，相对的虚拟地址和文件偏移</value>
+    <value>显示标记，相对虚拟地址和文件偏移</value>
   </data>
   <data name="DecompilerSettings_ShowXMLDocComments" xml:space="preserve">
     <value>在反编译的代码中显示 XML 文档</value>
@@ -229,7 +229,7 @@
     <value>为类添加 internal 关键字</value>
   </data>
   <data name="DecompilerSettings_UseLocalNameFromSyms" xml:space="preserve">
-    <value>如果可用，使用 debug symbols 声明的变量名称</value>
+    <value>如果可用，使用由调试符号所声明的变量名称</value>
   </data>
   <data name="DecompilerSettings_UseSourceCodeOrder" xml:space="preserve">
     <value>按源代码顺序排序成员</value>

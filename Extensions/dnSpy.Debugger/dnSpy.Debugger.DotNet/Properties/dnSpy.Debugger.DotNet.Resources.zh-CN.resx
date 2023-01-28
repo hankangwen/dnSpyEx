@@ -136,7 +136,7 @@
     <value>是否要取消加载模块？</value>
   </data>
   <data name="CantEvaluateWhenCurrentFrameIsNative" xml:space="preserve">
-    <value>在当前栈帧为本地栈帧时无法计算表达式</value>
+    <value>在当前栈帧为本地栈帧时无法对表达式进行求值</value>
   </data>
   <data name="DecompilerGeneratedVariablesCanNotBeEvaluated" xml:space="preserve">
     <value>反编译器生成的变量不能被求值</value>
@@ -178,12 +178,12 @@
     <value>返回值当前不可用</value>
   </data>
   <data name="StepFilter_SteppingOverOperator" xml:space="preserve">
-    <value>步入: 逐过程运算符 “{0}”。</value>
+    <value>逐过程执行运算符 “{0}”。</value>
   </data>
   <data name="StepFilter_SteppingOverProperty" xml:space="preserve">
-    <value>步入: 逐过程属性 “{0}”。</value>
+    <value>逐过程执行属性 “{0}”。</value>
   </data>
   <data name="UnknownVariableOrObjectId" xml:space="preserve">
-    <value>未知变量或对象 ID</value>
+    <value>未知的变量或对象 ID</value>
   </data>
 </root>

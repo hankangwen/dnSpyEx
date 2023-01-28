@@ -238,7 +238,7 @@
     <value>Shift+Enter</value>
   </data>
   <data name="Window_CSharp" xml:space="preserve">
-    <value>C# 交互窗口</value>
+    <value>C# 交互</value>
   </data>
   <data name="HelpClearDescription" xml:space="preserve">
     <value>清空脚本编辑器</value>

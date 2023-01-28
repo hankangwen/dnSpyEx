@@ -139,7 +139,7 @@
     <value>语言 '{0}' 不存在</value>
   </data>
   <data name="Languages" xml:space="preserve">
-    <value>语言：</value>
+    <value>语言: </value>
   </data>
   <data name="LanguageXDoesNotExist" xml:space="preserve">
     <value>语言 {0} 不存在</value>

@@ -392,13 +392,13 @@
     <value>&lt;错误&gt;</value>
   </data>
   <data name="EventType" xml:space="preserve">
-    <value>事件类型：{0}</value>
+    <value>事件类型: {0}</value>
   </data>
   <data name="Event_ClearCharacter" xml:space="preserve">
     <value>C</value>
   </data>
   <data name="Event_ClearCharacter_ToolTip" xml:space="preserve">
-    <value>设置为 Null</value>
+    <value>设置为 null</value>
   </data>
   <data name="Event_InvokeMethod" xml:space="preserve">
     <value>调用(_I)...</value>
@@ -431,10 +431,10 @@
     <value>偏移(_F)</value>
   </data>
   <data name="Field_RVA" xml:space="preserve">
-    <value>相对的虚拟地址(_R)</value>
+    <value>相对虚拟地址(_R)</value>
   </data>
   <data name="GenericParameterNumber" xml:space="preserve">
-    <value>通用参数({0})</value>
+    <value>泛型参数({0})</value>
   </data>
   <data name="GP_Class" xml:space="preserve">
     <value>类(_L)</value>
@@ -623,7 +623,7 @@
     <value>初始化类至类型</value>
   </data>
   <data name="MethodCantBeNull" xml:space="preserve">
-    <value>方法不能为 Null</value>
+    <value>方法不能为 null</value>
   </data>
   <data name="MethodInstantiationTypesTab" xml:space="preserve">
     <value>方法实例类型</value>
@@ -665,7 +665,7 @@
     <value>命名参数</value>
   </data>
   <data name="NoName" xml:space="preserve">
-    <value>&lt;&lt;没有名字&gt;&gt;</value>
+    <value>&lt;&lt;无名称&gt;&gt;</value>
   </data>
   <data name="NotGenericType" xml:space="preserve">
     <value>{0} 不是泛型类型</value>
@@ -950,7 +950,7 @@
     <value>是否取消保存？</value>
   </data>
   <data name="AskCancelSaveCloseWindow" xml:space="preserve">
-    <value>保存已经被取消。是否要关闭窗口？</value>
+    <value>保存操作已经被取消。是否要关闭窗口？</value>
   </data>
   <data name="AskDeleteField" xml:space="preserve">
     <value>程序集中的部分代码可能会引用此字段。是否要删除此字段？</value>
@@ -1019,10 +1019,10 @@
     <value>复制元数据标记(_M)</value>
   </data>
   <data name="CopyRVACommand" xml:space="preserve">
-    <value>复制相对的虚拟地址</value>
+    <value>复制相对虚拟地址</value>
   </data>
   <data name="CopyRVAsCommand" xml:space="preserve">
-    <value>复制相对的虚拟地址</value>
+    <value>复制相对虚拟地址</value>
   </data>
   <data name="CreateAnExceptionCatchType" xml:space="preserve">
     <value>创建异常捕获类型</value>
@@ -1271,10 +1271,10 @@
     <value>无法序列化图片。错误: {0}</value>
   </data>
   <data name="Error_DeSerializationDisabledInSettings" xml:space="preserve">
-    <value>反序列化已在设置中被禁用。</value>
+    <value>(反)序列化已在设置中被禁用。</value>
   </data>
   <data name="Error_EmptyImageList" xml:space="preserve">
-    <value>无法创建空的图像列表。</value>
+    <value>无法创建空的 ImageList。</value>
   </data>
   <data name="Error_Filename_ContainsInvalidPathCharacter" xml:space="preserve">
     <value>文件名包含无效路径字符。</value>
@@ -1313,7 +1313,7 @@
     <value>新的资源不是图像格式。错误: {0}</value>
   </data>
   <data name="Error_NotNetModule" xml:space="preserve">
-    <value>{0} 不是一个 .Net 模块</value>
+    <value>{0} 不是一个 NetModule</value>
   </data>
   <data name="Error_NotSNKFile" xml:space="preserve">
     <value>'{0}' 不是一个强名称密钥文件 (snk)</value>
@@ -1397,7 +1397,7 @@
     <value>跳转到行 ID</value>
   </data>
   <data name="HexCopyMethodBodyCommand" xml:space="preserve">
-    <value>以十六进制的方式复制方法体</value>
+    <value>以十六进制的形式复制方法体</value>
   </data>
   <data name="HexNode_PE" xml:space="preserve">
     <value>PE</value>
@@ -1418,16 +1418,16 @@
     <value>表流</value>
   </data>
   <data name="HexPasteMethodBodyCommand" xml:space="preserve">
-    <value>以十六进制的方式粘贴方法体</value>
+    <value>以十六进制形式粘贴方法体</value>
   </data>
   <data name="HexWriteEmptyMethodBodyCommand" xml:space="preserve">
-    <value>以十六进制的方式写入空方法体</value>
+    <value>以十六进制形式写入空方法体</value>
   </data>
   <data name="HexWriteReturnFalseBodyCommand" xml:space="preserve">
-    <value>以十六进制的方式写入返回值为 False 的方法体</value>
+    <value>以十六进制形式写入方法体 "return false"</value>
   </data>
   <data name="HexWriteReturnTrueBodyCommand" xml:space="preserve">
-    <value>以十六进制的方式写入返回值为 True 的方法体</value>
+    <value>以十六进制形式写入方法体 "return true"</value>
   </data>
   <data name="Hex_Undo_Message_InsertBytes" xml:space="preserve">
     <value>插入字节</value>
@@ -1532,22 +1532,22 @@
     <value>标头偏移量(_F)</value>
   </data>
   <data name="MethodBody_HeaderRVA" xml:space="preserve">
-    <value>与标头相对的虚拟地址(_R)</value>
+    <value>标头的相对虚拟地址(_R)</value>
   </data>
   <data name="MethodBody_InitLocals" xml:space="preserve">
     <value>初始化局部变量(_I)</value>
   </data>
   <data name="MethodBody_KeepOldMaxStack" xml:space="preserve">
-    <value>保留之前的栈的最大值(_K)</value>
+    <value>保留之前的 MaxStack(_K)</value>
   </data>
   <data name="MethodBody_KeepOldMaxStack_ToolTip" xml:space="preserve">
-    <value>保存文件时不重新计算栈的最大值</value>
+    <value>保存文件时不重新计算 MaxStack</value>
   </data>
   <data name="MethodBody_MaxStack" xml:space="preserve">
-    <value>栈的最大值(_M)</value>
+    <value>_MaxStack</value>
   </data>
   <data name="MethodBody_RVA" xml:space="preserve">
-    <value>相对的虚拟地址(_R)</value>
+    <value>相对虚拟地址(_R)</value>
   </data>
   <data name="MethodBody_Type" xml:space="preserve">
     <value>主体类型(_B)</value>
@@ -1667,7 +1667,7 @@
     <value>移除并添加 POP 操作(_E)</value>
   </data>
   <data name="RemoveNetModuleCommand" xml:space="preserve">
-    <value>从程序集移除 .Net 模块</value>
+    <value>从程序集中移除 NetModule</value>
   </data>
   <data name="RenameNamespaceCommand" xml:space="preserve">
     <value>重命名命名空间</value>
@@ -1754,7 +1754,7 @@
     <value>文件错误: {0}</value>
   </data>
   <data name="SaveModules_Log_SaveWasCanceled" xml:space="preserve">
-    <value>保存已被用户取消。</value>
+    <value>保存操作已被用户取消。</value>
   </data>
   <data name="SaveModules_Log_WritingFile" xml:space="preserve">
     <value>正在写入 {0}...</value>
@@ -1781,10 +1781,10 @@
     <value>文件名(_F)</value>
   </data>
   <data name="SaveModule_KeepOldMaxStack" xml:space="preserve">
-    <value>保持之前的栈的最大值(_K)</value>
+    <value>保持之前的 MaxStack(_K)</value>
   </data>
   <data name="SaveModule_KeepOldMaxStack_ToolTip" xml:space="preserve">
-    <value>使用方法原始的栈的最大值而不是重新计算。
+    <value>使用方法原始的 MaxStack 而不是重新计算。
 如果此方法被混淆，则可能需要此选项。</value>
   </data>
   <data name="SaveModule_MetadataHeaderOptions" xml:space="preserve">
@@ -1826,7 +1826,7 @@
     <value>混合模块(_M)</value>
   </data>
   <data name="SaveModule_UseMixedMode_ToolTip" xml:space="preserve">
-    <value>检查是否它是一个混合模式模块 (例如 C+ +/.NET )。单击此复选框时大多数选项将被重新初始化</value>
+    <value>检查是否它是一个混合模式模块 (例如 C++/.NET )。单击此复选框时大多数选项将被重新初始化</value>
   </data>
   <data name="SaveModule_WritePdb" xml:space="preserve">
     <value>保存 PDB 文件(_P)</value>
@@ -2051,7 +2051,7 @@
     <value>目标机器(_M)</value>
   </data>
   <data name="Property_Flags_RTSpecialName" xml:space="preserve">
-    <value>运行时的特殊名称(_R)</value>
+    <value>_RTSpecialName</value>
   </data>
   <data name="Property_Flags_SpecialName" xml:space="preserve">
     <value>特殊名称(_S)</value>
@@ -2258,7 +2258,7 @@
     <value>严重程度</value>
   </data>
   <data name="ParamDef_Flags_Lcid" xml:space="preserve">
-    <value>区域标识</value>
+    <value>Lcid</value>
   </data>
   <data name="ParamDef_Flags_Retval" xml:space="preserve">
     <value>返回值(_R)</value>
@@ -2291,7 +2291,7 @@
     <value>编译器</value>
   </data>
   <data name="ReplaceNopsInstrCommand" xml:space="preserve">
-    <value>_用 NOP 替换</value>
+    <value>用 NOP 替换(_R)</value>
   </data>
   <data name="ReplaceNopsInstrsCommand" xml:space="preserve">
     <value>用 NOP 替换(_R)</value>

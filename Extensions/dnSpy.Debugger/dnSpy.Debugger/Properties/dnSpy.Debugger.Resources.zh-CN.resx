@@ -229,7 +229,7 @@
     <value>位置</value>
   </data>
   <data name="Column_ThreadManagedId" xml:space="preserve">
-    <value>托管ID</value>
+    <value>托管 ID</value>
   </data>
   <data name="Column_ThreadPriority" xml:space="preserve">
     <value>优先级</value>
@@ -271,7 +271,7 @@
     <value>忽略 Debugger.Break() 和中断指令</value>
   </data>
   <data name="DbgSettings_PropertyEvalAndFunctionCalls" xml:space="preserve">
-    <value>启用属性计算和其它隐式函数调用</value>
+    <value>启用属性求值和其它隐式函数调用</value>
   </data>
   <data name="DbgSettings_UseMemoryModules" xml:space="preserve">
     <value>调试从进程内存加载的文件 (取消选中以使用磁盘文件)</value>
@@ -327,10 +327,10 @@
 {0}</value>
   </data>
   <data name="Error_CantEvalUnlessDebuggerStopped" xml:space="preserve">
-    <value>除非调试器停止，否则无法计算</value>
+    <value>除非调试器停止，否则无法求值</value>
   </data>
   <data name="Error_CantEvalWhenUnhandledExceptionHasOccurred" xml:space="preserve">
-    <value>当未捕捉异常发生时无法计算</value>
+    <value>当未捕的捉异常发生时无法求值</value>
   </data>
   <data name="Error_StartWithoutDebuggingCouldNotStart" xml:space="preserve">
     <value>无法启动 '{0}' 
@@ -398,16 +398,16 @@
     <value>该节点中的子元素数量已超过最大值 ({0} 个)，当展开时会限制显示的子元素数量。是否需要显示所有的内容？</value>
   </data>
   <data name="Locals_Error_CantEvaluateWhenThreadIsAtUnsafePoint" xml:space="preserve">
-    <value>当线程位于不安全状态时无法计算表达式。按步调试或运行直到触发断点。</value>
+    <value>当线程位于不安全状态时无法对表达式进行求值。按步调试或运行直到触发断点。</value>
   </data>
   <data name="Locals_Error_EvalDisabledCantCallPropsAndMethods" xml:space="preserve">
     <value>当前无法调用属性和方法</value>
   </data>
   <data name="Locals_Error_EvalTimedOutIsDisabled" xml:space="preserve">
-    <value>由于此前的函数计算已超时，因此该功能已被禁用。必须继续执行才能重新启用它</value>
+    <value>由于此前的函数求值已超时，因此该功能已被禁用。必须继续执行才能重新启用它</value>
   </data>
   <data name="Locals_Error_EvaluationTimedOut" xml:space="preserve">
-    <value>计算超时</value>
+    <value>求值超时</value>
   </data>
   <data name="MemoryWindowCommand" xml:space="preserve">
     <value>内存(_M)</value>
@@ -1163,7 +1163,7 @@
     <value>条件表达式(_E)</value>
   </data>
   <data name="EditBreakpointSettings_Filter" xml:space="preserve">
-    <value>筛选器_F)</value>
+    <value>筛选器(_F)</value>
   </data>
   <data name="EditBreakpointSettings_HitCount" xml:space="preserve">
     <value>命中计数(_H)</value>
@@ -1184,7 +1184,7 @@
     <value>当 '{0}' 已更改时</value>
   </data>
   <data name="Breakpoint_Condition_WhenConditionIsTrue2" xml:space="preserve">
-    <value>为 True</value>
+    <value>当 '{0}' 为 True 时</value>
   </data>
   <data name="Breakpoint_Filter_Filter" xml:space="preserve">
     <value>筛选器: '{0}'</value>
@@ -1295,7 +1295,7 @@
     <value>转义序列: {0}</value>
   </data>
   <data name="TracepointMessage_EvaluateMessage" xml:space="preserve">
-    <value>使用 {xxx} 来计算表达式 xxx</value>
+    <value>使用 {xxx} 来对表达式 xxx 进行求值</value>
   </data>
   <data name="TracepointMessage_Example" xml:space="preserve">
     <value>示例: {0}</value>
@@ -1361,13 +1361,13 @@
     <value>粘贴(_P)</value>
   </data>
   <data name="ExpressionCausesSideEffectsNoEval" xml:space="preserve">
-    <value>此表达式可导致副作用，将不被计算</value>
+    <value>此表达式可导致副作用，将不被求值</value>
   </data>
   <data name="RefreshExpressionButtonToolTip" xml:space="preserve">
     <value>单击按钮立即计算。</value>
   </data>
   <data name="ErrorEvaluatingExpression" xml:space="preserve">
-    <value>无法计算表达式的值</value>
+    <value>无法对表达式进行求值</value>
   </data>
   <data name="DeleteObjectIdCommand" xml:space="preserve">
     <value>删除对象 ID</value>
@@ -1445,7 +1445,7 @@
     <value>系统模块</value>
   </data>
   <data name="RuntimeIsUnableToEvaluateExpression" xml:space="preserve">
-    <value>运行时无法计算该表达式。</value>
+    <value>运行时无法对该表达式进行求值。</value>
   </data>
   <data name="Exceptions_ToggleMatchingExceptions_ToolTip" xml:space="preserve">
     <value>启用或禁用与当前搜索条件匹配的所有异常</value>
@@ -1475,7 +1475,7 @@
     <value>将 GUI 应用程序的控制台输出重定向到 "输出" 窗口</value>
   </data>
   <data name="AttachToProcess_MakingAnImageEasierToDebug" xml:space="preserve">
-    <value>使映像更易于调试 (Wiki)</value>
+    <value>Making an Image Easier to Debug (Wiki)</value>
   </data>
   <data name="ShowOnlyPublicMembersCommand" xml:space="preserve">
     <value>公共成员</value>
@@ -1493,7 +1493,7 @@
     <value>复制表达式(_X)</value>
   </data>
   <data name="Error_CouldNotShowDisassembly" xml:space="preserve">
-    <value>找不到方法的代码。请确保进程已暂停，并且该方法已实时编译（JIT）。</value>
+    <value>找不到目标方法的代码。请确保进程已暂停，并且该方法已实时编译 (JIT)。</value>
   </data>
   <data name="DisassemblyCommand" xml:space="preserve">
     <value>反汇编(_D)</value>

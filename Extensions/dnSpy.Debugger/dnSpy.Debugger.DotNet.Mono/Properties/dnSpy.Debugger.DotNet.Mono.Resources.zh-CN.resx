@@ -133,7 +133,7 @@
     <value>连接</value>
   </data>
   <data name="DbgAsm_IP_Address" xml:space="preserve">
-    <value>IP地址</value>
+    <value>IP 地址</value>
   </data>
   <data name="DbgAsm_WorkingDir" xml:space="preserve">
     <value>工作目录(_W)</value>
@@ -199,7 +199,7 @@
     <value>"&lt;没有异常消息&gt;"</value>
   </data>
   <data name="StackFrame_FunctionEvaluation" xml:space="preserve">
-    <value>函数计算</value>
+    <value>函数求值</value>
   </data>
   <data name="StackFrame_NativeTransition" xml:space="preserve">
     <value>本机转换</value>
@@ -208,7 +208,7 @@
     <value>目标运行时不支持调用泛型方法</value>
   </data>
   <data name="Error_CanNotWriteToThisArgument" xml:space="preserve">
-    <value>无法写入该值</value>
+    <value>不能写入到 "this"</value>
   </data>
   <data name="Error_CannotAccessMemberRuntimeLimitations" xml:space="preserve">
     <value>由于运行时限制，无法访问成员</value>
@@ -241,12 +241,12 @@
     <value>确保您已经修补了游戏的 mono.dll 文件</value>
   </data>
   <data name="DbgAsm_ConnectionTimeoutInSeconds" xml:space="preserve">
-    <value>超时（秒）(_T)</value>
+    <value>超时 (秒)(_T)</value>
   </data>
   <data name="AttachToUnityProcess_DebugBuildsOnlyMessage" xml:space="preserve">
     <value>仅可用于 Debug 编译的 Unity 进程</value>
   </data>
   <data name="DebuggingUnityGamesText" xml:space="preserve">
-    <value>调试 Unity 游戏 (Wiki)</value>
+    <value>Debugging Unity Games (Wiki)</value>
   </data>
 </root>

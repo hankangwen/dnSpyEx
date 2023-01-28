@@ -217,7 +217,7 @@
     <value>&lt;空&gt;</value>
   </data>
   <data name="ExceptionMessage" xml:space="preserve">
-    <value>发生意外: </value>
+    <value>发生异常: </value>
   </data>
   <data name="ExitAppCommand" xml:space="preserve">
     <value>退出(_X)</value>
@@ -226,7 +226,7 @@
     <value>Alt+F4</value>
   </data>
   <data name="ExplorerOpenWithDnSpy" xml:space="preserve">
-    <value>通过 dnSpy 打开</value>
+    <value>使用 dnSpy 打开</value>
   </data>
   <data name="FindCommand" xml:space="preserve">
     <value>查找(_F)</value>
@@ -757,10 +757,10 @@
     <value>导出到工程</value>
   </data>
   <data name="Error_FileAlreadyExists" xml:space="preserve">
-    <value>目标文件夹内已存在有相同名称的文件。</value>
+    <value>目标文件夹中已存在具有相同名称的文件。</value>
   </data>
   <data name="Error_MissingDestinationFolder" xml:space="preserve">
-    <value>目标文件夹缺失。</value>
+    <value>目标文件夹不能为空!</value>
   </data>
   <data name="ExportToProject_Button_Export" xml:space="preserve">
     <value>导出(_E)</value>
@@ -802,7 +802,7 @@
     <value>关闭(_C)</value>
   </data>
   <data name="ErrorExceptionOccurred" xml:space="preserve">
-    <value>发生意外: 
+    <value>发生异常: 
 
 {0}</value>
   </data>
@@ -1089,7 +1089,7 @@
     <value>常规</value>
   </data>
   <data name="GeneralSettings_Theme" xml:space="preserve">
-    <value>颜色主题</value>
+    <value>主题</value>
   </data>
   <data name="IntegrateWithWindowsExplorer" xml:space="preserve">
     <value>与 Windows 资源管理器集成</value>
@@ -1325,7 +1325,7 @@
     <value>复制 Visual Basic 数组</value>
   </data>
   <data name="FillSelectionCommand" xml:space="preserve">
-    <value>填充所选中的区域</value>
+    <value>用字节填充选定区域...</value>
   </data>
   <data name="FillSelection_Label" xml:space="preserve">
     <value>字节(_B)</value>
@@ -1536,7 +1536,7 @@
     <value>复制文件偏移</value>
   </data>
   <data name="CopyRVACommand" xml:space="preserve">
-    <value>复制相对的虚拟地址</value>
+    <value>复制相对虚拟地址</value>
   </data>
   <data name="CopyValueCommand" xml:space="preserve">
     <value>复制值</value>
@@ -1911,13 +1911,13 @@
     <value>如有必要，在十六进制数前加 '0'</value>
   </data>
   <data name="DisassemblySettings_AlwaysShowMemorySize" xml:space="preserve">
-    <value>总是显示内存操作数的大小</value>
+    <value>始终显示内存操作数的大小</value>
   </data>
   <data name="DisassemblySettings_AlwaysShowScale" xml:space="preserve">
-    <value>总是显示标量的值</value>
+    <value>始终显示标量的值</value>
   </data>
   <data name="DisassemblySettings_AlwaysShowSegmentRegister" xml:space="preserve">
-    <value>总是显示段寄存器</value>
+    <value>始终显示段寄存器</value>
   </data>
   <data name="DisassemblySettings_DigitSeparator" xml:space="preserve">
     <value>数字分隔符</value>
@@ -2034,7 +2034,7 @@
     <value>显示符号地址</value>
   </data>
   <data name="Decompile_Timestamp" xml:space="preserve">
-    <value>时间戳：</value>
+    <value>时间戳: </value>
   </data>
   <data name="UnknownValue" xml:space="preserve">
     <value>&lt;未知&gt;</value>
@@ -2064,7 +2064,7 @@
     <value>原始值: </value>
   </data>
   <data name="RecentFilesCommand" xml:space="preserve">
-    <value>最近的文件(_F)</value>
+    <value>最近打开过的文件(_F)</value>
   </data>
   <data name="ToolTip_Instruction" xml:space="preserve">
     <value>指令</value>
