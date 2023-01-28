@@ -1397,7 +1397,7 @@
     <value>跳转到行 ID</value>
   </data>
   <data name="HexCopyMethodBodyCommand" xml:space="preserve">
-    <value>以十六进制的形式复制方法体</value>
+    <value>以十六进制形式复制方法体</value>
   </data>
   <data name="HexNode_PE" xml:space="preserve">
     <value>PE</value>
