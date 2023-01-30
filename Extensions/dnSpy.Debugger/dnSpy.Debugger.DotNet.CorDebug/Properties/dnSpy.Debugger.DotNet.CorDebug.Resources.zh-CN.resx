@@ -127,7 +127,7 @@
     <value>宿主程序(_H)</value>
   </data>
   <data name="DbgAsm_HostArgs" xml:space="preserve">
-    <value>调试参数(_G)</value>
+    <value>程序参数(_G)</value>
   </data>
   <data name="DbgAsm_WorkingDir" xml:space="preserve">
     <value>工作目录(_W)</value>
