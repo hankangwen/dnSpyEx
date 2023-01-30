@@ -121,7 +121,7 @@
     <value>分析(_Z)</value>
   </data>
   <data name="AnalyzerWindowTitle" xml:space="preserve">
-    <value>分析</value>
+    <value>分析器</value>
   </data>
   <data name="AppliedToTreeNode" xml:space="preserve">
     <value>被应用于</value>
