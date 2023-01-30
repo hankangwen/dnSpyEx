@@ -178,10 +178,10 @@
     <value>类型: </value>
   </data>
   <data name="Decompile_AnyCPU32BitPreferred" xml:space="preserve">
-    <value>AnyCPU (32位优先)</value>
+    <value>AnyCPU (32 位优先)</value>
   </data>
   <data name="Decompile_AnyCPU64BitPreferred" xml:space="preserve">
-    <value>AnyCPU (64位优先)</value>
+    <value>AnyCPU (64 位优先)</value>
   </data>
   <data name="Decompile_Architecture" xml:space="preserve">
     <value>体系架构: </value>

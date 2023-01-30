@@ -169,7 +169,7 @@
     <value>展开动态视图将获得该对象的动态成员</value>
   </data>
   <data name="DebuggerVarsWindow_ExpandResultsViewMessage" xml:space="preserve">
-    <value>展开 "结果" 视图将枚举 IEnumerable</value>
+    <value>展开结果视图将枚举 IEnumerable</value>
   </data>
   <data name="DebuggerVarsWindow_InstanceMembers" xml:space="preserve">
     <value>实例成员</value>

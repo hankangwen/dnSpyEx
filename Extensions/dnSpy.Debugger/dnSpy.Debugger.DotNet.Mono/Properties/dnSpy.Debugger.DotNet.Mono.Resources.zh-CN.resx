@@ -229,7 +229,7 @@
     <value>编辑器</value>
   </data>
   <data name="ConnectToUnity_UseAttachToUnityProcessDlgBoxMessage" xml:space="preserve">
-    <value>使用 "附加到进程(Unity)" 对话框来附加到调试版本</value>
+    <value>使用 "附加到进程 (Unity)" 对话框来附加到调试版本</value>
   </data>
   <data name="CanNotSetABreakpointWhenProcessIsPaused" xml:space="preserve">
     <value>进程暂停时无法设置断点。</value>
@@ -244,9 +244,9 @@
     <value>超时 (秒)(_T)</value>
   </data>
   <data name="AttachToUnityProcess_DebugBuildsOnlyMessage" xml:space="preserve">
-    <value>仅可用于 Debug 编译的 Unity 进程</value>
+    <value>仅可用于在 Debug 模式下编译的 Unity 进程</value>
   </data>
   <data name="DebuggingUnityGamesText" xml:space="preserve">
-    <value>Debugging Unity Games (Wiki)</value>
+    <value>调试 Unity 游戏 (Wiki)</value>
   </data>
 </root>

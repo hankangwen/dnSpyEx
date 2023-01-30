@@ -127,7 +127,7 @@
     <value>宿主程序(_H)</value>
   </data>
   <data name="DbgAsm_HostArgs" xml:space="preserve">
-    <value>宿主参数(_G)</value>
+    <value>调试参数(_G)</value>
   </data>
   <data name="DbgAsm_WorkingDir" xml:space="preserve">
     <value>工作目录(_W)</value>
@@ -150,7 +150,7 @@
   <data name="Error_CouldNotStartDebuggerCheckAccessToFile" xml:space="preserve">
     <value>无法启动调试器。请确保您有权限访问文件 '{0}'
 
-错误：{1}</value>
+错误: {1}</value>
   </data>
   <data name="Error_CouldNotStartDebuggerRequireAdminPrivLvl" xml:space="preserve">
     <value>无法启动调试器。因为调试的目标程序需要管理员权限，请以管理员的身份运行 dnSpy 并重试。</value>
@@ -206,7 +206,7 @@
 错误：{0}</value>
   </data>
   <data name="Error_CouldNotAttachToProcess" xml:space="preserve">
-    <value>无法附加到进程 {0}</value>
+    <value>无法附加到目标进程 {0}</value>
   </data>
   <data name="Error_ProcessIsAlreadyBeingDebugged" xml:space="preserve">
     <value>目标进程正在被其它程序调试 {0}</value>
@@ -224,7 +224,7 @@
     <value>异常</value>
   </data>
   <data name="StackFrame_FunctionEvaluation" xml:space="preserve">
-    <value>函数计算</value>
+    <value>函数求值</value>
   </data>
   <data name="StackFrame_InternalCall" xml:space="preserve">
     <value>内部调用</value>
@@ -260,7 +260,7 @@
     <value>无法设置下一条语句。</value>
   </data>
   <data name="Error_CouldNotBreakProcess" xml:space="preserve">
-    <value>无法中断进程。错误: 0x{0:X8}</value>
+    <value>无法中断目标进程。错误: 0x{0:X8}</value>
   </data>
   <data name="InternalDebuggerError" xml:space="preserve">
     <value>内部调试器错误</value>

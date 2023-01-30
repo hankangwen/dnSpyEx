@@ -434,7 +434,7 @@
     <value>相对虚拟地址(_R)</value>
   </data>
   <data name="GenericParameterNumber" xml:space="preserve">
-    <value>泛型参数({0})</value>
+    <value>泛型参数 ({0})</value>
   </data>
   <data name="GP_Class" xml:space="preserve">
     <value>类(_L)</value>
@@ -494,10 +494,10 @@
     <value>文件头</value>
   </data>
   <data name="HexNode_OptHeader32" xml:space="preserve">
-    <value>可选头（32 -位）</value>
+    <value>可选头 (32 - 位)</value>
   </data>
   <data name="HexNode_OptHeader64" xml:space="preserve">
-    <value>可选头（64 - 位）</value>
+    <value>可选头 (64 - 位)</value>
   </data>
   <data name="ImplMapTab" xml:space="preserve">
     <value>实现映射</value>
@@ -812,7 +812,7 @@
     <value>下标(_W)</value>
   </data>
   <data name="TypeSigCreator_Array_LowerBounds_ToolTip" xml:space="preserve">
-    <value>逗号分隔的数组下标列表(有符号整数)</value>
+    <value>逗号分隔的数组下标列表 (有符号整数)</value>
   </data>
   <data name="TypeSigCreator_Array_Rank" xml:space="preserve">
     <value>维度(_K)</value>
@@ -842,13 +842,13 @@
     <value>C 修饰符可选 (_T)</value>
   </data>
   <data name="TypeSigCreator_CModOpt_ToolTip" xml:space="preserve">
-    <value>添加可选的C修饰符</value>
+    <value>添加可选的 C 修饰符</value>
   </data>
   <data name="TypeSigCreator_CModReqd" xml:space="preserve">
     <value>C 修饰符依赖(_M)</value>
   </data>
   <data name="TypeSigCreator_CModReqd_ToolTip" xml:space="preserve">
-    <value>添加依赖的C修饰符</value>
+    <value>添加依赖的 C 修饰符</value>
   </data>
   <data name="TypeSigCreator_FnPtr" xml:space="preserve">
     <value>函数指针(_F)</value>
@@ -962,10 +962,10 @@
     <value>程序集中的部分代码可能会引用此类型。是否要删除此类型？</value>
   </data>
   <data name="AskExitUnsavedFile" xml:space="preserve">
-    <value>有文件尚未被保存。要在退出前保存吗？</value>
+    <value>有一个文件尚未被保存。是否要在退出之前保存？</value>
   </data>
   <data name="AskExitUnsavedFiles" xml:space="preserve">
-    <value>有 {0} 个文件尚未被保存。要在退出前保存吗？</value>
+    <value>有 {0} 个文件尚未被保存。是否要在退出前保存它们？</value>
   </data>
   <data name="AskLoadAssembliesLoseChanges" xml:space="preserve">
     <value>是否要加载新程序集并放弃所有修改？</value>
@@ -1226,7 +1226,7 @@
     <value>哈希(_H)</value>
   </data>
   <data name="EditSwitchInstructionOperand" xml:space="preserve">
-    <value>编辑指令操作数</value>
+    <value>编辑分支操作数</value>
   </data>
   <data name="EditTypeCommand" xml:space="preserve">
     <value>编辑类型...</value>
@@ -1373,7 +1373,7 @@
     <value>转到元数据表行 ({0:X8})</value>
   </data>
   <data name="GoToMetaDataTableRowCommand2" xml:space="preserve">
-    <value>转到元数据表行......</value>
+    <value>转到元数据表行...</value>
   </data>
   <data name="GoToMetaDataTableRowTitle" xml:space="preserve">
     <value>转到元数据表行</value>
@@ -1816,8 +1816,7 @@
     <value>共享方法体(_B)</value>
   </data>
   <data name="SaveModule_ShareMethodBodies_ToolTip" xml:space="preserve">
-    <value>当有多个完全相同代码的 .NET 方法时将会共享方法体，
-并且输出文件将会变小。</value>
+    <value>有相同代码的多个 .NET 方法将会共享方法体，输出文件会因此变小。</value>
   </data>
   <data name="SaveModule_Title" xml:space="preserve">
     <value>保存模块</value>
@@ -1826,7 +1825,7 @@
     <value>混合模块(_M)</value>
   </data>
   <data name="SaveModule_UseMixedMode_ToolTip" xml:space="preserve">
-    <value>检查是否它是一个混合模式模块 (例如 C++/.NET )。单击此复选框时大多数选项将被重新初始化</value>
+    <value>检查它是否为一个混合模式模块 (例如 C++/.NET )。单击此复选框时大多数选项将被重新初始化</value>
   </data>
   <data name="SaveModule_WritePdb" xml:space="preserve">
     <value>保存 PDB 文件(_P)</value>
@@ -1928,7 +1927,7 @@
     <value>标记</value>
   </data>
   <data name="TooManyBytesSelected" xml:space="preserve">
-    <value>您选择数据的字节数太多</value>
+    <value>您选择的数据字节数太多</value>
   </data>
   <data name="Type_ClassSize" xml:space="preserve">
     <value>类大小(_L)</value>
@@ -2306,7 +2305,7 @@
     <value>布局(_U)</value>
   </data>
   <data name="Type_Flags_String" xml:space="preserve">
-    <value>字串(_G)</value>
+    <value>字符集(_G)</value>
   </data>
   <data name="Type_Flags_Visibility" xml:space="preserve">
     <value>可见性(_Y)</value>

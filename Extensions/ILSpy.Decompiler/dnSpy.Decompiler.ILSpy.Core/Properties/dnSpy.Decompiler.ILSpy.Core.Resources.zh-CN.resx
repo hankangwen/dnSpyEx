@@ -208,7 +208,7 @@
     <value>显示 IL 指令字节</value>
   </data>
   <data name="DecompilerSettings_ShowPdbInfo" xml:space="preserve">
-    <value>显示行号和文件名（如果可用）</value>
+    <value>显示行号和文件名 (如果可用)</value>
   </data>
   <data name="DecompilerSettings_ShowTokensRvasOffsets" xml:space="preserve">
     <value>显示标记，相对虚拟地址和文件偏移</value>

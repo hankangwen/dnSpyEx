@@ -124,7 +124,7 @@
     <value>文件/目录 '{0}' 不存在</value>
   </data>
   <data name="InvalidOption" xml:space="preserve">
-    <value>选项无效：{0}</value>
+    <value>选项无效: {0}</value>
   </data>
   <data name="InvalidSolutionName" xml:space="preserve">
     <value>.sln 名称 ({0}) 必须相对于工程目录</value>
@@ -133,7 +133,7 @@
     <value>元数据标记无效</value>
   </data>
   <data name="InvalidVSVersion" xml:space="preserve">
-    <value>无效的 Visual Studio 版本：{0}</value>
+    <value>无效的 Visual Studio 版本: {0}</value>
   </data>
   <data name="LanguageDoesNotExist" xml:space="preserve">
     <value>语言 '{0}' 不存在</value>
@@ -250,7 +250,7 @@
     <value>工作线程的数目。默认每个CPU核心使用一个线程。</value>
   </data>
   <data name="CmdLineDescription_OutputDirectory" xml:space="preserve">
-    <value>输出目录：</value>
+    <value>输出目录: </value>
   </data>
   <data name="CmdLineDescription_ProjectGUID" xml:space="preserve">
     <value>项目的 GUID</value>
@@ -292,7 +292,7 @@
     <value>反编译以上目录及子目录中所有 .NET  文件</value>
   </data>
   <data name="ExampleDescription3" xml:space="preserve">
-    <value>反编译目录中所有.NET的dll文件并保存到 C:\out\path</value>
+    <value>反编译目录中所有 .NET 的 dll 文件并保存到 C:\out\path</value>
   </data>
   <data name="ExampleDescription4" xml:space="preserve">
     <value>反编译标记为 0x06000123 的成员</value>
@@ -301,7 +301,7 @@
     <value>从 mscorlib 反编译 System.Int32</value>
   </data>
   <data name="ExamplesHeader" xml:space="preserve">
-    <value>例如：</value>
+    <value>例如: </value>
   </data>
   <data name="UsageHeader" xml:space="preserve">
     <value>[选项] [文件或路径1] [文件或路径2] [...]</value>
@@ -310,7 +310,7 @@
     <value>不要高亮文本</value>
   </data>
   <data name="CmdLineDescription_Spaces" xml:space="preserve">
-    <value>缩进大小（单位为空格），指定 0 时则使用一个制表符</value>
+    <value>缩进大小 (单位为空格)，指定 0 时则使用一个制表符</value>
   </data>
   <data name="InvalidSpacesArgument" xml:space="preserve">
     <value>空格的数量必须在 {0} 和 {1} 之间</value>
