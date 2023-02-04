@@ -84,16 +84,17 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler.CSharp {
 			GetCompilationState<CSharpEvalContextState>(evalInfo, references, out var langDebugInfo, out var method, out var methodToken, out var localVarSigTok, out var state, out var metadataBlocks, out var methodVersion);
 
 			var getMethodDebugInfo = CreateGetMethodDebugInfo(state, langDebugInfo);
-			var evalCtx = EvaluationContext.CreateMethodContext(metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
-			state.MetadataContext = new CSharpMetadataContext(evalCtx.Compilation, evalCtx);
 
 			if ((options & DbgEvaluationOptions.RawLocals) == 0) {
+				var evalCtx = EvaluationContext.CreateMethodContext(metadataBlocks, getMethodDebugInfo, method.Module.Mvid ?? Guid.Empty, methodToken, methodVersion, langDebugInfo.ILOffset, localVarSigTok);
+				state.MetadataContext = new CSharpMetadataContext(evalCtx.Compilation, evalCtx);
+
 				var asmBytes = evalCtx.CompileGetLocals(false, ImmutableArray<Alias>.Empty, out var localsInfo, out var typeName, out var errorMessage);
 				var res = CreateCompilationResult(state, asmBytes, typeName, localsInfo, errorMessage);
 				if (!res.IsError)
 					return res;
 			}
-			return CompileGetLocals(state, method);
+			return CompileGetLocals(state, method, getMethodDebugInfo);
 		}
 
 		public override DbgDotNetCompilationResult CompileExpression(DbgEvaluationInfo evalInfo, DbgModuleReference[] references, DbgDotNetAlias[] aliases, string expression, DbgEvaluationOptions options) {

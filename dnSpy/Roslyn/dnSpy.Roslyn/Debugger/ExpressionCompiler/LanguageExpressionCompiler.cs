@@ -548,8 +548,9 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 			}
 		}
 
-		protected DbgDotNetCompilationResult CompileGetLocals(EvalContextState state, MethodDef method) {
-			var builder = new GetLocalsAssemblyBuilder(this, method, state.MethodDebugInfo.LocalVariableNames, state.MethodDebugInfo.ParameterNames);
+		protected DbgDotNetCompilationResult CompileGetLocals(EvalContextState state, MethodDef method, GetMethodDebugInfo getMethodDebugInfo) {
+			var methodDebugInfo = getMethodDebugInfo();
+			var builder = new GetLocalsAssemblyBuilder(this, method, methodDebugInfo.LocalVariableNames, methodDebugInfo.ParameterNames);
 			var asmBytes = builder.Compile(out var localsInfo, out var typeName, out var errorMessage);
 			return CreateCompilationResult(state, asmBytes, typeName, localsInfo, errorMessage);
 		}
