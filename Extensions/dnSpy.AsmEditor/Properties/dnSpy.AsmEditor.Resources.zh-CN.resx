@@ -1499,7 +1499,7 @@
     <value>删除所有局部变量(_V)</value>
   </data>
   <data name="Local_CompilerGenerated_Character" xml:space="preserve">
-    <value>编译器生成</value>
+    <value>C</value>
   </data>
   <data name="Local_CompilerGenerated_Character_ToolTip" xml:space="preserve">
     <value>编译器生成</value>
