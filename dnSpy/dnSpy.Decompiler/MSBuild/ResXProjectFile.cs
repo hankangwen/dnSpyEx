@@ -19,49 +19,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Resources;
 using dnlib.DotNet;
+using dnlib.DotNet.Resources;
 using dnSpy.Decompiler.Properties;
 
 namespace dnSpy.Decompiler.MSBuild {
 	sealed class ResXProjectFile : ProjectFile {
-		static ResXProjectFile() {
-			// Mono doesn't support the constructors that we need
-
-			Type[] paramTypes;
-			ConstructorInfo? ctorInfo;
-
-			paramTypes = new Type[] { typeof(string), typeof(Func<Type, string>) };
-			ctorInfo = typeof(ResXResourceWriter).GetConstructor(paramTypes);
-			if (ctorInfo is not null) {
-				var dynMethod = new DynamicMethod("ResXResourceWriter-ctor", typeof(ResXResourceWriter), paramTypes);
-				var ilg = dynMethod.GetILGenerator();
-				ilg.Emit(OpCodes.Ldarg_0);
-				ilg.Emit(OpCodes.Ldarg_1);
-				ilg.Emit(OpCodes.Newobj, ctorInfo);
-				ilg.Emit(OpCodes.Ret);
-				delegateResXResourceWriterConstructor = (Func<string, Func<Type, string>, ResXResourceWriter>)dynMethod.CreateDelegate(typeof(Func<string, Func<Type, string>, ResXResourceWriter>));
-			}
-
-			paramTypes = new Type[] { typeof(string), typeof(object), typeof(Func<Type, string>) };
-			ctorInfo = typeof(ResXDataNode).GetConstructor(paramTypes);
-			if (ctorInfo is not null) {
-				var dynMethod = new DynamicMethod("ResXDataNode-ctor", typeof(ResXDataNode), paramTypes);
-				var ilg = dynMethod.GetILGenerator();
-				ilg.Emit(OpCodes.Ldarg_0);
-				ilg.Emit(OpCodes.Ldarg_1);
-				ilg.Emit(OpCodes.Ldarg_2);
-				ilg.Emit(OpCodes.Newobj, ctorInfo);
-				ilg.Emit(OpCodes.Ret);
-				delegateResXDataNodeConstructor = (Func<string, object?, Func<Type, string>, ResXDataNode>)dynMethod.CreateDelegate(typeof(Func<string, object?, Func<Type, string>, ResXDataNode>));
-			}
-		}
-		static readonly Func<string, Func<Type, string>, ResXResourceWriter>? delegateResXResourceWriterConstructor;
-		static readonly Func<string, object?, Func<Type, string>, ResXDataNode>? delegateResXDataNodeConstructor;
-
 		public override string Description => dnSpy_Decompiler_Resources.MSBuild_CreateResXFile;
 		public override BuildAction BuildAction => BuildAction.EmbeddedResource;
 		public override string Filename => filename;
@@ -70,13 +33,13 @@ namespace dnSpy.Decompiler.MSBuild {
 		public string TypeFullName { get; }
 		public bool IsSatelliteFile { get; set; }
 
-		readonly EmbeddedResource embeddedResource;
+		readonly ResourceElementSet resourceElementSet;
 		readonly Dictionary<IAssembly, IAssembly> newToOldAsm;
 
-		public ResXProjectFile(ModuleDef module, string filename, string typeFullName, EmbeddedResource er) {
+		public ResXProjectFile(ModuleDef module, string filename, string typeFullName, ResourceElementSet resourceElementSet) {
 			this.filename = filename;
 			TypeFullName = typeFullName;
-			embeddedResource = er;
+			this.resourceElementSet = resourceElementSet;
 
 			newToOldAsm = new Dictionary<IAssembly, IAssembly>(new AssemblyNameComparer(AssemblyNameComparerFlags.All & ~AssemblyNameComparerFlags.Version));
 			foreach (var asmRef in module.GetAssemblyRefs())
@@ -84,12 +47,10 @@ namespace dnSpy.Decompiler.MSBuild {
 		}
 
 		public override void Create(DecompileContext ctx) {
-			var list = ReadResourceEntries(ctx);
-
-			using (var writer = delegateResXResourceWriterConstructor?.Invoke(Filename, TypeNameConverter) ?? new ResXResourceWriter(Filename)) {
-				foreach (var t in list) {
+			using (var writer = new ResXResourceFileWriter(Filename, TypeNameConverter)) {
+				foreach (var resourceElement in resourceElementSet.ResourceElements) {
 					ctx.CancellationToken.ThrowIfCancellationRequested();
-					writer.AddResource(t);
+					writer.AddResourceData(resourceElement);
 				}
 			}
 		}
@@ -103,46 +64,6 @@ namespace dnSpy.Decompiler.MSBuild {
 			if (AssemblyNameComparer.CompareAll.Equals(oldAsm, newAsm))
 				return type.AssemblyQualifiedName ?? throw new ArgumentException();
 			return $"{type.FullName}, {oldAsm.FullName}";
-		}
-
-		List<ResXDataNode> ReadResourceEntries(DecompileContext ctx) {
-			var list = new List<ResXDataNode>();
-			int errors = 0;
-			try {
-				using (var reader = new ResourceReader(embeddedResource.CreateReader().AsStream())) {
-					var iter = reader.GetEnumerator();
-					while (iter.MoveNext()) {
-						ctx.CancellationToken.ThrowIfCancellationRequested();
-						string? key = null;
-						try {
-							key = iter.Key as string;
-							if (key is null)
-								continue;
-							var value = iter.Value;
-							// ResXDataNode ctor checks if the input is serializable, which this stream isn't.
-							// We have no choice but to create a new stream.
-							if (value is Stream && !value.GetType().IsSerializable) {
-								var stream = (Stream)value;
-								var data = new byte[stream.Length];
-								if (stream.Read(data, 0, data.Length) != data.Length)
-									throw new IOException("Could not read all bytes");
-								value = new MemoryStream(data);
-							}
-							//TODO: Some resources, like images, should be saved as separate files. Use ResXFileRef.
-							//		Don't do it if it's a satellite assembly.
-							list.Add(delegateResXDataNodeConstructor?.Invoke(key, value, TypeNameConverter) ?? new ResXDataNode(key, value));
-						}
-						catch (Exception ex) {
-							if (errors++ < 30)
-								ctx.Logger.Error($"Could not add resource '{key}', Message: {ex.Message}");
-						}
-					}
-				}
-			}
-			catch (Exception ex) {
-				ctx.Logger.Error($"Could not read resources from {embeddedResource.Name}, Message: {ex.Message}");
-			}
-			return list;
 		}
 	}
 }
