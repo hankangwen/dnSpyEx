@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright (C) 2023 ElektroKill
 
     This file is part of dnSpy
@@ -135,7 +135,7 @@ namespace dnSpy.Decompiler.MSBuild {
 				// Mimic formatting used in ResXDataNode and TypeConverter implementations
 				switch (builtInResourceData.Code) {
 				case ResourceTypeCode.Null:
-					return new ResXResourceInfo("", typeNameConverter(Type.GetType("System.Resources.ResXNullRef")!));
+					return new ResXResourceInfo("", typeNameConverter(typeof(ResXDataNode).Assembly.GetType("System.Resources.ResXNullRef")!));
 				case ResourceTypeCode.String:
 					return new ResXResourceInfo((string)builtInResourceData.Data);
 				case ResourceTypeCode.Boolean:
