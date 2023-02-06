@@ -1,4 +1,4 @@
-/*
+﻿/*
     Copyright (C) 2023 ElektroKill
 
     This file is part of dnSpy
@@ -55,11 +55,13 @@ namespace dnSpy.Decompiler.MSBuild {
 		}
 
 		readonly Func<Type, string> typeNameConverter;
+		readonly Func<string, bool> hasByteArrayConverter;
 		readonly XmlTextWriter writer;
 		bool written;
 
-		public ResXResourceFileWriter(string fileName, Func<Type, string> typeNameConverter) {
+		public ResXResourceFileWriter(string fileName, Func<Type, string> typeNameConverter, Func<string, bool> hasByteArrayConverter) {
 			this.typeNameConverter = typeNameConverter;
+			this.hasByteArrayConverter = hasByteArrayConverter;
 			writer = new XmlTextWriter(fileName, Encoding.UTF8) {
 				Formatting = Formatting.Indented,
 				Indentation = 2
@@ -183,14 +185,14 @@ namespace dnSpy.Decompiler.MSBuild {
 			if (resourceData is BinaryResourceData binaryResourceData) {
 				var commaIndex = binaryResourceData.TypeName.IndexOf(',');
 				string actualName = commaIndex == -1 ? binaryResourceData.TypeName : binaryResourceData.TypeName.Remove(commaIndex);
-				// TODO: We could try to resolve the type and check if it has a TypeConverter defined that can convert to/from byte[] using dnlib.
-				// Known types that can be serialized as byte arrays.
+				// These 4 are common types which are known to have a byte array converter.
+				// We check for them first to avoid the slow hasByteArrayConverter() call.
 				string mimeType = actualName switch {
 					"System.Drawing.Icon" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
 					"System.Drawing.Bitmap" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
 					"System.Drawing.Metafile" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
 					"System.Drawing.Image" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
-					_ => ResXResourceWriter.BinSerializedObjectMimeType
+					_ => hasByteArrayConverter(binaryResourceData.TypeName) ? ResXResourceWriter.ByteArraySerializedObjectMimeType : ResXResourceWriter.BinSerializedObjectMimeType
 				};
 				return new ResXResourceInfo(ToBase64WrappedString(binaryResourceData.Data), binaryResourceData.TypeName, mimeType);
 			}
