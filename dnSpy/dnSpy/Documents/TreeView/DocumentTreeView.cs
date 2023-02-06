@@ -830,6 +830,9 @@ namespace dnSpy.Documents.TreeView {
 				// extension, it's not a shortcut and we won't get a slow thrown exception.
 				if (!filenames[i].EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
 					continue;
+				// Check if the file exists. If it doesn't we won't get a slow thrown exception.
+				if (!File.Exists(filenames[i]))
+					continue;
 				try {
 					var sc = (IWshRuntimeLibrary.IWshShortcut?)ws.CreateShortcut(filenames[i]);
 					if (sc is not null)
