@@ -79,7 +79,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 			if (engine.MonoVirtualMachine.Version.AtLeast(2, 47)) {
 				var debuggerModule = method.Module.GetDebuggerModule();
 				if (debuggerModule is not null && engine.TryGetMonoModule(debuggerModule, out var monoModule) && !monoModule.Assembly.IsDynamic) {
-					monoMethod = monoModule.Assembly.GetMethod((uint)method.MetadataToken);
+					toMonoMethod[method] = monoMethod = monoModule.Assembly.GetMethod((uint)method.MetadataToken);
 					if (monoMethod is not null)
 						return monoMethod;
 				}
