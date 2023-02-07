@@ -35,10 +35,22 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 			return null;
 		}
 
-		static FieldInfoMirror? GetField(TypeMirror type, string name1, string name2) {
+		public static int? TryGetExceptionHResult(ObjectMirror exObj) {
+			var field = GetField(exObj.Type, KnownMemberNames.Exception_HResult_FieldName);
+			if (field is null)
+				return null;
+			var value = exObj.GetValue(field);
+			if (value is PrimitiveValue primitive && primitive.Value is int hResult)
+				return hResult;
+			return null;
+		}
+
+		static FieldInfoMirror? GetField(TypeMirror type, string name1, string? name2 = null) {
 			while (type is not null) {
 				foreach (var field in type.GetFields()) {
-					if (field.Name == name1 || field.Name == name2)
+					if (field.Name == name1)
+						return field;
+					if (name2 is not null && field.Name == name2)
 						return field;
 				}
 				type = type.BaseType;

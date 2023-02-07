@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Text;
@@ -310,7 +311,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 		public override string FileExtension => ".il";
 
 		protected override void TypeToString(IDecompilerOutput output, ITypeDefOrRef? t, bool includeNamespace, IHasCustomAttribute? attributeProvider = null) =>
-			t.WriteTo(output, includeNamespace ? ILNameSyntax.TypeName : ILNameSyntax.ShortTypeName);
+			t.WriteTo(output, new StringBuilder(), includeNamespace ? ILNameSyntax.TypeName : ILNameSyntax.ShortTypeName);
 	}
 #endif
 }

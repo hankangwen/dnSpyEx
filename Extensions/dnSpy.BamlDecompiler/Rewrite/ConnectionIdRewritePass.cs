@@ -73,9 +73,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			}
 
 			if (hasConnector && connIds is null) {
-				var msg = dnSpy_BamlDecompiler_Resources.Error_IComponentConnectorConnetCannotBeParsed;
+				var msg = dnSpy_BamlDecompiler_Resources.Error_IComponentConnectorConnectCannotBeParsed;
 				document.Root.AddBeforeSelf(new XComment(string.Format(msg, type.ReflectionFullName)));
-				return;
 			}
 
 			foreach (var elem in document.Elements()) {

@@ -113,7 +113,11 @@ namespace dnSpy.Decompiler.MSBuild {
 				Parallel.ForEach(projects, opts, p => {
 					options.CancellationToken.ThrowIfCancellationRequested();
 					try {
-						var writer = new ProjectWriter(p, p.Options.ProjectVersion ?? options.ProjectVersion, projects, options.UserGACPaths);
+						ProjectWriterBase writer;
+						if (options.GenerateSDKStyleProjects)
+							writer = new SdkProjectWriter(p, p.Options.ProjectVersion ?? options.ProjectVersion, projects, options.UserGACPaths);
+						else
+							writer = new DefaultProjectWriter(p, p.Options.ProjectVersion ?? options.ProjectVersion, projects, options.UserGACPaths);
 						writer.Write();
 					}
 					catch (OperationCanceledException) {
@@ -142,8 +146,7 @@ namespace dnSpy.Decompiler.MSBuild {
 				progressListener.SetProgress(maxProgress);
 			}
 			finally {
-				if (satelliteAssemblyFinder is not null)
-					satelliteAssemblyFinder.Dispose();
+				satelliteAssemblyFinder?.Dispose();
 			}
 		}
 

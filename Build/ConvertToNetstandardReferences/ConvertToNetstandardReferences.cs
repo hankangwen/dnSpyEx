@@ -123,8 +123,10 @@ namespace ConvertToNetstandardReferences {
 								if (IsPublic(type))
 									netstandardTypes.Add(type);
 							}
-							foreach (var type in netstandardAsm.ManifestModule.ExportedTypes)
-								netstandardTypes.Add(type);
+							foreach (var type in netstandardAsm.ManifestModule.ExportedTypes) {
+								if (IsPublic(type))
+									netstandardTypes.Add(type);
+							}
 						}
 
 						for (uint rid = 1; ; rid++) {

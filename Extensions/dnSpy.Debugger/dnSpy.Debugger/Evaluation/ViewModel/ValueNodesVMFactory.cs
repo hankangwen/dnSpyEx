@@ -34,6 +34,7 @@ namespace dnSpy.Debugger.Evaluation.ViewModel {
 		None,
 		Locals,
 		Autos,
+		StaticFields,
 		Watch,
 	}
 

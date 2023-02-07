@@ -57,6 +57,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Margin="0 5 0 0" Target="{Binding ElementName=destDirTextBox}" Content="{x:Static p:dnSpy_Resources.ExportToProject_DestinationFolder}" />
@@ -80,9 +81,10 @@
                     <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 0 0" IsChecked="{Binding UnpackResources}" Content="{x:Static p:dnSpy_Resources.ExportToProject_UnpackResources}" />
                     <CheckBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 0 0" IsChecked="{Binding CreateResX}" Content="{x:Static p:dnSpy_Resources.ExportToProject_CreateResX}" IsEnabled="{Binding CanCreateResX}" />
                     <CheckBox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 0 0" IsChecked="{Binding DecompileXaml}" Content="{x:Static p:dnSpy_Resources.ExportToProject_DecompileXaml}" IsEnabled="{Binding CanDecompileBaml}" />
-                    <CheckBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 0 0" IsChecked="{Binding OpenProject}" Content="{x:Static p:dnSpy_Resources.ExportToProject_OpenProjectInVisualStudio}" />
+                    <CheckBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 0 0" IsChecked="{Binding UseSDKStyleProjectFormat}" Content="{x:Static p:dnSpy_Resources.ExportToProject_UseSDKStyleProjectFormat}" />
+                    <CheckBox Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 0 0" IsChecked="{Binding OpenProject}" Content="{x:Static p:dnSpy_Resources.ExportToProject_OpenProjectInVisualStudio}" />
 
-                    <TextBlock Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" Margin="5 5 5 0" TextWrapping="Wrap" Text="{Binding FilesToExportMessage}" />
+                    <TextBlock Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="3" Margin="5 5 5 0" TextWrapping="Wrap" Text="{Binding FilesToExportMessage}" />
                 </Grid>
 
                 <Grid Grid.Row="0" Margin="5 5 5 0"

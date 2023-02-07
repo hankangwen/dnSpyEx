@@ -162,6 +162,14 @@ namespace dnSpy.Debugger.ToolWindows {
 		public override bool IsEnabled(IMenuItemContext context) => toolWindowsOperations.Value.CanShowLocals;
 	}
 
+	[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_DEBUG_WINDOWS_GUID, Header = "res:StaticFieldsCommand", Icon = DsImagesAttribute.FieldShortcut, Group = MenuConstants.GROUP_APP_MENU_DEBUG_WINDOWS_VALUES, Order = 30)]
+	sealed class StaticFieldsWindowCommand : DebugToolWindowMainMenuCommand {
+		[ImportingConstructor]
+		public StaticFieldsWindowCommand(Lazy<ToolWindowsOperations> toolWindowsOperations) : base(toolWindowsOperations) { }
+		public override void Execute(IMenuItemContext context) => toolWindowsOperations.Value.ShowStaticFields();
+		public override bool IsEnabled(IMenuItemContext context) => toolWindowsOperations.Value.CanShowStaticFields;
+	}
+
 	[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_DEBUG_WINDOWS_GUID, Header = "res:CallStackCommand", Icon = DsImagesAttribute.CallStackWindow, InputGestureText = "res:ShortCutKeyCtrlAltC", Group = MenuConstants.GROUP_APP_MENU_DEBUG_WINDOWS_INFO, Order = 0)]
 	sealed class CallStackWindowCommand : DebugToolWindowMainMenuCommand {
 		[ImportingConstructor]

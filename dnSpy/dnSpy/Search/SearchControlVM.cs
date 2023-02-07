@@ -192,6 +192,7 @@ namespace dnSpy.Search {
 					SearchComparer = CreateSearchComparer(),
 					Filter = new FlagsDocumentTreeNodeFilter(selectedSearchTypeVM.Flags),
 					SearchDecompiledData = SearchSettings.SearchDecompiledData,
+					SearchCompilerGeneratedMembers = SearchSettings.SearchCompilerGeneratedMembers,
 				};
 				fileSearcher = fileSearcherProvider.Create(options, documentTreeView);
 				fileSearcher.SyntaxHighlight = SearchSettings.SyntaxHighlight;
@@ -318,6 +319,7 @@ namespace dnSpy.Search {
 			case nameof(SearchSettings.MatchAnySearchTerm):
 			case nameof(SearchSettings.SearchDecompiledData):
 			case nameof(SearchSettings.SearchFrameworkAssemblies):
+			case nameof(SearchSettings.SearchCompilerGeneratedMembers):
 				Restart();
 				break;
 			}

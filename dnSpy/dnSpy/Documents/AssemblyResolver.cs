@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Xml;
 using dnlib.DotNet;
 using dnlib.PE;
 using dnSpy.Contracts.DnSpy.Metadata;
@@ -438,28 +439,32 @@ namespace dnSpy.Documents {
 				// - .NET:
 				//		5.0: System.Runtime, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 				//		6.0: System.Runtime, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+				//		7.0: System.Runtime, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 				if (frameworkName != TFM_netstandard) {
 					if (module.IsClr40Exactly && systemRuntimeRef.Version >= minSystemRuntimeNetCoreVersion) {
 						version = aspNetCoreRef?.Version;
 						if (version is null) {
 							// .NET Core 1.0 or 1.1
 							if (systemRuntimeRef.Version == version_4_1_0_0)
-								version = new Version(1, 0, 0, 0);
+								version = version_1_0_0_0;
 							// .NET Core 2.0
 							else if (systemRuntimeRef.Version == version_4_2_0_0)
-								version = new Version(2, 0, 0, 0);
+								version = version_2_0_0_0;
 							// .NET Core 2.1, 2.2 or 3.0
 							else if (systemRuntimeRef.Version == version_4_2_1_0)
-								version = new Version(2, 1, 0, 0);
+								version = version_2_1_0_0;
 							// .NET Core 3.1
 							else if (systemRuntimeRef.Version == version_4_2_2_0)
-								version = new Version(3, 1, 0, 0);
+								version = version_3_1_0_0;
 							// .NET 5
 							else if (systemRuntimeRef.Version == version_5_0_0_0)
 								version = version_5_0_0_0;
 							// .NET 6
 							else if (systemRuntimeRef.Version == version_6_0_0_0)
 								version = version_6_0_0_0;
+							// .NET 7
+							else if (systemRuntimeRef.Version == version_7_0_0_0)
+								version = version_7_0_0_0;
 							else
 								Debug.Fail("Unknown .NET Core version");
 						}
@@ -486,12 +491,19 @@ namespace dnSpy.Documents {
 
 			return FrameworkKind.Unknown;
 		}
+
+		// Cached version instances to prevent allocations
+		static readonly Version version_1_0_0_0 = new Version(1, 0, 0, 0);
+		static readonly Version version_2_0_0_0 = new Version(2, 0, 0, 0);
+		static readonly Version version_2_1_0_0 = new Version(2, 1, 0, 0);
+		static readonly Version version_3_1_0_0 = new Version(3, 1, 0, 0);
 		static readonly Version version_4_1_0_0 = new Version(4, 1, 0, 0);
 		static readonly Version version_4_2_0_0 = new Version(4, 2, 0, 0);
 		static readonly Version version_4_2_1_0 = new Version(4, 2, 1, 0);
 		static readonly Version version_4_2_2_0 = new Version(4, 2, 2, 0);
 		static readonly Version version_5_0_0_0 = new Version(5, 0, 0, 0);
 		static readonly Version version_6_0_0_0 = new Version(6, 0, 0, 0);
+		static readonly Version version_7_0_0_0 = new Version(7, 0, 0, 0);
 
 		// Silverlight uses 5.0.5.0
 		static bool IsValidMscorlibVersion(Version? version) => version is not null && (uint)version.Major <= 5;
@@ -667,10 +679,19 @@ namespace dnSpy.Documents {
 					return (document, false);
 			}
 
+			var configProbePaths = GetConfigProbePaths(sourceModule, sourceModuleDir);
+			if (configProbePaths is not null) {
+				foreach (var path in configProbePaths) {
+					document = TryFindFromDir(asmName, dirPath: path);
+					if (document is not null)
+						return (document, false);
+				}
+			}
+
 			string[]? dotNetPaths;
 			if (dotNetCoreAppVersion is not null) {
 				int bitness = (sourceModule?.GetPointerSize(IntPtr.Size) ?? IntPtr.Size) * 8;
-				dotNetPaths = dotNetPathProvider.TryGetDotNetPaths(dotNetCoreAppVersion, bitness);
+				dotNetPaths = dotNetPathProvider.TryGetSharedDotNetPaths(dotNetCoreAppVersion, bitness);
 			}
 			else
 				dotNetPaths = null;
@@ -687,6 +708,15 @@ namespace dnSpy.Documents {
 				if (document is not null)
 					return (document, true);
 			}
+
+			if (configProbePaths is not null) {
+				foreach (var path in configProbePaths) {
+					document = TryLoadFromDir(asmName, checkVersion: false, checkPublicKeyToken: false, dirPath: path);
+					if (document is not null)
+						return (document, true);
+				}
+			}
+
 			if (dotNetPaths is not null) {
 				foreach (var path in dotNetPaths) {
 					document = TryLoadFromDir(asmName, checkVersion: false, checkPublicKeyToken: false, dirPath: path);
@@ -696,6 +726,51 @@ namespace dnSpy.Documents {
 			}
 
 			return default;
+		}
+
+		static IList<string>? GetConfigProbePaths(ModuleDef? module, string? sourceModuleDir) {
+			var imageName = module?.Assembly?.ManifestModule?.Location;
+			if (string2.IsNullOrEmpty(imageName) || string2.IsNullOrEmpty(sourceModuleDir))
+				return null;
+
+			var configName = imageName + ".config";
+			if (!File.Exists(configName))
+				return null;
+
+			try {
+				using (var xmlStream = new FileStream(configName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+					var doc = new XmlDocument();
+					doc.Load(XmlReader.Create(xmlStream));
+
+					var searchPaths = new List<string>();
+
+					foreach (var tmp in doc.GetElementsByTagName("probing")) {
+						if (tmp is not XmlElement probingElem)
+							continue;
+						var privatePath = probingElem.GetAttribute("privatePath");
+						if (string2.IsNullOrEmpty(privatePath))
+							continue;
+						foreach (var tmp2 in privatePath.Split(';')) {
+							var path = tmp2.Trim();
+							if (string2.IsNullOrEmpty(path))
+								continue;
+							var newPath = Path.GetFullPath(Path.Combine(sourceModuleDir, path));
+							if (Directory.Exists(newPath) && FileUtils.IsFileInDir(sourceModuleDir, newPath))
+								searchPaths.Add(newPath);
+						}
+					}
+
+					return searchPaths;
+				}
+			}
+			catch (ArgumentException) {
+			}
+			catch (IOException) {
+			}
+			catch (XmlException) {
+			}
+
+			return null;
 		}
 
 		IDsDocument? TryFindFromDir(IAssembly asmName, string dirPath) {

@@ -185,4 +185,16 @@ namespace dnSpy.Search {
 		public override bool IsChecked(IMenuItemContext context) => searchSettings.SearchFrameworkAssemblies;
 		public override void Execute(IMenuItemContext context) => searchSettings.SearchFrameworkAssemblies = !searchSettings.SearchFrameworkAssemblies;
 	}
+
+	[ExportMenuItem(Header = "res:SearchWindow_SearchCompilerGeneratedMembers", Group = MenuConstants.GROUP_CTX_SEARCH_OPTIONS, Order = 60)]
+	sealed class SearchCompilerGeneratedMembersCtxMenuCommand : MenuItemBase {
+		readonly SearchSettingsImpl searchSettings;
+
+		[ImportingConstructor]
+		SearchCompilerGeneratedMembersCtxMenuCommand(SearchSettingsImpl searchSettings) => this.searchSettings = searchSettings;
+
+		public override bool IsVisible(IMenuItemContext context) => context.CreatorObject.Guid == new Guid(MenuConstants.GUIDOBJ_SEARCH_GUID);
+		public override bool IsChecked(IMenuItemContext context) => searchSettings.SearchCompilerGeneratedMembers;
+		public override void Execute(IMenuItemContext context) => searchSettings.SearchCompilerGeneratedMembers = !searchSettings.SearchCompilerGeneratedMembers;
+	}
 }

@@ -56,7 +56,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.XmlDoc {
 					var xmldoc = XmlDocLoader.LoadDocumentation(mr.Module);
 					if (xmldoc == null)
 						continue;
-					string? doc = xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, stringBuilder));
+					var doc = xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, stringBuilder)) ?? xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, stringBuilder, XmlDocCompiler.MSVC));
 					if (!string2.IsNullOrEmpty(doc))  {
 						InsertXmlDocumentation(entity, doc);
 					}

@@ -144,11 +144,10 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 		static bool NeedsFullName(XamlProperty property, XElement elem) {
 			var p = elem.Parent;
-			while (p != null && p.Annotation<XamlType>()?.ResolvedType.FullName != "System.Windows.Style") {
+			while (p is not null && p.Annotation<XamlType>()?.ResolvedType.FullName != "System.Windows.Style")
 				p = p.Parent;
-			}
 			var type = p?.Annotation<TargetTypeAnnotation>()?.Type;
-			return type == null || property.IsAttachedTo(type);
+			return type is null || property.IsAttachedTo(type);
 		}
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {

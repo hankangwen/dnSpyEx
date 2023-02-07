@@ -166,6 +166,23 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 		protected override ValueLocation DereferenceCore() => new ArrayElementValueLocation(Type.GetElementType()!, arrayMirror, index);
 	}
 
+	sealed class PointerValueLocation : ValueLocation {
+		public override DmdType Type { get; }
+
+		readonly PointerValue pointerVal;
+
+		public PointerValueLocation(DmdType type, PointerValue pointerVal) {
+			Type = type ?? throw new ArgumentNullException(nameof(type));
+			this.pointerVal = pointerVal ?? throw new ArgumentNullException(nameof(pointerVal));
+		}
+
+		public override Value Load() => pointerVal.Value;
+
+		public override string Store(Value value) => PredefinedEvaluationErrorMessages.RuntimeIsUnableToEvaluateExpression;
+
+		protected override ValueLocation DereferenceCore() => new PointerValueLocation(Type.GetElementType()!, pointerVal);
+	}
+
 	sealed class StaticFieldValueLocation : ValueLocation {
 		public override DmdType Type { get; }
 

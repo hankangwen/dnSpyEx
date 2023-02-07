@@ -89,6 +89,7 @@
   <ItemGroup Condition=" '$(IsDotNetFramework)' == 'true' ">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
@@ -98,6 +99,7 @@
     <!-- Self contained .NET apps already ship with this DLL (not necessarily the same version, though) -->
     <PackageReference Include="Microsoft.DiaSymReader.Native" Version="$(DiaSymReaderVersion)" Condition=" '$(IsSelfContainedDotNet)' != 'true' " />
     <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf" Version="$(MSVSTextVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
   </ItemGroup>
 
 </Project>

@@ -46,6 +46,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 		public override DbgEngineValueNodeProvider ExceptionsProvider { get; }
 		public override DbgEngineValueNodeProvider ReturnValuesProvider { get; }
 		public override DbgEngineValueNodeProvider TypeVariablesProvider { get; }
+		public override DbgEngineValueNodeProvider StaticFieldsProvider { get; }
 		public override DbgEngineValueNodeFactory ValueNodeFactory { get; }
 
 		readonly DbgMethodDebugInfoProvider dbgMethodDebugInfoProvider;
@@ -80,6 +81,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 			ExceptionsProvider = new DbgEngineExceptionsProviderImpl(valueNodeFactory);
 			ReturnValuesProvider = new DbgEngineReturnValuesProviderImpl(valueNodeFactory);
 			TypeVariablesProvider = new DbgEngineTypeVariablesProviderImpl(valueNodeFactory);
+			StaticFieldsProvider = new DbgEngineStaticFieldsProviderImpl(valueNodeFactory, formatter);
 			ValueNodeFactory = new DbgEngineValueNodeFactoryImpl(expressionEvaluator, valueNodeFactory, formatter);
 			debuggerDisplayAttributeEvaluator = expressionEvaluator;
 		}

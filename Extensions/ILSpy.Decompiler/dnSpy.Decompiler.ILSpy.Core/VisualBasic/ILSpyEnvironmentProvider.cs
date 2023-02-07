@@ -139,7 +139,7 @@ return loader.ReadTypeReference(annotation, entity: current).Resolve(context);
 			var propInfo = property.Annotation<PropertyDef>();
 
 			if (propInfo is null)
-				return new ICSharpCode.NRefactory.CSharp.ParameterDeclaration[0];
+				return Array.Empty<ICSharpCode.NRefactory.CSharp.ParameterDeclaration>();
 
 			sb.Clear();
 			var getMethod = propInfo.GetMethod;
@@ -152,7 +152,7 @@ return loader.ReadTypeReference(annotation, entity: current).Resolve(context);
 					return ps.Take(ps.Length - 1).Select(p => new ICSharpCode.NRefactory.CSharp.ParameterDeclaration(AstBuilder.ConvertType(p.Type, sb), p.Name, GetModifiers(p))).ToArray();
 			}
 
-			return new ICSharpCode.NRefactory.CSharp.ParameterDeclaration[0];
+			return Array.Empty<ICSharpCode.NRefactory.CSharp.ParameterDeclaration>();
 		}
 
 		ICSharpCode.NRefactory.CSharp.ParameterModifier GetModifiers(Parameter p) {

@@ -201,7 +201,7 @@ namespace dnSpy.Contracts.Documents.TreeView {
 			output.WriteSpace();
 			output.Write(BoxedTextColor.Punctuation, ":");
 			output.WriteSpace();
-			decompiler.WriteType(output, @event.EventType, false);
+			decompiler.WriteType(output, @event.EventType, false, @event);
 			WriteToken(output, @event, showToken);
 		}
 
@@ -218,7 +218,7 @@ namespace dnSpy.Contracts.Documents.TreeView {
 			output.WriteSpace();
 			output.Write(BoxedTextColor.Punctuation, ":");
 			output.WriteSpace();
-			decompiler.WriteType(output, property.PropertySig.GetRetType().ToTypeDefOrRef(), false);
+			decompiler.WriteType(output, property.PropertySig.GetRetType().ToTypeDefOrRef(), false, property);
 			WriteToken(output, property, showToken);
 		}
 
@@ -244,7 +244,7 @@ namespace dnSpy.Contracts.Documents.TreeView {
 			output.Write(BoxedTextColor.Punctuation, ":");
 			output.WriteSpace();
 			if (field.FieldSig?.Type.ToTypeDefOrRef() is ITypeDefOrRef fieldType)
-				decompiler.WriteType(output, fieldType, false);
+				decompiler.WriteType(output, fieldType, false, field as IHasCustomAttribute);
 			else
 				output.Write(BoxedTextColor.Error, "???");
 			WriteToken(output, field, showToken);

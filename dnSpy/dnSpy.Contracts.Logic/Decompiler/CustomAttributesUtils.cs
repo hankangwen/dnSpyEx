@@ -322,6 +322,7 @@ namespace dnSpy.Contracts.Decompiler {
 			foreach (var ca in GetSecurityDeclarations(module, method))
 				yield return ca;
 			var implAttr = method.ImplAttributes & ~MethodImplAttributes.CodeTypeMask;
+			var methodCodeType = method.ImplAttributes & MethodImplAttributes.CodeTypeMask;
 			if (method.ImplMap is ImplMap implMap) {
 				var declType = new TypeRefUser(module, systemRuntimeInteropServicesName, dllImportAttributeName, GetSystemRuntimeInteropServicesAssemblyRef(module));
 				var ca = new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void, module.CorLibTypes.String), declType));
@@ -394,7 +395,7 @@ namespace dnSpy.Contracts.Decompiler {
 					ca.NamedArguments.Add(new CANamedArgument(isField: true, module.CorLibTypes.Boolean, throwOnUnmappableCharName, new CAArgument(module.CorLibTypes.Boolean, true)));
 				yield return ca;
 			}
-			if (implAttr == MethodImplAttributes.PreserveSig) {
+			if (implAttr == MethodImplAttributes.PreserveSig && methodCodeType == MethodImplAttributes.IL) {
 				implAttr = 0;
 				var declType = new TypeRefUser(module, systemRuntimeInteropServicesName, preserveSigAttributeName, GetSystemRuntimeInteropServicesAssemblyRef(module));
 				yield return new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void), declType));
@@ -404,6 +405,11 @@ namespace dnSpy.Contracts.Decompiler {
 				var enumDeclType = new ValueTypeSig(new TypeRefUser(module, systemRuntimeCompilerServicesName, methodImplOptionsName, module.CorLibTypes.AssemblyRef));
 				var ca = new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void, enumDeclType), declType));
 				ca.ConstructorArguments.Add(new CAArgument(enumDeclType, (int)implAttr));
+
+				if (methodCodeType != MethodImplAttributes.IL) {
+					var enumDeclType2 = new ValueTypeSig(new TypeRefUser(module, systemRuntimeCompilerServicesName, methodCodeTypeName, module.CorLibTypes.AssemblyRef));
+					ca.NamedArguments.Add(new CANamedArgument(isField: true, enumDeclType2, methodCodeTypeName, new CAArgument(enumDeclType2, (int)methodCodeType)));
+				}
 				yield return ca;
 			}
 		}
@@ -446,7 +452,7 @@ namespace dnSpy.Contracts.Decompiler {
 					yield return new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void), declType));
 				}
 			}
-			if (parameter.IsOptional && parameter.Constant == null) {
+			if (parameter.IsOptional && parameter.Constant is null && !parameter.CustomAttributes.IsDefined("System.Runtime.CompilerServices.DecimalConstantAttribute")) {
 				var declType = new TypeRefUser(module, systemRuntimeInteropServicesName, optionalAttributeName, GetSystemRuntimeInteropServicesAssemblyRef(module));
 				yield return new CustomAttribute(new MemberRefUser(module, ctorName, MethodSig.CreateInstance(module.CorLibTypes.Void), declType));
 			}
@@ -565,6 +571,7 @@ namespace dnSpy.Contracts.Decompiler {
 		static readonly UTF8String optionalAttributeName = new UTF8String("OptionalAttribute");
 		static readonly UTF8String methodImplAttributeName = new UTF8String("MethodImplAttribute");
 		static readonly UTF8String methodImplOptionsName = new UTF8String("MethodImplOptions");
+		static readonly UTF8String methodCodeTypeName = new UTF8String("MethodCodeType");
 		static readonly UTF8String preserveSigAttributeName = new UTF8String("PreserveSigAttribute");
 		static readonly UTF8String nonSerializedAttributeName = new UTF8String("NonSerializedAttribute");
 		static readonly UTF8String serializableAttributeName = new UTF8String("SerializableAttribute");
@@ -635,6 +642,7 @@ namespace dnSpy.Contracts.Decompiler {
 			(systemConfigurationAssembliesName, assemblyHashAlgorithmName),
 			(systemReflectionName, assemblyNameFlagsName),
 			(systemRuntimeCompilerServicesName, methodImplOptionsName),
+			(systemRuntimeCompilerServicesName, methodCodeTypeName),
 			(systemRuntimeInteropServicesName, callingConventionName),
 			(systemRuntimeInteropServicesName, charSetName),
 			(systemRuntimeInteropServicesName, layoutKindName),

@@ -50,11 +50,17 @@ namespace dnSpy.Contracts.Search {
 		public bool SearchDecompiledData { get; set; }
 
 		/// <summary>
+		/// Searches compiler generated members
+		/// </summary>
+		public bool SearchCompilerGeneratedMembers { get; set; }
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public DocumentSearcherOptions() {
 			MaxResults = DEFAULT_MAX_RESULTS;
 			SearchDecompiledData = true;
+			SearchCompilerGeneratedMembers = true;
 		}
 
 		/// <summary>
@@ -73,6 +79,7 @@ namespace dnSpy.Contracts.Search {
 			other.SearchComparer = SearchComparer;
 			other.Filter = Filter;
 			other.SearchDecompiledData = SearchDecompiledData;
+			other.SearchCompilerGeneratedMembers = SearchCompilerGeneratedMembers;
 			return other;
 		}
 	}

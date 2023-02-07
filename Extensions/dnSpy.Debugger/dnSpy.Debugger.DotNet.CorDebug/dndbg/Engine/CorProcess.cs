@@ -190,6 +190,13 @@ namespace dndbg.Engine {
 			}
 		}
 
+		public CorValue? GetObject(ulong address) {
+			if (obj is not ICorDebugProcess5 p5)
+				return null;
+			int hr = p5.GetObject(address, out var value);
+			return hr < 0 || value is null ? null : new CorValue(value);
+		}
+
 		public bool Terminate(int exitCode) => obj.Terminate((uint)exitCode) >= 0;
 
 		public bool Detach() {

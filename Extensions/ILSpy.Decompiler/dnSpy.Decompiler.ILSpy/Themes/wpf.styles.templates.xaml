@@ -26,6 +26,7 @@
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.TypeAddInternalModifier}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_TypeAddInternalModifier}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.MemberAddPrivateModifier}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MemberAddPrivateModifier}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.HexadecimalNumbers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_HexadecimalNumbers}"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.EmitCalliAsInvocationExpression}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_EmitCalliAsInvocationExpression}"/>
             <GroupBox Margin="0 5 0 0" Header="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompilationOrder}">
                 <Grid>
                     <Grid.RowDefinitions>

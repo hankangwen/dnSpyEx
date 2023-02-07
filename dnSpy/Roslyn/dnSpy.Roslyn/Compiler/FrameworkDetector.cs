@@ -85,8 +85,11 @@ namespace dnSpy.Roslyn.Compiler {
 			if (arg.Type.GetElementType() != ElementType.String)
 				return default;
 			var s = arg.Value as UTF8String;
-			if (UTF8String.IsNullOrEmpty(s))
-				return default;
+			if (UTF8String.IsNullOrEmpty(s)) {
+				if (arg.Value is not string argAsString)
+					return default;
+				s = argAsString;
+			}
 			string attrString = s;
 
 			// See corclr/src/mscorlib/src/System/Runtime/Versioning/BinaryCompatibility.cs

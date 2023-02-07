@@ -2300,6 +2300,12 @@ Most options will be re-initialized when this checkbox is clicked</value>
   <data name="ReplaceNopsInstrsCommand" xml:space="preserve">
     <value>_Replace with NOPs</value>
   </data>
+  <data name="ReplaceMethodBodyWithStubCommand" xml:space="preserve">
+    <value>Replace Method Body with stub...</value>
+  </data>
+  <data name="ReplaceMethodBodyWithStubCommand2" xml:space="preserve">
+    <value>Replace Method Body with stub</value>
+  </data>
   <data name="Type_Flags_Accessibility" xml:space="preserve">
     <value>Accessibilit_y</value>
   </data>

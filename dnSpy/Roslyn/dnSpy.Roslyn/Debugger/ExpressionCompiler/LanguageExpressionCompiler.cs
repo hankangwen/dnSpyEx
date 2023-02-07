@@ -180,6 +180,7 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 			info.ParameterNames = GetParameterNames(langDebugInfo.MethodDebugInfo.Method, methodDebugInfo.Parameters);
 			info.LocalConstants = default;
 			info.ReuseSpan = RoslynExpressionCompilerMethods.GetReuseSpan(allScopes, langDebugInfo.ILOffset);
+			info.ContainingDocumentName = null;
 
 			return info;
 		}
@@ -263,7 +264,10 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 				if (!p.IsNormalMethodParameter)
 					continue;
 				var name = TryGetSourceParameter(parameters, i).Name ?? p.Name;
-				if (GetParameterName(i, name) != name) {
+				// Compare the name used in the decompiled code again the name in the .NET metadata
+				// If they are equal, we do not need top provide parameter names to the EE as it will just grab them from the metadata.
+				// If they are different, we need to provide the names to the EE so the parameter names in the Watch window and Locals window are correct.
+				if (GetParameterName(i, name) != p.Name) {
 					valid = false;
 					break;
 				}

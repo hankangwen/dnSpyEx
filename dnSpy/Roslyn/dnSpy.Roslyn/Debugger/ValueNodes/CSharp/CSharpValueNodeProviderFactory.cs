@@ -52,10 +52,14 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 				return true;
 
 			case TypeCode.Empty:
-			case TypeCode.Object:
 			case TypeCode.DBNull:
 			case TypeCode.DateTime:
+				return false;
+
+			case TypeCode.Object:
 			default:
+				if (type == type.AppDomain.System_UIntPtr || type == type.AppDomain.System_IntPtr)
+					return true;
 				return false;
 			}
 		}

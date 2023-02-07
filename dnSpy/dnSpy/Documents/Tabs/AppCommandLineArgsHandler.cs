@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -71,7 +72,7 @@ namespace dnSpy.Documents.Tabs {
 
 			foreach (var mod in GetLoadedFiles(args)) {
 				const string XMLDOC_NS_PREFIX = "N:";
-				bool isNamespace = args.SelectMember.StartsWith(XMLDOC_NS_PREFIX);
+				bool isNamespace = args.SelectMember.StartsWith(XMLDOC_NS_PREFIX, StringComparison.Ordinal);
 				if (isNamespace) {
 					var ns = args.SelectMember.Substring(XMLDOC_NS_PREFIX.Length);
 					var modNode = documentTabService.DocumentTreeView.FindNode(mod);
@@ -82,7 +83,8 @@ namespace dnSpy.Documents.Tabs {
 					}
 				}
 				else {
-					var member = XmlDocKeyProvider.FindMemberByKey(mod, args.SelectMember);
+					// Try Roslyn doc id format first, then try MSVC. MSVC is less common.
+					var member = XmlDocKeyProvider.FindMemberByKey(mod, args.SelectMember) ?? XmlDocKeyProvider.FindMemberByKey(mod, args.SelectMember, XmlDocCompiler.MSVC);
 					if (member is not null) {
 						documentTabService.FollowReference(member);
 						return true;

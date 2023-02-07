@@ -21,12 +21,12 @@
     <CopyLocalLockFileAssemblies Condition=" '$(IsDotNet)' == 'true' ">true</CopyLocalLockFileAssemblies>
     <!-- If this gets updated, also update .github/workflows/build.yml and build.ps1 -->
     <DnSpyRuntimeIdentifiers>win-x86;win-x64</DnSpyRuntimeIdentifiers>
-    <SatelliteResourceLanguages>cs;de;es;es-ES;fa;fr;hu;it;pt-BR;pt-PT;ru;tr;uk;zh-CN</SatelliteResourceLanguages>
+    <SatelliteResourceLanguages>cs;de;es;es-ES;fa;fr;hu;it;pt-BR;pt-PT;ru;tr;uk;zh-CN;vi</SatelliteResourceLanguages>
 
     <!-- Update app.config whenever this value changes -->
-    <DnSpyAssemblyVersion>6.1.9.0</DnSpyAssemblyVersion>
+    <DnSpyAssemblyVersion>6.3.0.0</DnSpyAssemblyVersion>
     <!-- This is shown in the title bar -->
-    <DnSpyAssemblyInformationalVersion>v6.1.9</DnSpyAssemblyInformationalVersion>
+    <DnSpyAssemblyInformationalVersion>v6.3.0</DnSpyAssemblyInformationalVersion>
     <DnSpyAssemblyCopyright>Copyright (C) 2014-2020 de4dot@gmail.com</DnSpyAssemblyCopyright>
 
     <!-- AD0001: buggy Roslyn analyzer(s) crash, disable that warning -->
@@ -36,16 +36,16 @@
 
     <!-- Update app.config whenever some of these versions change (eg. dnlib version) -->
     <DiaSymReaderVersion>1.7.0</DiaSymReaderVersion>
-    <DnlibVersion>3.5.0</DnlibVersion>
-    <IcedVersion>1.17.0</IcedVersion>
+    <DnlibVersion>3.6.0</DnlibVersion>
+    <IcedVersion>1.18.0</IcedVersion>
     <MSBuildNuGetVersion>17.1.0</MSBuildNuGetVersion>
     <MSDiagRuntimeVersion>1.1.142101</MSDiagRuntimeVersion>
-    <MSVSCompositionVersion>16.9.20</MSVSCompositionVersion>
+    <MSVSCompositionVersion>17.2.41</MSVSCompositionVersion>
     <MSVSIntellisenseVersion>15.5.27130</MSVSIntellisenseVersion>
     <MSVSTextVersion>15.5.27130</MSVSTextVersion>
-    <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
+    <NewtonsoftJsonVersion>13.0.2</NewtonsoftJsonVersion>
     <OokiiDialogsWpfVersion>5.0.1</OokiiDialogsWpfVersion>
-    <RoslynVersion>4.1.0</RoslynVersion>
+    <RoslynVersion>4.4.0</RoslynVersion>
     <SCCompositionVersion>6.0.0</SCCompositionVersion>
   </PropertyGroup>
 

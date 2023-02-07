@@ -81,7 +81,7 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 		}
 
 		public byte[] ComputeHash() {
-			hasher.TransformFinalBlock(new byte[0], 0, 0);
+			hasher.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
 			return hasher.Hash!;
 		}
 

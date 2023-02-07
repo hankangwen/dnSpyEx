@@ -1,80 +1,82 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Formatting.Rules;
-using Microsoft.CodeAnalysis.LanguageServices;
-using Microsoft.CodeAnalysis.Options;
+using Microsoft.CodeAnalysis.LanguageService;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Text;
 using Roslyn.Utilities;
 
 namespace dnSpy.Roslyn.Internal.SmartIndent {
-	abstract partial class AbstractIndentationService<TSyntaxRoot> {
-		protected struct Indenter {
+	internal abstract partial class AbstractIndentation<TSyntaxRoot> {
+		protected readonly struct Indenter {
 			readonly AbstractIndentationService<TSyntaxRoot> _service;
 
-			public readonly OptionSet OptionSet;
-			public readonly IOptionService OptionService;
+			public readonly IndentationOptions Options;
 			public readonly TextLine LineToBeIndented;
 			public readonly CancellationToken CancellationToken;
 
-			public readonly SyntacticDocument Document;
-			public readonly TSyntaxRoot Root;
 			public readonly IEnumerable<AbstractFormattingRule> Rules;
 			public readonly BottomUpBaseIndentationFinder Finder;
 
-			readonly ISyntaxFactsService _syntaxFacts;
-			readonly int _tabSize;
+			private readonly ISyntaxFacts _syntaxFacts;
+			private readonly int _tabSize;
 
-			public readonly SyntaxTree Tree => Document.SyntaxTree;
-			public readonly SourceText Text => Document.Text;
+			public readonly SyntaxTree Tree;
+			public readonly SourceText Text;
+			public readonly TSyntaxRoot Root;
+
+			public readonly ISmartTokenFormatter SmartTokenFormatter;
 
 			public Indenter(AbstractIndentationService<TSyntaxRoot> service,
-				SyntacticDocument document,
+				SyntaxTree tree,
 				IEnumerable<AbstractFormattingRule> rules,
-				OptionSet optionSet,
+				IndentationOptions options,
 				TextLine lineToBeIndented,
-				CancellationToken cancellationToken) {
-				Document = document;
-
+				ISmartTokenFormatter smartTokenFormatter,
+				CancellationToken cancellationToken)
+			{
 				_service = service;
-				_syntaxFacts = document.Document.GetRequiredLanguageService<ISyntaxFactsService>();
-				OptionSet = optionSet;
-				OptionService = document.Document.Project.Solution.Workspace.Services.GetRequiredService<IOptionService>();
-				Root = (TSyntaxRoot)document.Root;
+				_syntaxFacts = service.SyntaxFacts;
+				Options = options;
+				Tree = tree;
+				Text = tree.GetText(cancellationToken);
+				Root = (TSyntaxRoot)tree.GetRoot(cancellationToken);
 				LineToBeIndented = lineToBeIndented;
-				_tabSize = this.OptionSet.GetOption(FormattingOptions.TabSize, Root.Language);
+				_tabSize = options.FormattingOptions.TabSize;
+				SmartTokenFormatter = smartTokenFormatter;
 				CancellationToken = cancellationToken;
 
 				Rules = rules;
 				Finder = new BottomUpBaseIndentationFinder(
-					new ChainedFormattingRules(this.Rules, OptionSet.AsAnalyzerConfigOptions(OptionService, Root.Language)),
+					new ChainedFormattingRules(this.Rules, options.FormattingOptions),
 					_tabSize,
-					this.OptionSet.GetOption(FormattingOptions.IndentationSize, Root.Language),
+					options.FormattingOptions.IndentationSize,
 					tokenStream: null,
-					document.Document.GetRequiredLanguageService<IHeaderFactsService>());
+					service.HeaderFacts);
 			}
 
-			public IndentationResult? GetDesiredIndentation(FormattingOptions.IndentStyle indentStyle) {
+			public IndentationResult? GetDesiredIndentation(FormattingOptions2.IndentStyle indentStyle) {
 				// If the caller wants no indent, then we'll return an effective '0' indent.
-				if (indentStyle == FormattingOptions.IndentStyle.None)
+				if (indentStyle == FormattingOptions2.IndentStyle.None)
 					return null;
 
 				// If the user has explicitly set 'block' indentation, or they're in an inactive preprocessor region,
 				// then just do simple block indentation.
-				if (indentStyle == FormattingOptions.IndentStyle.Block ||
-					_syntaxFacts.IsInInactiveRegion(Document.SyntaxTree, LineToBeIndented.Start, this.CancellationToken)) {
+				if (indentStyle == FormattingOptions2.IndentStyle.Block ||
+					_syntaxFacts.IsInInactiveRegion(this.Tree, LineToBeIndented.Start, this.CancellationToken)) {
 					return GetDesiredBlockIndentation();
 				}
 
-				Debug.Assert(indentStyle == FormattingOptions.IndentStyle.Smart);
+				Debug.Assert(indentStyle == FormattingOptions2.IndentStyle.Smart);
 				return GetDesiredSmartIndentation();
 			}
 
@@ -137,7 +139,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent {
 				// Block indentation is simple, we keep walking back lines until we find a line with any sort of
 				// text on it.  We then set our indentation to whatever the indentation of that line was.
 				for (var currentLine = this.LineToBeIndented.LineNumber - 1; currentLine >= 0; currentLine--) {
-					var line = this.Document.Text.Lines[currentLine];
+					var line = this.Text.Lines[currentLine];
 					var offset = line.GetFirstNonWhitespaceOffset();
 					if (offset == null)
 						continue;
@@ -152,14 +154,9 @@ namespace dnSpy.Roslyn.Internal.SmartIndent {
 
 			public bool TryGetSmartTokenIndentation(out IndentationResult indentationResult) {
 				if (_service.ShouldUseTokenIndenter(this, out var token)) {
-					// var root = document.GetSyntaxRootSynchronously(cancellationToken);
-					var sourceText = Tree.GetText(CancellationToken);
+					var changes = SmartTokenFormatter.FormatToken(token, CancellationToken);
 
-					var formatter = _service.CreateSmartTokenFormatter(this);
-					var changes = formatter.FormatTokenAsync(Document.Project.Solution.Workspace, token, CancellationToken)
-										   .WaitAndGetResult(CancellationToken);
-
-					var updatedSourceText = sourceText.WithChanges(changes);
+					var updatedSourceText = Text.WithChanges(changes);
 					if (LineToBeIndented.LineNumber < updatedSourceText.Lines.Count) {
 						var updatedLine = updatedSourceText.Lines[LineToBeIndented.LineNumber];
 						var nonWhitespaceOffset = updatedLine.GetFirstNonWhitespaceOffset();

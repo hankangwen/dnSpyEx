@@ -50,12 +50,28 @@ namespace dnSpy.AsmEditor.Property {
 			prop.Name = Name ?? UTF8String.Empty;
 			prop.PropertySig = PropertySig;
 			prop.Constant = Constant;
+
+			foreach (var methodDef in prop.GetMethods)
+				methodDef.IsGetter = false;
+			foreach (var methodDef in GetMethods)
+				methodDef.IsGetter = true;
 			prop.GetMethods.Clear();
 			prop.GetMethods.AddRange(GetMethods);
+
+			foreach (var methodDef in prop.SetMethods)
+				methodDef.IsSetter = false;
+			foreach (var methodDef in SetMethods)
+				methodDef.IsSetter = true;
 			prop.SetMethods.Clear();
 			prop.SetMethods.AddRange(SetMethods);
+
+			foreach (var methodDef in prop.OtherMethods)
+				methodDef.IsOther = false;
+			foreach (var methodDef in OtherMethods)
+				methodDef.IsOther = true;
 			prop.OtherMethods.Clear();
 			prop.OtherMethods.AddRange(OtherMethods);
+
 			prop.CustomAttributes.Clear();
 			prop.CustomAttributes.AddRange(CustomAttributes);
 			return prop;

@@ -40,6 +40,7 @@ namespace dnSpy.Decompiler.CSharp {
 		const string Keyword_this = "this";
 		const string Keyword_get = "get";
 		const string Keyword_set = "set";
+		const string Keyword_init = "init";
 		const string Keyword_add = "add";
 		const string Keyword_remove = "remove";
 		const string Keyword_enum = "enum";
@@ -50,6 +51,7 @@ namespace dnSpy.Decompiler.CSharp {
 		const string Keyword_params = "params";
 		const string Keyword_default = "default";
 		const string Keyword_delegate = "delegate";
+		const string Keyword_arglist = "__arglist";
 		const string HexPrefix = "0x";
 		const string VerbatimStringPrefix = "@";
 		const string IdentifierEscapeBegin = "@";
@@ -80,7 +82,8 @@ namespace dnSpy.Decompiler.CSharp {
 		int recursionCounter;
 		int lineLength;
 		bool outputLengthExceeded;
-		bool forceWrite;
+		readonly bool forceWrite;
+		readonly StringBuilder sb;
 
 		readonly ITextColorWriter output;
 		FormatterOptions options;
@@ -137,6 +140,7 @@ namespace dnSpy.Decompiler.CSharp {
 			lineLength = 0;
 			outputLengthExceeded = false;
 			forceWrite = false;
+			sb = new StringBuilder();
 		}
 
 		static readonly HashSet<string> isKeyword = new HashSet<string>(StringComparer.Ordinal) {
@@ -333,8 +337,8 @@ namespace dnSpy.Decompiler.CSharp {
 
 		void WriteType(ITypeDefOrRef type, bool useNamespaces, bool useTypeKeywords) {
 			var td = type as TypeDef;
-			if (td is null && type is TypeRef)
-				td = ((TypeRef)type).Resolve();
+			if (td is null && type is TypeRef typeRef)
+				td = typeRef.Resolve();
 			if (td is null ||
 				td.GenericParameters.Count == 0 ||
 				(td.DeclaringType is not null && td.DeclaringType.GenericParameters.Count >= td.GenericParameters.Count)) {
@@ -358,12 +362,12 @@ namespace dnSpy.Decompiler.CSharp {
 				Write(type.DeclaringType);
 				options = oldFlags;
 				WritePeriod();
-				numGenParams = numGenParams - td.DeclaringType!.GenericParameters.Count;
+				numGenParams -= td.DeclaringType!.GenericParameters.Count;
 				if (numGenParams < 0)
 					numGenParams = 0;
 			}
 			else if (useNamespaces && !UTF8String.IsNullOrEmpty(td.Namespace)) {
-				foreach (var ns in td.Namespace.String.Split('.')) {
+				foreach (var ns in td.Namespace.String.Split(namespaceSeparators)) {
 					WriteIdentifier(ns, BoxedTextColor.Namespace);
 					WritePeriod();
 				}
@@ -410,6 +414,9 @@ namespace dnSpy.Decompiler.CSharp {
 			case AccessorKind.Setter:
 				keyword = Keyword_set;
 				break;
+			case AccessorKind.InitOnlySetter:
+				keyword = Keyword_init;
+				break;
 			case AccessorKind.Adder:
 				keyword = Keyword_add;
 				break;
@@ -427,7 +434,7 @@ namespace dnSpy.Decompiler.CSharp {
 				return;
 			}
 
-			var propInfo = TypeFormatterUtils.TryGetProperty(method as MethodDef);
+			var propInfo = TypeFormatterUtils.TryGetProperty(method as MethodDef, true);
 			if (propInfo.kind != AccessorKind.None) {
 				Write(propInfo.property, writeAccessors: false);
 				WriteAccessor(propInfo.kind);
@@ -530,7 +537,7 @@ namespace dnSpy.Decompiler.CSharp {
 					WriteSpace();
 				}
 				WriteModuleName(fd?.Module);
-				Write(sig.Type, null, null, null);
+				Write(sig.Type, null, null, null, attributeProvider: fd);
 				WriteSpace();
 			}
 			else
@@ -646,7 +653,7 @@ namespace dnSpy.Decompiler.CSharp {
 				Write(prop.DeclaringType);
 				WritePeriod();
 			}
-			var ovrMeth = md is null || md.Overrides.Count == 0 ? null : md.Overrides[0].MethodDeclaration;
+			var ovrMeth = md.Overrides.Count == 0 ? null : md.Overrides[0].MethodDeclaration;
 			if (prop.IsIndexer()) {
 				OutputWrite(Keyword_this, BoxedTextColor.Keyword);
 				WriteGenericArguments(info);
@@ -667,9 +674,17 @@ namespace dnSpy.Decompiler.CSharp {
 					OutputWrite(";", BoxedTextColor.Punctuation);
 				}
 				if (prop.SetMethods.Count > 0) {
-					WriteSpace();
-					OutputWrite(Keyword_set, BoxedTextColor.Keyword);
-					OutputWrite(";", BoxedTextColor.Punctuation);
+					if (prop.SetMethods.Count == 1 && prop.SetMethod.ReturnType is CModReqdSig modReq &&
+					    modReq.Modifier.FullName == "System.Runtime.CompilerServices.IsExternalInit") {
+						WriteSpace();
+						OutputWrite(Keyword_init, BoxedTextColor.Keyword);
+						OutputWrite(";", BoxedTextColor.Punctuation);
+					}
+					else {
+						WriteSpace();
+						OutputWrite(Keyword_set, BoxedTextColor.Keyword);
+						OutputWrite(";", BoxedTextColor.Punctuation);
+					}
 				}
 				WriteSpace();
 				OutputWrite("}", BoxedTextColor.Punctuation);
@@ -689,7 +704,7 @@ namespace dnSpy.Decompiler.CSharp {
 			}
 
 			WriteModuleName(evt.Module);
-			Write(evt.EventType);
+			Write(evt.EventType, attributeProvider: evt);
 			WriteSpace();
 			if (ShowDeclaringTypes) {
 				Write(evt.DeclaringType);
@@ -765,8 +780,8 @@ namespace dnSpy.Decompiler.CSharp {
 				WriteMethodParameterList(info, MethodParenOpen, MethodParenClose);
 				return;
 			}
-			else
-				WriteModuleName(td?.Module);
+
+			WriteModuleName(td?.Module);
 
 			if (td is null) {
 				Write(type);
@@ -798,7 +813,7 @@ namespace dnSpy.Decompiler.CSharp {
 			WriteType(type, true, false);
 		}
 
-		void Write(ITypeDefOrRef? type, bool showModuleNames = false) {
+		void Write(ITypeDefOrRef? type, bool showModuleNames = false, IHasCustomAttribute? attributeProvider = null) {
 			if (type is null) {
 				WriteError();
 				return;
@@ -809,7 +824,7 @@ namespace dnSpy.Decompiler.CSharp {
 			recursionCounter++;
 			try {
 				if (type is TypeSpec ts) {
-					Write(ts.TypeSig, null, null, null);
+					Write(ts.TypeSig, null, null, null, attributeProvider: attributeProvider);
 					return;
 				}
 
@@ -837,13 +852,12 @@ namespace dnSpy.Decompiler.CSharp {
 		void WriteNamespace(string ns) {
 			if (!ShowNamespaces || string.IsNullOrEmpty(ns))
 				return;
-			var namespaces = ns.Split(nsSep);
+			var namespaces = ns.Split(namespaceSeparators);
 			for (int i = 0; i < namespaces.Length; i++) {
 				OutputWrite(IdentifierEscaper.Escape(namespaces[i]), BoxedTextColor.Namespace);
 				WritePeriod();
 			}
 		}
-		static readonly char[] nsSep = new char[] { '.' };
 
 		string? GetTypeKeyword(ITypeDefOrRef? type) {
 			if (!ShowIntrinsicTypeKeywords)
@@ -871,14 +885,19 @@ namespace dnSpy.Decompiler.CSharp {
 			}
 		}
 
-		void Write(TypeSig? type, ParamDef? ownerParam, IList<TypeSig>? typeGenArgs, IList<TypeSig>? methGenArgs, bool forceReadOnly = false) {
+		void Write(TypeSig? type, ParamDef? ownerParam, IList<TypeSig>? typeGenArgs, IList<TypeSig>? methGenArgs, bool forceReadOnly = false, IHasCustomAttribute? attributeProvider = null) {
 			WriteRefIfByRef(type, ownerParam, forceReadOnly);
-			if (type.RemovePinnedAndModifiers() is ByRefSig byRef)
+			int dynamicTypeIndex = 0;
+			if (type.RemovePinnedAndModifiers() is ByRefSig byRef) {
 				type = byRef.Next;
-			Write(type, typeGenArgs, methGenArgs);
+				dynamicTypeIndex++;
+			}
+			int tupleNameIndex = 0;
+			int nativeIntIndex = 0;
+			Write(type, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 		}
 
-		void Write(TypeSig? type, IList<TypeSig>? typeGenArgs, IList<TypeSig>? methGenArgs) {
+		void Write(TypeSig? type, IList<TypeSig>? typeGenArgs, IList<TypeSig>? methGenArgs, ref int dynamicTypeIndex, ref int tupleNameIndex, ref int nativeIntIndex, IHasCustomAttribute? attributeProvider) {
 			if (type is null) {
 				WriteError();
 				return;
@@ -888,20 +907,18 @@ namespace dnSpy.Decompiler.CSharp {
 				return;
 			recursionCounter++;
 			try {
-				if (typeGenArgs is null)
-					typeGenArgs = Array.Empty<TypeSig>();
-				if (methGenArgs is null)
-					methGenArgs = Array.Empty<TypeSig>();
+				typeGenArgs ??= Array.Empty<TypeSig>();
+				methGenArgs ??= Array.Empty<TypeSig>();
 
 				List<ArraySigBase>? list = null;
 				while (type is not null && (type.ElementType == ElementType.SZArray || type.ElementType == ElementType.Array)) {
-					if (list is null)
-						list = new List<ArraySigBase>();
+					list ??= new List<ArraySigBase>();
 					list.Add((ArraySigBase)type);
 					type = type.Next;
 				}
 				if (list is not null) {
-					Write(list[list.Count - 1].Next, typeGenArgs, Array.Empty<TypeSig>());
+					dynamicTypeIndex += list.Count;
+					Write(list[list.Count - 1].Next, typeGenArgs, Array.Empty<TypeSig>(), ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					foreach (var aryType in list) {
 						if (aryType.ElementType == ElementType.Array) {
 							OutputWrite(ArrayParenOpen, BoxedTextColor.Punctuation);
@@ -918,7 +935,7 @@ namespace dnSpy.Decompiler.CSharp {
 										if (i < indexes.Count && indexes[i] == 0)
 											FormatInt32((int)dims[i]);
 										else if (i < indexes.Count && i < dims.Count) {
-											FormatInt32((int)indexes[i]);
+											FormatInt32(indexes[i]);
 											OutputWrite("..", BoxedTextColor.Operator);
 											FormatInt32((int)(indexes[i] + dims[i] - 1));
 										}
@@ -959,19 +976,40 @@ namespace dnSpy.Decompiler.CSharp {
 				case ElementType.R4:			WriteSystemTypeKeyword("Single", "float", true); break;
 				case ElementType.R8:			WriteSystemTypeKeyword("Double", "double", true); break;
 				case ElementType.String:		WriteSystemTypeKeyword("String", "string", false); break;
-				case ElementType.Object:		WriteSystemTypeKeyword("Object", "object", false); break;
+				case ElementType.Object:
+					if (TypeFormatterUtils.HasDynamicAttribute(attributeProvider, dynamicTypeIndex))
+						OutputWrite("dynamic", BoxedTextColor.Keyword);
+					else
+						WriteSystemTypeKeyword("Object", "object", false);
+					break;
 
-				case ElementType.TypedByRef:	WriteSystemType("TypedReference", true); break;
-				case ElementType.I:				WriteSystemType("IntPtr", true); break;
-				case ElementType.U:				WriteSystemType("UIntPtr", true); break;
+				case ElementType.TypedByRef:
+					WriteSystemType("TypedReference", true);
+					break;
+
+				case ElementType.I:
+					if (TypeFormatterUtils.HasNativeIntegerAttribute(attributeProvider, nativeIntIndex++))
+						OutputWrite("nint", BoxedTextColor.Keyword);
+					else
+						WriteSystemType("IntPtr", true);
+					break;
+
+				case ElementType.U:
+					if (TypeFormatterUtils.HasNativeIntegerAttribute(attributeProvider, nativeIntIndex++))
+						OutputWrite("nuint", BoxedTextColor.Keyword);
+					else
+						WriteSystemType("UIntPtr", true);
+					break;
 
 				case ElementType.Ptr:
-					Write(type.Next, typeGenArgs, methGenArgs);
+					dynamicTypeIndex++;
+					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					OutputWrite("*", BoxedTextColor.Operator);
 					break;
 
 				case ElementType.ByRef:
-					Write(type.Next, typeGenArgs, methGenArgs);
+					dynamicTypeIndex++;
+					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					OutputWrite("&", BoxedTextColor.Operator);
 					break;
 
@@ -985,7 +1023,7 @@ namespace dnSpy.Decompiler.CSharp {
 				case ElementType.MVar:
 					var gsType = Read(type.ElementType == ElementType.Var ? typeGenArgs : methGenArgs, (int)((GenericSig)type).Number);
 					if (gsType is not null)
-						Write(gsType, typeGenArgs, methGenArgs);
+						Write(gsType, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					else {
 						var gp = ((GenericSig)type).GenericParam;
 						if (gp is not null)
@@ -1007,50 +1045,68 @@ namespace dnSpy.Decompiler.CSharp {
 					var gis = (GenericInstSig?)type;
 					Debug2.Assert(gis is not null);
 					if (TypeFormatterUtils.IsSystemNullable(gis)) {
-						Write(GenericArgumentResolver.Resolve(gis.GenericArguments[0], typeGenArgs, methGenArgs), null, null);
+						dynamicTypeIndex++;
+						Write(GenericArgumentResolver.Resolve(gis.GenericArguments[0], typeGenArgs, methGenArgs), null, null, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 						OutputWrite("?", BoxedTextColor.Operator);
+						break;
 					}
-					else if (TypeFormatterUtils.IsSystemValueTuple(gis)) {
-						OutputWrite(TupleParenOpen, BoxedTextColor.Punctuation);
-						bool needComma = false;
-						for (int i = 0; i < 1000; i++) {
-							for (int j = 0; j < gis.GenericArguments.Count && j < 7; j++) {
-								if (needComma)
-									WriteCommaSpace();
-								needComma = true;
-								Write(GenericArgumentResolver.Resolve(gis.GenericArguments[j], typeGenArgs, methGenArgs), null, null);
+					if (TypeFormatterUtils.IsSystemValueTuple(gis, out int tupleCardinality)) {
+						int localtupleNameIndex = tupleNameIndex;
+						tupleNameIndex += tupleCardinality;
+						if (tupleCardinality > 1) {
+							OutputWrite(TupleParenOpen, BoxedTextColor.Punctuation);
+							bool needComma = false;
+							for (int i = 0; i < 1000; i++) {
+								for (int j = 0; j < gis.GenericArguments.Count && j < 7; j++) {
+									if (needComma)
+										WriteCommaSpace();
+									needComma = true;
+									dynamicTypeIndex++;
+									var elementName = TypeFormatterUtils.GetTupleElementNameAtIndex(attributeProvider, localtupleNameIndex++);
+									Write(GenericArgumentResolver.Resolve(gis.GenericArguments[j], typeGenArgs, methGenArgs), null, null, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
+									if (elementName is not null) {
+										WriteSpace();
+										OutputWrite(elementName, BoxedTextColor.InstanceField);
+									}
+								}
+								if (gis.GenericArguments.Count != 8)
+									break;
+								gis = gis.GenericArguments[gis.GenericArguments.Count - 1] as GenericInstSig;
+								dynamicTypeIndex++;
+								if (gis is null) {
+									WriteError();
+									break;
+								}
+								tupleNameIndex += TypeFormatterUtils.GetSystemValueTupleRank(gis);
 							}
-							if (gis.GenericArguments.Count != 8)
-								break;
-							gis = gis.GenericArguments[gis.GenericArguments.Count - 1] as GenericInstSig;
-							if (gis is null) {
-								WriteError();
-								break;
-							}
+							OutputWrite(TupleParenClose, BoxedTextColor.Punctuation);
+							break;
 						}
-						OutputWrite(TupleParenClose, BoxedTextColor.Punctuation);
 					}
-					else {
-						Write(gis.GenericType, null, null);
-						OutputWrite(GenericParenOpen, BoxedTextColor.Punctuation);
-						for (int i = 0; i < gis.GenericArguments.Count; i++) {
-							if (i > 0)
-								WriteCommaSpace();
-							Write(GenericArgumentResolver.Resolve(gis.GenericArguments[i], typeGenArgs, methGenArgs), null, null);
-						}
-						OutputWrite(GenericParenClose, BoxedTextColor.Punctuation);
+					Write(gis.GenericType, null, null, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
+					OutputWrite(GenericParenOpen, BoxedTextColor.Punctuation);
+					for (int i = 0; i < gis.GenericArguments.Count; i++) {
+						if (i > 0)
+							WriteCommaSpace();
+						dynamicTypeIndex++;
+						Write(GenericArgumentResolver.Resolve(gis.GenericArguments[i], typeGenArgs, methGenArgs), null, null, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					}
+					OutputWrite(GenericParenClose, BoxedTextColor.Punctuation);
 					break;
 
 				case ElementType.FnPtr:
 					var sig = ((FnPtrSig)type).MethodSig;
-					Write(sig.RetType, typeGenArgs, methGenArgs);
+
+					dynamicTypeIndex++;
+					Write(sig.RetType, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
+
 					WriteSpace();
 					OutputWrite(MethodParenOpen, BoxedTextColor.Punctuation);
 					for (int i = 0; i < sig.Params.Count; i++) {
 						if (i > 0)
 							WriteCommaSpace();
-						Write(sig.Params[i], typeGenArgs, methGenArgs);
+						dynamicTypeIndex++;
+						Write(sig.Params[i], typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					}
 					if (sig.ParamsAfterSentinel is not null) {
 						if (sig.Params.Count > 0)
@@ -1058,7 +1114,7 @@ namespace dnSpy.Decompiler.CSharp {
 						OutputWrite("...", BoxedTextColor.Punctuation);
 						for (int i = 0; i < sig.ParamsAfterSentinel.Count; i++) {
 							WriteCommaSpace();
-							Write(sig.ParamsAfterSentinel[i], typeGenArgs, methGenArgs);
+							Write(sig.ParamsAfterSentinel[i], typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 						}
 					}
 					OutputWrite(MethodParenClose, BoxedTextColor.Punctuation);
@@ -1066,8 +1122,12 @@ namespace dnSpy.Decompiler.CSharp {
 
 				case ElementType.CModReqd:
 				case ElementType.CModOpt:
+					dynamicTypeIndex++;
+					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
+					break;
+
 				case ElementType.Pinned:
-					Write(type.Next, typeGenArgs, methGenArgs);
+					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
 					break;
 
 				case ElementType.End:
@@ -1087,7 +1147,7 @@ namespace dnSpy.Decompiler.CSharp {
 			}
 		}
 
-		TypeSig? Read(IList<TypeSig> list, int index) {
+		static TypeSig? Read(IList<TypeSig> list, int index) {
 			if ((uint)index < (uint)list.Count)
 				return list[index];
 			return null;
@@ -1105,7 +1165,7 @@ namespace dnSpy.Decompiler.CSharp {
 			OutputWrite(isLocal ? dnSpy_Decompiler_Resources.ToolTip_Local : dnSpy_Decompiler_Resources.ToolTip_Parameter, BoxedTextColor.Text);
 			OutputWrite(DescriptionParenClose, BoxedTextColor.Punctuation);
 			WriteSpace();
-			Write(variable.Type, !isLocal ? ((Parameter)variable.Variable!).ParamDef : null, null, null, forceReadOnly: (variable.Flags & SourceVariableFlags.ReadOnlyReference) != 0);
+			Write(variable.Type, !isLocal ? pd : null, null, null, forceReadOnly: (variable.Flags & SourceVariableFlags.ReadOnlyReference) != 0, attributeProvider: pd);
 			WriteSpace();
 			WriteIdentifier(TypeFormatterUtils.GetName(variable), isLocal ? BoxedTextColor.Local : BoxedTextColor.Parameter);
 			if (pd is not null)
@@ -1127,7 +1187,7 @@ namespace dnSpy.Decompiler.CSharp {
 				OutputWrite(IdentifierEscaper.Escape(parts[i]), BoxedTextColor.Namespace);
 			}
 		}
-		static readonly char[] namespaceSeparators = new char[] { '.' };
+		static readonly char[] namespaceSeparators = { '.' };
 
 		void Write(ModuleDef? module) {
 			try {
@@ -1184,21 +1244,14 @@ namespace dnSpy.Decompiler.CSharp {
 						retParamDef = null;
 					else {
 						var l = info.MethodDef.Parameters.LastOrDefault();
-						retParamDef = l is null ? null : l.ParamDef;
+						retParamDef = l?.ParamDef;
 					}
 				}
 				else {
 					retType = info.MethodSig.RetType;
-					retParamDef = info.MethodDef is null ? null : info.MethodDef.Parameters.ReturnParameter.ParamDef;
+					retParamDef = info.MethodDef?.Parameters.ReturnParameter.ParamDef;
 				}
-				if (retType.RemovePinnedAndModifiers() is ByRefSig && isReadOnly) {
-					retType = retType.RemovePinnedAndModifiers().Next;
-					OutputWrite(Keyword_ref, BoxedTextColor.Keyword);
-					WriteSpace();
-					OutputWrite(Keyword_readonly, BoxedTextColor.Keyword);
-					WriteSpace();
-				}
-				Write(retType, retParamDef, info.TypeGenericParams, info.MethodGenericParams);
+				Write(retType, retParamDef, info.TypeGenericParams, info.MethodGenericParams, isReadOnly, attributeProvider: retParamDef);
 				if (writeSpace)
 					WriteSpace();
 			}
@@ -1244,7 +1297,7 @@ namespace dnSpy.Decompiler.CSharp {
 						WriteSpace();
 					}
 					var paramType = info.MethodSig.Params[i];
-					Write(paramType, pd, info.TypeGenericParams, info.MethodGenericParams);
+					Write(paramType, pd, info.TypeGenericParams, info.MethodGenericParams, attributeProvider: pd);
 				}
 				if (ShowParameterNames) {
 					if (needSpace)
@@ -1279,6 +1332,13 @@ namespace dnSpy.Decompiler.CSharp {
 				if (isDefault)
 					OutputWrite(DefaultParamValueParenClose, BoxedTextColor.Punctuation);
 			}
+
+			if (info.MethodSig.IsVarArg) {
+				if (count > 0)
+					WriteCommaSpace();
+				OutputWrite(Keyword_arglist, BoxedTextColor.Keyword);
+			}
+
 			OutputWrite(rparen, BoxedTextColor.Punctuation);
 		}
 
@@ -1326,7 +1386,7 @@ namespace dnSpy.Decompiler.CSharp {
 		void FormatChar(char value) => OutputWrite(ToFormattedChar(value), BoxedTextColor.Char);
 
 		string ToFormattedChar(char value) {
-			var sb = new StringBuilder();
+			sb.Clear();
 
 			sb.Append('\'');
 			switch (value) {
@@ -1405,7 +1465,7 @@ namespace dnSpy.Decompiler.CSharp {
 		}
 
 		string GetFormattedString(string value) {
-			var sb = new StringBuilder();
+			sb.Clear();
 
 			sb.Append('"');
 			foreach (var c in value) {
@@ -1436,7 +1496,7 @@ namespace dnSpy.Decompiler.CSharp {
 		}
 
 		string GetFormattedVerbatimString(string value) {
-			var sb = new StringBuilder();
+			sb.Clear();
 
 			sb.Append(VerbatimStringPrefix + "\"");
 			foreach (var c in value) {

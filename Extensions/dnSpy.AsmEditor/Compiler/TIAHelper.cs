@@ -121,7 +121,7 @@ namespace dnSpy.AsmEditor.Compiler {
 			}
 			return new Info(scope, identifier);
 		}
-		static readonly byte[] empty = new byte[0];
+		static readonly byte[] empty = Array.Empty<byte>();
 
 		static byte[] Concat(byte[] a, byte b, byte[] c) {
 			var data = new byte[a.Length + 1 + c.Length];

@@ -28,10 +28,16 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 	sealed class DebugOptionsProviderImpl : DebugOptionsProvider {
 		readonly bool suppressJITOptimization_SystemModules;
 		readonly bool suppressJITOptimization_ProgramModules;
+		readonly bool enableJMC;
+		readonly bool stepOverSystemModules;
+		readonly bool onlyStepIntoPrimaryModule;
 
 		public DebugOptionsProviderImpl(DebuggerSettings debuggerSettings) {
 			suppressJITOptimization_SystemModules = debuggerSettings.SuppressJITOptimization_SystemModules;
 			suppressJITOptimization_ProgramModules = debuggerSettings.SuppressJITOptimization_ProgramModules;
+			enableJMC = debuggerSettings.EnableJustMyCodeDebugging;
+			stepOverSystemModules = debuggerSettings.StepOverCodeInSystemModules;
+			onlyStepIntoPrimaryModule = debuggerSettings.OnlyStepIntoCodeInPrimaryModule;
 		}
 
 		public override CorDebugJITCompilerFlags GetDesiredNGENCompilerFlags(DnProcess process) =>
@@ -63,7 +69,22 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return filename.StartsWith(dir, StringComparison.OrdinalIgnoreCase);
 		}
 
-		bool IsJustMyCode(DnModule module) => true;
+		bool setJMCForMainModule;
+
+		bool IsJustMyCode(DnModule module) {
+			if (!enableJMC)
+				return true;
+			if (stepOverSystemModules)
+				return IsProgramModule(module);
+			if (onlyStepIntoPrimaryModule) {
+				if (setJMCForMainModule || !IsProgramModule(module))
+					return false;
+				setJMCForMainModule = true;
+				return true;
+			}
+
+			return true;
+		}
 
 		public override ModuleLoadOptions GetModuleLoadOptions(DnModule module) {
 			ModuleLoadOptions options = default;

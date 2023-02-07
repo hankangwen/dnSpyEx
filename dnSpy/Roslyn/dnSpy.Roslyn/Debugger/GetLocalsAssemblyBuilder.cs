@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using dnlib.DotNet;
@@ -74,14 +75,55 @@ namespace dnSpy.Roslyn.Debugger {
 		}
 
 		GenericParam Clone(GenericParam gp) {
-			var clone = new GenericParamUser(gp.Number, gp.Flags, gp.Name);
+			var clone = new GenericParamUser(gp.Number, gp.Flags, gp.Name) {
+				Kind = (ITypeDefOrRef?)generatedModule!.Import(gp.Kind)
+			};
 			foreach (var gpc in gp.GenericParamConstraints)
 				clone.GenericParamConstraints.Add(Clone(gpc));
+			foreach (var ca in gp.CustomAttributes) {
+				var cloned = Clone(ca);
+				if (cloned is null)
+					continue;
+				clone.CustomAttributes.Add(cloned);
+			}
 			return clone;
 		}
 
-		GenericParamConstraint Clone(GenericParamConstraint gpc) =>
-			new GenericParamConstraintUser((ITypeDefOrRef)generatedModule!.Import(gpc.Constraint));
+		GenericParamConstraint Clone(GenericParamConstraint gpc) {
+			var clone = new GenericParamConstraintUser((ITypeDefOrRef)generatedModule!.Import(gpc.Constraint));
+			foreach (var ca in gpc.CustomAttributes) {
+				var cloned = Clone(ca);
+				if (cloned is null)
+					continue;
+				clone.CustomAttributes.Add(cloned);
+			}
+			return clone;
+		}
+
+		CustomAttribute? Clone(CustomAttribute ca) {
+			if (ca.IsRawBlob)
+				return null;
+			var clone = new CustomAttribute((ICustomAttributeType)generatedModule!.Import(ca.Constructor));
+			foreach (var caa in ca.ConstructorArguments)
+				clone.ConstructorArguments.Add(Clone(caa));
+			foreach (var cana in ca.NamedArguments)
+				clone.NamedArguments.Add(Clone(cana));
+			return clone;
+		}
+
+		CAArgument Clone(CAArgument caa) {
+			if (caa.Value is IList<CAArgument> list) {
+				var newList = new List<CAArgument>(list.Count);
+				foreach (var argument in newList)
+					newList.Add(Clone(argument));
+				return new CAArgument(generatedModule!.Import(caa.Type), newList);
+			}
+			if (caa.Value is CAArgument boxed)
+				return new CAArgument(generatedModule!.Import(caa.Type), Clone(boxed));
+			return new CAArgument(generatedModule!.Import(caa.Type), caa.Value);
+		}
+
+		CANamedArgument Clone(CANamedArgument cana) => new CANamedArgument(cana.IsField, generatedModule!.Import(cana.ArgumentType), cana.Name, Clone(cana.Argument));
 
 		public byte[] Compile(out DSEELocalAndMethod[] locals, out string typeName, out string? errorMessage) {
 			if (generatedModule is null) {
@@ -96,7 +138,8 @@ namespace dnSpy.Roslyn.Debugger {
 				var name = language.GetVariableName(GetName(p), isThis: p.IsHiddenThisParameter);
 				var kind = p.IsHiddenThisParameter ? LocalAndMethodKind.This : LocalAndMethodKind.Parameter;
 				var (methodName, flags) = AddMethod(p.Type, p.Index, isLocal: false);
-				localAndMethodBuilder.Add(new DSEELocalAndMethod(name, name, methodName, flags, kind, p.Index, Guid.Empty, null));
+				var (payloadId, payload) = CreateCustomTypeInfoForParameter(p);
+				localAndMethodBuilder.Add(new DSEELocalAndMethod(name, name, methodName, flags, kind, p.Index, payloadId, payload));
 			}
 
 			var body = sourceMethod.Body;
@@ -116,6 +159,58 @@ namespace dnSpy.Roslyn.Debugger {
 			typeName = getLocalsType.ReflectionFullName;
 			errorMessage = null;
 			return memStream.ToArray();
+		}
+
+		static (Guid payloadId, ReadOnlyCollection<byte>? payload) CreateCustomTypeInfoForParameter(Parameter parameter) {
+			if (!parameter.HasParamDef)
+				return (Guid.Empty, null);
+
+			var tupleAttr = parameter.ParamDef.CustomAttributes.Find("System.Runtime.CompilerServices.TupleElementNamesAttribute");
+			var dynamicAttr = parameter.ParamDef.CustomAttributes.Find("System.Runtime.CompilerServices.DynamicAttribute");
+
+			ReadOnlyCollection<string?>? tupleNames = null;
+			if (tupleAttr is not null && tupleAttr.ConstructorArguments.Count == 1 && tupleAttr.ConstructorArguments[0].Value is IList<CAArgument> names) {
+				string?[]? array = new string?[names.Count];
+				for (var i = 0; i < names.Count; i++) {
+					var argValue = names[i].Value;
+					if (argValue is UTF8String u8str)
+						array[i] = u8str.String;
+					else if (argValue is string str)
+						array[i] = str;
+					else if (argValue is null)
+						array[i] = null;
+					else {
+						array = null;
+						break;
+					}
+				}
+
+				if (array is not null)
+					tupleNames = new ReadOnlyCollection<string?>(array);
+			}
+
+			ReadOnlyCollection<byte>? dynamicFlags = null;
+			if (dynamicAttr is not null) {
+				if (dynamicAttr.ConstructorArguments.Count == 0)
+					dynamicFlags = new ReadOnlyCollection<byte>(new byte[] { 1 });
+				else if (dynamicAttr.ConstructorArguments.Count == 1 && dynamicAttr.ConstructorArguments[0].Value is IList<CAArgument> flags) {
+					bool[]? array = new bool[flags.Count];
+					for (var i = 0; i < flags.Count; i++) {
+						var argValue = flags[i].Value;
+						if (argValue is bool b)
+							array[i] = b;
+						else {
+							array = null;
+							break;
+						}
+					}
+
+					if (array is not null)
+						dynamicFlags = DynamicFlagsCustomTypeInfo.ToBytes(array);
+				}
+			}
+
+			return (CustomTypeInfo.PayloadTypeId, CustomTypeInfo.Encode(dynamicFlags, tupleNames));
 		}
 
 		string GetName(Parameter p) {
@@ -250,7 +345,7 @@ namespace dnSpy.Roslyn.Debugger {
 
 			case ElementType.GenericInst:
 				var gis = (GenericInstSig)type!;
-				if (gis.GenericType.IsValueTypeSig)
+				if (gis.GenericType.RemovePinnedAndModifiers().IsValueTypeSig)
 					return Instruction.Create(OpCodes.Ldobj, generatedModule.Import(type).ToTypeDefOrRef());
 				return Instruction.Create(OpCodes.Ldind_Ref);
 

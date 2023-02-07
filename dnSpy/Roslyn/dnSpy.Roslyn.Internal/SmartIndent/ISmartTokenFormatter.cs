@@ -10,6 +10,6 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace dnSpy.Roslyn.Internal.SmartIndent {
 	interface ISmartTokenFormatter {
-		Task<IList<TextChange>> FormatTokenAsync(Workspace workspace, SyntaxToken token, CancellationToken cancellationToken);
+		IList<TextChange> FormatToken(SyntaxToken token, CancellationToken cancellationToken);
 	}
 }

@@ -22,7 +22,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo.CSharp {
 		/// </summary>
 		protected override bool GetBindableNodeForTokenIndicatingLambda(SyntaxToken token, out SyntaxNode found) {
 			if (token.IsKind(SyntaxKind.EqualsGreaterThanToken)
-				&& token.Parent.IsKind(SyntaxKind.ParenthesizedLambdaExpression, SyntaxKind.SimpleLambdaExpression)) {
+				&& token.Parent is (kind: SyntaxKind.ParenthesizedLambdaExpression or SyntaxKind.SimpleLambdaExpression)) {
 				// () =>
 				found = token.Parent;
 				return true;
@@ -38,7 +38,7 @@ namespace dnSpy.Roslyn.Internal.QuickInfo.CSharp {
 		}
 
 		protected override bool GetBindableNodeForTokenIndicatingPossibleIndexerAccess(SyntaxToken token, out SyntaxNode found) {
-			if (token.IsKind(SyntaxKind.CloseBracketToken, SyntaxKind.OpenBracketToken) &&
+			if (token.Kind() is SyntaxKind.CloseBracketToken or SyntaxKind.OpenBracketToken &&
 				token.Parent?.Parent.IsKind(SyntaxKind.ElementAccessExpression) == true) {
 				found = token.Parent.Parent;
 				return true;

@@ -95,11 +95,11 @@ namespace dnSpy.Roslyn.Internal.SignatureHelp {
 		public static SignatureHelpService GetService(Document document) {
 			if (document == null)
 				throw new ArgumentNullException(nameof(document));
-			return document.Project.LanguageServices.GetService<SignatureHelpService>();
+			return document.Project.Services.GetService<SignatureHelpService>();
 		}
 
 		public async Task<SignatureHelpResult> GetItemsAsync(Document document, int position, SignatureHelpTriggerInfo triggerInfo, CancellationToken cancellationToken = default(CancellationToken)) {
-			var res = await ComputeItemsAsync(signatureHelpProviders, position, triggerInfo.ToSignatureHelpTriggerInfo(), SignatureHelpOptions.From(document.Project), document, cancellationToken).ConfigureAwait(false);
+			var res = await ComputeItemsAsync(signatureHelpProviders, position, triggerInfo.ToSignatureHelpTriggerInfo(), SignatureHelpOptions.Default, document, cancellationToken).ConfigureAwait(false);
 			return GetSignatureHelpResult(res, document);
 		}
 

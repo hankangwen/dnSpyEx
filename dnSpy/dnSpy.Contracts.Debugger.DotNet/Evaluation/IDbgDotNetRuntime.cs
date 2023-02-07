@@ -337,6 +337,14 @@ namespace dnSpy.Contracts.Debugger.DotNet.Evaluation {
 		/// <param name="result">Updated with the symbol if successful</param>
 		/// <returns></returns>
 		bool TryGetSymbol(ulong address, out SymbolResolverResult result);
+
+		/// <summary>
+		/// Tries to get the object value located at the provided address
+		/// </summary>
+		/// <param name="evalInfo">Evaluation info</param>
+		/// <param name="address">Address</param>
+		/// <returns></returns>
+		DbgDotNetValue? GetObjectValueAtAddress(DbgEvaluationInfo evalInfo, ulong address);
 	}
 
 	/// <summary>

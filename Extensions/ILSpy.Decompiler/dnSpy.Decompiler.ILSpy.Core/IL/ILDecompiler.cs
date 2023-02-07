@@ -1,14 +1,14 @@
 // Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -105,7 +105,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.IL {
 			var xmldoc = XmlDocLoader.LoadDocumentation(mr.Module);
 			if (xmldoc is null)
 				yield break;
-			var doc = xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, sb));
+			var doc = xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, sb)) ?? xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, sb, XmlDocCompiler.MSVC));
 			if (string2.IsNullOrEmpty(doc))
 				yield break;
 
@@ -188,7 +188,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.IL {
 		}
 
 		protected override void TypeToString(IDecompilerOutput output, ITypeDefOrRef? t, bool includeNamespace, IHasCustomAttribute? attributeProvider = null) =>
-			t.WriteTo(output, includeNamespace ? ILNameSyntax.TypeName : ILNameSyntax.ShortTypeName);
+			t.WriteTo(output, new StringBuilder(), includeNamespace ? ILNameSyntax.TypeName : ILNameSyntax.ShortTypeName);
 
 		public override void WriteToolTip(ITextColorWriter output, IMemberRef member, IHasCustomAttribute? typeAttributes) {
 			if (!(member is ITypeDefOrRef) && ILDecompilerUtils.Write(TextColorWriterToDecompilerOutput.Create(output), member))

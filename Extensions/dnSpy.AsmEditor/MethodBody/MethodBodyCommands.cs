@@ -204,4 +204,134 @@ namespace dnSpy.AsmEditor.MethodBody {
 		void ICommand.Execute(object? parameter) => Execute(GetStatements());
 		bool ICommand.CanExecute(object? parameter) => IsVisible(GetStatements());
 	}
+
+	[DebuggerDisplay("{Description}")]
+	sealed class ReplaceILMethodBodyWithStub : IUndoCommand {
+		[ExportMenuItem(Header = "res:ReplaceMethodBodyWithStubCommand", Group = MenuConstants.GROUP_CTX_DOCUMENTS_ASMED_ILED, Order = 21)]
+		sealed class DocumentsCommand : DocumentsContextMenuHandler {
+			readonly Lazy<IUndoCommandService> undoCommandService;
+			readonly Lazy<IMethodAnnotations> methodAnnotations;
+
+			[ImportingConstructor]
+			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, Lazy<IMethodAnnotations> methodAnnotations, IAppService appService) {
+				this.undoCommandService = undoCommandService;
+				this.methodAnnotations = methodAnnotations;
+			}
+
+			public override bool IsVisible(AsmEditorContext context) => CanExecute(context.Nodes);
+			public override void Execute(AsmEditorContext context) => ReplaceILMethodBodyWithStub.Execute(methodAnnotations, undoCommandService, context.Nodes);
+		}
+
+		[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_EDIT_GUID, Header = "res:ReplaceMethodBodyWithStubCommand", Group = MenuConstants.GROUP_APP_MENU_EDIT_ASMED_SETTINGS, Order = 51)]
+		sealed class EditMenuCommand : EditMenuHandler {
+			readonly Lazy<IUndoCommandService> undoCommandService;
+			readonly Lazy<IMethodAnnotations> methodAnnotations;
+
+			[ImportingConstructor]
+			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, Lazy<IMethodAnnotations> methodAnnotations, IAppService appService)
+				: base(appService.DocumentTreeView) {
+				this.undoCommandService = undoCommandService;
+				this.methodAnnotations = methodAnnotations;
+			}
+
+			public override bool IsVisible(AsmEditorContext context) => CanExecute(context.Nodes);
+			public override void Execute(AsmEditorContext context) => ReplaceILMethodBodyWithStub.Execute(methodAnnotations, undoCommandService, context.Nodes);
+		}
+
+		[ExportMenuItem(Header = "res:ReplaceMethodBodyWithStubCommand", Group = MenuConstants.GROUP_CTX_DOCVIEWER_ASMED_ILED, Order = 21)]
+		sealed class CodeCommand : CodeContextMenuHandler {
+			readonly Lazy<IUndoCommandService> undoCommandService;
+			readonly Lazy<IMethodAnnotations> methodAnnotations;
+
+			[ImportingConstructor]
+			CodeCommand(Lazy<IUndoCommandService> undoCommandService, Lazy<IMethodAnnotations> methodAnnotations, IAppService appService)
+				: base(appService.DocumentTreeView) {
+				this.undoCommandService = undoCommandService;
+				this.methodAnnotations = methodAnnotations;
+			}
+
+			public override bool IsEnabled(CodeContext context) => !StatementCommand.IsVisibleInternal(context.MenuItemContext) && CanExecute(context.Nodes);
+
+			public override void Execute(CodeContext context) => ReplaceILMethodBodyWithStub.Execute(methodAnnotations, undoCommandService, context.Nodes);
+		}
+
+		[ExportMenuItem(Header = "res:ReplaceMethodBodyWithStubCommand", Group = MenuConstants.GROUP_CTX_DOCVIEWER_ASMED_ILED, Order = 21)]
+		sealed class StatementCommand : MenuItemBase {
+			readonly Lazy<IUndoCommandService> undoCommandService;
+			readonly Lazy<IMethodAnnotations> methodAnnotations;
+			readonly IAppService appService;
+
+			[ImportingConstructor]
+			StatementCommand(Lazy<IUndoCommandService> undoCommandService, Lazy<IMethodAnnotations> methodAnnotations, IAppService appService) {
+				this.undoCommandService = undoCommandService;
+				this.methodAnnotations = methodAnnotations;
+				this.appService = appService;
+			}
+
+			public override void Execute(IMenuItemContext context) {
+				var statements = BodyCommandUtils.GetStatements(context, FindByTextPositionOptions.None);
+				if (statements is null)
+					return;
+
+				var method = statements[0].Method;
+				var methodNode = appService.DocumentTreeView.FindNode(method);
+				if (methodNode is null) {
+					MsgBox.Instance.Show(string.Format(dnSpy_AsmEditor_Resources.Error_CouldNotFindMethod, method));
+					return;
+				}
+
+				ReplaceILMethodBodyWithStub.Execute(methodAnnotations, undoCommandService, new DocumentTreeNodeData[] { methodNode });
+			}
+
+			public override bool IsVisible(IMenuItemContext context) => IsVisibleInternal(context);
+
+			internal static bool IsVisibleInternal(IMenuItemContext? context) => IsVisible(BodyCommandUtils.GetStatements(context, FindByTextPositionOptions.None));
+			static bool IsVisible(IList<MethodSourceStatement>? list) =>
+				list is not null &&
+				list.Count != 0 &&
+				list[0].Method.Body is not null &&
+				list[0].Method.Body.Instructions.Count > 0;
+		}
+
+		static bool CanExecute(DocumentTreeNodeData[] nodes) => nodes.Length == 1 && nodes[0] is MethodNode;
+
+		static void Execute(Lazy<IMethodAnnotations> methodAnnotations, Lazy<IUndoCommandService> undoCommandService, DocumentTreeNodeData[] nodes) {
+			if (!CanExecute(nodes))
+				return;
+
+			var methodNode = (MethodNode)nodes[0];
+
+			undoCommandService.Value.Add(new ReplaceILMethodBodyWithStub(methodAnnotations.Value, methodNode, new DefaultCilBodyBuilder(methodNode.MethodDef).CreateDefaultCilMethodBody()));
+		}
+
+		readonly IMethodAnnotations methodAnnotations;
+		readonly MethodNode methodNode;
+		readonly MethodBodyOptions newOptions;
+		readonly dnlib.DotNet.Emit.MethodBody origMethodBody;
+		bool isBodyModified;
+
+		ReplaceILMethodBodyWithStub(IMethodAnnotations methodAnnotations, MethodNode methodNode, MethodBodyOptions options) {
+			this.methodAnnotations = methodAnnotations;
+			this.methodNode = methodNode;
+			newOptions = options;
+			origMethodBody = methodNode.MethodDef.MethodBody;
+		}
+
+		public string Description => dnSpy_AsmEditor_Resources.ReplaceMethodBodyWithStubCommand2;
+
+		public void Execute() {
+			isBodyModified = methodAnnotations.IsBodyModified(methodNode.MethodDef);
+			methodAnnotations.SetBodyModified(methodNode.MethodDef, true);
+			newOptions.CopyTo(methodNode.MethodDef);
+		}
+
+		public void Undo() {
+			methodNode.MethodDef.MethodBody = origMethodBody;
+			methodAnnotations.SetBodyModified(methodNode.MethodDef, isBodyModified);
+		}
+
+		public IEnumerable<object> ModifiedObjects {
+			get { yield return methodNode; }
+		}
+	}
 }

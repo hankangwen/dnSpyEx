@@ -4709,10 +4709,14 @@ namespace dnSpy.Debugger.DotNet.Interpreter.Impl {
 			case TypeCode.Int64:
 			case TypeCode.UInt64:	return 8;
 			case TypeCode.Single:	return 4;
-			case TypeCode.Double:	return 8;
+			case TypeCode.Double:
+			case TypeCode.DateTime:	return 8;
+			case TypeCode.Decimal:	return 16;
 			}
 			if (type == type.AppDomain.System_IntPtr || type == type.AppDomain.System_UIntPtr)
 				return debuggerRuntime.PointerSize;
+			if (type == type.AppDomain.GetWellKnownType(DmdWellKnownType.System_TypedReference))
+				return debuggerRuntime.PointerSize * 2;
 
 			return debuggerRuntime.GetSizeOfValueType(type);
 		}

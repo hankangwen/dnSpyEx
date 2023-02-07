@@ -1,14 +1,14 @@
 // Copyright (c) 2010-2013 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -42,14 +42,14 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 		{
 			readonly KeyValuePair<string, string?>[] entries;
 			int pos;
-			
+
 			public XmlDocumentationCache(int size = 50)
 			{
 				if (size <= 0)
 					throw new ArgumentOutOfRangeException(nameof(size), size, "Value must be positive");
 				entries = new KeyValuePair<string, string?>[size];
 			}
-			
+
 			internal bool TryGet(string key, out string? value)
 			{
 				foreach (var pair in entries) {
@@ -61,7 +61,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				value = null;
 				return false;
 			}
-			
+
 			internal void Add(string key, string? value)
 			{
 				entries[pos++] = new KeyValuePair<string, string?>(key, value);
@@ -70,7 +70,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			}
 		}
 		#endregion
-		
+
 		[Serializable]
 		struct IndexEntry : IComparable<IndexEntry>
 		{
@@ -78,12 +78,12 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			/// Hash code of the documentation tag
 			/// </summary>
 			internal readonly int HashCode;
-			
+
 			/// <summary>
 			/// Position in the .xml file where the documentation starts
 			/// </summary>
 			internal readonly int PositionInFile;
-			
+
 			internal IndexEntry(int hashCode, int positionInFile)
 			{
 				HashCode = hashCode;
@@ -92,10 +92,10 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 
 			public int CompareTo(IndexEntry other) => HashCode.CompareTo(other.HashCode);
 		}
-		
+
 		[NonSerialized]
 		XmlDocumentationCache cache = new XmlDocumentationCache();
-		
+
 		readonly string fileName;
 		readonly Encoding encoding;
 		volatile IndexEntry[] index; // SORTED array of index entries
@@ -138,7 +138,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			if (fileName is null)
 				throw new ArgumentNullException(nameof(fileName));
 
-			index = new IndexEntry[0];
+			index = Array.Empty<IndexEntry>();
 			using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete)) {
 				using (XmlTextReader xmlReader = new XmlTextReader(fs)) {
 					xmlReader.XmlResolver = null; // no DTD resolving
@@ -168,24 +168,24 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				}
 			}
 		}
-		
+
 		static string? GetRedirectionTarget(string xmlFileName, string target)
 		{
 			var programFilesDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 			if (string.IsNullOrEmpty(programFilesDir))
 				programFilesDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 			programFilesDir = AppendDirectorySeparator(programFilesDir);
-			
+
 			string corSysDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
 			corSysDir = AppendDirectorySeparator(corSysDir);
-			
+
 			var fileName = target.Replace ("%PROGRAMFILESDIR%", programFilesDir)
 				.Replace ("%CORSYSDIR%", corSysDir);
 			if (!Path.IsPathRooted (fileName))
 				fileName = Path.Combine (Path.GetDirectoryName (xmlFileName)!, fileName);
 			return LookupLocalizedXmlDoc(fileName);
 		}
-		
+
 		static string AppendDirectorySeparator(string dir)
 		{
 			if (dir.EndsWith("\\", StringComparison.Ordinal) || dir.EndsWith("/", StringComparison.Ordinal))
@@ -193,7 +193,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			else
 				return dir + Path.DirectorySeparatorChar;
 		}
-		
+
 		/// <summary>
 		/// Given the assembly file name, looks up the XML documentation file name.
 		/// Returns null if no XML documentation file is found.
@@ -203,7 +203,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			string xmlFileName = Path.ChangeExtension(fileName, ".xml");
 			string currentCulture = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
 			string localizedXmlDocFile = GetLocalizedName(xmlFileName, currentCulture);
-			
+
 			//Debug.WriteLine("Try find XMLDoc @" + localizedXmlDocFile);
 			if (File.Exists(localizedXmlDocFile)) {
 				return localizedXmlDocFile;
@@ -221,7 +221,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			}
 			return null;
 		}
-		
+
 		static string GetLocalizedName(string fileName, string language)
 		{
 			string localizedXmlDocFile = Path.GetDirectoryName(fileName)!;
@@ -230,7 +230,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			return localizedXmlDocFile;
 		}
 		#endregion
-		
+
 		#region Load / Create Index
 		void ReadXmlDoc(XmlTextReader reader)
 		{
@@ -252,23 +252,23 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				index = indexList.ToArray(); // volatile write
 			}
 		}
-		
+
 		sealed class LinePositionMapper
 		{
 			readonly FileStream fs;
 			readonly Decoder decoder;
 			int currentLine = 1;
-			
+
 			// buffers for use with Decoder:
 			readonly byte[] input = new byte[1];
 			readonly char[] output = new char[2];
-			
+
 			public LinePositionMapper(FileStream fs, Encoding encoding)
 			{
 				decoder = encoding.GetDecoder();
 				this.fs = fs;
 			}
-			
+
 			public int GetPositionForLine(int line)
 			{
 				Debug.Assert(line >= currentLine);
@@ -289,7 +289,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				return checked((int)fs.Position);
 			}
 		}
-		
+
 		static void ReadMembersSection(XmlTextReader reader, LinePositionMapper linePosMapper, List<IndexEntry> indexList)
 		{
 			while (reader.Read()) {
@@ -311,7 +311,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Hash algorithm used for the index.
 		/// This is a custom implementation so that old index files work correctly
@@ -329,7 +329,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			}
 		}
 		#endregion
-		
+
 		#region GetDocumentation
 		/// <summary>
 		/// Get the documentation for the member with the specified documentation key.
@@ -340,7 +340,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				return null;
 			return GetDocumentation(key, true);
 		}
-		
+
 		/// <summary>
 		/// Get the documentation for the member with the specified documentation key.
 		/// </summary>
@@ -351,7 +351,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			//TODO: Try to prevent ToString()
 			return GetDocumentation(key.ToString(), true);
 		}
-		
+
 		string? GetDocumentation(string key, bool allowReload)
 		{
 			int hashcode = GetHashCode(key);
@@ -364,7 +364,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 			// possibly there are multiple items with the same hash, so go to the first.
 			while (--m >= 0 && index[m].HashCode == hashcode);
 			// m is now 1 before the first item with the correct hash
-			
+
 			XmlDocumentationCache cache = this.cache;
 			lock (cache) {
 				if (!cache.TryGet(key, out string? val)) {
@@ -388,7 +388,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				return val;
 			}
 		}
-		
+
 		string? ReloadAndGetDocumentation(string key)
 		{
 			try {
@@ -402,16 +402,16 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				}
 			} catch (IOException) {
 				// Ignore errors on reload; IEntity.Documentation callers aren't prepared to handle exceptions
-				index = new IndexEntry[0]; // clear index to avoid future load attempts
+				index = Array.Empty<IndexEntry>(); // clear index to avoid future load attempts
 				return null;
 			} catch (XmlException) {
-				index = new IndexEntry[0]; // clear index to avoid future load attempts
-				return null;				
+				index = Array.Empty<IndexEntry>(); // clear index to avoid future load attempts
+				return null;
 			}
 			return GetDocumentation(key, allowReload: false); // prevent infinite reload loops
 		}
 		#endregion
-		
+
 		#region Load / Read XML
 		string? LoadDocumentation(string key, int positionInFile)
 		{

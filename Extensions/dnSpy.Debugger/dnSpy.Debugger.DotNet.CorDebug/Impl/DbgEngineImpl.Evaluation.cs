@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using dndbg.COM.CorDebug;
 using dndbg.Engine;
-using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation;
 using dnSpy.Contracts.Debugger.Engine.Evaluation;
 using dnSpy.Contracts.Debugger.Evaluation;
@@ -32,7 +31,7 @@ using dnSpy.Debugger.DotNet.Metadata;
 
 namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 	abstract partial class DbgEngineImpl {
-		internal DbgDotNetValue CreateDotNetValue_CorDebug(CorValue value, DmdAppDomain reflectionAppDomain, bool tryCreateStrongHandle, bool closeOnContinue = true) {
+		internal DbgDotNetValue CreateDotNetValue_CorDebug(CorValue? value, DmdAppDomain reflectionAppDomain, bool tryCreateStrongHandle, bool closeOnContinue = true) {
 			debuggerThread.VerifyAccess();
 			if (value is null)
 				return new SyntheticValue(reflectionAppDomain.System_Void, new DbgDotNetRawValue(DbgSimpleValueType.Void));
@@ -111,56 +110,6 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			dnDebugger.DisposeHandle(value);
 		}
 
-		DbgDotNetRawValue? ReadField_CorDebug(CorValue? obj, DbgAppDomain? appDomain, string fieldName1, string fieldName2) {
-			if (obj is null || appDomain is null)
-				return null;
-			var reflectionAppDomain = appDomain.GetReflectionAppDomain();
-			if (reflectionAppDomain is null)
-				return null;
-			DbgDotNetValueImpl? objImp = null;
-			try {
-				objImp = CreateDotNetValue_CorDebug(obj, reflectionAppDomain, tryCreateStrongHandle: false) as DbgDotNetValueImpl;
-				if (objImp is null)
-					return null;
-				return ReadField_CorDebug(objImp, fieldName1, fieldName2);
-			}
-			finally {
-				objImp?.Dispose();
-			}
-		}
-
-		DbgDotNetRawValue? ReadField_CorDebug(DbgDotNetValueImpl obj, string fieldName1, string? fieldName2) {
-			const DmdBindingFlags fieldFlags = DmdBindingFlags.Public | DmdBindingFlags.NonPublic | DmdBindingFlags.Instance;
-			var field = obj.Type.GetField(fieldName1, fieldFlags);
-			if (field is null && fieldName2 is not null)
-				field = obj.Type.GetField(fieldName2, fieldFlags);
-			Debug2.Assert(field is not null);
-			if (field is null)
-				return null;
-
-			var dnAppDomain = ((DbgCorDebugInternalAppDomainImpl)obj.Type.AppDomain.GetDebuggerAppDomain().InternalAppDomain).DnAppDomain;
-			var corFieldDeclType = GetType(dnAppDomain.CorAppDomain, field.DeclaringType!);
-			var objValue = DbgCorDebugInternalRuntimeImpl.TryGetObjectOrPrimitiveValue(obj.TryGetCorValue(), out int hr);
-			if (objValue is null)
-				return null;
-			if (objValue.IsObject) {
-				// This isn't a generic read-field method, so we won't try to load any classes by calling cctors.
-
-				var fieldValue = objValue.GetFieldValue(corFieldDeclType.Class, (uint)field.MetadataToken, out hr);
-				if (fieldValue is null)
-					return null;
-				DbgDotNetValue? dnValue = null;
-				try {
-					dnValue = CreateDotNetValue_CorDebug(fieldValue, field.AppDomain, tryCreateStrongHandle: false);
-					return dnValue.GetRawValue();
-				}
-				finally {
-					dnValue?.Dispose();
-				}
-			}
-			return null;
-		}
-
 		CorType GetType(CorAppDomain appDomain, DmdType type) => CorDebugTypeCreator.GetType(this, appDomain, type);
 
 		sealed class EvalTimedOut { }
@@ -234,7 +183,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 						var val = converter.Convert(obj, declType, out origType);
 						if (val.ErrorMessage is not null)
 							return DbgDotNetValueResult.CreateError(val.ErrorMessage);
-						args[w++] = BoxIfNeeded(dnEval, appDomain, createdValues, val.CorValue!, declType, origType);
+						var valType = origType ?? new ReflectionTypeCreator(this, method.AppDomain).Create(val.CorValue!.ExactType);
+						args[w++] = BoxIfNeeded(dnEval, appDomain, createdValues, val.CorValue!, declType, valType);
 					}
 					for (int i = 0; i < arguments.Length; i++) {
 						var paramType = paramTypes[i];
@@ -302,7 +252,6 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 
 		CorValue BoxIfNeeded(DnEval dnEval, CorAppDomain appDomain, List<CorValue> createdValues, CorValue corValue, DmdType targetType, DmdType valueType) {
 			if (!targetType.IsValueType && valueType.IsValueType && corValue.IsGeneric && !corValue.IsHeap) {
-				var etype = corValue.ElementType;
 				var corValueType = corValue.ExactType;
 				if (corValueType?.HasClass == false)
 					corValueType = GetType(appDomain, valueType);

@@ -78,6 +78,11 @@ namespace dnSpy.Decompiler.MSBuild {
 		public Func<TextWriter, IDecompilerOutput> CreateDecompilerOutput { get; set; }
 
 		/// <summary>
+		/// Set to 'true' to generate the more modern SDK style project files.
+		/// </summary>
+		public bool GenerateSDKStyleProjects { get; set; }
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="directory">Base directory</param>

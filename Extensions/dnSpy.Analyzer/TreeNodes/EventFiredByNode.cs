@@ -1,14 +1,14 @@
 // Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -29,16 +29,14 @@ using dnSpy.Contracts.Text;
 
 namespace dnSpy.Analyzer.TreeNodes {
 	sealed class EventFiredByNode : SearchNode {
-		readonly List<TypeDef> analyzedTypes;
+		readonly EventDef analyzedEvent;
 		readonly FieldDef? eventBackingField;
 		readonly MethodDef? eventFiringMethod;
 
 		ConcurrentDictionary<MethodDef, int>? foundMethods;
 
 		public EventFiredByNode(EventDef analyzedEvent) {
-			if (analyzedEvent is null)
-				throw new ArgumentNullException(nameof(analyzedEvent));
-			analyzedTypes = new List<TypeDef> { analyzedEvent.DeclaringType };
+			this.analyzedEvent = analyzedEvent ?? throw new ArgumentNullException(nameof(analyzedEvent));
 
 			eventBackingField = GetBackingField(analyzedEvent);
 			var eventType = analyzedEvent.EventType.ResolveTypeDef();
@@ -52,10 +50,9 @@ namespace dnSpy.Analyzer.TreeNodes {
 		protected override IEnumerable<AnalyzerTreeNodeData> FetchChildren(CancellationToken ct) {
 			foundMethods = new ConcurrentDictionary<MethodDef, int>();
 
-			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
-			foreach (var declType in analyzedTypes) {
-				foreach (var child in FindReferencesInType(declType))
-					yield return child;
+			var analyzer = new ScopedWhereUsedAnalyzer<AnalyzerTreeNodeData>(Context.DocumentService, analyzedEvent, FindReferencesInType);
+			foreach (var child in analyzer.PerformAnalysis(ct)) {
+				yield return child;
 			}
 
 			foundMethods = null;
@@ -63,22 +60,22 @@ namespace dnSpy.Analyzer.TreeNodes {
 
 		IEnumerable<AnalyzerTreeNodeData> FindReferencesInType(TypeDef type) {
 			// HACK: in lieu of proper flow analysis, I'm going to use a simple heuristic
-			// If the method accesses the event's backing field, and calls invoke on a delegate 
+			// If the method accesses the event's backing field, and calls invoke on a delegate
 			// with the same signature, then it is (most likely) raise the given event.
 
-			foreach (MethodDef method in type.Methods) {
-				bool readBackingField = false;
+			foreach (var method in type.Methods) {
 				if (!method.HasBody)
 					continue;
 				Instruction? foundInstr = null;
-				foreach (Instruction instr in method.Body.Instructions) {
-					Code code = instr.OpCode.Code;
-					if ((code == Code.Ldfld || code == Code.Ldflda || code == Code.Ldtoken) && instr.Operand is IField fr && fr.IsField) {
+				bool readBackingField = false;
+				foreach (var instr in method.Body.Instructions) {
+					var code = instr.OpCode.Code;
+					if ((code == Code.Ldfld || code == Code.Ldflda || code == Code.Ldsfld || code == Code.Ldsflda || code == Code.Ldtoken) && instr.Operand is IField fr && fr.IsField) {
 						if (CheckEquals(fr.ResolveFieldDef(), eventBackingField)) {
 							readBackingField = true;
 						}
 					}
-					if (readBackingField && (code == Code.Callvirt || code == Code.Call)) {
+					else if (readBackingField && (code == Code.Callvirt || code == Code.Call)) {
 						if (instr.Operand is IMethod mr && eventFiringMethod is not null && mr.Name == eventFiringMethod.Name && CheckEquals(mr.ResolveMethodDef(), eventFiringMethod)) {
 							foundInstr = instr;
 							break;

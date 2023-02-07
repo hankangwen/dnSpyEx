@@ -149,6 +149,17 @@ namespace dnSpy.Documents.Tabs.Dialogs {
 		}
 		bool decompileXaml;
 
+		public bool UseSDKStyleProjectFormat {
+			get => useSDKStyleProjectFormat;
+			set {
+				if (useSDKStyleProjectFormat != value) {
+					useSDKStyleProjectFormat = value;
+					OnPropertyChanged(nameof(UseSDKStyleProjectFormat));
+				}
+			}
+		}
+		bool useSDKStyleProjectFormat;
+
 		public bool OpenProject {
 			get => openProject;
 			set {

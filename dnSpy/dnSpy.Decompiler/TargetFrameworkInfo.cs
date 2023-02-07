@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using dnlib.DotNet;
 
 namespace dnSpy.Decompiler {
@@ -92,8 +93,11 @@ namespace dnSpy.Decompiler {
 			if (arg.Type.GetElementType() != ElementType.String)
 				return null;
 			var s = arg.Value as UTF8String;
-			if (UTF8String.IsNullOrEmpty(s))
-				return null;
+			if (UTF8String.IsNullOrEmpty(s)) {
+				if (arg.Value is not string argAsString)
+					return null;
+				s = argAsString;
+			}
 
 			return TryCreateFromAttributeString(s);
 		}
@@ -135,7 +139,7 @@ namespace dnSpy.Decompiler {
 			return new TargetFrameworkInfo(framework, versionStr, profile, true);
 		}
 
-		static HashSet<string> dotNet30Asms = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+		static readonly HashSet<string> dotNet30Asms = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
 			"ComSvcConfig, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
 			"infocard, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
 			"Microsoft.Transactions.Bridge, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
@@ -173,7 +177,7 @@ namespace dnSpy.Decompiler {
 			"WsatConfig, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
 		};
 
-		static HashSet<string> dotNet35Asms = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+		static readonly HashSet<string> dotNet35Asms = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
 			"AddInProcess, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
 			"AddInProcess32, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
 			"AddInUtil, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
@@ -302,7 +306,8 @@ namespace dnSpy.Decompiler {
 				return "Windows Universal " + Version;
 
 			case ".NETCoreApp":
-				if (Version.StartsWith("1.") || Version.StartsWith("2.") || Version.StartsWith("3.")) {
+				if (Version.StartsWith("1.", StringComparison.Ordinal) || Version.StartsWith("2.", StringComparison.Ordinal) ||
+				    Version.StartsWith("3.", StringComparison.Ordinal)) {
 					// .NET Core 1.0-3.x
 					return ".NET Core " + Version;
 				}
@@ -400,6 +405,47 @@ namespace dnSpy.Decompiler {
 				if (Framework.Length > 20)
 					return null;
 				return Framework + " " + Version;
+			}
+		}
+
+		public string? GetTargetFrameworkMoniker() {
+			switch (Framework) {
+			case ".NETFramework":
+				return "net" + Version.Replace(".", "");
+
+			case ".NETCoreApp":
+				if (Version.StartsWith("1.", StringComparison.Ordinal) || Version.StartsWith("2.", StringComparison.Ordinal) ||
+				    Version.StartsWith("3.", StringComparison.Ordinal)) {
+					// .NET Core 1.0-3.x
+					return "netcoreapp" + Version;
+				}
+				// .NET 5.0+
+				return "net" + Version;
+
+			case ".NETStandard":
+				return "netstandard" + Version;
+
+			case "Silverlight":
+				return "sl" + Version[0];
+
+			case ".NETCore":
+				return "netcore" + Version.Replace(".", "");
+
+			case "WindowsPhone":
+				var builder = new StringBuilder();
+				builder.Append("wp");
+				foreach (string s in Version.Split('.')) {
+					if (s == "0")
+						break;
+					builder.Append(s);
+				}
+				return builder.ToString();
+
+			case ".NETMicroFramework":
+				return "netmf";
+
+			default:
+				return null;
 			}
 		}
 

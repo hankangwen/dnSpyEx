@@ -24,7 +24,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public override string Name { get; }
 		public override DmdType FieldType { get; }
 		public override DmdFieldAttributes Attributes { get; }
-		public override uint FieldRVA => 0;
+		public override uint FieldRVA { get; }
 
 		readonly DmdComMetadataReader reader;
 
@@ -36,6 +36,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			Attributes = MDAPI.GetFieldAttributes(reader.MetaDataImport, token);
 			Name = MDAPI.GetFieldName(reader.MetaDataImport, token) ?? string.Empty;
 			FieldType = reader.ReadFieldType_COMThread(MDAPI.GetFieldSignatureBlob(reader.MetaDataImport, token), DeclaringType!.GetGenericArguments());
+			if (HasFieldRVA)
+				FieldRVA = MDAPI.GetRVA(reader.MetaDataImport, token) ?? 0;
 		}
 
 		T COMThread<T>(Func<T> action) => reader.Dispatcher.Invoke(action);

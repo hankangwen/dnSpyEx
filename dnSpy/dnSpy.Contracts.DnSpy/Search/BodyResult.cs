@@ -17,6 +17,8 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using dnlib.DotNet.Emit;
+
 namespace dnSpy.Contracts.Search {
 	/// <summary>
 	/// Stored in <see cref="ISearchResult.Object"/> if the method body was searched
@@ -28,9 +30,25 @@ namespace dnSpy.Contracts.Search {
 		public uint ILOffset { get; }
 
 		/// <summary>
+		/// OpCode of instruction referencing the constant
+		/// </summary>
+		public OpCode OpCode { get; }
+
+		/// <summary>
+		/// Operand of instruction referencing the constant
+		/// </summary>
+		public object? Operand { get; }
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="ilOffset">IL offset of instruction</param>
-		public BodyResult(uint ilOffset) => ILOffset = ilOffset;
+		/// <param name="opCode">OpCode of instruction</param>
+		/// <param name="operand">Operand of instruction</param>
+		public BodyResult(uint ilOffset, OpCode opCode, object? operand) {
+			ILOffset = ilOffset;
+			OpCode = opCode;
+			Operand = operand;
+		}
 	}
 }

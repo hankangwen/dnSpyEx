@@ -56,8 +56,14 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		bool RewriteElement(XamlContext ctx, XElement parent, XElement elem) {
 			var type = parent.Annotation<XamlType>();
 			var property = elem.Annotation<XamlProperty>();
-			if ((property is null || type is null) && elem.Name != key)
-				return false;
+
+			if (elem.Name != key) {
+				if (property is null || type is null)
+					return false;
+
+				if (property.ResolvedMember is PropertyDef propertyDef && propertyDef.SetMethod is null)
+					return false;
+			}
 
 			if (elem.Elements().Count() != 1 || elem.Attributes().Any(t => t.Name.Namespace != XNamespace.Xmlns))
 				return false;

@@ -104,6 +104,21 @@ namespace dnSpy.Contracts.Debugger {
 		public abstract bool EnableManagedDebuggingAssistants { get; set; }
 
 		/// <summary>
+		/// true to enable Just My Code debugging support
+		/// </summary>
+		public abstract bool EnableJustMyCodeDebugging { get; set; }
+
+		/// <summary>
+		/// Step over code in system modules
+		/// </summary>
+		public abstract bool StepOverCodeInSystemModules { get; set; }
+
+		/// <summary>
+		/// Only step into code in primary module
+		/// </summary>
+		public abstract bool OnlyStepIntoCodeInPrimaryModule { get; set; }
+
+		/// <summary>
 		/// Highlights the value of a variable that has changed in variables windows
 		/// </summary>
 		public abstract bool HighlightChangedVariables { get; set; }

@@ -36,6 +36,7 @@ namespace dnSpy.Debugger.Evaluation {
 		public override DbgValueNodeProvider ExceptionsProvider { get; }
 		public override DbgValueNodeProvider ReturnValuesProvider { get; }
 		public override DbgValueNodeProvider TypeVariablesProvider { get; }
+		public override DbgValueNodeProvider StaticFieldsProvider { get; }
 		public override DbgValueNodeFactory ValueNodeFactory { get; }
 
 		readonly DbgEngineLanguage engineLanguage;
@@ -52,6 +53,7 @@ namespace dnSpy.Debugger.Evaluation {
 			ExceptionsProvider = new DbgValueNodeProviderImpl(this, runtimeKindGuid, engineLanguage.ExceptionsProvider);
 			ReturnValuesProvider = new DbgValueNodeProviderImpl(this, runtimeKindGuid, engineLanguage.ReturnValuesProvider);
 			TypeVariablesProvider = new DbgValueNodeProviderImpl(this, runtimeKindGuid, engineLanguage.TypeVariablesProvider);
+			StaticFieldsProvider = new DbgValueNodeProviderImpl(this, runtimeKindGuid, engineLanguage.StaticFieldsProvider);
 			ValueNodeFactory = new DbgValueNodeFactoryImpl(this, runtimeKindGuid, engineLanguage.ValueNodeFactory);
 		}
 

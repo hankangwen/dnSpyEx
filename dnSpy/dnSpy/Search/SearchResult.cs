@@ -66,24 +66,7 @@ namespace dnSpy.Search {
 			OnPropertyChanged(nameof(ToolTip));
 		}
 
-		public string? ToolTip {
-			get {
-				var dsDocument = Document;
-				if (dsDocument is null)
-					return null;
-				var module = dsDocument.ModuleDef;
-				if (module is null)
-					return dsDocument.Filename;
-				if (!string.IsNullOrWhiteSpace(module.Location))
-					return module.Location;
-				if (!string.IsNullOrWhiteSpace(module.Name))
-					return module.Name;
-				if (module.Assembly is not null && !string.IsNullOrWhiteSpace(module.Assembly.Name))
-					return module.Assembly.Name;
-				return null;
-			}
-		}
-
+		public object ToolTip => CreateToolTipUI(NameObject);
 		public object NameUI => CreateUI(NameObject, false);
 		public object? LocationUI => CreateUI(LocationObject, true);
 
@@ -111,6 +94,8 @@ namespace dnSpy.Search {
 			}
 		}
 
+		const FormatterOptions DefaultFormatterOptions = FormatterOptions.Default & ~(FormatterOptions.ShowParameterNames | FormatterOptions.ShowDeclaringTypes | FormatterOptions.ShowFieldLiteralValues);
+
 		void CreateUI(ITextColorWriter output, object? o, bool includeNamespace) {
 			if (o is NamespaceSearchResult ns) {
 				output.WriteNamespace(ns.Namespace);
@@ -124,29 +109,20 @@ namespace dnSpy.Search {
 			}
 
 			if (o is MethodDef md) {
-				var methodNameColor = Context.Decompiler.MetadataTextColorProvider.GetColor(md);
-				output.Write(methodNameColor, IdentifierEscaper.Escape(md.Name));
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.Write(output, md, DefaultFormatterOptions);
 				if (md.ImplMap is ImplMap implMap && !UTF8String.IsNullOrEmpty(implMap.Name) && implMap.Name != md.Name) {
 					output.WriteSpace();
 					output.Write(BoxedTextColor.Punctuation, "(");
-					output.Write(methodNameColor, IdentifierEscaper.Escape(implMap.Name));
+					output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(md), IdentifierEscaper.Escape(implMap.Name));
 					output.Write(BoxedTextColor.Punctuation, ")");
 				}
 				return;
 			}
 
-			if (o is FieldDef fd) {
-				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(fd), IdentifierEscaper.Escape(fd.Name));
-				return;
-			}
-
-			if (o is PropertyDef pd) {
-				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(pd), IdentifierEscaper.Escape(pd.Name));
-				return;
-			}
-
-			if (o is EventDef ed) {
-				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(ed), IdentifierEscaper.Escape(ed.Name));
+			if (o is IMemberDef memberDef) {
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.Write(output, memberDef, DefaultFormatterOptions);
 				return;
 			}
 
@@ -197,6 +173,124 @@ namespace dnSpy.Search {
 			}
 
 			Debug2.Assert(o is null);
+		}
+
+		object CreateToolTipUI(object? o) {
+			var writer = Cache.GetWriter();
+			try {
+				CreateToolTipUI(writer, o);
+				var context = new TextClassifierContext(writer.Text, string.Empty, Context.SyntaxHighlight, writer.Colors);
+				return Context.TextElementProvider.CreateTextElement(Context.ClassificationFormatMap, context, ContentTypes.Search, TextElementFlags.None);
+			}
+			finally {
+				Cache.FreeWriter(writer);
+			}
+		}
+
+		void CreateToolTipUI(ITextColorWriter output, object? o) {
+			if (o is NamespaceSearchResult ns)
+				output.WriteNamespace(ns.Namespace);
+			else if (o is TypeDef td) {
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.WriteType(output, td, false);
+			}
+			else if (o is IMemberDef md) {
+				Debug2.Assert(Context.Decompiler is not null);
+				Context.Decompiler.WriteToolTip(output, md, md.DeclaringType);
+				if (ObjectInfo is BodyResult bodyResult) {
+					output.WriteLine();
+					output.Write(BoxedTextColor.Label, "IL_");
+					output.Write(BoxedTextColor.Label, bodyResult.ILOffset.ToString("X4"));
+					output.Write(BoxedTextColor.Punctuation, ":");
+					output.WriteSpace();
+					output.Write(BoxedTextColor.OpCode, bodyResult.OpCode.Name);
+					output.WriteSpace();
+					WriteOperand(output, bodyResult.Operand);
+				}
+			}
+			else if (o is AssemblyDef asm)
+				output.Write(asm);
+			else if (o is ModuleDef mod)
+				output.WriteModule(mod.FullName);
+			else if (o is AssemblyRef asmRef)
+				output.Write(asmRef);
+			else if (o is ModuleRef modRef)
+				output.WriteModule(modRef.FullName);
+			else if (o is ParamDef paramDef)
+				output.Write(BoxedTextColor.Parameter, IdentifierEscaper.Escape(paramDef.Name));
+			else if (o is IDsDocument document) // non-.NET file
+				output.Write(BoxedTextColor.Text, document.GetShortName());
+			else if (o is ResourceNode resNode)
+				output.WriteFilename(resNode.Name);
+			else if (o is ResourceElementNode resElNode)
+				output.WriteFilename(resElNode.Name);
+			else if (o is ErrorMessage em)
+				output.Write(em.Color, em.Text);
+			else
+				Debug2.Assert(o is null);
+
+			var asmLocation = GetAssemblyLocation();
+			if (asmLocation is not null) {
+				output.WriteLine();
+				output.WriteFilename(asmLocation);
+			}
+		}
+
+		void WriteOperand(ITextColorWriter output, object? operand) {
+			if (operand is null)
+				return;
+			if (operand is string str)
+				output.Write(BoxedTextColor.String, "\"" + IdentifierEscaper.Escape(str, true) + "\"");
+			else if (operand is float floatVal) {
+				if (floatVal == 0) {
+					// negative zero is a special case
+					output.Write(BoxedTextColor.Number, 1 / floatVal == float.NegativeInfinity ? "-0.0" : "0.0");
+				}
+				else if (float.IsInfinity(floatVal) || float.IsNaN(floatVal)) {
+					byte[] data = BitConverter.GetBytes(floatVal);
+					for (int i = 0; i < data.Length; i++) {
+						if (i > 0)
+							output.WriteSpace();
+						output.Write(BoxedTextColor.Number, data[i].ToString("X2"));
+					}
+				}
+				else
+					output.Write(BoxedTextColor.Number, floatVal.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+			}
+			else if (operand is double doubleVal) {
+				if (doubleVal == 0) {
+					// negative zero is a special case
+					output.Write(BoxedTextColor.Number, 1 / doubleVal == double.NegativeInfinity ? "-0.0" : "0.0");
+				}
+				else if (double.IsInfinity(doubleVal) || double.IsNaN(doubleVal)) {
+					byte[] data = BitConverter.GetBytes(doubleVal);
+					for (int i = 0; i < data.Length; i++) {
+						if (i > 0)
+							output.WriteSpace();
+						output.Write(BoxedTextColor.Number, data[i].ToString("X2"));
+					}
+				}
+				else
+					output.Write(BoxedTextColor.Number, doubleVal.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
+			}
+			else
+				output.Write(Context.Decompiler.MetadataTextColorProvider.GetColor(operand), operand.ToString());
+		}
+
+		string? GetAssemblyLocation() {
+			var dsDocument = Document;
+			if (dsDocument is null)
+				return null;
+			var module = dsDocument.ModuleDef;
+			if (module is null)
+				return dsDocument.Filename;
+			if (!string.IsNullOrWhiteSpace(module.Location))
+				return module.Location;
+			if (!string.IsNullOrWhiteSpace(module.Name))
+				return module.Name;
+			if (module.Assembly is not null && !string.IsNullOrWhiteSpace(module.Assembly.Name))
+				return module.Assembly.Name;
+			return null;
 		}
 
 		public static SearchResult CreateMessage(SearchResultContext context, string msg, object color, bool first) =>

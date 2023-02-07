@@ -33,6 +33,7 @@ namespace dnSpy.Search {
 		bool MatchAnySearchTerm { get; set; }
 		bool SearchDecompiledData { get; set; }
 		bool SearchFrameworkAssemblies { get; set; }
+		bool SearchCompilerGeneratedMembers { get; set; }
 	}
 
 	class SearchSettings : ViewModelBase, ISearchSettings {
@@ -124,6 +125,17 @@ namespace dnSpy.Search {
 		}
 		bool searchFrameworkAssemblies = true;
 
+		public bool SearchCompilerGeneratedMembers {
+			get => searchCompilerGeneratedMembers;
+			set {
+				if (searchCompilerGeneratedMembers != value) {
+					searchCompilerGeneratedMembers = value;
+					OnPropertyChanged(nameof(SearchCompilerGeneratedMembers));
+				}
+			}
+		}
+		bool searchCompilerGeneratedMembers = true;
+
 		public SearchSettings Clone() => CopyTo(new SearchSettings());
 
 		public SearchSettings CopyTo(SearchSettings other) {
@@ -135,6 +147,7 @@ namespace dnSpy.Search {
 			other.MatchAnySearchTerm = MatchAnySearchTerm;
 			other.SearchDecompiledData = SearchDecompiledData;
 			other.SearchFrameworkAssemblies = SearchFrameworkAssemblies;
+			other.SearchCompilerGeneratedMembers = SearchCompilerGeneratedMembers;
 			return other;
 		}
 	}
@@ -158,6 +171,7 @@ namespace dnSpy.Search {
 			MatchAnySearchTerm = sect.Attribute<bool?>(nameof(MatchAnySearchTerm)) ?? MatchAnySearchTerm;
 			SearchDecompiledData = sect.Attribute<bool?>(nameof(SearchDecompiledData)) ?? SearchDecompiledData;
 			SearchFrameworkAssemblies = sect.Attribute<bool?>(nameof(SearchFrameworkAssemblies)) ?? SearchFrameworkAssemblies;
+			SearchCompilerGeneratedMembers = sect.Attribute<bool?>(nameof(SearchCompilerGeneratedMembers)) ?? SearchCompilerGeneratedMembers;
 			PropertyChanged += SearchSettingsImpl_PropertyChanged;
 		}
 
@@ -171,6 +185,7 @@ namespace dnSpy.Search {
 			sect.Attribute(nameof(MatchAnySearchTerm), MatchAnySearchTerm);
 			sect.Attribute(nameof(SearchDecompiledData), SearchDecompiledData);
 			sect.Attribute(nameof(SearchFrameworkAssemblies), SearchFrameworkAssemblies);
+			sect.Attribute(nameof(SearchCompilerGeneratedMembers), SearchCompilerGeneratedMembers);
 		}
 	}
 }

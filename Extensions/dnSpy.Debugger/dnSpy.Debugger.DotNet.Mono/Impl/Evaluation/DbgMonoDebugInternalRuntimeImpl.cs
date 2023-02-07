@@ -71,13 +71,15 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 		}
 
 		static DbgDotNetRuntimeFeatures CalculateFeatures(VirtualMachine vm) {
-			var res = DbgDotNetRuntimeFeatures.ObjectIds | DbgDotNetRuntimeFeatures.NoDereferencePointers;
+			var res = DbgDotNetRuntimeFeatures.ObjectIds;
 			if (!vm.Version.AtLeast(2, 24))
 				res |= DbgDotNetRuntimeFeatures.NoGenericMethods;
 			// We need FuncEvalOptions.ReturnOutThis support so func-eval of Task/ObjectIdForDebugger
 			// prop updates the struct's task field
 			if (!vm.Version.AtLeast(2, 35))
 				res |= DbgDotNetRuntimeFeatures.NoAsyncStepObjectId;
+			if (!vm.Version.AtLeast(2, 46))
+				res |= DbgDotNetRuntimeFeatures.NoDereferencePointers;
 			return res;
 		}
 
@@ -1279,6 +1281,8 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 			result = default;
 			return false;
 		}
+
+		public DbgDotNetValue? GetObjectValueAtAddress(DbgEvaluationInfo evalInfo, ulong address) => null; // Not supported on Mono.
 
 		protected override void CloseCore(DbgDispatcher dispatcher) { }
 	}

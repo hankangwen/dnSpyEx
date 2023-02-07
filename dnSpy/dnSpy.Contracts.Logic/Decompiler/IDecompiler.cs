@@ -100,8 +100,8 @@ namespace dnSpy.Contracts.Decompiler {
 		/// <param name="output">Output</param>
 		/// <param name="type">Type</param>
 		/// <param name="includeNamespace">true to include namespace</param>
-		/// <param name="pd"><see cref="ParamDef"/> or null</param>
-		void WriteType(ITextColorWriter output, ITypeDefOrRef? type, bool includeNamespace, ParamDef? pd = null);
+		/// <param name="customAttributeProvider"><see cref="IHasCustomAttribute"/> or null</param>
+		void WriteType(ITextColorWriter output, ITypeDefOrRef? type, bool includeNamespace, IHasCustomAttribute? customAttributeProvider = null);
 
 		/// <summary>
 		/// Decompiles a method

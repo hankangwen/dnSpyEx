@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation;
 using dnSpy.Debugger.DotNet.Interpreter;
 using dnSpy.Debugger.DotNet.Metadata;
@@ -52,7 +53,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter.Hooks {
 				var addr = arrayValue.GetRawAddressValue(onlyDataAddress: true);
 				if (addr is null)
 					break;
-				if (!TryGetSize(field.FieldType, out int fieldTypeSize))
+				if (!field.FieldType.TryGetSize(out int fieldTypeSize))
 					break;
 				if (addr.Value.Length != (uint)fieldTypeSize)
 					break;
@@ -67,19 +68,6 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter.Hooks {
 			}
 
 			return null;
-		}
-
-		static bool TryGetSize(DmdType type, out int size) {
-			if (type.IsValueType) {
-				var attr = type.StructLayoutAttribute;
-				if (attr is not null && attr.Size >= 0) {
-					size = attr.Size;
-					return true;
-				}
-			}
-
-			size = -1;
-			return false;
 		}
 	}
 }

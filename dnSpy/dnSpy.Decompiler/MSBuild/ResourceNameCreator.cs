@@ -205,7 +205,7 @@ namespace dnSpy.Decompiler.MSBuild {
 			var sb = new StringBuilder(resourceName.Length);
 			for (int i = 0; i < parts.Length - 1; i++) {
 				if (sb.Length > 0)
-					sb.Append(".");
+					sb.Append('.');
 				sb.Append(parts[i]);
 				var ns = sb.ToString();
 				lowerCaseNsToReal.TryGetValue(ns, out var realNs);

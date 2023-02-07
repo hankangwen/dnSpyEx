@@ -20,10 +20,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using dnSpy.Contracts.Utilities;
 
-namespace dnSpy.Search {
-	static class FrameworkFileUtils {
+namespace dnSpy.Contracts.Utilities {
+	/// <summary>
+	/// Helper functions for working with framework assembly files
+	/// </summary>
+	public static class FrameworkFileUtils {
 		static readonly string[] frameworkAssemblyNamePrefixes = new string[] {
 			"Unity.",
 			"UnityEngine.",
@@ -454,10 +456,15 @@ namespace dnSpy.Search {
 			"Mono.Security",
 			"System.EnterpriseServices",
 		};
-
+		/// <summary>
+		/// Guesses if an assembly is likely a standard framework assembly or external assembly.  Uses some whitelisting and GAC checks.
+		/// </summary>
+		/// <param name="filename">Full path to the assembly file in question</param>
+		/// <param name="assemblySimpleName">Optional unversioned simple assembly name to check against whitelist, ie: Microsoft.AspNetCore.Authorization</param>
+		/// <returns></returns>
 		public static bool IsFrameworkAssembly(string filename, string? assemblySimpleName) {
 			// Check if it's in one of the .NET runtime dirs
-			if (Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filename))) is string baseDir && Directory.Exists(Path.Combine(baseDir, "Microsoft.NETCore.App")))
+			if (!string2.IsNullOrWhiteSpace(filename) && Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filename))) is string baseDir && Directory.Exists(Path.Combine(baseDir, "Microsoft.NETCore.App")))
 				return true;
 
 			if (assemblySimpleName is not null) {
@@ -470,7 +477,7 @@ namespace dnSpy.Search {
 			}
 
 			// .NET Framework
-			if (GacInfo.IsGacPath(filename))
+			if (!string2.IsNullOrWhiteSpace(filename) && GacInfo.IsGacPath(filename))
 				return true;
 
 			return false;

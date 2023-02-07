@@ -119,7 +119,7 @@ namespace dnSpy.Debugger.DbgUI {
 				string? message = null;
 				if (isCompatible is null)
 					message = dnSpy_Debugger_Resources.StartDebuggingWarning_UnknownBitness;
-				else if (!isCompatible.Value) 
+				else if (!isCompatible.Value)
 					message = dnSpy_Debugger_Resources.StartDebuggingWarning_IncorrectBitness;
 
 				if (message is not null) {
@@ -138,7 +138,7 @@ namespace dnSpy.Debugger.DbgUI {
 			try {
 				using (var peImage = new PEImage(fileName, false)) {
 					var machine = peImage.ImageNTHeaders.FileHeader.Machine;
-					if (machine.IsAMD64())
+					if (machine.Is64Bit())
 						bitness = 64;
 					else if (machine.IsI386()) {
 						var dotNetDir = peImage.ImageNTHeaders.OptionalHeader.DataDirectories[14];
@@ -147,17 +147,24 @@ namespace dnSpy.Debugger.DbgUI {
 							var cor20HeaderReader = peImage.CreateReader(dotNetDir.VirtualAddress, 0x48);
 							var cor20Header = new ImageCor20Header(ref cor20HeaderReader, false);
 
-							var bit32Required = (cor20Header.Flags & ComImageFlags.Bit32Required) != 0;
-							var bit32Preferred = (cor20Header.Flags & ComImageFlags.Bit32Preferred) != 0;
-							var ilOnly = (cor20Header.Flags & ComImageFlags.ILOnly) != 0;
+							var version = (uint)(cor20Header.MajorRuntimeVersion << 16) | cor20Header.MinorRuntimeVersion;
 
-							if (bit32Required)
+							// If the runtime version is < 2.5, then it's always loaded as a 32-bit process.
+							if (version < 0x00020005)
 								bitness = 32;
-							else if (!bit32Preferred) {
-								if (ilOnly)
-									bitness = Environment.Is64BitOperatingSystem ? 64 : 32;
-								else
+							else {
+								var bit32Required = (cor20Header.Flags & ComImageFlags.Bit32Required) != 0;
+								var bit32Preferred = (cor20Header.Flags & ComImageFlags.Bit32Preferred) != 0;
+								var ilOnly = (cor20Header.Flags & ComImageFlags.ILOnly) != 0;
+
+								if (bit32Required)
 									bitness = 32;
+								else if (!bit32Preferred) {
+									if (ilOnly)
+										bitness = Environment.Is64BitOperatingSystem ? 64 : 32;
+									else
+										bitness = 32;
+								}
 							}
 						}
 						else
