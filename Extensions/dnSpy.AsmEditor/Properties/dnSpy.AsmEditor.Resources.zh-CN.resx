@@ -449,7 +449,7 @@
     <value>类别</value>
   </data>
   <data name="GP_Kind_ToolTip" xml:space="preserve">
-    <value>只有当元数据的头版本为 1.1 (0x0101) 时才被使用，但它永远不可能是 1.1 所以忽略</value>
+    <value>只有当元数据的头版本为 1.1 (0x0101) 时才会被使用，但它永远不可能是 1.1 所以忽略</value>
   </data>
   <data name="GP_Name" xml:space="preserve">
     <value>名称(_N)</value>
@@ -917,7 +917,7 @@
     <value>未知</value>
   </data>
   <data name="UnknownBytesMsg" xml:space="preserve">
-    <value>由于方法已被编辑，因此某些复制的字节是未知的。只有在将文件保存到磁盘并重新打开时才能知悉新的标记和字符串偏移。</value>
+    <value>由于方法已被编辑，因此某些复制的字节是未知的。只有在将文件保存到磁盘并重新打开时才能知道新的标记和字符串偏移。</value>
   </data>
   <data name="UnknownEnum" xml:space="preserve">
     <value>未知枚举</value>
@@ -2104,7 +2104,7 @@
     <value>主版本号(_a)</value>
   </data>
   <data name="SaveModule_TablesHeap_MinorVersion" xml:space="preserve">
-    <value>预留1(_e)</value>
+    <value>次版本号(_i)</value>
   </data>
   <data name="SaveModule_TablesHeap_Reserved1" xml:space="preserve">
     <value>预留1(_e)</value>
@@ -2179,10 +2179,10 @@
     <value>编辑方法代码</value>
   </data>
   <data name="ERR_IM_AddingRemovingStaticFromEditedMethodNotSupported" xml:space="preserve">
-    <value>不支持在被编辑的方法上添加或移除 “静态 (static)” 或 “已共享 (Shared)”: {0}</value>
+    <value>不支持在被编辑的方法上添加或移除 "静态 (static)" 或 "已共享 (Shared)": {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindEditedMethod" xml:space="preserve">
-    <value>找不到被编辑的方法。请确保您没有添加或移除 “静态 (static)” 或 “已共享 (Shared)”，或更改参数类型、返回类型或方法名称: {0}</value>
+    <value>找不到被编辑的方法。请确保您没有添加或移除 "静态 (static)" 或 "已共享 (Shared)"，或更改参数类型、返回类型或方法名称: {0}</value>
   </data>
   <data name="ERR_IM_CouldNotFindField" xml:space="preserve">
     <value>找不到字段: {0}</value>

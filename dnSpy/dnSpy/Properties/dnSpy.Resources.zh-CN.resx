@@ -448,7 +448,7 @@
     <value>文件</value>
   </data>
   <data name="OpenList_MissingName" xml:space="preserve">
-    <value>缺失名称</value>
+    <value>缺少名称</value>
   </data>
   <data name="OpenList_Name_Column" xml:space="preserve">
     <value>名称</value>
@@ -760,7 +760,7 @@
     <value>目标文件夹中已存在具有相同名称的文件。</value>
   </data>
   <data name="Error_MissingDestinationFolder" xml:space="preserve">
-    <value>目标文件夹不能为空!</value>
+    <value>目标文件夹不能为空！</value>
   </data>
   <data name="ExportToProject_Button_Export" xml:space="preserve">
     <value>导出(_E)</value>

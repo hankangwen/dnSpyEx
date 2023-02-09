@@ -130,7 +130,7 @@
     <value>反编译顺序</value>
   </data>
   <data name="DecompilerSettings_DecompileAnonMethods" xml:space="preserve">
-    <value>反编译匿名方法和 lambda 方法</value>
+    <value>反编译 Lambda 表达式和匿名函数</value>
   </data>
   <data name="DecompilerSettings_DecompileAsyncMethods" xml:space="preserve">
     <value>反编译异步方法 (async/await)</value>
@@ -169,7 +169,7 @@
     <value>将命名空间名添加到具有相同名称的类型</value>
   </data>
   <data name="DecompilerSettings_HexadecimalNumbers" xml:space="preserve">
-    <value>始终显示十六进制数字</value>
+    <value>以十六进制显示数字</value>
   </data>
   <data name="DecompilerSettings_IntroduceIncrementAndDecrement" xml:space="preserve">
     <value>使用增量和减量运算符</value>
@@ -184,7 +184,7 @@
     <value>最大字符串长度</value>
   </data>
   <data name="DecompilerSettings_MemberAddPrivateModifier" xml:space="preserve">
-    <value>为类成员添加 private 关键字</value>
+    <value>为类型成员添加 private 关键字</value>
   </data>
   <data name="DecompilerSettings_ObjectOrCollectionInitializers" xml:space="preserve">
     <value>反编译对象或集合的初始值设定项</value>
@@ -196,7 +196,7 @@
     <value>移除空的默认构造函数</value>
   </data>
   <data name="DecompilerSettings_RemoveNewDelegateClass" xml:space="preserve">
-    <value>将 “new delegate-class(xxx)” 替换为 “xxx”</value>
+    <value>将 "new delegate-class(xxx)" 替换为 "xxx"</value>
   </data>
   <data name="DecompilerSettings_ShowCompilerGeneratedTypes" xml:space="preserve">
     <value>显示编译器生成的隐藏类型和方法</value>
@@ -211,7 +211,7 @@
     <value>显示行号和文件名 (如果可用)</value>
   </data>
   <data name="DecompilerSettings_ShowTokensRvasOffsets" xml:space="preserve">
-    <value>显示标记，相对虚拟地址和文件偏移</value>
+    <value>显示元数据标记、相对虚拟地址和文件偏移</value>
   </data>
   <data name="DecompilerSettings_ShowXMLDocComments" xml:space="preserve">
     <value>在反编译的代码中显示 XML 文档</value>
@@ -220,13 +220,13 @@
     <value>排序自定义特性</value>
   </data>
   <data name="DecompilerSettings_SortMethods" xml:space="preserve">
-    <value>排序方法、 字段、 属性、 事件和类型</value>
+    <value>排序方法、字段、属性、事件和类型</value>
   </data>
   <data name="DecompilerSettings_SortSystemFirst" xml:space="preserve">
     <value>对 using 排序时将 "System" 指令排在首位</value>
   </data>
   <data name="DecompilerSettings_TypeAddInternalModifier" xml:space="preserve">
-    <value>为类添加 internal 关键字</value>
+    <value>为类型添加 internal 关键字</value>
   </data>
   <data name="DecompilerSettings_UseLocalNameFromSyms" xml:space="preserve">
     <value>如果可用，使用由调试符号所声明的变量名称</value>

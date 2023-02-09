@@ -133,7 +133,7 @@
     <value>调试中</value>
   </data>
   <data name="AskDeleteAllBreakpoints" xml:space="preserve">
-    <value>是否要删除所有的断点？</value>
+    <value>是否删除所有的断点？</value>
   </data>
   <data name="AttachToProcessCommand" xml:space="preserve">
     <value>附加到进程(_P)...</value>
@@ -330,7 +330,7 @@
     <value>除非调试器停止，否则无法求值</value>
   </data>
   <data name="Error_CantEvalWhenUnhandledExceptionHasOccurred" xml:space="preserve">
-    <value>当未捕的捉异常发生时无法求值</value>
+    <value>当触发未捕获的异常时无法求值</value>
   </data>
   <data name="Error_StartWithoutDebuggingCouldNotStart" xml:space="preserve">
     <value>无法启动 '{0}' 
@@ -1073,7 +1073,7 @@
     <value>全部</value>
   </data>
   <data name="Modules_NoMatch" xml:space="preserve">
-    <value>未找到符合搜索条件的模块</value>
+    <value>未找到符合搜索条件的模块。</value>
   </data>
   <data name="Modules_Search" xml:space="preserve">
     <value>搜索</value>
