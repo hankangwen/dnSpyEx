@@ -208,6 +208,6 @@
     <value>被使用</value>
   </data>
   <data name="UsesTreeNode" xml:space="preserve">
-    <value>使用于</value>
+    <value>使用</value>
   </data>
 </root>
