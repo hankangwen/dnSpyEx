@@ -31,16 +31,16 @@ using dnSpy.BamlDecompiler.Xaml;
 using dnSpy.Contracts.Decompiler;
 
 namespace dnSpy.BamlDecompiler {
-	internal class XamlContext {
+	sealed class XamlContext {
 		XamlContext(ModuleDef module) {
 			Module = module;
 			NodeMap = new Dictionary<BamlRecord, BamlBlockNode>();
 			XmlNs = new XmlnsDictionary();
 		}
 
-		Dictionary<ushort, XamlType> typeMap = new Dictionary<ushort, XamlType>();
-		Dictionary<ushort, XamlProperty> propertyMap = new Dictionary<ushort, XamlProperty>();
-		Dictionary<string, XNamespace> xmlnsMap = new Dictionary<string, XNamespace>();
+		readonly Dictionary<ushort, XamlType> typeMap = new Dictionary<ushort, XamlType>();
+		readonly Dictionary<ushort, XamlProperty> propertyMap = new Dictionary<ushort, XamlProperty>();
+		readonly Dictionary<string, XNamespace> xmlnsMap = new Dictionary<string, XNamespace>();
 
 		public ModuleDef Module { get; }
 		public CancellationToken CancellationToken { get; private set; }
@@ -82,8 +82,7 @@ namespace dnSpy.BamlDecompiler {
 
 		void BuildPIMappings(BamlDocument document) {
 			foreach (var record in document) {
-				var piMap = record as PIMappingRecord;
-				if (piMap is null)
+				if (record is not PIMappingRecord piMap)
 					continue;
 
 				XmlNs.SetPIMapping(piMap.XmlNamespace, piMap.ClrNamespace, Baml.ResolveAssembly(piMap.AssemblyId));

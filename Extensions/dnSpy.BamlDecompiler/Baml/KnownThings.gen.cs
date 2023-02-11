@@ -67,7 +67,7 @@ namespace Test {
 					assemblies.Add(GetDeclAssembly(member.Item3));
 			}
 
-			code.AppendLine("\tinternal enum KnownTypes : short {");
+			code.AppendLine("\tenum KnownTypes : short {");
 			code.AppendLine("\t\tUnknown = 0,");
 			for (int i = 1; i < types.Count; i++) {
 				if (types[i] is null) {
@@ -79,7 +79,7 @@ namespace Test {
 			}
 			code.AppendLine("\t}").AppendLine();
 
-			code.AppendLine("\tinternal enum KnownMembers : short {");
+			code.AppendLine("\tenum KnownMembers : short {");
 			code.AppendLine("\t\tUnknown = 0,");
 			for (int i = 1; i < members.Count; i++) {
 				if (members[i] is null) {

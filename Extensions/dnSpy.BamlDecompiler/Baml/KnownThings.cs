@@ -26,7 +26,7 @@ using System.Threading;
 using dnlib.DotNet;
 
 namespace dnSpy.BamlDecompiler.Baml {
-	internal partial class KnownThings {
+	sealed partial class KnownThings {
 		readonly ModuleDef module;
 
 		readonly Dictionary<int, KnownAssembly> assemblies;
@@ -61,7 +61,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 		KnownAssembly InitAssembly(string asmFullName) => new KnownAssembly(asmFullName, module);
 	}
 
-	class KnownAssembly {
+	sealed class KnownAssembly {
 		AssemblyDef resolved;
 		readonly ModuleDef sourceModule;
 
@@ -97,7 +97,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public static implicit operator AssemblyDef(KnownAssembly knownAssembly) => knownAssembly.AssemblyDef;
 	}
 
-	class KnownType {
+	sealed class KnownType {
 		TypeDef resolved;
 		readonly ModuleDef sourceModule;
 
@@ -130,7 +130,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public static implicit operator TypeDef(KnownType knownType) => knownType.TypeDef;
 	}
 
-	class KnownMember {
+	sealed class KnownMember {
 		PropertyDef resolvedProperty;
 
 		public KnownMember(KnownTypes parent, KnownType declType, string name, KnownType type) {

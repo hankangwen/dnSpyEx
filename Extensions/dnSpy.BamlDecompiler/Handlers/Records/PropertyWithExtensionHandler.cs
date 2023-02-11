@@ -25,7 +25,7 @@ using dnSpy.BamlDecompiler.Baml;
 using dnSpy.BamlDecompiler.Xaml;
 
 namespace dnSpy.BamlDecompiler.Handlers {
-	internal class PropertyWithExtensionHandler : IHandler {
+	sealed class PropertyWithExtensionHandler : IHandler {
 		public BamlRecordType Type => BamlRecordType.PropertyWithExtension;
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
@@ -43,7 +43,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			if (valTypeExt || extTypeId == (short)KnownTypes.TypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
 
-				object[] initializer = new object[] { ctx.ToString(parent.Xaml, value) };
+				object[] initializer = { ctx.ToString(parent.Xaml, value) };
 				if (valTypeExt)
 					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfd4d)) { Initializer = initializer } }; // Known type - TypeExtension
 
@@ -91,7 +91,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					attrName = ctx.ToString(parent.Xaml, xName);
 				}
 
-				object[] initializer = new object[] { attrName };
+				object[] initializer = { attrName };
 				if (valStaticExt)
 					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfda6)) { Initializer = initializer } }; // Known type - StaticExtension
 

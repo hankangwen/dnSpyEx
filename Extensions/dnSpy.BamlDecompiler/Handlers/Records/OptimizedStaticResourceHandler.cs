@@ -25,7 +25,7 @@ using dnSpy.BamlDecompiler.Baml;
 using dnSpy.BamlDecompiler.Xaml;
 
 namespace dnSpy.BamlDecompiler.Handlers {
-	internal class OptimizedStaticResourceHandler : IHandler, IDeferHandler {
+	sealed class OptimizedStaticResourceHandler : IHandler, IDeferHandler {
 		public BamlRecordType Type => BamlRecordType.OptimizedStaticResource;
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {

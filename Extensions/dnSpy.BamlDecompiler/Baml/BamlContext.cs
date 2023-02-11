@@ -25,11 +25,11 @@ using System.Threading;
 using dnlib.DotNet;
 
 namespace dnSpy.BamlDecompiler.Baml {
-	internal class BamlContext {
+	sealed class BamlContext {
 		public ModuleDef Module { get; }
 		public KnownThings KnownThings { get; }
 
-		Dictionary<ushort, IAssembly> assemblyMap = new Dictionary<ushort, IAssembly>();
+		readonly Dictionary<ushort, IAssembly> assemblyMap = new Dictionary<ushort, IAssembly>();
 
 		public Dictionary<ushort, AssemblyInfoRecord> AssemblyIdMap { get; }
 		public Dictionary<ushort, AttributeInfoRecord> AttributeIdMap { get; }
@@ -84,11 +84,8 @@ namespace dnSpy.BamlDecompiler.Baml {
 					else
 						assembly = Module.Context.AssemblyResolver.Resolve(assemblyName, Module);
 
-					if (assembly is null)
-						assembly = assemblyName;
+					assembly ??= assemblyName;
 				}
-				else
-					assembly = null;
 
 				assemblyMap[id] = assembly;
 			}

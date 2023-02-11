@@ -31,12 +31,12 @@ using dnSpy.Contracts.Text;
 using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.BamlDecompiler {
-	internal class BamlDisassembler {
+	sealed class BamlDisassembler {
 		#region Record handler map
 
 		static Action<BamlContext, BamlRecord> Thunk<TRecord>(Action<BamlContext, TRecord> handler) where TRecord : BamlRecord => (ctx, record) => handler(ctx, (TRecord)record);
 
-		Dictionary<BamlRecordType, Action<BamlContext, BamlRecord>> handlerMap =
+		readonly Dictionary<BamlRecordType, Action<BamlContext, BamlRecord>> handlerMap =
 			new Dictionary<BamlRecordType, Action<BamlContext, BamlRecord>>();
 
 		void InitRecordHandlers() {
@@ -84,8 +84,8 @@ namespace dnSpy.BamlDecompiler {
 
 		#endregion
 
-		IDecompilerOutput output;
-		CancellationToken token;
+		readonly IDecompilerOutput output;
+		readonly CancellationToken token;
 
 		public BamlDisassembler(IDecompilerOutput output, CancellationToken token) {
 			this.output = output;
@@ -232,7 +232,7 @@ namespace dnSpy.BamlDecompiler {
 
 		static string GetRecordReference(BamlRecord record) => $"Position: 0x{record.Position:x}";
 
-		Stack<BamlRecord> scopeStack = new Stack<BamlRecord>();
+		readonly Stack<BamlRecord> scopeStack = new Stack<BamlRecord>();
 
 		void DisassembleRecord(BamlContext ctx, BamlRecord record) {
 			if (BamlNode.IsFooter(record)) {

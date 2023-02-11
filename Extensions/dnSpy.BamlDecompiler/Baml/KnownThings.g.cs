@@ -24,7 +24,7 @@ using System;
 using dnlib.DotNet;
 
 namespace dnSpy.BamlDecompiler.Baml {
-	internal partial class KnownThings {
+	sealed partial class KnownThings {
 		// Auto generated. Do not modify.
 
 		void InitAssemblies() {

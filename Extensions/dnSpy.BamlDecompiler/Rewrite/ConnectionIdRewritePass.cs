@@ -33,7 +33,7 @@ using ICSharpCode.Decompiler;
 using ICSharpCode.Decompiler.ILAst;
 
 namespace dnSpy.BamlDecompiler.Rewrite {
-	internal class ConnectionIdRewritePass : IRewritePass {
+	sealed class ConnectionIdRewritePass : IRewritePass {
 		static bool Impl(MethodDef method, MethodDef ifaceMethod) {
 			if (method.HasOverrides) {
 				var comparer = new SigComparer(SigComparerOptions.CompareDeclaringTypes | SigComparerOptions.PrivateScopeIsComparable);
