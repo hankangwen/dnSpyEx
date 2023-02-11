@@ -30,9 +30,9 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
 			var record = (PropertyWithExtensionRecord)((BamlRecordNode)node).Record;
-			var extTypeId = ((short)record.Flags & 0xfff);
-			bool valTypeExt = ((short)record.Flags & 0x4000) == 0x4000;
-			bool valStaticExt = ((short)record.Flags & 0x2000) == 0x2000;
+			var extTypeId = record.ExtensionTypeId;
+			bool valTypeExt = record.IsValueTypeExtension;
+			bool valStaticExt = record.IsValueStaticExtension;
 
 			var elemType = parent.Xaml.Element.Annotation<XamlType>();
 			var xamlProp = ctx.ResolveProperty(record.AttributeId);

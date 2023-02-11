@@ -40,7 +40,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var record = (OptimizedStaticResourceRecord)((BamlRecordNode)node).Record;
 			var bamlElem = new BamlElement(node);
 			object key;
-			if (record.IsType) {
+			if (record.IsValueTypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
 
 				var typeElem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
@@ -48,7 +48,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), ctx.ToString(parent.Xaml, value)));
 				key = typeElem;
 			}
-			else if (record.IsStatic) {
+			else if (record.IsValueStaticExtension) {
 				string attrName;
 				if (record.ValueId > 0x7fff) {
 					bool isKey = true;

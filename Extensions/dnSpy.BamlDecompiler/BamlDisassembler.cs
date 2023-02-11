@@ -327,7 +327,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteAttributeId(ctx, record.AttributeId);
 
 			WriteText(", SerializerTypeId=");
-			WriteTypeId(ctx, record.SerializerTypeId);
+			WriteTypeId(ctx, record.RawSerializerTypeId);
 
 			WriteText(", Data=");
 			for (int i = 0; i < record.Data.Length; i++)
@@ -382,7 +382,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteTypeId(ctx, record.OwnerTypeId);
 
 			WriteText(", AttributeUsage=");
-			WriteHexNumber(record.AttributeUsage);
+			WriteHexNumber((byte)record.AttributeUsage);
 
 			string declType;
 			if (record.OwnerTypeId > 0x7fff)
@@ -460,7 +460,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteTypeId(ctx, record.TypeId);
 
 			WriteText(", Flags=");
-			WriteHexNumber(record.Flags);
+			WriteHexNumber((byte)record.Flags);
 		}
 
 		void DisassembleRecord(BamlContext ctx, ConnectionIdRecord record) {
@@ -544,9 +544,9 @@ namespace dnSpy.BamlDecompiler {
 			WriteHexNumber(record.Flags);
 
 			WriteText(", ValueId=");
-			if (record.IsType)
+			if (record.IsValueTypeExtension)
 				WriteTypeId(ctx, record.ValueId);
-			else if (record.IsStatic)
+			else if (record.IsValueStaticExtension)
 				WriteAttributeId(ctx, record.ValueId);
 			else
 				WriteStringId(ctx, record.ValueId);

@@ -152,8 +152,8 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
 			var record = (PropertyCustomRecord)((BamlRecordNode)node).Record;
-			var serTypeId = ((short)record.SerializerTypeId & 0xfff);
-			bool valueType = ((short)record.SerializerTypeId & 0x4000) == 0x4000;
+			var serTypeId = record.SerializerTypeId;
+			bool valueType = record.IsValueTypeId;
 
 			var elemType = parent.Xaml.Element.Annotation<XamlType>();
 			var xamlProp = ctx.ResolveProperty(record.AttributeId);

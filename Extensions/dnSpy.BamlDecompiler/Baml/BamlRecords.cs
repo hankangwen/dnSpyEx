@@ -249,20 +249,37 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public override BamlRecordType Type => BamlRecordType.PropertyCustom;
 
 		public ushort AttributeId { get; set; }
-		public ushort SerializerTypeId { get; set; }
+		public ushort RawSerializerTypeId { get; set; }
 		public byte[] Data { get; set; }
+
+		public short SerializerTypeId {
+			get => (short)(RawSerializerTypeId & 0xFFF);
+			set => RawSerializerTypeId = (ushort)(RawSerializerTypeId & 0xF000 | (ushort)value & 0xFFF);
+		}
+
+		public bool IsValueTypeId {
+			get => (RawSerializerTypeId & 0x4000) == 0x4000;
+			set => ModifyRawSerializerTypeId(value, 0x4000);
+		}
 
 		protected override void ReadData(BamlBinaryReader reader, int size) {
 			long pos = reader.BaseStream.Position;
 			AttributeId = reader.ReadUInt16();
-			SerializerTypeId = reader.ReadUInt16();
+			RawSerializerTypeId = reader.ReadUInt16();
 			Data = reader.ReadBytes(size - (int)(reader.BaseStream.Position - pos));
 		}
 
 		protected override void WriteData(BamlBinaryWriter writer) {
 			writer.Write(AttributeId);
-			writer.Write(SerializerTypeId);
+			writer.Write(RawSerializerTypeId);
 			writer.Write(Data);
+		}
+
+		void ModifyRawSerializerTypeId(bool set, ushort flags) {
+			if (set)
+				RawSerializerTypeId |= flags;
+			else
+				RawSerializerTypeId &= (ushort)~flags;
 		}
 	}
 
@@ -413,25 +430,32 @@ namespace dnSpy.BamlDecompiler.Baml {
 		}
 	}
 
+	enum BamlAttributeUsage : byte {
+		Default,
+		XmlLang,
+		XmlSpace,
+		RuntimeName,
+	}
+
 	sealed class AttributeInfoRecord : SizedBamlRecord {
 		public override BamlRecordType Type => BamlRecordType.AttributeInfo;
 
 		public ushort AttributeId { get; set; }
 		public ushort OwnerTypeId { get; set; }
-		public byte AttributeUsage { get; set; }
+		public BamlAttributeUsage AttributeUsage { get; set; }
 		public string Name { get; set; }
 
 		protected override void ReadData(BamlBinaryReader reader, int size) {
 			AttributeId = reader.ReadUInt16();
 			OwnerTypeId = reader.ReadUInt16();
-			AttributeUsage = reader.ReadByte();
+			AttributeUsage = (BamlAttributeUsage)reader.ReadByte();
 			Name = reader.ReadString();
 		}
 
 		protected override void WriteData(BamlBinaryWriter writer) {
 			writer.Write(AttributeId);
 			writer.Write(OwnerTypeId);
-			writer.Write(AttributeUsage);
+			writer.Write((byte)AttributeUsage);
 			writer.Write(Name);
 		}
 	}
@@ -557,20 +581,43 @@ namespace dnSpy.BamlDecompiler.Baml {
 		}
 	}
 
+	[Flags]
+	enum ElementStartRecordFlags : byte {
+		CreateUsingTypeConverter = 0x1,
+		IsInjected = 0x2,
+	}
+
 	class ElementStartRecord : BamlRecord {
 		public override BamlRecordType Type => BamlRecordType.ElementStart;
 
 		public ushort TypeId { get; set; }
-		public byte Flags { get; set; }
+		public ElementStartRecordFlags Flags { get; set; }
+
+		public bool CreateUsingTypeConverter {
+			get => (Flags & ElementStartRecordFlags.CreateUsingTypeConverter) != 0;
+			set => ModifyFlags(value, ElementStartRecordFlags.CreateUsingTypeConverter);
+		}
+
+		public bool IsInjected {
+			get => (Flags & ElementStartRecordFlags.IsInjected) != 0;
+			set => ModifyFlags(value, ElementStartRecordFlags.IsInjected);
+		}
 
 		public override void Read(BamlBinaryReader reader) {
 			TypeId = reader.ReadUInt16();
-			Flags = reader.ReadByte();
+			Flags = (ElementStartRecordFlags)reader.ReadByte();
 		}
 
 		public override void Write(BamlBinaryWriter writer) {
 			writer.Write(TypeId);
-			writer.Write(Flags);
+			writer.Write((byte)Flags);
+		}
+
+		void ModifyFlags(bool set, ElementStartRecordFlags flag) {
+			if (set)
+				Flags |= flag;
+			else
+				Flags &= ~flag;
 		}
 	}
 
@@ -615,6 +662,21 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public ushort Flags { get; set; }
 		public ushort ValueId { get; set; }
 
+		public short ExtensionTypeId {
+			get => (short)(Flags & 0xFFF);
+			set => Flags = (ushort)(Flags & 0xF000 | (ushort)value & 0xFFF);
+		}
+
+		public bool IsValueStaticExtension {
+			get => (Flags & 0x2000) == 0x2000;
+			set => ModifyFlags(value, 0x2000);
+		}
+
+		public bool IsValueTypeExtension {
+			get => (Flags & 0x4000) == 0x4000;
+			set => ModifyFlags(value, 0x4000);
+		}
+
 		public override void Read(BamlBinaryReader reader) {
 			AttributeId = reader.ReadUInt16();
 			Flags = reader.ReadUInt16();
@@ -625,6 +687,13 @@ namespace dnSpy.BamlDecompiler.Baml {
 			writer.Write(AttributeId);
 			writer.Write(Flags);
 			writer.Write(ValueId);
+		}
+
+		void ModifyFlags(bool set, ushort flags) {
+			if (set)
+				Flags |= flags;
+			else
+				Flags &= (ushort)~flags;
 		}
 	}
 
@@ -926,9 +995,15 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public byte Flags { get; set; }
 		public ushort ValueId { get; set; }
 
-		public bool IsType => (Flags & 1) != 0;
+		public bool IsValueTypeExtension {
+			get => (Flags & 0x1) != 0;
+			set => ModifyFlags(value, 0x1);
+		}
 
-		public bool IsStatic => (Flags & 2) != 0;
+		public bool IsValueStaticExtension {
+			get => (Flags & 0x2) != 0;
+			set => ModifyFlags(value, 0x2);
+		}
 
 		public override void Read(BamlBinaryReader reader) {
 			Flags = reader.ReadByte();
@@ -938,6 +1013,13 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public override void Write(BamlBinaryWriter writer) {
 			writer.Write(Flags);
 			writer.Write(ValueId);
+		}
+
+		void ModifyFlags(bool set, byte flags) {
+			if (set)
+				Flags |= flags;
+			else
+				Flags &= (byte)~flags;
 		}
 	}
 
