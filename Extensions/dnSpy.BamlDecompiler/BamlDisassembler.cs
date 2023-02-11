@@ -130,8 +130,8 @@ namespace dnSpy.BamlDecompiler {
 			string reference;
 			if (id == 0xffff)
 				reference = ctx.KnownThings.FrameworkAssembly.FullName;
-			else if (ctx.AssemblyIdMap.ContainsKey(id))
-				reference = ctx.AssemblyIdMap[id].AssemblyFullName;
+			else if (ctx.AssemblyIdMap.TryGetValue(id, out var assemblyRecord))
+				reference = assemblyRecord.AssemblyFullName;
 			else
 				reference = null;
 			output.Write($"0x{id:x4}", BamlToolTipReference.Create(reference), DecompilerReferenceFlags.Local, BoxedTextColor.Number);
@@ -141,8 +141,8 @@ namespace dnSpy.BamlDecompiler {
 			string reference;
 			if (id > 0x7fff)
 				reference = ctx.KnownThings.Types((KnownTypes)(-id)).FullName;
-			else if (ctx.TypeIdMap.ContainsKey(id))
-				reference = ctx.TypeIdMap[id].TypeFullName;
+			else if (ctx.TypeIdMap.TryGetValue(id, out var typeRecord))
+				reference = typeRecord.TypeFullName;
 			else
 				reference = null;
 
@@ -160,12 +160,11 @@ namespace dnSpy.BamlDecompiler {
 				declType = knownMember.DeclaringType.FullName;
 				name = knownMember.Name;
 			}
-			else if (ctx.AttributeIdMap.ContainsKey(id)) {
-				var attrInfo = ctx.AttributeIdMap[id];
+			else if (ctx.AttributeIdMap.TryGetValue(id, out var attrInfo)) {
 				if (attrInfo.OwnerTypeId > 0x7fff)
 					declType = ctx.KnownThings.Types((KnownTypes)(-attrInfo.OwnerTypeId)).FullName;
-				else if (ctx.TypeIdMap.ContainsKey(attrInfo.OwnerTypeId))
-					declType = ctx.TypeIdMap[attrInfo.OwnerTypeId].TypeFullName;
+				else if (ctx.TypeIdMap.TryGetValue(attrInfo.OwnerTypeId, out var typeInfo))
+					declType = typeInfo.TypeFullName;
 				else
 					declType = $"(0x{attrInfo.OwnerTypeId:x4})";
 				name = attrInfo.Name;
@@ -183,8 +182,8 @@ namespace dnSpy.BamlDecompiler {
 			string str;
 			if (id > 0x7fff)
 				str = ctx.KnownThings.Strings((short)-id);
-			else if (ctx.StringIdMap.ContainsKey(id))
-				str = ctx.StringIdMap[id].Value;
+			else if (ctx.StringIdMap.TryGetValue(id, out var stringInfo))
+				str = stringInfo.Value;
 			else
 				str = null;
 			string reference = null;
@@ -237,7 +236,7 @@ namespace dnSpy.BamlDecompiler {
 
 		void DisassembleRecord(BamlContext ctx, BamlRecord record) {
 			if (BamlNode.IsFooter(record)) {
-				while (scopeStack.Count > 0 && !BamlNode.IsMatch(scopeStack.Peek(), record)) {
+				while (scopeStack.Count > 0 && !BamlNode.IsMatchHeaderAndFooter(scopeStack.Peek(), record)) {
 					scopeStack.Pop();
 					output.DecreaseIndent();
 				}
@@ -388,8 +387,8 @@ namespace dnSpy.BamlDecompiler {
 			string declType;
 			if (record.OwnerTypeId > 0x7fff)
 				declType = ctx.KnownThings.Types((KnownTypes)(-record.OwnerTypeId)).FullName;
-			else if (ctx.TypeIdMap.ContainsKey(record.OwnerTypeId))
-				declType = ctx.TypeIdMap[record.OwnerTypeId].TypeFullName;
+			else if (ctx.TypeIdMap.TryGetValue(record.OwnerTypeId, out var ownerType))
+				declType = ownerType.TypeFullName;
 			else
 				declType = $"(0x{record.OwnerTypeId:x4})";
 			var def = $"{IdentifierEscaper.Escape(declType)}::{IdentifierEscaper.Escape(record.Name)}";

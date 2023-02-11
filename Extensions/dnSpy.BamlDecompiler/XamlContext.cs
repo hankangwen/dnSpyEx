@@ -158,9 +158,8 @@ namespace dnSpy.BamlDecompiler {
 		public string ResolveString(ushort id) {
 			if (id > 0x7fff)
 				return Baml.KnownThings.Strings(unchecked((short)-id));
-			else if (Baml.StringIdMap.ContainsKey(id))
-				return Baml.StringIdMap[id].Value;
-
+			if (Baml.StringIdMap.TryGetValue(id, out var stringInfo))
+				return stringInfo.Value;
 			return null;
 		}
 
