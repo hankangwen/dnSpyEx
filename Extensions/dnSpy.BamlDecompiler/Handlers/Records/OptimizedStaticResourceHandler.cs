@@ -67,9 +67,9 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					var res = ctx.Baml.KnownThings.Resources(bamlId);
 					string name;
 					if (isKey)
-						name = res.Item1 + "." + res.Item2;
+						name = res.TypeName + "." + res.KeyName;
 					else
-						name = res.Item1 + "." + res.Item3;
+						name = res.TypeName + "." + res.PropertyName;
 					var xmlns = ctx.GetXmlNamespace(XamlContext.KnownNamespace_Presentation);
 					attrName = ctx.ToString(parent.Xaml, xmlns.GetName(name));
 				}

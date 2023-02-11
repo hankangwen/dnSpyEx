@@ -33,7 +33,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 		readonly Dictionary<KnownMembers, KnownMember> members;
 		readonly Dictionary<KnownTypes, KnownType> types;
 		readonly Dictionary<int, string> strings;
-		readonly Dictionary<int, Tuple<string, string, string>> resources;
+		readonly Dictionary<int, (string TypeName, string KeyName, string PropertyName)> resources;
 
 		public KnownThings(ModuleDef module) {
 			this.module = module;
@@ -42,7 +42,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 			types = new Dictionary<KnownTypes, KnownType>();
 			members = new Dictionary<KnownMembers, KnownMember>();
 			strings = new Dictionary<int, string>();
-			resources = new Dictionary<int, Tuple<string, string, string>>();
+			resources = new Dictionary<int, (string, string, string)>();
 
 			InitAssemblies();
 			InitTypes();
@@ -54,7 +54,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public Func<KnownTypes, KnownType> Types => id => types[id];
 		public Func<KnownMembers, KnownMember> Members => id => members[id];
 		public Func<short, string> Strings => id => strings[id];
-		public Func<short, Tuple<string, string, string>> Resources => id => resources[id];
+		public Func<short, (string TypeName, string KeyName, string PropertyName)> Resources => id => resources[id];
 		public KnownAssembly FrameworkAssembly => assemblies[0];
 		KnownType InitType(KnownAssembly assembly, string ns, string name) => new KnownType(assembly, ns, name, module);
 		KnownMember InitMember(KnownTypes parent, string name, KnownType type) => new KnownMember(parent, types[parent], name, type);

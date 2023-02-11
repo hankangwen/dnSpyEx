@@ -149,7 +149,7 @@ namespace Test {
 					continue;
 				}
 				var res = resources[i];
-				var line = "\t\t\tresources[{0}] = Tuple.Create(\"{1}\", \"{2}\", \"{3}\");";
+				var line = "\t\t\tresources[{0}] = (\"{1}\", \"{2}\", \"{3}\");";
 				code.AppendLine(string.Format(line, i, res.Item1.Name, res.Item2, res.Item3));
 			}
 			code.AppendLine("\t\t}").AppendLine();
