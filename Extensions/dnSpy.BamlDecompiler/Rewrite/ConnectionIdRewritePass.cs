@@ -55,8 +55,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			if (type is null)
 				return;
 
-			var componentConnectorConnect = ctx.Baml.KnownThings.Types(KnownTypes.IComponentConnector).FindMethod("Connect");
-			var styleConnectorConnect = ctx.Baml.KnownThings.Types(KnownTypes.IStyleConnector).FindMethod("Connect");
+			var componentConnectorConnect = ctx.Baml.KnownThings.Types(KnownTypes.IComponentConnector).TypeDef.FindMethod("Connect");
+			var styleConnectorConnect = ctx.Baml.KnownThings.Types(KnownTypes.IStyleConnector).TypeDef.FindMethod("Connect");
 
 			var connIds = new Dictionary<int, Action<XamlContext, XElement>>();
 

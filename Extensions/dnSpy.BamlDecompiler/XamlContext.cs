@@ -106,7 +106,7 @@ namespace dnSpy.BamlDecompiler {
 			IAssembly assembly;
 
 			if (id > 0x7fff) {
-				type = Baml.KnownThings.Types((KnownTypes)(-id));
+				type = Baml.KnownThings.Types((KnownTypes)(-id)).TypeDef;
 				assembly = type.DefinitionAssembly;
 			}
 			else {
