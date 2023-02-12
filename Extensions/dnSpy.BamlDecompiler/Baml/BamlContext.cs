@@ -74,6 +74,10 @@ namespace dnSpy.BamlDecompiler.Baml {
 		}
 
 		public IAssembly ResolveAssembly(ushort id) {
+			// Special case for PresentationFramework, see System.Windows.Markup.BamlMapTable
+			if (id == 0xffff)
+				return KnownThings.PresentationFrameworkAssembly.AssemblyDef;
+
 			id &= 0xfff;
 			if (!assemblyMap.TryGetValue(id, out var assembly)) {
 				if (AssemblyIdMap.TryGetValue(id, out var assemblyRec)) {

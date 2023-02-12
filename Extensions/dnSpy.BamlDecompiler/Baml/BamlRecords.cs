@@ -538,7 +538,6 @@ namespace dnSpy.BamlDecompiler.Baml {
 
 		public string Value { get; set; }
 		public ushort AttributeId { get; set; }
-		public uint Reserved1 { get; set; }
 
 		protected override void ReadData(BamlBinaryReader reader, int size) {
 			AttributeId = reader.ReadUInt16();

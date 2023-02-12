@@ -129,7 +129,7 @@ namespace dnSpy.BamlDecompiler {
 		void WriteAssemblyId(BamlContext ctx, ushort id) {
 			string reference;
 			if (id == 0xffff)
-				reference = ctx.KnownThings.FrameworkAssembly.FullName;
+				reference = ctx.KnownThings.PresentationFrameworkAssembly.FullName;
 			else if (ctx.AssemblyIdMap.TryGetValue(id, out var assemblyRecord))
 				reference = assemblyRecord.AssemblyFullName;
 			else
@@ -439,9 +439,6 @@ namespace dnSpy.BamlDecompiler {
 
 			WriteText(", AttributeId=");
 			WriteAttributeId(ctx, record.AttributeId);
-
-			WriteText(", Reserved1=");
-			WriteHexNumber(record.Reserved1);
 		}
 
 		void DisassembleRecord(BamlContext ctx, DocumentStartRecord record) {

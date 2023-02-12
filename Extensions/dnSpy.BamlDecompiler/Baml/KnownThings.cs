@@ -55,7 +55,7 @@ namespace dnSpy.BamlDecompiler.Baml {
 		public Func<KnownMembers, KnownMember> Members => id => members[id];
 		public Func<short, string> Strings => id => strings[id];
 		public Func<short, (string TypeName, string KeyName, string PropertyName)> Resources => id => resources[id];
-		public KnownAssembly FrameworkAssembly => assemblies[0];
+		public KnownAssembly PresentationFrameworkAssembly => assemblies[4];
 		KnownType InitType(KnownAssembly assembly, string ns, string name) => new KnownType(assembly, ns, name, module);
 		KnownMember InitMember(KnownTypes parent, string name, KnownType type) => new KnownMember(parent, types[parent], name, type);
 		KnownAssembly InitAssembly(string asmFullName) => new KnownAssembly(asmFullName, module);
