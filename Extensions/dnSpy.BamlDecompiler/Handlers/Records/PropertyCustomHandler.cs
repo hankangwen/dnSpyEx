@@ -41,11 +41,11 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			I4
 		}
 
-		string Deserialize(XamlContext ctx, XElement elem, KnownTypes ser, byte[] value) {
+		string Deserialize(XamlContext ctx, XElement elem, KnownTypes ser, bool isValueTypeId, byte[] value) {
 			using (BinaryReader reader = new BinaryReader(new MemoryStream(value))) {
 				switch (ser) {
 					case KnownTypes.DependencyPropertyConverter: {
-						if (value.Length == 2) {
+						if (value.Length == 2 || !isValueTypeId) {
 							var property = ctx.ResolveProperty(reader.ReadUInt16());
 							return ctx.ToString(elem, property.ToXName(ctx, elem, NeedsFullName(property, elem)));
 						}
@@ -158,7 +158,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var elemType = parent.Xaml.Element.Annotation<XamlType>();
 			var xamlProp = ctx.ResolveProperty(record.AttributeId);
 
-			string value = Deserialize(ctx, parent.Xaml, (KnownTypes)serTypeId, record.Data);
+			string value = Deserialize(ctx, parent.Xaml, (KnownTypes)serTypeId, valueType, record.Data);
 			var attr = new XAttribute(xamlProp.ToXName(ctx, parent.Xaml, xamlProp.IsAttachedTo(elemType)), value);
 			parent.Xaml.Element.Add(attr);
 
