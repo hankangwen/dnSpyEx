@@ -107,9 +107,6 @@ namespace dnSpy.BamlDecompiler.Baml {
 
 		public string Name { get; }
 
-		// Fast path which skips type resolution used by BamlDisassembler
-		public string FullName => $"{Namespace}.{Name}";
-
 		public TypeDef TypeDef {
 			get {
 				if (resolved is null)
