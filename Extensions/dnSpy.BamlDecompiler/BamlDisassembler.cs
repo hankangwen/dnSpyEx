@@ -121,6 +121,13 @@ namespace dnSpy.BamlDecompiler {
 			output.AddBracePair(new TextSpan(start, 1), new TextSpan(end - 1, 1), CodeBracesRangeFlags.DoubleQuotes);
 		}
 
+		void WriteIdentifierNameString(string value) {
+			int start = output.NextPosition;
+			output.Write($"\"{IdentifierEscaper.Escape(value)}\"", BoxedTextColor.String);
+			int end = output.NextPosition;
+			output.AddBracePair(new TextSpan(start, 1), new TextSpan(end - 1, 1), CodeBracesRangeFlags.DoubleQuotes);
+		}
+
 		const DecompilerReferenceFlags toolTipReferenceFlags = DecompilerReferenceFlags.Local | DecompilerReferenceFlags.Hidden | DecompilerReferenceFlags.NoFollow;
 
 		void WriteHexNumber(byte num) => output.Write($"0x{num:x2}", num, toolTipReferenceFlags, BoxedTextColor.Number);
@@ -170,8 +177,16 @@ namespace dnSpy.BamlDecompiler {
 				// HACK: In order to avoid type resolution, we split the type from the namespace by finding the last occurrence of a dot.
 				// Names used in WPF should be valid for reflection so this should work.
 				int lastDot = typeRecord.TypeFullName.LastIndexOf('.');
-				string ns = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(0, lastDot));
-				string name = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(lastDot + 1));
+				string ns;
+				string name;
+				if (lastDot < 0) {
+					ns = string.Empty;
+					name = IdentifierEscaper.Escape(typeRecord.TypeFullName);
+				}
+				else {
+					ns = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(0, lastDot));
+					name = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(lastDot + 1));
+				}
 				return typeReferences[id] = BamlTypeReference.Create(ns, name);
 			}
 			return typeReferences[id] = null;
@@ -200,9 +215,17 @@ namespace dnSpy.BamlDecompiler {
 					// HACK: In order to avoid type resolution, we split the type from the namespace by finding the last occurrence of a dot.
 					// Names used in WPF should be valid for reflection so this should work.
 					int lastDot = typeRecord.TypeFullName.LastIndexOf('.');
-					string ns = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(0, lastDot));
-					string typeName = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(lastDot + 1));
-					return attributeReferences[id] = BamlAttributeReference.Create(ns, typeName, attrInfo.Name);
+					string ns;
+					string typeName;
+					if (lastDot < 0) {
+						ns = string.Empty;
+						typeName = IdentifierEscaper.Escape(typeRecord.TypeFullName);
+					}
+					else {
+						ns = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(0, lastDot));
+						typeName = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(lastDot + 1));
+					}
+					return attributeReferences[id] = BamlAttributeReference.Create(ns, typeName, IdentifierEscaper.Escape(attrInfo.Name));
 				}
 			}
 			return attributeReferences[id] = null;
@@ -500,7 +523,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteComma(spaceAfterComma: true);
 			WriteRecordField("TypeFullName");
 			WriteOperator("=");
-			WriteString(IdentifierEscaper.Escape(record.TypeFullName));
+			WriteIdentifierNameString(record.TypeFullName);
 		}
 
 		void DisassembleRecord(BamlContext ctx, TypeSerializerInfoRecord record) {
@@ -546,7 +569,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteComma(spaceAfterComma: true);
 			WriteRecordField("Name");
 			WriteOperator("=");
-			WriteString(IdentifierEscaper.Escape(record.Name));
+			WriteIdentifierNameString(record.Name);
 		}
 
 		void DisassembleRecord(BamlContext ctx, StringInfoRecord record) {
@@ -557,13 +580,13 @@ namespace dnSpy.BamlDecompiler {
 			WriteComma(spaceAfterComma: true);
 			WriteRecordField("Value");
 			WriteOperator("=");
-			WriteString(IdentifierEscaper.Escape(record.Value));
+			WriteString(record.Value);
 		}
 
 		void DisassembleRecord(BamlContext ctx, TextRecord record) {
 			WriteRecordField("Value");
 			WriteOperator("=");
-			WriteString(IdentifierEscaper.Escape(record.Value));
+			WriteString(record.Value);
 		}
 
 		void DisassembleRecord(BamlContext ctx, TextWithConverterRecord record) {
@@ -810,7 +833,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteComma(spaceAfterComma: true);
 			WriteRecordField("RuntimeName");
 			WriteOperator("=");
-			WriteString(IdentifierEscaper.Escape(record.RuntimeName));
+			WriteString(record.RuntimeName);
 		}
 
 		#endregion

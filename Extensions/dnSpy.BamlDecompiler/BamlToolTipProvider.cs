@@ -161,7 +161,7 @@ namespace dnSpy.BamlDecompiler {
 		}
 
 		public static object Create(string ns, string name) {
-			if (string.IsNullOrEmpty(ns) || string.IsNullOrEmpty(name))
+			if (ns is null || string.IsNullOrEmpty(name))
 				return null;
 			return new BamlTypeReference(ns, name);
 		}
@@ -181,7 +181,7 @@ namespace dnSpy.BamlDecompiler {
 		}
 
 		public static object Create(string ns, string typeName, string memberName) {
-			if (string.IsNullOrEmpty(ns) || string.IsNullOrEmpty(typeName) || string.IsNullOrEmpty(memberName))
+			if (ns is null || string.IsNullOrEmpty(typeName) || string.IsNullOrEmpty(memberName))
 				return null;
 			return new BamlAttributeReference(ns, typeName, memberName);
 		}
