@@ -4715,7 +4715,7 @@ namespace dnSpy.Debugger.DotNet.Interpreter.Impl {
 			}
 			if (type == type.AppDomain.System_IntPtr || type == type.AppDomain.System_UIntPtr)
 				return debuggerRuntime.PointerSize;
-			if (type == type.AppDomain.GetWellKnownType(DmdWellKnownType.System_TypedReference))
+			if (type == type.AppDomain.System_TypedReference)
 				return debuggerRuntime.PointerSize * 2;
 
 			return debuggerRuntime.GetSizeOfValueType(type);

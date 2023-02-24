@@ -603,6 +603,16 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		}
 
 		public override bool CallStaticIndirect(DmdMethodSignature methodSig, ILValue methodAddress, ILValue[] arguments, out ILValue? returnValue) {
+			if (methodAddress is FunctionPointerILValue fnPtrValue) {
+				var targetMethod = fnPtrValue.Method;
+
+				if (!targetMethod.IsStatic || fnPtrValue.IsVirtual && !fnPtrValue.VirtualThisObject!.IsNull) {
+					returnValue = null;
+					return false;
+				}
+
+				return CallStatic(targetMethod, arguments, out returnValue);
+			}
 			returnValue = null;
 			return false;//TODO:
 		}
