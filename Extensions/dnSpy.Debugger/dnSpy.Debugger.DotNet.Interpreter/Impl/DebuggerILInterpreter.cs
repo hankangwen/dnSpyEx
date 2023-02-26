@@ -93,6 +93,18 @@ namespace dnSpy.Debugger.DotNet.Interpreter.Impl {
 			return res;
 		}
 
+		void EnsureStackCapacity(int maxStack) {
+			if (ilValueStack.Count >= maxStack)
+				return;
+			// Use the same growth algorithm as List<T>
+			int newCapacity = ilValueStack.Capacity == 0 ? 4 : 2 * ilValueStack.Capacity;
+			if ((uint)newCapacity > 0X7FFFFFC7)
+				newCapacity = 0X7FFFFFC7;
+			if (newCapacity < maxStack)
+				newCapacity = maxStack;
+			ilValueStack.Capacity = newCapacity;
+		}
+
 		ILValue Convert(ILValue value, DmdType targetType, bool boxIfNeeded = true) {
 			// We want to return the same ILValue, if possible, since it can contain extra information,
 			// such as address of value that the caller (debugger) would like to keep.
@@ -229,6 +241,7 @@ namespace dnSpy.Debugger.DotNet.Interpreter.Impl {
 			debuggerRuntime.Initialize(currentMethod, body);
 			var bodyBytes = state.ILBytes;
 			Debug2.Assert(bodyBytes is not null);
+			EnsureStackCapacity(body.MaxStackSize);
 			var exceptionHandlingClauses = body.ExceptionHandlingClauses;
 			int methodBodyPos = 0;
 			DmdType? constrainedType = null;
