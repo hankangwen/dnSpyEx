@@ -606,6 +606,11 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			if (methodAddress is FunctionPointerILValue fnPtrValue) {
 				var targetMethod = fnPtrValue.Method;
 
+				if (!methodSig.Equals(fnPtrValue.Method.GetMethodSignature())) {
+					returnValue = null;
+					return false;
+				}
+
 				if (!targetMethod.IsStatic || fnPtrValue.IsVirtual && !fnPtrValue.VirtualThisObject!.IsNull) {
 					returnValue = null;
 					return false;
