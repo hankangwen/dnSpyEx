@@ -94,7 +94,7 @@ namespace dnSpy.Debugger.DotNet.Interpreter.Impl {
 		}
 
 		void EnsureStackCapacity(int maxStack) {
-			if (ilValueStack.Count >= maxStack)
+			if (ilValueStack.Capacity >= maxStack)
 				return;
 			// Use the same growth algorithm as List<T>
 			int newCapacity = ilValueStack.Capacity == 0 ? 4 : 2 * ilValueStack.Capacity;
