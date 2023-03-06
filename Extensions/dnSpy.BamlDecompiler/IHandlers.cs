@@ -42,7 +42,7 @@ namespace dnSpy.BamlDecompiler {
 					break;
 			}
 #endif
-			return handlers.ContainsKey(type) ? handlers[type] : null;
+			return handlers.TryGetValue(type, out var handler) ? handler : null;
 		}
 
 		public static void ProcessChildren(XamlContext ctx, BamlBlockNode node, BamlElement nodeElem) {
