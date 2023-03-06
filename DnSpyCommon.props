@@ -40,7 +40,7 @@
     <IcedVersion>1.18.0</IcedVersion>
     <MSBuildNuGetVersion>17.1.0</MSBuildNuGetVersion>
     <MSDiagRuntimeVersion>1.1.142101</MSDiagRuntimeVersion>
-    <MSVSCompositionVersion>17.2.41</MSVSCompositionVersion>
+    <MSVSCompositionVersion>17.4.16</MSVSCompositionVersion>
     <MSVSIntellisenseVersion>15.5.27130</MSVSIntellisenseVersion>
     <MSVSTextVersion>15.5.27130</MSVSTextVersion>
     <NewtonsoftJsonVersion>13.0.2</NewtonsoftJsonVersion>
