@@ -89,14 +89,6 @@ namespace dnSpy.BamlDecompiler {
 			}
 		}
 
-		class DummyAssemblyRefFinder : IAssemblyRefFinder {
-			readonly IAssembly assemblyDef;
-
-			public DummyAssemblyRefFinder(IAssembly assemblyDef) => this.assemblyDef = assemblyDef;
-
-			public AssemblyRef FindAssemblyRef(TypeRef nonNestedTypeRef) => assemblyDef.ToAssemblyRef();
-		}
-
 		public XamlType ResolveType(ushort id) {
 			if (typeMap.TryGetValue(id, out var xamlType))
 				return xamlType;

@@ -121,9 +121,9 @@ namespace dnSpy.BamlDecompiler {
 			output.AddBracePair(new TextSpan(start, 1), new TextSpan(end - 1, 1), CodeBracesRangeFlags.DoubleQuotes);
 		}
 
-		void WriteIdentifierNameString(string value) {
+		void WriteIdentifierNameString(string value, bool allowSpaces = false) {
 			int start = output.NextPosition;
-			output.Write($"\"{IdentifierEscaper.Escape(value)}\"", BoxedTextColor.String);
+			output.Write($"\"{IdentifierEscaper.Escape(value, allowSpaces)}\"", BoxedTextColor.String);
 			int end = output.NextPosition;
 			output.AddBracePair(new TextSpan(start, 1), new TextSpan(end - 1, 1), CodeBracesRangeFlags.DoubleQuotes);
 		}
@@ -170,24 +170,12 @@ namespace dnSpy.BamlDecompiler {
 			if (typeReferences.TryGetValue(id, out var reference))
 				return reference;
 			if (id > 0x7fff) {
-				var knownType = ctx.KnownThings.Types((KnownTypes)(-id));
-				return typeReferences[id] = BamlTypeReference.Create(knownType.Namespace, knownType.Name);
+				return typeReferences[id] = BamlTypeReference.Create(ctx.KnownThings.Types((KnownTypes)(-id)).TypeDef);
 			}
 			if (ctx.TypeIdMap.TryGetValue(id, out var typeRecord)) {
-				// HACK: In order to avoid type resolution, we split the type from the namespace by finding the last occurrence of a dot.
-				// Names used in WPF should be valid for reflection so this should work.
-				int lastDot = typeRecord.TypeFullName.LastIndexOf('.');
-				string ns;
-				string name;
-				if (lastDot < 0) {
-					ns = string.Empty;
-					name = IdentifierEscaper.Escape(typeRecord.TypeFullName);
-				}
-				else {
-					ns = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(0, lastDot));
-					name = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(lastDot + 1));
-				}
-				return typeReferences[id] = BamlTypeReference.Create(ns, name);
+				var type = TypeNameParser.ParseReflection(ctx.Module, typeRecord.TypeFullName, new DummyAssemblyRefFinder(ctx.ResolveAssembly(typeRecord.AssemblyId)));
+				if (type is not null)
+					return typeReferences[id] = BamlTypeReference.Create(type);
 			}
 			return typeReferences[id] = null;
 		}
@@ -203,29 +191,16 @@ namespace dnSpy.BamlDecompiler {
 
 			if (id > 0x7fff) {
 				var knownMember = ctx.KnownThings.Members((KnownMembers)(-id));
-				var knownType = knownMember.DeclaringType;
-				return attributeReferences[id] = BamlAttributeReference.Create(knownType.Namespace, knownType.Name, knownMember.Name);
+				return attributeReferences[id] = BamlAttributeReference.Create(knownMember.DeclaringType.TypeDef, knownMember.Name);
 			}
 			if (ctx.AttributeIdMap.TryGetValue(id, out var attrInfo)) {
 				if (attrInfo.OwnerTypeId > 0x7fff) {
-					var knownType = ctx.KnownThings.Types((KnownTypes)(-attrInfo.OwnerTypeId));
-					return attributeReferences[id] = BamlAttributeReference.Create(knownType.Namespace, knownType.Name, attrInfo.Name);
+					return attributeReferences[id] = BamlAttributeReference.Create(ctx.KnownThings.Types((KnownTypes)(-attrInfo.OwnerTypeId)).TypeDef, attrInfo.Name);
 				}
 				if (ctx.TypeIdMap.TryGetValue(attrInfo.OwnerTypeId, out var typeRecord)) {
-					// HACK: In order to avoid type resolution, we split the type from the namespace by finding the last occurrence of a dot.
-					// Names used in WPF should be valid for reflection so this should work.
-					int lastDot = typeRecord.TypeFullName.LastIndexOf('.');
-					string ns;
-					string typeName;
-					if (lastDot < 0) {
-						ns = string.Empty;
-						typeName = IdentifierEscaper.Escape(typeRecord.TypeFullName);
-					}
-					else {
-						ns = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(0, lastDot));
-						typeName = IdentifierEscaper.Escape(typeRecord.TypeFullName.Substring(lastDot + 1));
-					}
-					return attributeReferences[id] = BamlAttributeReference.Create(ns, typeName, IdentifierEscaper.Escape(attrInfo.Name));
+					var type = TypeNameParser.ParseReflection(ctx.Module, typeRecord.TypeFullName, new DummyAssemblyRefFinder(ctx.ResolveAssembly(typeRecord.AssemblyId)));
+					if (type is not null)
+						return attributeReferences[id] = BamlAttributeReference.Create(type, attrInfo.Name);
 				}
 			}
 			return attributeReferences[id] = null;
@@ -523,7 +498,7 @@ namespace dnSpy.BamlDecompiler {
 			WriteComma(spaceAfterComma: true);
 			WriteRecordField("TypeFullName");
 			WriteOperator("=");
-			WriteIdentifierNameString(record.TypeFullName);
+			WriteIdentifierNameString(record.TypeFullName, true);
 		}
 
 		void DisassembleRecord(BamlContext ctx, TypeSerializerInfoRecord record) {

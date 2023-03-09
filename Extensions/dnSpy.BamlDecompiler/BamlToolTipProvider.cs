@@ -19,6 +19,7 @@
 
 using dnlib.DotNet;
 using dnSpy.BamlDecompiler.Baml;
+using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents.Tabs.DocViewer.ToolTips;
 using dnSpy.Contracts.Images;
 using dnSpy.Contracts.Text;
@@ -61,30 +62,19 @@ namespace dnSpy.BamlDecompiler {
 			}
 			if (@ref is BamlTypeReference typeRef) {
 				var provider = context.Create();
-				provider.Image = DsImages.ClassPublic;
-				if (!string.IsNullOrEmpty(typeRef.Namespace)) {
-					var nsParts = typeRef.Namespace.Split('.');
-					for (var i = 0; i < nsParts.Length; i++) {
-						provider.Output.Write(BoxedTextColor.Namespace, nsParts[i]);
-						provider.Output.Write(BoxedTextColor.Punctuation, ".");
-					}
-				}
-				provider.Output.Write(BoxedTextColor.Type, typeRef.Name);
+				if (typeRef.Type is TypeRef tr)
+					provider.SetImage((ITypeDefOrRef)tr.Resolve() ?? tr);
+				else
+					provider.SetImage(typeRef.Type);
+				context.Decompiler.WriteType(provider.Output, typeRef.Type, true);
 				return provider.Create();
 			}
 			if (@ref is BamlAttributeReference attrRef) {
 				var provider = context.Create();
 				provider.Image = DsImages.Property;
-				if (!string.IsNullOrEmpty(attrRef.Namespace)) {
-					var nsParts = attrRef.Namespace.Split('.');
-					for (var i = 0; i < nsParts.Length; i++) {
-						provider.Output.Write(BoxedTextColor.Namespace, nsParts[i]);
-						provider.Output.Write(BoxedTextColor.Punctuation, ".");
-					}
-				}
-				provider.Output.Write(BoxedTextColor.Type, attrRef.TypeName);
+				context.Decompiler.WriteType(provider.Output, attrRef.Type, true);
 				provider.Output.Write(BoxedTextColor.Punctuation, ".");
-				provider.Output.Write(BoxedTextColor.InstanceProperty, attrRef.MemberName);
+				provider.Output.Write(BoxedTextColor.InstanceProperty, IdentifierEscaper.Escape(attrRef.MemberName));
 				return provider.Create();
 			}
 
@@ -151,39 +141,31 @@ namespace dnSpy.BamlDecompiler {
 	}
 
 	sealed class BamlTypeReference {
-		public string Namespace { get; }
+		public ITypeDefOrRef Type { get; }
 
-		public string Name { get; }
+		BamlTypeReference(ITypeDefOrRef type) => Type = type;
 
-		BamlTypeReference(string ns, string name) {
-			Namespace = ns;
-			Name = name;
-		}
-
-		public static object Create(string ns, string name) {
-			if (ns is null || string.IsNullOrEmpty(name))
+		public static object Create(ITypeDefOrRef type) {
+			if (type is null)
 				return null;
-			return new BamlTypeReference(ns, name);
+			return new BamlTypeReference(type);
 		}
 	}
 
 	sealed class BamlAttributeReference {
-		public string Namespace { get; }
-
-		public string TypeName { get; }
+		public ITypeDefOrRef Type { get; }
 
 		public string MemberName { get; }
 
-		BamlAttributeReference(string ns, string typeName, string memberName) {
-			Namespace = ns;
-			TypeName = typeName;
+		BamlAttributeReference(ITypeDefOrRef type, string memberName) {
+			Type = type;
 			MemberName = memberName;
 		}
 
-		public static object Create(string ns, string typeName, string memberName) {
-			if (ns is null || string.IsNullOrEmpty(typeName) || string.IsNullOrEmpty(memberName))
+		public static object Create(ITypeDefOrRef type, string memberName) {
+			if (type is null || string.IsNullOrEmpty(memberName))
 				return null;
-			return new BamlAttributeReference(ns, typeName, memberName);
+			return new BamlAttributeReference(type, memberName);
 		}
 	}
 }
