@@ -48,7 +48,7 @@ namespace dndbg.Engine {
 		}
 	}
 
-	struct EvalResult {
+	readonly struct EvalResult {
 		public bool NormalResult => !WasException && !WasCustomNotification && !WasCancelled;
 		public bool WasException { get; }
 		public bool WasCustomNotification { get; }
@@ -187,7 +187,7 @@ namespace dndbg.Engine {
 			}
 		}
 
-		struct ThreadInfos {
+		readonly struct ThreadInfos {
 			readonly CorThread thread;
 			readonly List<ThreadInfo> list;
 			readonly bool suspendOtherThreads;
