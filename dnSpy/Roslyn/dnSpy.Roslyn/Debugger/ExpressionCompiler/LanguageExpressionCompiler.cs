@@ -378,7 +378,10 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 				default:
 					throw new InvalidOperationException();
 				}
-				builder.Add(new Alias(aliasKind, alias.Name, alias.Name, alias.Type, alias.CustomTypeInfoId, alias.CustomTypeInfo));
+				if (alias.CustomTypeInfo is null)
+					builder.Add(new Alias(aliasKind, alias.Name, alias.Name, alias.Type, Guid.Empty, null));
+				else
+					builder.Add(new Alias(aliasKind, alias.Name, alias.Name, alias.Type, alias.CustomTypeInfo.CustomTypeInfoId, alias.CustomTypeInfo.CustomTypeInfo));
 			}
 			return builder.ToImmutableArray();
 		}
