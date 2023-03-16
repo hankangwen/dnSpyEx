@@ -336,7 +336,7 @@ namespace dnSpy.Contracts.Utilities {
 			// Known dirs: Microsoft.NETCore.App.Ref, Microsoft.WindowsDesktop.App.Ref, Microsoft.AspNetCore.App.Ref
 			foreach (var packDirs in GetDirectories(packsDir)) {
 				// Exclude app host packs and .NET Standard packs
-				if (!packDirs.EndsWith(".Ref", StringComparison.Ordinal) && !packDirs.EndsWith(NetStandardRefPackName, StringComparison.Ordinal))
+				if (!packDirs.EndsWith(".Ref", StringComparison.Ordinal) || packDirs.EndsWith(NetStandardRefPackName, StringComparison.Ordinal))
 					continue;
 				foreach (var versionDir in GetDirectories(packDirs)) {
 					var frameWorkPath = CreateFrameworkPath(versionDir, bitness);
