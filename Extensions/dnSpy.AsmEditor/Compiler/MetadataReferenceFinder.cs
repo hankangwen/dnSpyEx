@@ -33,6 +33,7 @@ namespace dnSpy.AsmEditor.Compiler {
 		readonly Dictionary<IAssembly, AssemblyDef> assemblies;
 		readonly HashSet<IAssembly> checkedContractsAssemblies;
 		readonly DotNetPathProvider dotNetPathProvider;
+		readonly TargetFrameworkInfo targetFrameworkInfo;
 
 		public MetadataReferenceFinder(ModuleDef module, CancellationToken cancellationToken) {
 			this.module = module ?? throw new ArgumentNullException(nameof(module));
@@ -40,6 +41,7 @@ namespace dnSpy.AsmEditor.Compiler {
 			assemblies = new Dictionary<IAssembly, AssemblyDef>(new AssemblyNameComparer(AssemblyNameComparerFlags.All & ~AssemblyNameComparerFlags.Version));
 			checkedContractsAssemblies = new HashSet<IAssembly>(AssemblyNameComparer.CompareAll);
 			dotNetPathProvider = new DotNetPathProvider();
+			targetFrameworkInfo = TargetFrameworkInfo.Create(module);
 		}
 
 		public IEnumerable<ModuleDef> Find(IEnumerable<string> extraAssemblyReferences) {
@@ -165,15 +167,11 @@ namespace dnSpy.AsmEditor.Compiler {
 			var resolved = module.Context.AssemblyResolver.Resolve(asmRef, module);
 			if (resolved is null)
 				return null;
+			if (!dotNetPathProvider.HasDotNet || targetFrameworkInfo.IsDotNetFramework)
+				return resolved;
 			if (!IsPublicKeyToken(contractsPublicKeyTokens, asmRef.PublicKeyOrToken?.Token))
 				return resolved;
 
-			if (!dotNetPathProvider.HasDotNet)
-				return resolved;
-
-			var targetFrameworkInfo = TargetFrameworkInfo.Create(module);
-			if (targetFrameworkInfo.IsDotNetFramework)
-				return resolved;
 			if (!Version.TryParse(targetFrameworkInfo.Version, out var ver))
 				return resolved;
 			var moniker = targetFrameworkInfo.GetTargetFrameworkMoniker();
@@ -181,16 +179,12 @@ namespace dnSpy.AsmEditor.Compiler {
 				return resolved;
 
 			string[]? referencePaths;
-			int bitness = module.GetPointerSize(IntPtr.Size) * 8;
 			switch (targetFrameworkInfo.Framework) {
 			case ".NETStandard":
-				referencePaths = dotNetPathProvider.TryGetNetStandardReferencePaths(ver, bitness);
+				referencePaths = dotNetPathProvider.TryGetNetStandardReferencePaths(ver, module.GetPointerSize(IntPtr.Size) * 8);
 				break;
 			case ".NETCoreApp": {
-				var dotNetVersion = dotNetPathProvider.TryGetDotNetVersion(resolved.ManifestModule.Location);
-				if (dotNetVersion is null)
-					return resolved;
-				referencePaths = dotNetPathProvider.TryGetReferenceDotNetPaths(dotNetVersion, bitness);
+				referencePaths = dotNetPathProvider.TryGetReferenceDotNetPaths(ver, module.GetPointerSize(IntPtr.Size) * 8);
 				break;
 			}
 			default:
