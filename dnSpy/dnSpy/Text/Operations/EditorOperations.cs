@@ -1632,11 +1632,21 @@ namespace dnSpy.Text.Operations {
 		}
 
 		public void SelectEnclosing() {
-			return;//TODO:
+			SnapshotSpan oldSelection;
+			if (Selection.IsEmpty || Selection.Mode == TextSelectionMode.Box)
+				oldSelection = new SnapshotSpan(Caret.Position.BufferPosition, 0);
+			else
+				oldSelection = Selection.StreamSelectionSpan.SnapshotSpan;
+			SelectAndMove(TextStructureNavigator.GetSpanOfEnclosing(oldSelection));
 		}
 
 		public void SelectFirstChild() {
-			return;//TODO:
+			SnapshotSpan oldSelection;
+			if (Selection.IsEmpty || Selection.Mode == TextSelectionMode.Box)
+				oldSelection = new SnapshotSpan(Caret.Position.BufferPosition, 0);
+			else
+				oldSelection = Selection.StreamSelectionSpan.SnapshotSpan;
+			SelectAndMove(TextStructureNavigator.GetSpanOfFirstChild(oldSelection));
 		}
 
 		public void SelectLine(ITextViewLine viewLine, bool extendSelection) {
@@ -1669,11 +1679,35 @@ namespace dnSpy.Text.Operations {
 		}
 
 		public void SelectNextSibling(bool extendSelection) {
-			return;//TODO:
+			SnapshotSpan oldSelection;
+			if (Selection.IsEmpty || Selection.Mode == TextSelectionMode.Box)
+				oldSelection = new SnapshotSpan(Caret.Position.BufferPosition, 0);
+			else
+				oldSelection = Selection.StreamSelectionSpan.SnapshotSpan;
+			var newSelection = TextStructureNavigator.GetSpanOfNextSibling(oldSelection);
+			Selection.Clear();
+			if (!newSelection.IsEmpty && extendSelection) {
+				var start = newSelection.Start <= oldSelection.Start ? newSelection.Start : oldSelection.Start;
+				var end = newSelection.End <= oldSelection.End ? oldSelection.End : newSelection.End;
+				newSelection = new SnapshotSpan(start, end);
+			}
+			SelectAndMove(newSelection);
 		}
 
 		public void SelectPreviousSibling(bool extendSelection) {
-			return;//TODO:
+			SnapshotSpan oldSelection;
+			if (Selection.IsEmpty || Selection.Mode == TextSelectionMode.Box)
+				oldSelection = new SnapshotSpan(Caret.Position.BufferPosition, 0);
+			else
+				oldSelection = Selection.StreamSelectionSpan.SnapshotSpan;
+			var newSelection = TextStructureNavigator.GetSpanOfPreviousSibling(oldSelection);
+			Selection.Clear();
+			if (!newSelection.IsEmpty && extendSelection) {
+				var start = newSelection.Start <= oldSelection.Start ? newSelection.Start : oldSelection.Start;
+				var end = newSelection.End <= oldSelection.End ? oldSelection.End : newSelection.End;
+				newSelection = new SnapshotSpan(start, end);
+			}
+			SelectAndMove(newSelection);
 		}
 
 		public void SwapCaretAndAnchor() {
