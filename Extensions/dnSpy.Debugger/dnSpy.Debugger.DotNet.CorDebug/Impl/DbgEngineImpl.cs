@@ -811,8 +811,12 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 					else
 						errMsg = dnSpy_Debugger_DotNet_CorDebug_Resources.Error_CouldNotStartDebuggerRequireAdminPrivLvl;
 				}
-				else
-					errMsg = string.Format(dnSpy_Debugger_DotNet_CorDebug_Resources.Error_CouldNotStartDebuggerCheckAccessToFile, options.Filename ?? "<???>", ex.Message);
+				else {
+					string exMessage = ex.Message;
+					if (cex is not null)
+						exMessage += $" (0x{cex.ErrorCode:X8})";
+					errMsg = string.Format(dnSpy_Debugger_DotNet_CorDebug_Resources.Error_CouldNotStartDebuggerCheckAccessToFile, options.Filename ?? "<???>", exMessage);
+				}
 
 				SendMessage(new DbgMessageConnected(errMsg, GetMessageFlags()));
 				return;
