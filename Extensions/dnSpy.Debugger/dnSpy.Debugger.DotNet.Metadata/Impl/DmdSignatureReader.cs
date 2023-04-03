@@ -318,8 +318,9 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 			case DmdSignatureCallingConvention.ThisCall:
 			case DmdSignatureCallingConvention.FastCall:
 			case DmdSignatureCallingConvention.VarArg:
-			case DmdSignatureCallingConvention.NativeVarArg:
 			case DmdSignatureCallingConvention.Property:
+			case DmdSignatureCallingConvention.Unmanaged:
+			case DmdSignatureCallingConvention.NativeVarArg:
 				break;
 
 			default:
