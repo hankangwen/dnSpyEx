@@ -42,10 +42,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 		const string Keyword_set = "set";
 		const string Keyword_add = "add";
 		const string Keyword_remove = "remove";
-		const string Keyword_out = "out";
-		const string Keyword_ref = "ref";
-		const string Keyword_in = "in";
-		const string Keyword_readonly = "readonly";
+		const string Keyword_arglist = "__arglist";
 		const string GenericsParenOpen = "<";
 		const string GenericsParenClose = ">";
 		const string IndexerParenOpen = "[";
@@ -111,20 +108,16 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 			return res;
 		}
 
-		void FormatReturnType(DmdType type, bool isReadOnly) {
-			if (type.IsByRef && isReadOnly) {
-				type = type.GetElementType()!;
-				OutputWrite(Keyword_ref, DbgTextColor.Keyword);
-				WriteSpace();
-				OutputWrite(Keyword_readonly, DbgTextColor.Keyword);
-				WriteSpace();
-			}
-			FormatType(type);
+		void FormatType(DmdType type, DmdParameterInfo? pd, bool forceReadonly = false) {
+			var typeOptions = GetValueFormatterOptions().ToTypeFormatterOptions(showArrayValueSizes: false);
+			var typeInfoProvider = CustomAttributeAdditionalTypeInfoProvider.Create(pd);
+			new CSharpTypeFormatter(output, typeOptions, cultureInfo).Format(type, null, typeInfoProvider, pd, forceReadonly);
 		}
 
-		void FormatType(DmdType type) {
+		void FormatType(DmdType type, IDmdCustomAttributeProvider? customAttributes = null) {
 			var typeOptions = GetValueFormatterOptions().ToTypeFormatterOptions(showArrayValueSizes: false);
-			new CSharpTypeFormatter(output, typeOptions, cultureInfo).Format(type, null);
+			var typeInfoProvider = CustomAttributeAdditionalTypeInfoProvider.Create(customAttributes);
+			new CSharpTypeFormatter(output, typeOptions, cultureInfo).Format(type, null, typeInfoProvider);
 		}
 
 		void WriteToken(DmdMemberInfo member) {
@@ -229,10 +222,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 						WriteSpace();
 					}
 					var parameterType = parameterTypes[i];
-					WriteRefIfByRef(param);
-					if (parameterType.IsByRef)
-						parameterType = parameterType.GetElementType()!;
-					FormatType(parameterType);
+					FormatType(parameterType, param);
 				}
 				if (showParameterNames) {
 					if (needSpace)
@@ -248,27 +238,14 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 					needSpace = FormatValue((uint)(baseIndex + i), needSpace);
 			}
 
-			OutputWrite(closeParen, DbgTextColor.Punctuation);
-		}
+			var signature = method.GetMethodSignature();
+			if ((signature.Flags & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.VarArg) {
+				if (parameters.Count > 0)
+					WriteCommaSpace();
+				OutputWrite(Keyword_arglist, DbgTextColor.Keyword);
+			}
 
-		void WriteRefIfByRef(DmdParameterInfo? param) {
-			if (param is null)
-				return;
-			var type = param.ParameterType;
-			if (!type.IsByRef)
-				return;
-			if (!param.IsIn && param.IsOut) {
-				OutputWrite(Keyword_out, DbgTextColor.Keyword);
-				WriteSpace();
-			}
-			else if (!param.IsIn && !param.IsOut && TypeFormatterUtils.IsReadOnlyParameter(param)) {
-				OutputWrite(Keyword_in, DbgTextColor.Keyword);
-				WriteSpace();
-			}
-			else {
-				OutputWrite(Keyword_ref, DbgTextColor.Keyword);
-				WriteSpace();
-			}
+			OutputWrite(closeParen, DbgTextColor.Punctuation);
 		}
 
 		bool FormatValue(uint index, bool needSpace) {
@@ -278,12 +255,13 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 			try {
 				parameterValue = runtime.GetParameterValue(evalInfo, index);
 				if (parameterValue.IsNormalResult) {
-					if (needSpace) {
+					if (needSpace)
 						WriteSpace();
-						OutputWrite("=", DbgTextColor.Operator);
-						WriteSpace();
-					}
 					needSpace = true;
+
+					WriteSpace();
+					OutputWrite("=", DbgTextColor.Operator);
+					WriteSpace();
 
 					var valueFormatter = new CSharpValueFormatter(output, evalInfo, languageFormatter, valueOptions, cultureInfo);
 					var value = parameterValue.Value;
@@ -402,7 +380,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 		void Format(DmdMethodBase method, DmdPropertyInfo property, AccessorKind accessorKind) {
 			if (ReturnTypes) {
-				FormatReturnType(property.PropertyType, TypeFormatterUtils.IsReadOnlyProperty(property));
+				FormatType(property.PropertyType, method is DmdMethodInfo mi ? mi.ReturnParameter : null, TypeFormatterUtils.IsReadOnlyProperty(property));
 				WriteSpace();
 			}
 			if (DeclaringTypes) {
@@ -454,7 +432,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 			if (!isExplicitOrImplicit) {
 				if (ReturnTypes && !(method is DmdConstructorInfo)) {
-					FormatReturnType(sig.ReturnType, TypeFormatterUtils.IsReadOnlyMethod(method));
+					FormatType(sig.ReturnType, method is DmdMethodInfo mi ? mi.ReturnParameter : null, TypeFormatterUtils.IsReadOnlyMethod(method));
 					WriteSpace();
 				}
 			}
@@ -478,7 +456,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 			if (isExplicitOrImplicit) {
 				WriteToken(method);
 				WriteSpace();
-				FormatType(sig.ReturnType);
+				FormatType(sig.ReturnType, method is DmdMethodInfo mi ? mi.ReturnParameter : null, TypeFormatterUtils.IsReadOnlyMethod(method));
 			}
 			else
 				WriteToken(method);
