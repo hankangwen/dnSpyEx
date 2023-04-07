@@ -89,6 +89,11 @@ namespace dnSpy.Contracts.Debugger {
 		public abstract bool AntiCheckRemoteDebuggerPresent { get; set; }
 
 		/// <summary>
+		/// true to patch NtRaiseHardError() so it can't be used to trigger kernel faults.
+		/// </summary>
+		public abstract bool AntiNtRaiseHardError { get; set; }
+
+		/// <summary>
 		/// true to ignore break instructions and <see cref="System.Diagnostics.Debugger.Break"/> method calls
 		/// </summary>
 		public abstract bool IgnoreBreakInstructions { get; set; }

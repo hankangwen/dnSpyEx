@@ -199,6 +199,23 @@ namespace dnSpy.Debugger.Settings {
 		}
 		bool antiCheckRemoteDebuggerPresent = true;
 
+		public override bool AntiNtRaiseHardError {
+			get {
+				lock (lockObj)
+					return antiNtRaiseHardError;
+			}
+			set {
+				bool modified;
+				lock (lockObj) {
+					modified = antiNtRaiseHardError != value;
+					antiNtRaiseHardError = value;
+				}
+				if (modified)
+					OnPropertyChanged(nameof(AntiNtRaiseHardError));
+			}
+		}
+		bool antiNtRaiseHardError;
+
 		public override bool IgnoreBreakInstructions {
 			get {
 				lock (lockObj)
@@ -688,6 +705,7 @@ namespace dnSpy.Debugger.Settings {
 			other.PreventManagedDebuggerDetection = PreventManagedDebuggerDetection;
 			other.AntiIsDebuggerPresent = AntiIsDebuggerPresent;
 			other.AntiCheckRemoteDebuggerPresent = AntiCheckRemoteDebuggerPresent;
+			other.AntiNtRaiseHardError = AntiNtRaiseHardError;
 			other.IgnoreBreakInstructions = IgnoreBreakInstructions;
 			other.BreakAllProcesses = BreakAllProcesses;
 			other.EnableManagedDebuggingAssistants = EnableManagedDebuggingAssistants;
@@ -742,6 +760,7 @@ namespace dnSpy.Debugger.Settings {
 			PreventManagedDebuggerDetection = sect.Attribute<bool?>(nameof(PreventManagedDebuggerDetection)) ?? PreventManagedDebuggerDetection;
 			AntiIsDebuggerPresent = sect.Attribute<bool?>(nameof(AntiIsDebuggerPresent)) ?? AntiIsDebuggerPresent;
 			AntiCheckRemoteDebuggerPresent = sect.Attribute<bool?>(nameof(AntiCheckRemoteDebuggerPresent)) ?? AntiCheckRemoteDebuggerPresent;
+			AntiNtRaiseHardError = sect.Attribute<bool?>(nameof(AntiNtRaiseHardError)) ?? AntiNtRaiseHardError;
 			IgnoreBreakInstructions = sect.Attribute<bool?>(nameof(IgnoreBreakInstructions)) ?? IgnoreBreakInstructions;
 			BreakAllProcesses = sect.Attribute<bool?>(nameof(BreakAllProcesses)) ?? BreakAllProcesses;
 			EnableManagedDebuggingAssistants = sect.Attribute<bool?>(nameof(EnableManagedDebuggingAssistants)) ?? EnableManagedDebuggingAssistants;
@@ -785,6 +804,7 @@ namespace dnSpy.Debugger.Settings {
 			sect.Attribute(nameof(PreventManagedDebuggerDetection), PreventManagedDebuggerDetection);
 			sect.Attribute(nameof(AntiIsDebuggerPresent), AntiIsDebuggerPresent);
 			sect.Attribute(nameof(AntiCheckRemoteDebuggerPresent), AntiCheckRemoteDebuggerPresent);
+			sect.Attribute(nameof(AntiNtRaiseHardError), AntiNtRaiseHardError);
 			sect.Attribute(nameof(IgnoreBreakInstructions), IgnoreBreakInstructions);
 			sect.Attribute(nameof(BreakAllProcesses), BreakAllProcesses);
 			sect.Attribute(nameof(EnableManagedDebuggingAssistants), EnableManagedDebuggingAssistants);

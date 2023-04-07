@@ -77,6 +77,7 @@
                     <CheckBox Grid.Row="0" Grid.Column="0" Margin="0 5 0 0" IsChecked="{Binding Settings.AntiIsDebuggerPresent}" Content="IsDebuggerPresent" />
                     <CheckBox Grid.Row="0" Grid.Column="1" Margin="5 5 0 0" IsChecked="{Binding Settings.AntiCheckRemoteDebuggerPresent}" Content="CheckRemoteDebuggerPresent" />
                     <CheckBox Grid.Row="1" Grid.Column="0" Margin="0 5 0 0" IsChecked="{Binding Settings.PreventManagedDebuggerDetection}" Content="System.Diagnostics.Debugger" />
+                    <CheckBox Grid.Row="1" Grid.Column="1" Margin="5 5 0 0" IsChecked="{Binding Settings.AntiNtRaiseHardError}" Content="NtRaiseHardError" />
                 </Grid>
             </GroupBox>
             <CheckBox Grid.Row="1" Margin="0 5 0 0" IsChecked="{Binding Settings.PropertyEvalAndFunctionCalls}" Content="{x:Static p:dnSpy_Debugger_Resources.DbgSettings_PropertyEvalAndFunctionCalls}" />
