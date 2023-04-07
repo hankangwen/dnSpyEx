@@ -257,7 +257,6 @@ namespace dnSpy.AsmEditor.Compiler {
 						if (rank == 0)
 							return false;
 						num = ReadCompressedUInt32();
-						var sizes = new List<uint>((int)num);
 						for (uint i = 0; i < num; i++)
 							ReadCompressedUInt32();
 						num = ReadCompressedUInt32();
