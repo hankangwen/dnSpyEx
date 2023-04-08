@@ -233,7 +233,7 @@ namespace dndbg.Engine {
 
 				NativeMethods.ResumeThread(hThread);
 
-				const uint WAIT_MS = 5000;
+				uint WAIT_MS = (uint)info.ConnectionTimeout.TotalMilliseconds;
 				for (;;) {
 					uint res = NativeMethods.WaitForSingleObject(startupEvent, WAIT_MS);
 					if (res == 0)

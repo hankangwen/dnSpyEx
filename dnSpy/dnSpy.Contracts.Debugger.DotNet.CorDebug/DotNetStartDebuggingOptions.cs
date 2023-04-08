@@ -43,6 +43,11 @@ namespace dnSpy.Contracts.Debugger.DotNet.CorDebug {
 		public string? HostArguments { get; set; }
 
 		/// <summary>
+		/// Maximum amount of time to wait for CoreCLR initialization
+		/// </summary>
+		public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+		/// <summary>
 		/// Clones this instance
 		/// </summary>
 		/// <returns></returns>
@@ -60,6 +65,7 @@ namespace dnSpy.Contracts.Debugger.DotNet.CorDebug {
 			other.UseHost = UseHost;
 			other.Host = Host;
 			other.HostArguments = HostArguments;
+			other.ConnectionTimeout = ConnectionTimeout;
 			return other;
 		}
 	}
