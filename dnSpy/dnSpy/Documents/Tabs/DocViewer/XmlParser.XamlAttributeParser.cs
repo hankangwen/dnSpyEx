@@ -242,6 +242,10 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 					return new NameToken(first);
 				}
 				var last = GetNextToken();
+				if (last.Kind == TokenKind.CloseCurlyBrace) {
+					Undo(last);
+					return new NameToken(first);
+				}
 				if (last.Kind != TokenKind.Name) {
 					Undo(last);
 					return null;
