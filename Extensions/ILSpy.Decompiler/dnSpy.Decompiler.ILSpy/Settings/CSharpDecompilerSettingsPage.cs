@@ -175,6 +175,7 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			if (g.MemberAddPrivateModifier != d.MemberAddPrivateModifier) flags |= RefreshFlags.CSharp;
 			if (g.HexadecimalNumbers != d.HexadecimalNumbers) flags |= RefreshFlags.CSharp;
 			if (g.EmitCalliAsInvocationExpression != d.EmitCalliAsInvocationExpression) flags |= RefreshFlags.CSharp;
+			if (g.InsertParenthesesForReadability != d.InsertParenthesesForReadability) flags |= RefreshFlags.CSharp | RefreshFlags.VB;
 
 			if ((flags & RefreshFlags.ShowMember) != 0)
 				appRefreshSettings.Add(AppSettingsConstants.REFRESH_LANGUAGE_SHOWMEMBER);

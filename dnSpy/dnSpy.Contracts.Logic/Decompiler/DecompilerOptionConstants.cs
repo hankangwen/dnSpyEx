@@ -223,5 +223,10 @@ namespace dnSpy.Contracts.Decompiler {
 		public static readonly Guid EmitCalliAsInvocationExpression_GUID = new Guid("BB0F4E9E-51F5-4C0B-B769-FB3B01EE4D20");
 		/// <summary />
 		public static readonly string EmitCalliAsInvocationExpression_NAME = "emit-calli-as-invoke";
+
+		/// <summary />
+		public static readonly Guid InsertParenthesesForReadability_GUID = new Guid("F3F0DC5E-CC1E-4515-80D1-165383B33300");
+		/// <summary />
+		public static readonly string InsertParenthesesForReadability_NAME = "insert-parentheses-for-readability";
 	}
 }

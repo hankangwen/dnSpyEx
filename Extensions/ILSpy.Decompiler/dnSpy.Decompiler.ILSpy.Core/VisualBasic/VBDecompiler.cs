@@ -202,7 +202,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.VisualBasic {
 			var settings = GetDecompilerSettings();
 			CSharpDecompiler.AddXmlDocumentation(ref state, settings, astBuilder);
 			var csharpUnit = astBuilder.SyntaxTree;
-			csharpUnit.AcceptVisitor(new ICSharpCode.NRefactory.CSharp.InsertParenthesesVisitor() { InsertParenthesesForReadability = true });
+			csharpUnit.AcceptVisitor(new ICSharpCode.NRefactory.CSharp.InsertParenthesesVisitor() { InsertParenthesesForReadability = settings.InsertParenthesesForReadability });
 			GenericGrammarAmbiguityVisitor.ResolveAmbiguities(csharpUnit);
 			var unit = csharpUnit.AcceptVisitor(new CSharpToVBConverterVisitor(state.AstBuilder.Context.CurrentModule, new ILSpyEnvironmentProvider(state.State.XmlDoc_StringBuilder)), null);
 			var outputFormatter = new VBTextOutputFormatter(output, astBuilder.Context);

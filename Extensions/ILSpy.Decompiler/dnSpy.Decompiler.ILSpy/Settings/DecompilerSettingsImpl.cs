@@ -76,6 +76,7 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			//RemoveNewDelegateClass = sect.Attribute<bool?>(nameof(RemoveNewDelegateClass)) ?? RemoveNewDelegateClass;
 			HexadecimalNumbers = sect.Attribute<bool?>(nameof(HexadecimalNumbers)) ?? HexadecimalNumbers;
 			EmitCalliAsInvocationExpression = sect.Attribute<bool?>(nameof(EmitCalliAsInvocationExpression)) ?? EmitCalliAsInvocationExpression;
+			InsertParenthesesForReadability = sect.Attribute<bool?>(nameof(InsertParenthesesForReadability)) ?? InsertParenthesesForReadability;
 			//TODO: CSharpFormattingOptions
 			disableSave = false;
 		}
@@ -127,6 +128,7 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			//sect.Attribute(nameof(RemoveNewDelegateClass), RemoveNewDelegateClass);
 			sect.Attribute(nameof(HexadecimalNumbers), HexadecimalNumbers);
 			sect.Attribute(nameof(EmitCalliAsInvocationExpression), EmitCalliAsInvocationExpression);
+			sect.Attribute(nameof(InsertParenthesesForReadability), InsertParenthesesForReadability);
 			//TODO: CSharpFormattingOptions
 		}
 	}

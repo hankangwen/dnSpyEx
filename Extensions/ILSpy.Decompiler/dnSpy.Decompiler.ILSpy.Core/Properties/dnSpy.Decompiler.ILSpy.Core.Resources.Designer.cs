@@ -232,6 +232,15 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Insert parentheses for readability.
+        /// </summary>
+        public static string DecompilerSettings_InsertParenthesesForReadability {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_InsertParenthesesForReadability", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use increment and decrement operators.
         /// </summary>
         public static string DecompilerSettings_IntroduceIncrementAndDecrement {
