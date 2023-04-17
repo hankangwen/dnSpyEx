@@ -118,6 +118,7 @@ namespace dnSpy.Contracts.Controls {
 		IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
 			const int WM_DPICHANGED = 0x02E0;
 			const int WM_MOUSEHWHEEL = 0x020E;
+			const int WM_NCHITTEST = 0x0084;
 
 			if (msg == WM_DPICHANGED) {
 				if (WM_DPICHANGED_counter != 0)
@@ -138,15 +139,28 @@ namespace dnSpy.Contracts.Controls {
 
 			if (msg == WM_MOUSEHWHEEL) {
 				short delta = (short)unchecked((uint)(long)wParam >> 16);
-				if (delta == 0) {
+				if (delta == 0)
 					return IntPtr.Zero;
-				}
 
 				var element = Mouse.DirectlyOver;
 				if (element is null)
 					return IntPtr.Zero;
 
 				handled = HandleHoriztonalScroll(element, (short)(delta / 10));
+
+				return IntPtr.Zero;
+			}
+
+			if (msg == WM_NCHITTEST) {
+				if (IntPtr.Size == 8) {
+					// Workaround for a potential OverflowException in WindowChromeWorker._HandleNCHitTest
+					// See: https://developercommunity.visualstudio.com/t/overflow-exception-in-windowchrome/167357
+					long int64 = lParam.ToInt64();
+					if (int64 > int.MaxValue || int64 < int.MinValue) {
+						handled = true;
+						return IntPtr.Zero;
+					}
+				}
 
 				return IntPtr.Zero;
 			}
