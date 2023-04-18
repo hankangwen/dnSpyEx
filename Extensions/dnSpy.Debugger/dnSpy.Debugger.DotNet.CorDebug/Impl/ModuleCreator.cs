@@ -118,14 +118,20 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 						return new DmdLazyMetadataBytesPtr(rawMd.Address, (uint)rawMd.Size, rawMd.IsFileLayout);
 					}
 
-					var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
-					if (comMetadata is null) {
-						closedListenerCollection.Closed += (s, e) => rawMd.Release();
-						return new DmdLazyMetadataBytesPtr(rawMd.Address, (uint)rawMd.Size, rawMd.IsFileLayout);
+					var dmdComMetadata = ExecuteOnCOMThread(engine, () => {
+						var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
+						if (comMetadata is null)
+							return null;
+						return new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
+					});
+
+					if (dmdComMetadata is not null) {
+						rawMd.Release();
+						return dmdComMetadata;
 					}
 
-					rawMd.Release();
-					return new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
+					closedListenerCollection.Closed += (s, e) => rawMd.Release();
+					return new DmdLazyMetadataBytesPtr(rawMd.Address, (uint)rawMd.Size, rawMd.IsFileLayout);
 				}
 				catch {
 					rawMd.Release();
@@ -133,6 +139,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				}
 			};
 		}
+
+		static T ExecuteOnCOMThread<T>(DbgEngineImpl engine, Func<T> func) => engine.CheckCorDebugThread() ? func() : engine.InvokeCorDebugThread(func);
 
 		static bool IsValidNETImage(IntPtr address, uint size, bool isFileLayout) {
 			if (address == IntPtr.Zero || size == 0)
