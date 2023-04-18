@@ -209,7 +209,7 @@ namespace dnSpy.Text.Operations {
 		public bool CutSelection() {
 			if (!UpdateCaretForEdit())
 				return false;
-			var text = wpfTextView.Selection.GetText();
+			var text = wpfTextView.Selection.GetText(Options.GetNewLineCharacter());
 			try {
 				Clipboard.SetText(text);
 			}

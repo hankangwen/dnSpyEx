@@ -22,7 +22,7 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace dnSpy.Text.Editor {
 	static class TextSelectionExtensions {
-		public static string GetText(this ITextSelection textSelection) {
+		public static string GetText(this ITextSelection textSelection, string newLineString) {
 			if (textSelection.Mode == TextSelectionMode.Stream)
 				return textSelection.StreamSelectionSpan.GetText();
 			var sb = new StringBuilder();
@@ -30,11 +30,11 @@ namespace dnSpy.Text.Editor {
 			int i = 0;
 			foreach (var s in textSelection.SelectedSpans) {
 				if (i++ > 0)
-					sb.AppendLine();
+					sb.Append(newLineString);
 				sb.Append(snapshot.GetText(s));
 			}
 			if (i > 1)
-				sb.AppendLine();
+				sb.Append(newLineString);
 			return sb.ToString();
 		}
 	}

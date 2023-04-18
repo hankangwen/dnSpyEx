@@ -64,7 +64,7 @@ namespace dnSpy.Text.Operations {
 		bool MoveInVirtualSpace => Options.IsVirtualSpaceEnabled() || Selection.Mode == TextSelectionMode.Box;
 		public ITrackingSpan? ProvisionalCompositionSpan => null;//TODO:
 		public IEditorOptions Options => TextView.Options;
-		public string SelectedText => TextView.Selection.GetText();
+		public string SelectedText => TextView.Selection.GetText(Options.GetNewLineCharacter());
 		public ITextView TextView { get; }
 		ITextSelection Selection => TextView.Selection;
 		ITextCaret Caret => TextView.Caret;
@@ -312,7 +312,7 @@ namespace dnSpy.Text.Operations {
 					TextBuffer.Delete(lineExtentSpan);
 				return CopyToClipboard(lineText, htmlText, isFullLineData: true, isBoxData: false);
 			}
-			var text = Selection.GetText();
+			var text = SelectedText;
 			bool isBox = Selection.Mode == TextSelectionMode.Box;
 			var spans = Selection.SelectedSpans;
 			htmlText = TryCreateHtmlText(spans);
