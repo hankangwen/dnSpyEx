@@ -178,7 +178,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 					else if (File.Exists(filename))
 						rawMd = engine.RawMetadataService.Create(runtime, true, File.ReadAllBytes(filename));
 					else if (getMetadataBlob is not null)
-						rawMd = engine.RawMetadataService.Create(runtime, true, getMetadataBlob());
+						rawMd = engine.RawMetadataService.Create(runtime, true, ExecuteOnMonoThread(engine, getMetadataBlob));
 					else {
 						//TODO:
 						rawMd = engine.RawMetadataService.Create(runtime, imageLayout == DbgImageLayout.File, Array.Empty<byte>());
@@ -192,6 +192,8 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 				}
 			};
 		}
+
+		static T ExecuteOnMonoThread<T>(DbgEngineImpl engine, Func<T> func) => engine.CheckMonoDebugThread() ? func() : engine.InvokeMonoDebugThread(func);
 
 		bool? CalculateIsOptimized() {
 			return null;//TODO:
