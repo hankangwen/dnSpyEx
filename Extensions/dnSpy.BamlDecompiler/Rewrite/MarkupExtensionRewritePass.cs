@@ -21,6 +21,7 @@
 */
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using dnlib.DotNet;
@@ -159,7 +160,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			var ext = new XamlExtension(type);
 
 			foreach (var attr in ctxElement.Attributes()) {
-				Debug.Assert(!NonInlineAttibute(attr));
+				Debug2.Assert(!NonInlineAttibute(attr));
 				ext.NamedArguments[attr.Name.LocalName] = attr.Value;
 			}
 
