@@ -48,7 +48,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 					sb.Append(':');
 				}
 			}
-			sb.Append(name.LocalName);
+			sb.Append(name.LocalName.Replace("_x002B_", "+"));
 			return sb.ToString();
 		}
 
