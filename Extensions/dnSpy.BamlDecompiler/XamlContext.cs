@@ -91,8 +91,8 @@ namespace dnSpy.BamlDecompiler {
 
 		static string NestedReflectionName(ITypeDefOrRef type, out string clrNs) {
 			var name = type.ReflectionFullName;
-			while (type.DeclaringType is ITypeDefOrRef t2)
-				type = t2;
+			while (type.DeclaringType is ITypeDefOrRef declaringType)
+				type = declaringType;
 			clrNs = type.ReflectionNamespace;
 			name = name.Substring(clrNs.Length + 1);
 			return name;
