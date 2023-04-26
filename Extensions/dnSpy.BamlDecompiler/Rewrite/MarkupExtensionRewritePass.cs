@@ -54,7 +54,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			return doWork;
 		}
 
-		static bool NonInlineAttibute(XAttribute attr) => attr.Name.Namespace == XamlContext.KnownNamespace_Xaml;
+		static bool IsXamlNsAttr(XAttribute attr) => attr.Name.Namespace == XamlContext.KnownNamespace_Xaml;
 
 		bool RewriteElement(XamlContext ctx, XElement parent, XElement elem) {
 			var type = parent.Annotation<XamlType>();
@@ -68,7 +68,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 					return false;
 			}
 
-			if (elem.Elements().Count() != 1 || elem.Attributes().Any(NonInlineAttibute))
+			if (elem.Elements().Count() != 1 || elem.Attributes().Any(IsXamlNsAttr))
 				return false;
 
 			var value = elem.Elements().Single();
@@ -121,7 +121,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			         ctxElement.Name != ctor)
 				return false;
 
-			if (ctxElement.Attributes().Any(NonInlineAttibute))
+			if (ctxElement.Attributes().Any(IsXamlNsAttr))
 				return false;
 
 			foreach (var child in ctxElement.Elements()) {
@@ -160,7 +160,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			var ext = new XamlExtension(type);
 
 			foreach (var attr in ctxElement.Attributes()) {
-				Debug2.Assert(!NonInlineAttibute(attr));
+				Debug2.Assert(!IsXamlNsAttr(attr));
 				ext.NamedArguments[attr.Name.LocalName] = attr.Value;
 			}
 
@@ -182,7 +182,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 				var property = elem.Annotation<XamlProperty>();
 				if (property is null || elem.Nodes().Count() != 1 ||
-				    elem.Attributes().Any(NonInlineAttibute))
+				    elem.Attributes().Any(IsXamlNsAttr))
 					return null;
 
 				var name = property.PropertyName;
