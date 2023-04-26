@@ -424,17 +424,14 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 						var cts = new CancellationTokenSource(connectionTimeout - elapsedTime);
 						var asyncConn = VirtualMachineManager.ConnectAsync(endPoint, null, cts.Token);
 						if (!asyncConn.Wait(connectionTimeout - elapsedTime))
-							throw new CouldNotConnectException(
-								GetCouldNotConnectErrorMessage(connectionAddress, connectionPort, filename));
+							throw new CouldNotConnectException(GetCouldNotConnectErrorMessage(connectionAddress, connectionPort, filename));
 						vm = asyncConn.Result;
 						break;
 					}
 					catch (SocketException sex) when (sex.SocketErrorCode == SocketError.ConnectionRefused) {
 						// Retry it in case it takes a while for mono.exe to initialize or if it hasn't started yet
 					}
-					catch (AggregateException aex) when (aex.InnerExceptions.All(ex => ex is SocketException {
-						                                     SocketErrorCode: SocketError.ConnectionRefused
-					                                     })) {
+					catch (AggregateException aex) when (aex.InnerExceptions.Count == 1 && aex.InnerExceptions[0] is SocketException {SocketErrorCode: SocketError.ConnectionRefused}) {
 						// Retry it in case it takes a while
 					}
 					Thread.Sleep(100);
