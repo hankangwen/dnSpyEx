@@ -431,6 +431,9 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 					catch (SocketException sex) when (sex.SocketErrorCode == SocketError.ConnectionRefused) {
 						// Retry it in case it takes a while for mono.exe to initialize or if it hasn't started yet
 					}
+					catch (AggregateException aex) when (aex.InnerExceptions.Count == 1 && aex.InnerExceptions[0] is SocketException {SocketErrorCode: SocketError.ConnectionRefused}) {
+						// Retry it in case it takes a while
+					}
 					Thread.Sleep(100);
 				}
 
