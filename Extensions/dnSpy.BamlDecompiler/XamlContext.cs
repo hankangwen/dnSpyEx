@@ -89,6 +89,15 @@ namespace dnSpy.BamlDecompiler {
 			}
 		}
 
+		static string NestedReflectionName(ITypeDefOrRef type, out string clrNs) {
+			var name = type.ReflectionFullName;
+			while (type.DeclaringType is ITypeDefOrRef declaringType)
+				type = declaringType;
+			clrNs = type.ReflectionNamespace;
+			name = name.Substring(clrNs.Length + 1);
+			return name;
+		}
+		
 		public XamlType ResolveType(ushort id) {
 			if (typeMap.TryGetValue(id, out var xamlType))
 				return xamlType;
@@ -106,10 +115,10 @@ namespace dnSpy.BamlDecompiler {
 				type = TypeNameParser.ParseReflectionThrow(Module, typeRec.TypeFullName, new DummyAssemblyRefFinder(assembly));
 			}
 
-			var clrNs = type.ReflectionNamespace;
+			var name = NestedReflectionName(type, out string clrNs);
 			var xmlNs = XmlNs.LookupXmlns(assembly, clrNs);
 
-			typeMap[id] = xamlType = new XamlType(assembly, clrNs, type.ReflectionName, GetXmlNamespace(xmlNs)) {
+			typeMap[id] = xamlType = new XamlType(assembly, clrNs, name, GetXmlNamespace(xmlNs)) {
 				ResolvedType = type
 			};
 

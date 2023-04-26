@@ -21,6 +21,7 @@
 */
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using dnlib.DotNet;
@@ -53,6 +54,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			return doWork;
 		}
 
+		static bool IsXamlNsAttr(XAttribute attr) => attr.Name.Namespace == XamlContext.KnownNamespace_Xaml;
+
 		bool RewriteElement(XamlContext ctx, XElement parent, XElement elem) {
 			var type = parent.Annotation<XamlType>();
 			var property = elem.Annotation<XamlProperty>();
@@ -65,7 +68,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 					return false;
 			}
 
-			if (elem.Elements().Count() != 1 || elem.Attributes().Any(t => t.Name.Namespace != XNamespace.Xmlns))
+			if (elem.Elements().Count() != 1 || elem.Attributes().Any(IsXamlNsAttr))
 				return false;
 
 			var value = elem.Elements().Single();
@@ -118,6 +121,9 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			         ctxElement.Name != ctor)
 				return false;
 
+			if (ctxElement.Attributes().Any(IsXamlNsAttr))
+				return false;
+
 			foreach (var child in ctxElement.Elements()) {
 				if (!CanInlineExt(ctx, child))
 					return false;
@@ -153,8 +159,10 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 			var ext = new XamlExtension(type);
 
-			foreach (var attr in ctxElement.Attributes().Where(attr => attr.Name.Namespace != XNamespace.Xmlns))
+			foreach (var attr in ctxElement.Attributes()) {
+				Debug2.Assert(!IsXamlNsAttr(attr));
 				ext.NamedArguments[attr.Name.LocalName] = attr.Value;
+			}
 
 			foreach (var child in ctxElement.Nodes()) {
 				if (child is not XElement elem)
@@ -174,7 +182,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 				var property = elem.Annotation<XamlProperty>();
 				if (property is null || elem.Nodes().Count() != 1 ||
-				    elem.Attributes().Any(attr => attr.Name.Namespace != XNamespace.Xmlns))
+				    elem.Attributes().Any(IsXamlNsAttr))
 					return null;
 
 				var name = property.PropertyName;
