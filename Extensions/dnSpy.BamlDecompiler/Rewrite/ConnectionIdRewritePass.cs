@@ -218,11 +218,18 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 							}
 							else {
 								// CLR event
-								var add = operand.ResolveMethodDefThrow();
-								var ev = add.DeclaringType.Events.FirstOrDefault(e => e.AddMethod == add);
+								var add = operand.ResolveMethodDef();
+
+								string eventName = null;
+								if (add is not null) {
+									var ev = add.DeclaringType.Events.FirstOrDefault(e => e.AddMethod == add);
+									eventName = ev?.Name;
+								}
+								else if (operand.Name.StartsWith("add_"))
+									eventName = operand.Name.Substring(4);
 
 								var ctor = expr.Arguments[1];
-								if (ev is null || ctor.Code != ILCode.Newobj ||
+								if (eventName is null || ctor.Code != ILCode.Newobj ||
 									ctor.Arguments.Count != 2 || ctor.Arguments[1].Code != ILCode.Ldftn) {
 									cb += new Error { Msg = string.Format(dnSpy_BamlDecompiler_Resources.Error_AttachedEvent, add.Name) }.Callback;
 									break;
@@ -230,7 +237,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 								var handler = (IMethod)ctor.Arguments[1].Operand;
 
 								cb += new EventAttachment {
-									EventName = ev.Name,
+									EventName = eventName,
 									MethodName = IdentifierEscaper.Escape(handler.Name)
 								}.Callback;
 							}
