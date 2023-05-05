@@ -499,5 +499,35 @@ namespace dnSpy.Contracts.Utilities {
 
 			return foundMatch;
 		}
+
+		internal bool TryGetClosestNetStandardCompatibleVersion(Version netStandardVersion, out Version? netCoreVersion) {
+			netCoreVersion = null;
+
+			if (!HasDotNet)
+				return false;
+
+			var version2 = new Version(2, 0, 0, 0);
+			FrameworkVersion maxNetCoreVersion;
+			if (netStandardVersion < version2)
+				maxNetCoreVersion = new FrameworkVersion(1, 1, 0, "");
+			else if (netStandardVersion == version2)
+				maxNetCoreVersion = new FrameworkVersion(2, 2, 0, "");
+			else
+				return TryGetLatestNetStandardCompatibleVersion(netStandardVersion, out netCoreVersion);
+
+			Version? max = null;
+			foreach (var info in netPathsShared) {
+				if (info.Version.CompareTo(maxNetCoreVersion) < 0 &&
+					info.IsCompatibleWithNetStandard(netStandardVersion) && (max is null || info.SystemVersion > max))
+					max = info.SystemVersion;
+			}
+
+			if (max is not null) {
+				netCoreVersion = max;
+				return true;
+			}
+
+			return false;
+		}
 	}
 }

@@ -128,6 +128,7 @@ namespace dnSpy.Contracts.Utilities {
 		public readonly string Path;
 		public readonly int Bitness;
 		public readonly FrameworkVersion Version;
+
 		public FrameworkPath(string path, int bitness, FrameworkVersion version) {
 			Path = path ?? throw new ArgumentNullException(nameof(path));
 			Bitness = bitness;
@@ -140,12 +141,14 @@ namespace dnSpy.Contracts.Utilities {
 		public readonly int Minor;
 		public readonly int Patch;
 		public readonly string Extra;
+
 		public FrameworkVersion(int major, int minor, int patch, string extra) {
 			Major = major;
 			Minor = minor;
 			Patch = patch;
 			Extra = extra;
 		}
+
 		public override string ToString() {
 			if (Extra.Length == 0)
 				return $"{Major}.{Minor}.{Patch}";
