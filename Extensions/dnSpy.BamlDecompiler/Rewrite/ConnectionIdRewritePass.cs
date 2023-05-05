@@ -191,7 +191,9 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 					switch (expr.Code) {
 					case ILCode.Stfld:
-						cb += new FieldAssignment { FieldName = IdentifierEscaper.Escape(((IField)expr.Operand).Name) }.Callback;
+						cb += new FieldAssignment {
+							FieldName = IdentifierEscaper.Escape(((IField)expr.Operand).Name)
+						}.Callback;
 						break;
 
 					case ILCode.Call:
@@ -242,7 +244,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 							var handler = (IMethod)ctor.Arguments[1].Operand;
 
 							cb += new EventAttachment {
-								EventName = eventName, MethodName = IdentifierEscaper.Escape(handler.Name)
+								EventName = eventName,
+								MethodName = IdentifierEscaper.Escape(handler.Name)
 							}.Callback;
 						}
 						break;
@@ -331,59 +334,84 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 				return list;
 			}
 
+			return AnalyzeBody(body, list, true) == true ? list : null;
+		}
+
+		static bool? AnalyzeBody(List<ILNode> body, List<(IList<int>, List<ILNode>)> list, bool isRoot) {
+			if (body.Count == 0)
+				return false;
 			int pos = 0;
 			for (;;) {
 				if (pos >= body.Count)
+					return isRoot;
+				var current = body[pos];
+				if (current is not ILCondition cond) {
+					if (current.Match(ILCode.Ret))
+						return true;
+					if (current.Match(ILCode.Stfld, out IField _, out var ldthis, out var ldci4) && ldthis.MatchThis() && ldci4.MatchLdcI4(1))
+						return true;
+
 					return null;
-				if (body[pos] is not ILCondition cond) {
-					if (!body[pos].Match(ILCode.Stfld, out IField _, out var ldthis, out var ldci4) || !ldthis.MatchThis() || !ldci4.MatchLdcI4(1))
-						return null;
-					return list;
 				}
 				pos++;
 				if (cond.TrueBlock is null || cond.FalseBlock is null)
 					return null;
 
-				bool isEq = true;
-				var condExpr = cond.Condition;
-				for (;;) {
-					if (!condExpr.Match(ILCode.LogicNot, out ILExpression expr))
-						break;
-					isEq = !isEq;
-					condExpr = expr;
-				}
-				if (condExpr.Code != ILCode.Ceq && condExpr.Code != ILCode.Cne)
+				if (!MatchConditionExpression(cond.Condition, out bool isEq, out int val))
 					return null;
-				if (condExpr.Arguments.Count != 2)
-					return null;
-				if (!condExpr.Arguments[0].Match(ILCode.Ldloc, out ILVariable v) || v.OriginalParameter?.Index != 1)
-					return null;
-				if (!condExpr.Arguments[1].Match(ILCode.Ldc_I4, out int val))
-					return null;
-				if (condExpr.Code == ILCode.Cne)
-					isEq ^= true;
 
 				if (isEq) {
+					if (cond.TrueBlock.Body.Count < 1)
+						return null;
+					bool trueBlockExits = cond.TrueBlock.Body.Last().Match(ILCode.Ret);
 					list.Add((new[] { val }, cond.TrueBlock.Body));
-					if (cond.FalseBlock.Body.Count != 0) {
-						body = cond.FalseBlock.Body;
-						pos = 0;
-					}
+
+					var falseBlockExits = AnalyzeBody(cond.FalseBlock.Body, list, false);
+					if (falseBlockExits is null)
+						return null;
+
+					if (falseBlockExits.Value && trueBlockExits)
+						return true;
+				}
+				else if (cond.FalseBlock.Body.Count == 0) {
+					list.Add((new[] { val }, body.Skip(pos).ToList()));
+					return true;
 				}
 				else {
-					if (cond.FalseBlock.Body.Count != 0) {
-						list.Add((new[] { val }, cond.FalseBlock.Body));
-						if (cond.TrueBlock.Body.Count != 0) {
-							body = cond.TrueBlock.Body;
-							pos = 0;
-						}
-					}
-					else {
-						list.Add((new[] { val }, body.Skip(pos).ToList()));
-						return list;
-					}
+					if (cond.FalseBlock.Body.Count < 1)
+						return null;
+					bool falseBlockExits = cond.TrueBlock.Body.Last().Match(ILCode.Ret);
+					list.Add((new[] { val }, cond.FalseBlock.Body));
+
+					var trueBlockExits = AnalyzeBody(cond.TrueBlock.Body, list, false);
+					if (trueBlockExits is null)
+						return null;
+					if (trueBlockExits.Value && falseBlockExits)
+						return true;
 				}
 			}
+		}
+
+		static bool MatchConditionExpression(ILExpression condExpr, out bool isEq, out int val) {
+			isEq = true;
+			val = 0;
+			for (;;) {
+				if (!condExpr.Match(ILCode.LogicNot, out ILExpression expr))
+					break;
+				isEq = !isEq;
+				condExpr = expr;
+			}
+			if (condExpr.Code != ILCode.Ceq && condExpr.Code != ILCode.Cne)
+				return false;
+			if (condExpr.Arguments.Count != 2)
+				return false;
+			if (!condExpr.Arguments[0].Match(ILCode.Ldloc, out ILVariable v) || v.OriginalParameter?.Index != 1)
+				return false;
+			if (!condExpr.Arguments[1].Match(ILCode.Ldc_I4, out val))
+				return false;
+			if (condExpr.Code == ILCode.Cne)
+				isEq ^= true;
+			return true;
 		}
 	}
 }
