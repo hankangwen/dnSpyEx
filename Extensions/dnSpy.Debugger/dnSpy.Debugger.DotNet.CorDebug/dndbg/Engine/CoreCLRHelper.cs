@@ -184,7 +184,9 @@ namespace dndbg.Engine {
 				return null;
 
 			int hr = dbgShimState.CreateDebuggingInterfaceFromVersionEx!(CorDebugInterfaceVersion.CorDebugVersion_4_5, otherVersion, out object obj);
-			return obj as ICorDebug;
+			if (obj is not ICorDebug corDebug)
+				throw new Exception($"Could not create a ICorDebug: hr=0x{hr:X8}");
+			return corDebug;
 		}
 
 		public unsafe static DnDebugger CreateDnDebugger(DebugProcessOptions options, CoreCLRTypeDebugInfo info, IntPtr outputHandle, IntPtr errorHandle, Func<bool> keepWaiting, Func<ICorDebug, string, uint, string?, DnDebugger> createDnDebugger) {
