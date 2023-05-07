@@ -249,10 +249,7 @@
   <data name="DebuggingUnityGamesText" xml:space="preserve">
     <value>Debugging Unity Games</value>
   </data>
-  <data name="MonoVMVersionMessage" xml:space="preserve">
-    <value>Mono VM version: {0}</value>
-  </data>
-  <data name="MonoDebuggerProtocolVersionMessage" xml:space="preserve">
-    <value>Mono debugger protocol version: {0}.{1}</value>
+  <data name="MonoDebuggerConnectionMessage" xml:space="preserve">
+    <value>Connected to: {0}, Mono version: {1}, Protocol version: {2}</value>
   </data>
 </root>

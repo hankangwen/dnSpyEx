@@ -339,20 +339,11 @@ namespace dnSpy.Debugger.DotNet.Mono.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mono debugger protocol version: {0}.{1}.
+        ///   Looks up a localized string similar to Connected to: {0}, Mono version: {1}, Protocol version: {2}.
         /// </summary>
-        public static string MonoDebuggerProtocolVersionMessage {
+        public static string MonoDebuggerConnectionMessage {
             get {
-                return ResourceManager.GetString("MonoDebuggerProtocolVersionMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mono VM version: {0}.
-        /// </summary>
-        public static string MonoVMVersionMessage {
-            get {
-                return ResourceManager.GetString("MonoVMVersionMessage", resourceCulture);
+                return ResourceManager.GetString("MonoDebuggerConnectionMessage", resourceCulture);
             }
         }
         
