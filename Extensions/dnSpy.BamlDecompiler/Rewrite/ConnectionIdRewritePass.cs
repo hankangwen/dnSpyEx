@@ -363,30 +363,38 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 				if (isEq) {
 					if (cond.TrueBlock.Body.Count < 1)
 						return null;
-					bool trueBlockExits = cond.TrueBlock.Body.Last().Match(ILCode.Ret);
+
 					list.Add((new[] { val }, cond.TrueBlock.Body));
 
 					var falseBlockExits = AnalyzeBody(cond.FalseBlock.Body, list, false);
 					if (falseBlockExits is null)
 						return null;
-
-					if (falseBlockExits.Value && trueBlockExits)
+					if (falseBlockExits.Value && cond.TrueBlock.Body.Last().Match(ILCode.Ret))
 						return true;
 				}
 				else if (cond.FalseBlock.Body.Count == 0) {
-					list.Add((new[] { val }, body.Skip(pos).ToList()));
-					return true;
+					var remainingBody = body.Skip(pos).ToList();
+					if (remainingBody.Count < 1)
+						return null;
+
+					list.Add((new[] { val }, remainingBody));
+
+					var trueBlockExits = AnalyzeBody(cond.TrueBlock.Body, list, false);
+					if (trueBlockExits is null)
+						return null;
+					if (isRoot || trueBlockExits.Value && remainingBody.Last().Match(ILCode.Ret))
+						return true;
 				}
 				else {
 					if (cond.FalseBlock.Body.Count < 1)
 						return null;
-					bool falseBlockExits = cond.TrueBlock.Body.Last().Match(ILCode.Ret);
+
 					list.Add((new[] { val }, cond.FalseBlock.Body));
 
 					var trueBlockExits = AnalyzeBody(cond.TrueBlock.Body, list, false);
 					if (trueBlockExits is null)
 						return null;
-					if (trueBlockExits.Value && falseBlockExits)
+					if (trueBlockExits.Value && cond.FalseBlock.Body.Last().Match(ILCode.Ret))
 						return true;
 				}
 			}
