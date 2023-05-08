@@ -34,6 +34,7 @@ namespace dnSpy.AsmEditor.Compiler {
 		readonly HashSet<IAssembly> checkedContractsAssemblies;
 		readonly DotNetPathProvider dotNetPathProvider;
 		readonly TargetFrameworkInfo targetFrameworkInfo;
+		readonly Dictionary<IAssembly, AssemblyDef> referenceAssemblies;
 
 		public MetadataReferenceFinder(ModuleDef module, CancellationToken cancellationToken) {
 			this.module = module ?? throw new ArgumentNullException(nameof(module));
@@ -42,6 +43,7 @@ namespace dnSpy.AsmEditor.Compiler {
 			checkedContractsAssemblies = new HashSet<IAssembly>(AssemblyNameComparer.CompareAll);
 			dotNetPathProvider = new DotNetPathProvider();
 			targetFrameworkInfo = TargetFrameworkInfo.Create(module);
+			referenceAssemblies = new Dictionary<IAssembly, AssemblyDef>(AssemblyNameComparer.CompareAll);
 		}
 
 		public IEnumerable<ModuleDef> Find(IEnumerable<string> extraAssemblyReferences) {
@@ -163,7 +165,11 @@ namespace dnSpy.AsmEditor.Compiler {
 			}
 		}
 
+		static readonly Version ver2_0_0_0 = new Version(2, 0, 0, 0);
+
 		AssemblyDef? Resolve(ModuleDef module, IAssembly asmRef) {
+			if (referenceAssemblies.TryGetValue(asmRef, out var refAsm))
+				return refAsm;
 			var resolved = module.Context.AssemblyResolver.Resolve(asmRef, module);
 			if (resolved is null)
 				return null;
@@ -178,11 +184,49 @@ namespace dnSpy.AsmEditor.Compiler {
 			if (moniker is null)
 				return resolved;
 
+			var fileName = Path.GetFileName(resolved.ManifestModule.Location);
+
 			string[]? referencePaths;
 			switch (targetFrameworkInfo.Framework) {
 			case ".NETStandard":
-				referencePaths = dotNetPathProvider.TryGetNetStandardReferencePaths(ver, module.GetPointerSize(IntPtr.Size) * 8);
-				break;
+				if (ver > ver2_0_0_0) {
+					referencePaths = dotNetPathProvider.TryGetNetStandardReferencePaths(ver, module.GetPointerSize(IntPtr.Size) * 8);
+					break;
+				}
+
+				string? targetPath = null;
+				foreach (var source in NuGetPackageLocator.GetPossibleNuGetPackageLocations("netstandard.library", null)) {
+					targetPath = null;
+					Version? maxCompatibleVersion = null;
+					foreach (string versionPath in source) {
+						var versionText = Path.GetFileName(versionPath);
+						if (!Version.TryParse(versionText, out var packageVer))
+							continue;
+
+						if (packageVer.Major != ver.Major || packageVer.Minor != ver.Minor)
+							continue;
+
+						if (maxCompatibleVersion is not null && packageVer <= maxCompatibleVersion)
+							continue;
+
+						var newPath = Path.Combine(versionPath, "build", moniker, "ref", fileName);
+						if (!File.Exists(newPath))
+							continue;
+
+						maxCompatibleVersion = packageVer;
+						targetPath = newPath;
+					}
+
+					if (targetPath is not null)
+						break;
+				}
+
+				if (targetPath is null)
+					return resolved;
+
+				var newModule = ModuleDefMD.Load(targetPath, module.Context);
+				(newModule.Metadata.PEImage as IInternalPEImage)?.UnsafeDisableMemoryMappedIO();
+				return referenceAssemblies[asmRef] = newModule.Assembly;
 			case ".NETCoreApp": {
 				referencePaths = dotNetPathProvider.TryGetReferenceDotNetPaths(ver, module.GetPointerSize(IntPtr.Size) * 8);
 				break;
@@ -194,14 +238,13 @@ namespace dnSpy.AsmEditor.Compiler {
 			if (referencePaths is null)
 				return resolved;
 
-			string fileName = Path.GetFileName(resolved.ManifestModule.Location);
 			foreach (string path in referencePaths) {
 				var newFileName = Path.Combine(path, "ref", moniker, fileName);
 				if (!File.Exists(newFileName))
 					continue;
 				var newModule = ModuleDefMD.Load(newFileName, module.Context);
 				(newModule.Metadata.PEImage as IInternalPEImage)?.UnsafeDisableMemoryMappedIO();
-				return newModule.Assembly;
+				return referenceAssemblies[asmRef] = newModule.Assembly;
 			}
 
 			return resolved;
