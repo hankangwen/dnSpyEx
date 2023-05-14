@@ -163,6 +163,10 @@ namespace dnSpy.Text.Editor {
 					else
 						editorOperations.ZoomOut();
 				}
+				else if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) {
+					var pixelCount = -(double)e.Delta * TextView.FormattedLineSource.ColumnWidth * 10 / 120.0;
+					TextView.ViewScroller.ScrollViewportHorizontallyByPixels(pixelCount);
+				}
 				else {
 					int lines = GetScrollWheelLines();
 					var direction = e.Delta < 0 ? ScrollDirection.Down : ScrollDirection.Up;
