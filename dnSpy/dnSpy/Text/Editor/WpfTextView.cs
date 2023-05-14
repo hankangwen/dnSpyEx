@@ -543,13 +543,17 @@ namespace dnSpy.Text.Editor {
 		public double ViewportLeft {
 			get => viewportLeft;
 			set {
-				if (double.IsNaN(value))
-					throw new ArgumentOutOfRangeException(nameof(value));
-				double left = value;
+				if (IsClosed)
+					return;
+				double left;
 				if ((Options.WordWrapStyle() & WordWrapStyles.WordWrap) != 0)
-					left = 0;
-				if (left < 0)
-					left = 0;
+					left = 0.0;
+				else {
+					if (double.IsNaN(value))
+						throw new ArgumentOutOfRangeException(nameof(value));
+					double maxRight = Math.Max(MaxTextRightCoordinate, Caret.Right) + 200.0;
+					left = Math.Max(0.0, Math.Min(value, maxRight - ViewportWidth));
+				}
 				if (viewportLeft == left)
 					return;
 				viewportLeft = left;
