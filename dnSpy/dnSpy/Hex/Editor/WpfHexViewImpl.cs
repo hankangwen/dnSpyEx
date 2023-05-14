@@ -124,6 +124,8 @@ namespace dnSpy.Hex.Editor {
 		readonly List<PhysicalLine> visiblePhysicalLines;
 		readonly TextLayer textLayer;
 		readonly HexCursorProviderInfoCollection hexCursorProviderInfoCollection;
+		readonly MouseScrollHelper mouseScrollHelper;
+		UIElement? container;
 
 #pragma warning disable CS0169
 		[Export(typeof(HexAdornmentLayerDefinition))]
@@ -213,6 +215,7 @@ namespace dnSpy.Hex.Editor {
 			canvas.FocusVisualStyle = null;
 			InitializeOptions();
 
+			mouseScrollHelper = new MouseScrollHelper(this);
 			Options.OptionChanged += EditorOptions_OptionChanged;
 			Buffer.ChangedLowPriority += HexBuffer_ChangedLowPriority;
 			Buffer.BufferSpanInvalidated += Buffer_BufferSpanInvalidated;
@@ -588,11 +591,11 @@ namespace dnSpy.Hex.Editor {
 		public override double ViewportLeft {
 			get => viewportLeft;
 			set {
+				if (IsClosed)
+					return;
 				if (double.IsNaN(value))
 					throw new ArgumentOutOfRangeException(nameof(value));
-				double left = value;
-				if (left < 0)
-					left = 0;
+				double left = Math.Max(0.0, Math.Min(value, MaxTextRightCoordinate - ViewportWidth + WpfHexViewConstants.EXTRA_HORIZONTAL_SCROLLBAR_WIDTH));
 				if (viewportLeft == left)
 					return;
 				viewportLeft = left;
@@ -679,7 +682,10 @@ namespace dnSpy.Hex.Editor {
 			hexCursorProviderInfoCollection.Dispose();
 			if (metroWindow is not null)
 				metroWindow.WindowDpiChanged -= MetroWindow_WindowDpiChanged;
+			mouseScrollHelper.OnClosed();
 		}
+
+		internal override void SetContainer(UIElement container) => this.container = container;
 
 		void InitializeOptions() {
 			UpdateOption(DefaultWpfHexViewOptions.ZoomLevelName);

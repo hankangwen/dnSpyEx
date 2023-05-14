@@ -66,6 +66,7 @@ namespace dnSpy.Text.Editor {
 			containerMargins[3] = CreateContainerMargin(wpfTextViewMarginProviderCollectionProvider, PredefinedMarginNames.Left, false, 1, 0, 1);
 			containerMargins[4] = CreateContainerMargin(wpfTextViewMarginProviderCollectionProvider, PredefinedMarginNames.Right, false, 1, 2, 1);
 			Add(TextView.VisualElement, 1, 1, 1);
+			TextView.SetContainer(grid);
 			Debug2.Assert(!containerMargins.Any(a => a is null));
 
 			if (setFocus) {

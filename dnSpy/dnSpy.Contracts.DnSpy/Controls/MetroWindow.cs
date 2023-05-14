@@ -146,7 +146,7 @@ namespace dnSpy.Contracts.Controls {
 				if (element is null)
 					return IntPtr.Zero;
 
-				handled = HandleHoriztonalScroll(element, (short)(delta / 10));
+				handled = HandleHorizontalScroll(element, delta);
 
 				return IntPtr.Zero;
 			}
@@ -168,7 +168,7 @@ namespace dnSpy.Contracts.Controls {
 			return IntPtr.Zero;
 		}
 
-		private protected virtual bool HandleHoriztonalScroll(IInputElement element, short delta) {
+		private protected virtual bool HandleHorizontalScroll(IInputElement element, short delta) {
 			ScrollViewer? scrollViewer = null;
 			if (element is ScrollViewer scViewer) {
 				scrollViewer = scViewer;
@@ -176,7 +176,7 @@ namespace dnSpy.Contracts.Controls {
 			else if (element is DependencyObject dependencyObject) {
 				var current = UIUtilities.GetParent(dependencyObject);
 
-				while (current != null) {
+				while (current is not null) {
 					if (current is ScrollViewer newScrollViewer) {
 						scrollViewer = newScrollViewer;
 						break;
@@ -186,7 +186,7 @@ namespace dnSpy.Contracts.Controls {
 			}
 
 			if (scrollViewer is not null) {
-				scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + delta);
+				scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + delta / 10.0);
 				return true;
 			}
 

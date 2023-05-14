@@ -115,6 +115,8 @@ namespace dnSpy.Text.Editor {
 		readonly PhysicalLineCache physicalLineCache;
 		readonly List<PhysicalLine> visiblePhysicalLines;
 		readonly TextLayer textLayer;
+		readonly MouseScrollHelper mouseScrollHelper;
+		UIElement? container;
 
 #pragma warning disable CS0169
 		[Export(typeof(AdornmentLayerDefinition))]
@@ -206,6 +208,7 @@ namespace dnSpy.Text.Editor {
 			FocusVisualStyle = null;
 			InitializeOptions();
 
+			mouseScrollHelper = new MouseScrollHelper(this);
 			Options.OptionChanged += EditorOptions_OptionChanged;
 			TextBuffer.ChangedLowPriority += TextBuffer_ChangedLowPriority;
 			TextViewModel.DataModel.ContentTypeChanged += DataModel_ContentTypeChanged;
@@ -253,6 +256,8 @@ namespace dnSpy.Text.Editor {
 				throw new ArgumentException();
 			InvalidateSpan(span);
 		}
+
+		void IDsWpfTextView.SetContainer(UIElement container) => this.container = container;
 
 		void DelayScreenRefresh() {
 			if (IsClosed)
@@ -551,7 +556,7 @@ namespace dnSpy.Text.Editor {
 				else {
 					if (double.IsNaN(value))
 						throw new ArgumentOutOfRangeException(nameof(value));
-					double maxRight = Math.Max(MaxTextRightCoordinate, Caret.Right) + 200.0;
+					double maxRight = Math.Max(MaxTextRightCoordinate, Caret.Right) + WpfTextViewConstants.EXTRA_HORIZONTAL_SCROLLBAR_WIDTH;
 					left = Math.Max(0.0, Math.Min(value, maxRight - ViewportWidth));
 				}
 				if (viewportLeft == left)
@@ -638,6 +643,7 @@ namespace dnSpy.Text.Editor {
 			spaceReservationStack.LostAggregateFocus -= SpaceReservationStack_LostAggregateFocus;
 			if (metroWindow is not null)
 				metroWindow.WindowDpiChanged -= MetroWindow_WindowDpiChanged;
+			mouseScrollHelper.OnClosed();
 		}
 
 		void InitializeOptions() {

@@ -93,5 +93,7 @@ namespace dnSpy.Contracts.Hex.Editor {
 		/// <param name="bufferPosition">Position</param>
 		/// <returns></returns>
 		public abstract WpfHexViewLine GetWpfHexViewLineContainingBufferPosition(HexBufferPoint bufferPosition);
+
+		internal abstract void SetContainer(UIElement container);
 	}
 }

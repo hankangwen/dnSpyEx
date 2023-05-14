@@ -68,6 +68,7 @@ namespace dnSpy.Hex.Editor {
 			containerMargins[3] = CreateContainerMargin(wpfHexViewMarginProviderCollectionProvider, PredefinedHexMarginNames.Left, false, 1, 0, 1);
 			containerMargins[4] = CreateContainerMargin(wpfHexViewMarginProviderCollectionProvider, PredefinedHexMarginNames.Right, false, 1, 2, 1);
 			Add(HexView.VisualElement, 1, 1, 1);
+			HexView.SetContainer(grid);
 			Debug2.Assert(!containerMargins.Any(a => a is null));
 
 			if (setFocus) {
@@ -164,6 +165,10 @@ namespace dnSpy.Hex.Editor {
 						editorOperations.ZoomIn();
 					else
 						editorOperations.ZoomOut();
+				}
+				else if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) {
+					var pixelCount = -(double)e.Delta * HexView.FormattedLineSource.ColumnWidth * 10 / 120.0;
+					HexView.ViewScroller.ScrollViewportHorizontallyByPixels(pixelCount);
 				}
 				else {
 					int lines = GetScrollWheelLines();

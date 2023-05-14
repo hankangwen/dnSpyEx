@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System.Windows;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
@@ -30,5 +31,11 @@ namespace dnSpy.Contracts.Text.Editor {
 		/// </summary>
 		/// <param name="span">Span to invalidate</param>
 		void InvalidateClassifications(SnapshotSpan span);
+
+		/// <summary>
+		/// Sets the container control
+		/// </summary>
+		/// <param name="container">Container control</param>
+		void SetContainer(UIElement container);
 	}
 }
