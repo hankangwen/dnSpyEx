@@ -27,6 +27,20 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
+  <Choose>
+    <!-- Use the x86 icon when publishing the .NET x86 build -->
+    <When Condition="'$(RuntimeIdentifier)' == 'win-x86' And '$(IsDotNetFramework)' == 'false'">
+      <PropertyGroup>
+        <ApplicationIcon>Images\dnSpy-x86.ico</ApplicationIcon>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ApplicationIcon>Images\dnSpy.ico</ApplicationIcon>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
   <ItemGroup>
     <Compile Remove="MainApp\DevBuildWarning.cs" />
     <None Include="MainApp\DevBuildWarning.cs" />
