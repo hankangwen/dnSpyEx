@@ -43,7 +43,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 				return;
 
 			var newType = typeDef.BaseType;
-			var xamlType = new XamlType(newType.DefinitionAssembly, newType.ReflectionNamespace, newType.Name);
+			var name = XamlTypeName.From(newType, out string clrNs);
+			var xamlType = new XamlType(newType.DefinitionAssembly, clrNs, name);
 			xamlType.ResolveNamespace(elem, ctx);
 
 			elem.Name = xamlType.ToXName(ctx);

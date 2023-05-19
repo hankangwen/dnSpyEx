@@ -47,12 +47,12 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					case KnownTypes.DependencyPropertyConverter: {
 						if (value.Length == 2 || !isValueTypeId) {
 							var property = ctx.ResolveProperty(reader.ReadUInt16());
-							return ctx.ToString(elem, property.ToXName(ctx, elem, NeedsFullName(property, elem)));
+							return property.ToMarkupExtensionName(ctx, elem, NeedsFullName(property, elem));
 						}
 						else {
 							var type = ctx.ResolveType(reader.ReadUInt16());
 							var name = reader.ReadString();
-							var typeName = ctx.ToString(elem, type);
+							var typeName = type.ToMarkupExtensionName(ctx, elem);
 							return typeName + "." + name;
 						}
 					}

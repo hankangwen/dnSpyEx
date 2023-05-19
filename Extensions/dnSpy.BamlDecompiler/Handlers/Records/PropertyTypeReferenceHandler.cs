@@ -32,7 +32,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var record = (PropertyTypeReferenceRecord)((BamlRecordNode)node).Record;
 			var attr = ctx.ResolveProperty(record.AttributeId);
 			var type = ctx.ResolveType(record.TypeId);
-			var typeName = ctx.ToString(parent.Xaml, type);
+			var typeName = type.ToMarkupExtensionName(ctx, parent.Xaml);
 
 			var elem = new BamlElement(node);
 

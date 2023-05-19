@@ -42,10 +42,11 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			object key;
 			if (record.IsValueTypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
+				string typeName = value.ToMarkupExtensionName(ctx, parent.Xaml);
 
 				var typeElem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 				typeElem.AddAnnotation(ctx.ResolveType(0xfd4d)); // Known type - TypeExtension
-				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), ctx.ToString(parent.Xaml, value)));
+				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), typeName));
 				key = typeElem;
 			}
 			else if (record.IsValueStaticExtension) {
@@ -77,9 +78,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					var value = ctx.ResolveProperty(record.ValueId);
 
 					value.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
-					var xName = value.ToXName(ctx, parent.Xaml);
-
-					attrName = ctx.ToString(parent.Xaml, xName);
+					attrName = value.ToMarkupExtensionName(ctx, parent.Xaml);
 				}
 
 				var staticElem = new XElement(ctx.GetKnownNamespace("StaticExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));

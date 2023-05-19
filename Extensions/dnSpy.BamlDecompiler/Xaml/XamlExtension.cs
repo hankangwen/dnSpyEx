@@ -47,7 +47,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 			var sb = new StringBuilder();
 			sb.Append('{');
 
-			var typeName = ctx.ToString(ctxElement, ExtensionType);
+			var typeName = ExtensionType.ToMarkupExtensionName(ctx, ctxElement);
 			if (typeName.EndsWith("Extension", StringComparison.Ordinal))
 				sb.Append(typeName.Substring(0, typeName.Length - 9));
 			else

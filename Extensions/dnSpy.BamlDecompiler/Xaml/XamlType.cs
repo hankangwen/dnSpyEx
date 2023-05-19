@@ -20,6 +20,7 @@
 	THE SOFTWARE.
 */
 
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using dnlib.DotNet;
@@ -29,16 +30,16 @@ namespace dnSpy.BamlDecompiler.Xaml {
 	sealed class XamlType {
 		public IAssembly Assembly { get; }
 		public string TypeNamespace { get; }
-		public string TypeName { get; }
+		public XamlTypeName TypeName { get; }
 
 		public XNamespace Namespace { get; private set; }
 		public ITypeDefOrRef ResolvedType { get; set; }
 
-		public XamlType(IAssembly assembly, string ns, string name)
+		public XamlType(IAssembly assembly, string ns, XamlTypeName name)
 			: this(assembly, ns, name, null) {
 		}
 
-		public XamlType(IAssembly assembly, string ns, string name, XNamespace xmlns) {
+		public XamlType(IAssembly assembly, string ns, XamlTypeName name, XNamespace xmlns) {
 			Assembly = assembly;
 			TypeNamespace = ns;
 			TypeName = name;
@@ -96,6 +97,21 @@ namespace dnSpy.BamlDecompiler.Xaml {
 			if (Namespace is null)
 				return XmlConvert.EncodeLocalName(TypeName);
 			return Namespace + XmlConvert.EncodeLocalName(TypeName);
+		}
+
+		public string ToMarkupExtensionName(XamlContext ctx, XElement elem) {
+			ResolveNamespace(elem, ctx);
+
+			var sb = new StringBuilder();
+			if (Namespace != elem.GetDefaultNamespace()) {
+				var prefix = elem.GetPrefixOfNamespace(Namespace);
+				if (!string.IsNullOrEmpty(prefix)) {
+					sb.Append(prefix);
+					sb.Append(':');
+				}
+			}
+
+			return TypeName.AppendEncodedName(sb).ToString();
 		}
 
 		public override string ToString() => TypeName;

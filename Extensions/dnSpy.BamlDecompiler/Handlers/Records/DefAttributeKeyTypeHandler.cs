@@ -36,7 +36,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 		public BamlElement TranslateDefer(XamlContext ctx, BamlNode node, BamlElement parent) {
 			var record = (DefAttributeKeyTypeRecord)((BamlRecordNode)node).Record;
 			var type = ctx.ResolveType(record.TypeId);
-			var typeName = ctx.ToString(parent.Xaml, type);
+			var typeName = type.ToMarkupExtensionName(ctx, parent.Xaml);
 			var key = (XamlResourceKey)node.Annotation;
 
 			var bamlElem = new BamlElement(node);

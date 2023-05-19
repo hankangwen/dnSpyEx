@@ -20,6 +20,7 @@
 	THE SOFTWARE.
 */
 
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using dnlib.DotNet;
@@ -85,6 +86,25 @@ namespace dnSpy.BamlDecompiler.Xaml {
 					name = typeName.Namespace + name.LocalName;
 			}
 			return name;
+		}
+
+		public string ToMarkupExtensionName(XamlContext ctx, XElement parent, bool isFullName = true) {
+			if (!isFullName)
+				return XmlConvert.EncodeLocalName(PropertyName);
+
+			var sb = new StringBuilder();
+			if (DeclaringType.Namespace != parent.GetDefaultNamespace()) {
+				var prefix = parent.GetPrefixOfNamespace(DeclaringType.Namespace);
+				if (!string.IsNullOrEmpty(prefix)) {
+					sb.Append(prefix);
+					sb.Append(':');
+				}
+			}
+
+			DeclaringType.TypeName.AppendEncodedName(sb);
+			sb.Append('.');
+			sb.Append(XmlConvert.EncodeLocalName(PropertyName));
+			return sb.ToString();
 		}
 
 		public override string ToString() => PropertyName;
