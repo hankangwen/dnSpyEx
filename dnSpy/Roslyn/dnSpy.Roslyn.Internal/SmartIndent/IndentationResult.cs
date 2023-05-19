@@ -4,6 +4,7 @@
 
 using System;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.Formatting;
 
 namespace dnSpy.Roslyn.Internal.SmartIndent {
 	/// <summary>
@@ -47,16 +48,10 @@ namespace dnSpy.Roslyn.Internal.SmartIndent {
 			return indentString;
 		}
 
-		public static string CreateIndentationString(this int desiredIndentation, bool useTab, int tabSize) {
-			var numberOfTabs = 0;
-			var numberOfSpaces = Math.Max(0, desiredIndentation);
+		public static string GetIndentationString(this IndentationResult indentationResult, SourceText sourceText, SyntaxFormattingOptions options)
+			=> GetIndentationString(indentationResult, sourceText, options.UseTabs, options.TabSize);
 
-			if (useTab) {
-				numberOfTabs = desiredIndentation / tabSize;
-				numberOfSpaces -= numberOfTabs * tabSize;
-			}
-
-			return new string('\t', numberOfTabs) + new string(' ', numberOfSpaces);
-		}
+		public static string GetIndentationString(this IndentationResult indentationResult, SourceText sourceText, IndentationOptions options)
+			=> GetIndentationString(indentationResult, sourceText, options.FormattingOptions);
 	}
 }

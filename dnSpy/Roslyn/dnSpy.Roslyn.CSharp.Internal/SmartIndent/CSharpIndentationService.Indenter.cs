@@ -81,8 +81,10 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 			//       """
 			if (token.IsKind(SyntaxKind.MultiLineRawStringLiteralToken)) {
 				var endLine = sourceText.Lines.GetLineFromPosition(token.Span.End);
-				var minimumOffset = endLine.GetFirstNonWhitespaceOffset();
-				Contract.ThrowIfNull(minimumOffset);
+
+				// Raw string may be unterminated.  So last line may just be the last line of the file, which may have
+				// no contents on it.  In that case, just presume the minimum offset is 0.
+				var minimumOffset = endLine.GetFirstNonWhitespaceOffset() ?? 0;
 
 				// If possible, indent to match the indentation of the previous non-whitespace line contained in the
 				// same raw string. Otherwise, indent to match the ending line of the raw string.
@@ -90,7 +92,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 				for (var currentLineNumber = indenter.LineToBeIndented.LineNumber - 1; currentLineNumber >= startLine.LineNumber + 1; currentLineNumber--) {
 					var currentLine = sourceText.Lines[currentLineNumber];
 					if (currentLine.GetFirstNonWhitespaceOffset() is { } priorLineOffset) {
-						if (priorLineOffset >= minimumOffset.Value) {
+						if (priorLineOffset >= minimumOffset) {
 							return indenter.GetIndentationOfLine(currentLine);
 						}
 
@@ -116,8 +118,10 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 				Contract.ThrowIfNull(interpolatedExpression);
 				if (interpolatedExpression.StringStartToken.IsKind(SyntaxKind.InterpolatedMultiLineRawStringStartToken)) {
 					var endLine = sourceText.Lines.GetLineFromPosition(interpolatedExpression.StringEndToken.Span.End);
-					var minimumOffset = endLine.GetFirstNonWhitespaceOffset();
-					Contract.ThrowIfNull(minimumOffset);
+
+					// Raw string may be unterminated.  So last line may just be the last line of the file, which may have
+					// no contents on it.  In that case, just presume the minimum offset is 0.
+					var minimumOffset = endLine.GetFirstNonWhitespaceOffset() ?? 0;
 
 					// If possible, indent to match the indentation of the previous non-whitespace line contained in the
 					// same raw string. Otherwise, indent to match the ending line of the raw string.
@@ -136,7 +140,7 @@ namespace dnSpy.Roslyn.Internal.SmartIndent.CSharp {
 						}
 
 						if (currentLine.GetFirstNonWhitespaceOffset() is { } priorLineOffset) {
-							if (priorLineOffset >= minimumOffset.Value) {
+							if (priorLineOffset >= minimumOffset) {
 								return indenter.GetIndentationOfLine(currentLine);
 							}
 
