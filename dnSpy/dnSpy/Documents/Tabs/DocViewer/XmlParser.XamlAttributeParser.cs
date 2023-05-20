@@ -317,7 +317,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 			}
 
 			bool IsNameStartChar(char c) => char.IsLetter(c) || c == '_';
-			bool IsNameChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+			bool IsNameChar(char c) => char.IsLetterOrDigit(c) || c == '_' || c == '+';
 
 			void SkipWhitespace() {
 				for (;;) {
