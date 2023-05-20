@@ -52,20 +52,8 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			else if (record.IsValueStaticExtension) {
 				string attrName;
 				if (record.ValueId > 0x7fff) {
-					bool isKey = true;
-					short bamlId = unchecked((short)-record.ValueId);
-					if (bamlId > 232 && bamlId < 464) {
-						bamlId -= 232;
-						isKey = false;
-					}
-					else if (bamlId > 464 && bamlId < 467) {
-						bamlId -= 231;
-					}
-					else if (bamlId > 467 && bamlId < 470) {
-						bamlId -= 234;
-						isKey = false;
-					}
-					var res = ctx.Baml.KnownThings.Resources(bamlId);
+					var resId = BamlUtils.GetKnownResourceIdFromBamlId(record.ValueId, out bool isKey);
+					var res = ctx.Baml.KnownThings.Resources(resId);
 					string name;
 					if (isKey)
 						name = res.TypeName + "." + res.KeyName;
