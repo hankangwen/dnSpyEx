@@ -333,7 +333,7 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 					return new Token(new Span(startPos, 1), TokenKind.Period);
 				if (c == '=')
 					return new Token(new Span(startPos, 1), TokenKind.Equals);
-				if (c == '\'' )
+				if (c == '\'')
 					return new Token(new Span(startPos, 1), TokenKind.SingleQuote);
 				if (c == '"')
 					return new Token(new Span(startPos, 1), TokenKind.DoubleQuote);
