@@ -43,7 +43,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			if (valTypeExt || extTypeId == (short)KnownTypes.TypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
 
-				object[] initializer = { value.ToMarkupExtensionName(ctx, parent.Xaml) };
+				object[] initializer = { new XamlMemberName(value.ToMarkupExtensionName(ctx, parent.Xaml)) };
 				if (valTypeExt)
 					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfd4d)) { Initializer = initializer } }; // Known type - TypeExtension
 
@@ -53,7 +53,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 				var value = ctx.ResolveProperty(record.ValueId);
 
 				value.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
-				ext.Initializer = new object[] { value.ToMarkupExtensionName(ctx, parent.Xaml) };
+				ext.Initializer = new object[] { new XamlMemberName(value.ToMarkupExtensionName(ctx, parent.Xaml)) };
 			}
 			else if (valStaticExt || extTypeId == (short)KnownTypes.StaticExtension) {
 				string attrName;
@@ -75,7 +75,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					attrName = value.ToMarkupExtensionName(ctx, parent.Xaml);
 				}
 
-				object[] initializer = { attrName };
+				object[] initializer = { new XamlMemberName(attrName) };
 				if (valStaticExt)
 					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfda6)) { Initializer = initializer } }; // Known type - StaticExtension
 

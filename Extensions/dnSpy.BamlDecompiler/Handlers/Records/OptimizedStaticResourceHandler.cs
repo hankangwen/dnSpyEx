@@ -46,7 +46,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 				var typeElem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 				typeElem.AddAnnotation(ctx.ResolveType(0xfd4d)); // Known type - TypeExtension
-				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), typeName));
+				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(typeName).WithAnnotation(IsMemberNameAnnotation.Instance)));
 				key = typeElem;
 			}
 			else if (record.IsValueStaticExtension) {
@@ -71,7 +71,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 				var staticElem = new XElement(ctx.GetKnownNamespace("StaticExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 				staticElem.AddAnnotation(ctx.ResolveType(0xfda6)); // Known type - StaticExtension
-				staticElem.Add(new XElement(ctx.GetPseudoName("Ctor"), attrName));
+				staticElem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(attrName).WithAnnotation(IsMemberNameAnnotation.Instance)));
 				key = staticElem;
 			}
 			else

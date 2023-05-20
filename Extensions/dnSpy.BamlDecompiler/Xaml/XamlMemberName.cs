@@ -1,5 +1,5 @@
-/*
-	Copyright (c) 2015 Ki
+﻿/*
+	Copyright (c) 2023 ElektroKill
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -20,29 +20,12 @@
 	THE SOFTWARE.
 */
 
-using System.Xml.Linq;
-using dnSpy.BamlDecompiler.Baml;
-using dnSpy.BamlDecompiler.Xaml;
+namespace dnSpy.BamlDecompiler.Xaml {
+	public sealed class XamlMemberName {
+		public string MemberName { get; }
 
-namespace dnSpy.BamlDecompiler.Handlers {
-	sealed class ConstructorParameterTypeHandler : IHandler {
-		public BamlRecordType Type => BamlRecordType.ConstructorParameterType;
+		public XamlMemberName(string memberName) => MemberName = memberName;
 
-		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
-			var record = (ConstructorParameterTypeRecord)((BamlRecordNode)node).Record;
-
-			var elem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
-			elem.AddAnnotation(ctx.ResolveType(0xfd4d)); // Known type - TypeExtension
-
-			var bamlElem = new BamlElement(node);
-			bamlElem.Xaml = elem;
-			parent.Xaml.Element.Add(elem);
-
-			var type = ctx.ResolveType(record.TypeId);
-			var typeName = type.ToMarkupExtensionName(ctx, parent.Xaml);
-			elem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(typeName).WithAnnotation(IsMemberNameAnnotation.Instance)));
-
-			return bamlElem;
-		}
+		public override string ToString() => MemberName;
 	}
 }

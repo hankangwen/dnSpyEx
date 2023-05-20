@@ -42,6 +42,8 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 				Period,
 				Equals,
 				Name,
+				SingleQuote,
+				DoubleQuote,
 			}
 
 			enum MarkupExtensionKind {
@@ -167,6 +169,31 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 						switch (token.Kind) {
 						case TokenKind.OpenCurlyBrace:
 							ReadMarkupExtension(token);
+							break;
+
+						case TokenKind.SingleQuote:
+						case TokenKind.DoubleQuote:
+							var next = GetNextToken();
+							if (next.Kind == TokenKind.OpenCurlyBrace) {
+								ReadMarkupExtension(next);
+								next = GetNextToken();
+								if (next.Kind != token.Kind) {
+									Error();
+									return;
+								}
+							}
+							else {
+								for (;;) {
+									if (next.Kind == TokenKind.EOF) {
+										Error();
+										return;
+									}
+									if (next.Kind == token.Kind)
+										break;
+									next = GetNextToken();
+								}
+							}
+							owner.SaveBraceInfo(token.Span, next.Span, token.Kind == TokenKind.SingleQuote ? CodeBracesRangeFlags.SingleQuotes : CodeBracesRangeFlags.DoubleQuotes);
 							break;
 
 						case TokenKind.Name:
@@ -306,6 +333,10 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 					return new Token(new Span(startPos, 1), TokenKind.Period);
 				if (c == '=')
 					return new Token(new Span(startPos, 1), TokenKind.Equals);
+				if (c == '\'' )
+					return new Token(new Span(startPos, 1), TokenKind.SingleQuote);
+				if (c == '"')
+					return new Token(new Span(startPos, 1), TokenKind.DoubleQuote);
 				if (IsNameStartChar((char)c))
 					return ReadName(startPos);
 
