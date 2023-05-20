@@ -140,6 +140,12 @@ namespace dnSpy.Documents.Tabs.DocViewer {
 					return;
 				}
 
+				var nextToken = PeekToken();
+				if (nextToken.Kind == TokenKind.CloseCurlyBrace) {
+					owner.SaveBraceInfo(openCurlyBraceToken.Span, nextToken.Span, CodeBracesRangeFlags.OtherBlockBraces);
+					return;
+				}
+
 				try {
 					var markupExtName = ReadNameToken();
 					if (markupExtName is null) {
