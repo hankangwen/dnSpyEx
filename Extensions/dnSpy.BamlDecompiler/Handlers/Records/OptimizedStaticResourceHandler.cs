@@ -42,29 +42,18 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			object key;
 			if (record.IsValueTypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
+				string typeName = value.ToMarkupExtensionName(ctx, parent.Xaml);
 
 				var typeElem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 				typeElem.AddAnnotation(ctx.ResolveType(0xfd4d)); // Known type - TypeExtension
-				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), ctx.ToString(parent.Xaml, value)));
+				typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(typeName).WithAnnotation(IsMemberNameAnnotation.Instance)));
 				key = typeElem;
 			}
 			else if (record.IsValueStaticExtension) {
 				string attrName;
 				if (record.ValueId > 0x7fff) {
-					bool isKey = true;
-					short bamlId = unchecked((short)-record.ValueId);
-					if (bamlId > 232 && bamlId < 464) {
-						bamlId -= 232;
-						isKey = false;
-					}
-					else if (bamlId > 464 && bamlId < 467) {
-						bamlId -= 231;
-					}
-					else if (bamlId > 467 && bamlId < 470) {
-						bamlId -= 234;
-						isKey = false;
-					}
-					var res = ctx.Baml.KnownThings.Resources(bamlId);
+					var resId = BamlUtils.GetKnownResourceIdFromBamlId(record.ValueId, out bool isKey);
+					var res = ctx.Baml.KnownThings.Resources(resId);
 					string name;
 					if (isKey)
 						name = res.TypeName + "." + res.KeyName;
@@ -77,14 +66,12 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					var value = ctx.ResolveProperty(record.ValueId);
 
 					value.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
-					var xName = value.ToXName(ctx, parent.Xaml);
-
-					attrName = ctx.ToString(parent.Xaml, xName);
+					attrName = value.ToMarkupExtensionName(ctx, parent.Xaml);
 				}
 
 				var staticElem = new XElement(ctx.GetKnownNamespace("StaticExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 				staticElem.AddAnnotation(ctx.ResolveType(0xfda6)); // Known type - StaticExtension
-				staticElem.Add(new XElement(ctx.GetPseudoName("Ctor"), attrName));
+				staticElem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(attrName).WithAnnotation(IsMemberNameAnnotation.Instance)));
 				key = staticElem;
 			}
 			else

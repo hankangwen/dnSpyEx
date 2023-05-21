@@ -32,7 +32,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var record = (PropertyTypeReferenceRecord)((BamlRecordNode)node).Record;
 			var attr = ctx.ResolveProperty(record.AttributeId);
 			var type = ctx.ResolveType(record.TypeId);
-			var typeName = ctx.ToString(parent.Xaml, type);
+			var typeName = type.ToMarkupExtensionName(ctx, parent.Xaml);
 
 			var elem = new BamlElement(node);
 
@@ -47,7 +47,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 			var typeElem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 			typeElem.AddAnnotation(ctx.ResolveType(0xfd4d)); // Known type - TypeExtension
-			typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), typeName));
+			typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(typeName).WithAnnotation(IsMemberNameAnnotation.Instance)));
 			elem.Xaml.Element.Add(typeElem);
 
 			elemAttr.DeclaringType.ResolveNamespace(elem.Xaml, ctx);

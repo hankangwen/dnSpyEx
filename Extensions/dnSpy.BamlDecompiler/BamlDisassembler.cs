@@ -232,20 +232,9 @@ namespace dnSpy.BamlDecompiler {
 		object GetResourceReferenceObject(BamlContext ctx, ushort id) {
 			if (resourceReferences.TryGetValue(id, out var reference))
 				return reference;
-			bool isKey = true;
-			short bamlId = unchecked((short)-id);
-			if (bamlId > 232 && bamlId < 464) {
-				bamlId -= 232;
-				isKey = false;
-			}
-			else if (bamlId > 464 && bamlId < 467) {
-				bamlId -= 231;
-			}
-			else if (bamlId > 467 && bamlId < 470) {
-				bamlId -= 234;
-				isKey = false;
-			}
-			var res = ctx.KnownThings.Resources(bamlId);
+
+			var resourceId = BamlUtils.GetKnownResourceIdFromBamlId(id, out bool isKey);
+			var res = ctx.KnownThings.Resources(resourceId);
 			return resourceReferences[id] = isKey
 					? BamlResourceReference.CreateKey(res.TypeName, res.KeyName)
 					: BamlResourceReference.CreateProperty(res.TypeName, res.PropertyName);

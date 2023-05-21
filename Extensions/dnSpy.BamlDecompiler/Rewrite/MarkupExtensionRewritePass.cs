@@ -132,8 +132,11 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		}
 
 		object InlineObject(XamlContext ctx, XNode obj) {
-			if (obj is XText text)
+			if (obj is XText text) {
+				if (text.Annotation<IsMemberNameAnnotation>() is not null)
+					return new XamlMemberName(text.Value);
 				return text.Value;
+			}
 			if (obj is XElement element)
 				return InlineExtension(ctx, element);
 			return null;

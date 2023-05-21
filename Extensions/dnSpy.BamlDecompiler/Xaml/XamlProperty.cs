@@ -20,9 +20,11 @@
 	THE SOFTWARE.
 */
 
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using dnlib.DotNet;
+using dnSpy.Contracts.Decompiler;
 
 namespace dnSpy.BamlDecompiler.Xaml {
 	sealed class XamlProperty {
@@ -30,6 +32,8 @@ namespace dnSpy.BamlDecompiler.Xaml {
 		public string PropertyName { get; }
 
 		public IMemberDef ResolvedMember { get; set; }
+
+		public ITypeDefOrRef ResolvedMemberDeclaringType { get; set; }
 
 		public XamlProperty(XamlType type, string name) {
 			DeclaringType = type;
@@ -40,38 +44,89 @@ namespace dnSpy.BamlDecompiler.Xaml {
 			if (ResolvedMember is not null)
 				return;
 
-			var typeDef = DeclaringType.ResolvedType.ResolveTypeDef();
-			if (typeDef is null)
-				return;
-
-			ResolvedMember = typeDef.FindPropertyCheckBaseType(PropertyName);
+			(ResolvedMember, ResolvedMemberDeclaringType) = FindProperty(DeclaringType.ResolvedType, PropertyName);
 			if (ResolvedMember is not null)
 				return;
 
-			ResolvedMember = typeDef.FindFieldCheckBaseType(PropertyName + "Property");
+			(ResolvedMember, ResolvedMemberDeclaringType) = FindField(DeclaringType.ResolvedType, PropertyName + "Property");
 			if (ResolvedMember is not null)
 				return;
 
-			ResolvedMember = typeDef.FindEventCheckBaseType(PropertyName);
+			(ResolvedMember, ResolvedMemberDeclaringType) = FindEvent(DeclaringType.ResolvedType, PropertyName);
 			if (ResolvedMember is not null)
 				return;
 
-			ResolvedMember = typeDef.FindFieldCheckBaseType(PropertyName + "Event");
+			(ResolvedMember, ResolvedMemberDeclaringType) = FindField(DeclaringType.ResolvedType, PropertyName + "Event");
+		}
+
+		static (PropertyDef, ITypeDefOrRef) FindProperty(ITypeDefOrRef declType, string name) {
+			while (declType is not null) {
+				var td = declType.ResolveTypeDef();
+				if (td is null)
+					break;
+
+				var pd = td.FindProperty(name);
+				if (pd is not null)
+					return (pd, declType);
+
+				declType = GetInstantiatedBaseType(declType);
+			}
+
+			return default;
+		}
+
+		static (EventDef, ITypeDefOrRef) FindEvent(ITypeDefOrRef declType, string name) {
+			while (declType is not null) {
+				var td = declType.ResolveTypeDef();
+				if (td is null)
+					break;
+
+				var ed = td.FindEvent(name);
+				if (ed is not null)
+					return (ed, declType);
+
+				declType = GetInstantiatedBaseType(declType);
+			}
+
+			return default;
+		}
+
+		static (FieldDef, ITypeDefOrRef) FindField(ITypeDefOrRef declType, string name) {
+			while (declType is not null) {
+				var td = declType.ResolveTypeDef();
+				if (td is null)
+					break;
+
+				var fd = td.FindField(name);
+				if (fd is not null)
+					return (fd, declType);
+
+				declType = GetInstantiatedBaseType(declType);
+			}
+
+			return default;
 		}
 
 		public bool IsAttachedTo(XamlType type) {
 			if (type is null || ResolvedMember is null || type.ResolvedType is null)
 				return true;
 
-			var declType = ResolvedMember.DeclaringType;
+			var declType = ResolvedMemberDeclaringType;
 			var t = type.ResolvedType;
 			var comparer = new SigComparer();
 			do {
 				if (comparer.Equals(t, declType))
 					return false;
-				t = t.GetBaseType();
+				t = GetInstantiatedBaseType(t);
 			} while (t is not null);
 			return true;
+		}
+
+		static ITypeDefOrRef GetInstantiatedBaseType(ITypeDefOrRef type) {
+			var baseType = type.GetBaseType();
+			if (type is TypeSpec typeSpec && typeSpec.TypeSig is GenericInstSig genericInstSig && baseType is TypeSpec baseTypeSpec)
+				baseType = GenericArgumentResolver.Resolve(baseTypeSpec.TypeSig, genericInstSig.GenericArguments, null).ToTypeDefOrRef();
+			return baseType;
 		}
 
 		public XName ToXName(XamlContext ctx, XElement parent, bool isFullName = true) {
@@ -85,6 +140,25 @@ namespace dnSpy.BamlDecompiler.Xaml {
 					name = typeName.Namespace + name.LocalName;
 			}
 			return name;
+		}
+
+		public string ToMarkupExtensionName(XamlContext ctx, XElement parent, bool isFullName = true) {
+			if (!isFullName)
+				return XmlConvert.EncodeLocalName(PropertyName);
+
+			var sb = new StringBuilder();
+			if (DeclaringType.Namespace != parent.GetDefaultNamespace()) {
+				var prefix = parent.GetPrefixOfNamespace(DeclaringType.Namespace);
+				if (!string.IsNullOrEmpty(prefix)) {
+					sb.Append(prefix);
+					sb.Append(':');
+				}
+			}
+
+			DeclaringType.TypeName.AppendEncodedName(sb);
+			sb.Append('.');
+			sb.Append(XmlConvert.EncodeLocalName(PropertyName));
+			return sb.ToString();
 		}
 
 		public override string ToString() => PropertyName;
