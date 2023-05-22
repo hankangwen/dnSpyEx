@@ -161,6 +161,23 @@ namespace dnSpy.Contracts.Utilities {
 			return fpMajorMinor ?? fpMajor;
 		}
 
+		/// <summary>
+		/// Returns the .NET runtime assembly directories on the system which exactly match the search criteria.
+		/// </summary>
+		/// <param name="version">The exact version of the .NET runtime</param>
+		/// <param name="bitness">The bitness of the .NET runtime</param>
+		/// <returns>The .NET runtime assembly directories. Empty if non where found.</returns>
+		public string[] TryFindExactRuntimePaths(Version version, int bitness) {
+			var candidates = new List<string>();
+			foreach (var frameworkPaths in netPathsShared) {
+				if (frameworkPaths.Bitness != bitness)
+					continue;
+				if (frameworkPaths.SystemVersion == version)
+					candidates.AddRange(frameworkPaths.Paths);
+			}
+			return candidates.ToArray();
+		}
+
 		static FrameworkPaths BestMinorVersion(int minor, FrameworkPaths a, FrameworkPaths b) {
 			uint da = VerDist(minor, a.Version.Minor);
 			uint db = VerDist(minor, b.Version.Minor);

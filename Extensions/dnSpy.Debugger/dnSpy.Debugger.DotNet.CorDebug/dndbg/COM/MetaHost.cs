@@ -83,4 +83,23 @@ namespace dndbg.COM.MetaHost {
 		[return: MarshalAs(UnmanagedType.Interface)]
 		object GetRequestedRuntime([In] METAHOST_POLICY_FLAGS dwPolicyFlags, [MarshalAs(UnmanagedType.LPWStr)] [In] string pwzBinary, [MarshalAs(UnmanagedType.Interface)] [In] IStream pCfgStream, [MarshalAs(UnmanagedType.LPWStr)] [In] [Out] StringBuilder pwzVersion, [In] [Out] ref uint pcchVersion, [MarshalAs(UnmanagedType.LPWStr)] [Out] StringBuilder pwzImageVersion, [In] [Out] ref uint pcchImageVersion, out uint pdwConfigFlags, [In] ref Guid riid);
 	}
+	[Guid("E04E2FF1-DCFD-45D5-BCD1-16FFF2FAF7BA"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[ComImport, SuppressUnmanagedCodeSecurity]
+	interface ICLRDebuggingLibraryProvider2 {
+		[PreserveSig]
+		int ProvideLibrary2([MarshalAs(UnmanagedType.LPWStr)] [In] string pwszFileName, [In] int dwTimestamp, [In] int dwSizeOfImage, out IntPtr ppResolvedModulePath);
+	}
+	[Guid("DE3AAB18-46A0-48B4-BF0D-2C336E69EA1B"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[ComImport, SuppressUnmanagedCodeSecurity]
+	interface ICLRDebuggingLibraryProvider3 {
+		[PreserveSig]
+		int ProvideWindowsLibrary([MarshalAs(UnmanagedType.LPWStr)] [In] string pwszFileName, [MarshalAs(UnmanagedType.LPWStr)] [In] string pwszRuntimeModule, [In] LIBRARY_PROVIDER_INDEX_TYPE indexType, [In] int dwTimestamp, [In] int dwSizeOfImage, out IntPtr ppResolvedModulePath);
+		[PreserveSig]
+		int ProvideUnixLibrary([MarshalAs(UnmanagedType.LPWStr)] [In] string pwszFileName, [MarshalAs(UnmanagedType.LPWStr)] [In] string pwszRuntimeModule, [In] LIBRARY_PROVIDER_INDEX_TYPE indexType, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 4)] [In] byte[] pbBuildId, [In] int iBuildIdSize, out IntPtr ppResolvedModulePath);
+	}
+	enum LIBRARY_PROVIDER_INDEX_TYPE {
+		Unknown,
+		Identity,
+		Runtime,
+	}
 }
