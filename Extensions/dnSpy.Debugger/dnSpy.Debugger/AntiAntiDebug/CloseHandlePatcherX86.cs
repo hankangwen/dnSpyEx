@@ -118,7 +118,7 @@ namespace dnSpy.Debugger.AntiAntiDebug {
 			c.mov(__qword_ptr[rbp + 16], rcx);
 			c.lea(rdx, __[rbp - 6]);
 			c.mov(rax, __qword_ptr[rbp + 16]);
-			c.mov(__dword_ptr[rsp + 32], 0);
+			c.mov(__qword_ptr[rsp + 32], 0);
 			c.mov(r9d, OBJECT_HANDLE_FLAG_INFORMATION_SIZE);
 			c.mov(r8, rdx);
 			c.mov(edx, ObjectHandleFlagInformation);
