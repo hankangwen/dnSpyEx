@@ -1016,26 +1016,63 @@ namespace dnSpy.Text.Operations {
 		}
 
 		public bool Paste() {
-			string text;
+			string? text;
 			bool isFullLineData;
+			bool isBoxCut;
 			try {
 				var dataObj = Clipboard.GetDataObject();
 				if (dataObj is null)
 					return false;
-				text = (string)dataObj.GetData(DataFormats.UnicodeText);
+				text = (string?)dataObj.GetData(DataFormats.UnicodeText) ?? (string?)dataObj.GetData(DataFormats.Text);
 				var fullLineDataObj = dataObj.GetData(VS_COPY_FULL_LINE_DATA_FORMAT);
-				isFullLineData = fullLineDataObj is bool && (bool)fullLineDataObj;
+				isFullLineData = fullLineDataObj is bool fullLineData && fullLineData;
+				var boxCutDataObj = dataObj.GetData(VS_COPY_BOX_DATA_FORMAT);
+				isBoxCut = boxCutDataObj is bool boxCut && boxCut;
 			}
 			catch (ExternalException) {
 				return false;
 			}
 			if (text is null)
 				return false;
-			const bool isProvisional = false;
-			const bool overwriteMode = false;
-			if (!Selection.IsEmpty)
-				isFullLineData = false;
-			return InsertText(text, isProvisional, overwriteMode, isFullLineData);
+
+			if (isFullLineData && Selection.IsEmpty) {
+				var start = Caret.Position.BufferPosition.GetContainingLine().Start;
+				using (var ed = TextBuffer.CreateEdit()) {
+					if (!ed.Insert(start.Position, text))
+						return false;
+					ed.Apply();
+				}
+				Caret.EnsureVisible();
+				return true;
+			}
+
+			if (!isBoxCut)
+				return InsertText(text, isProvisional: false, overwriteMode: false, isFullLineData: false);
+
+			if (Selection.IsEmpty && IsPointOnBlankViewLine()) {
+				string whitespace = GetWhitespaceForVirtualSpace(Caret.Position.VirtualBufferPosition);
+				var lines = new List<string>();
+				using (var stringReader = new StringReader(text)) {
+					string? line = stringReader.ReadLine();
+					while (line is not null) {
+						lines.Add(line);
+						line = stringReader.ReadLine();
+					}
+				}
+				string newText = string.Join(Options.GetNewLineCharacter() + whitespace, lines);
+				return InsertText(newText, isProvisional: false, overwriteMode: false, isFullLineData: false);
+			}
+
+			return InsertTextAsBox(text, out _, out _);
+		}
+
+		bool IsPointOnBlankViewLine() {
+			var line = Caret.ContainingTextViewLine;
+			var lineSnapshot = line.Extent.Snapshot;
+			int pos = line.Start;
+			while (pos < line.End && char.IsWhiteSpace(lineSnapshot[pos]))
+				pos++;
+			return pos == line.End;
 		}
 
 		bool InsertText(string text, bool isProvisional, bool overwriteMode, bool isFullLineData) {
@@ -1079,9 +1116,95 @@ namespace dnSpy.Text.Operations {
 		}
 
 		public bool InsertTextAsBox(string text, out VirtualSnapshotPoint boxStart, out VirtualSnapshotPoint boxEnd) {
-			boxStart = new VirtualSnapshotPoint(Snapshot, 0);
-			boxEnd = new VirtualSnapshotPoint(Snapshot, 0);
-			return true;//TODO:
+			boxStart = (boxEnd = Caret.Position.VirtualBufferPosition);
+			if (text.Length == 0)
+				return InsertText(text);
+
+			using (var ed = TextBuffer.CreateEdit()) {
+				foreach (var span in Selection.SelectedSpans)
+					ed.Delete(span);
+				ed.Apply();
+			}
+
+			Selection.Mode = TextSelectionMode.Box;
+			if (!Selection.IsEmpty)
+				Caret.MoveTo(Selection.Start);
+
+			var caretPosition = Caret.Position.VirtualBufferPosition;
+			var caretVirtualPos = Caret.Position.VirtualBufferPosition;
+			double left = Caret.Left;
+
+			ITrackingPoint? insertionTrackingPoint = null;
+			int? indentSize = null;
+
+			using (var ed = TextBuffer.CreateEdit()) {
+				var insertionPosition = caretPosition;
+				var currentLine = TextView.GetTextViewLineContainingBufferPosition(insertionPosition.Position);
+				bool done = false;
+				using (var stringReader = new StringReader(text)) {
+					string? textLine = stringReader.ReadLine();
+					while (textLine is not null) {
+						if (textLine.Length > 0) {
+							insertionTrackingPoint = Snapshot.CreateTrackingPoint(insertionPosition.Position, PointTrackingMode.Positive);
+							int identLength = 0;
+							if (insertionPosition.IsInVirtualSpace) {
+								string indent = GetWhitespaceForVirtualSpace(insertionPosition);
+								textLine = indent + textLine;
+								identLength = indent.Length;
+							}
+
+							if (!indentSize.HasValue) {
+								indentSize = identLength;
+								caretPosition = insertionPosition;
+							}
+
+							if (!ed.Insert(insertionPosition.Position, textLine))
+								return false;
+						}
+
+						if (done)
+							break;
+
+						if (currentLine.LineBreakLength == 0) {
+							string whitespaceForDisplayColumn = GetWhitespaceForVirtualSpace(caretVirtualPos);
+							string newLineCharacter = Options.GetNewLineCharacter();
+							textLine = string.Empty;
+							string newLines = string.Empty;
+							while (stringReader.ReadLine() is { } nextLine) {
+								if (nextLine.Length > 0) {
+									textLine = textLine + newLines + newLineCharacter + whitespaceForDisplayColumn + nextLine;
+									newLines = string.Empty;
+								}
+								else
+									newLines += newLineCharacter;
+							}
+
+							done = true;
+							insertionPosition = new VirtualSnapshotPoint(currentLine.EndIncludingLineBreak);
+						}
+						else {
+							textLine = stringReader.ReadLine();
+							if (textLine is not null) {
+								currentLine = TextView.GetTextViewLineContainingBufferPosition(currentLine.EndIncludingLineBreak);
+								insertionPosition = currentLine.GetInsertionBufferPositionFromXCoordinate(left);
+							}
+						}
+					}
+				}
+				if (insertionTrackingPoint is null) {
+					ed.Cancel();
+					return false;
+				}
+				ed.Apply();
+				if (ed.Canceled)
+					return false;
+			}
+
+			Selection.Clear();
+			Caret.MoveTo(new SnapshotPoint(Snapshot, caretPosition.Position.Position + indentSize ?? 0));
+			boxStart = Caret.Position.VirtualBufferPosition;
+			boxEnd = new VirtualSnapshotPoint(insertionTrackingPoint.GetPoint(Snapshot));
+			return true;
 		}
 
 		public bool MakeLowercase() => UpperLower(false);
