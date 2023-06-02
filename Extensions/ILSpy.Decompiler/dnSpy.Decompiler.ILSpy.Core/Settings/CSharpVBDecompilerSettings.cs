@@ -139,11 +139,11 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ShowXMLDocComments,
 				Name = DecompilerOptionConstants.ShowXmlDocumentation_NAME,
 			};
-			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.RemoveEmptyDefaultConstructors_GUID,
-			// 			() => decompilerSettings.RemoveEmptyDefaultConstructors, a => decompilerSettings.RemoveEmptyDefaultConstructors = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RemoveEmptyDefaultCtors,
-			// 	Name = DecompilerOptionConstants.RemoveEmptyDefaultConstructors_NAME,
-			// };
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.RemoveEmptyDefaultConstructors_GUID,
+						() => decompilerSettings.RemoveEmptyDefaultConstructors, a => decompilerSettings.RemoveEmptyDefaultConstructors = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RemoveEmptyDefaultCtors,
+				Name = DecompilerOptionConstants.RemoveEmptyDefaultConstructors_NAME,
+			};
 			yield return new DecompilerOption<bool>(DecompilerOptionConstants.IntroduceIncrementAndDecrement_GUID,
 						() => decompilerSettings.IntroduceIncrementAndDecrement, a => decompilerSettings.IntroduceIncrementAndDecrement = a) {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IntroduceIncrementAndDecrement,

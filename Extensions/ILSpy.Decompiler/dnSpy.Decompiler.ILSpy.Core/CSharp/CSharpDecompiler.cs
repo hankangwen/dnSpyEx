@@ -79,13 +79,10 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 
 //#if DEBUG
 		internal static IEnumerable<CSharpDecompiler> GetDebugDecompilers(CSharpVBDecompilerSettings langSettings) {
-			var dummy = new ModuleDefUser("Dummy");
-			dummy.Kind = ModuleKind.Dll;
-			var decompiler = new ICSharpCode.Decompiler.CSharp.CSharpDecompiler(dummy, new DecompilerSettings());
 			string lastTransformName = "no transforms";
 			double orderUI = DecompilerConstants.CSHARP_ILSPY_DEBUG_ORDERUI;
 			uint id = 0xBF67AF3F;
-			foreach (Type _transformType in decompiler.AstTransforms.Select(v => v.GetType()).Distinct()) {
+			foreach (Type _transformType in ICSharpCode.Decompiler.CSharp.CSharpDecompiler.GetAstTransforms().Select(v => v.GetType()).Distinct()) {
 				Type transformType = _transformType; // copy for lambda
 				yield return new CSharpDecompiler(langSettings, orderUI++) {
 					transformAbortCondition = v => transformType.IsInstanceOfType(v),
@@ -366,7 +363,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 					((ComposedType)astType).PointerRank--;
 			}
 
-			astType.AcceptVisitor(new CSharpOutputVisitor(new TextTokenWriter(output, MetadataTextColorProvider), FormattingOptionsFactory.CreateAllman()));
+			var ctx = new DecompilerContext(langSettings.Settings.SettingsVersion, type.Module, MetadataTextColorProvider);
+			astType.AcceptVisitor(new CSharpOutputVisitor(new TextTokenWriter(output, ctx), FormattingOptionsFactory.CreateAllman()));
 		}
 
 		protected override void FormatPropertyName(IDecompilerOutput output, PropertyDef property, bool? isIndexer) {
@@ -500,7 +498,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		internal static DecompilerSettings CreateDecompilerSettings_DecompileTypeMethods(DecompilerSettings settings, bool useUsingDeclarations, bool showAll) {
 			var s = CreateDecompilerSettings(settings, useUsingDeclarations);
 			// Make sure the ctor is shown if the user tries to edit an empty ctor/cctor
-			//s.RemoveEmptyDefaultConstructors = false;
+			s.RemoveEmptyDefaultConstructors = false;
 			if (!showAll) {
 				// Inline all field initialization code
 				s.AllowFieldInitializers = false;
@@ -513,6 +511,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			newOne.UsingDeclarations = useUsingDeclarations;
 			//newOne.FullyQualifyAllTypes = !useUsingDeclarations;
 			//newOne.RemoveNewDelegateClass = useUsingDeclarations;
+			newOne.UseImplicitMethodGroupConversion = useUsingDeclarations;
 			newOne.ForceShowAllMembers = false;
 			return newOne;
 		}

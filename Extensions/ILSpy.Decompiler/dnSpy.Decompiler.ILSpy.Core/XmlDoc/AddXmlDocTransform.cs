@@ -37,36 +37,22 @@ namespace dnSpy.Decompiler.ILSpy.Core.XmlDoc {
 		public AddXmlDocTransform(StringBuilder sb) => stringBuilder = sb;
 
 		public void Run(AstNode node) {
-			try {
-				foreach (var entity in node.DescendantsAndSelf.OfType<EntityDeclaration>()) {
-					var symbol = entity.GetSymbol();
-					IMemberRef? mr;
-					switch (symbol) {
-					case IMember member:
-						mr = member.MetadataToken as IMemberRef;
-						break;
-					case ICSharpCode.Decompiler.TypeSystem.IType type:
-						mr = type.GetDefinition()?.MetadataToken;
-						break;
-					default:
-						continue;
-					}
-					if (mr == null)
-						continue;
+			if (node is EntityDeclaration) {
+				IMemberRef mr = node.Annotation<IMemberRef>();
+				if (mr is not null && mr.Module is not null) {
 					var xmldoc = XmlDocLoader.LoadDocumentation(mr.Module);
-					if (xmldoc == null)
-						continue;
-					var doc = xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, stringBuilder)) ?? xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, stringBuilder, XmlDocCompiler.MSVC));
-					if (!string2.IsNullOrEmpty(doc))  {
-						InsertXmlDocumentation(entity, doc);
+					if (xmldoc is not null) {
+						var doc = xmldoc.GetDocumentation(XmlDocKeyProvider.GetKey(mr, stringBuilder));
+						if (!string2.IsNullOrEmpty(doc)) {
+							InsertXmlDocumentation(node, doc);
+						}
 					}
 				}
-			} catch (XmlException ex) {
-				string[] msg = (" Exception while reading XmlDoc: " + ex).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-				var insertionPoint = node.FirstChild;
-				for (int i = 0; i < msg.Length; i++)
-					node.InsertChildBefore(insertionPoint, new Comment(msg[i], CommentType.Documentation), Roles.Comment);
+				if (node is not TypeDeclaration)
+					return; // don't recurse into attributed nodes, except for type definitions
 			}
+			foreach (AstNode child in node.Children)
+				Run(child);
 		}
 
 		void InsertXmlDocumentation(AstNode node, string doc) {

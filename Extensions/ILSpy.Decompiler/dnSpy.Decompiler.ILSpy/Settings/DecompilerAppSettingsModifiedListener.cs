@@ -45,8 +45,8 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			if (refreshIL)
 				RefreshCode<Core.IL.ILDecompiler>();
 #if DEBUG
-			// if (refreshILAst)
-			// 	RefreshCode<Core.ILAst.ILAstDecompiler>();
+			if (refreshILAst)
+				RefreshCode<Core.ILAst.ILAstDecompiler>();
 #endif
 			if (refreshCSharp)
 				RefreshCode<Core.CSharp.CSharpDecompiler>();
