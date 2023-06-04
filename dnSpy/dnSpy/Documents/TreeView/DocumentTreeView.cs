@@ -852,29 +852,13 @@ namespace dnSpy.Documents.TreeView {
 					continue;
 				if (!File.Exists(filename))
 					continue;
-				try {
-					var urlString = GetUrlFromInternetShortcutFile(filename);
-					if (urlString == null)
-						continue;
-					var urlUri = new Uri(urlString);
-					if (urlUri is { IsAbsoluteUri: true, IsFile: true }) {
-						filenames[i] = urlUri.AbsolutePath;
-					}
-				}
-				catch {
-					// ignore any unexpected parsing errors
-				}
+				var urlString = InternetShortcutFileFormat.GetUrlFromInternetShortcutFile(filename);
+				if (!Uri.TryCreate(urlString, UriKind.Absolute, out var urlUri))
+					continue;
+				if (!urlUri.IsFile)
+					continue;
+				filenames[i] = urlUri.AbsolutePath;
 			}
-		}
-
-		// get the URL from a Microsoft [InternetShortcut] .url file
-		static string? GetUrlFromInternetShortcutFile(string filename) {
-			foreach (var line in File.ReadAllLines(filename)) {
-				if (line.StartsWith("URL=")) {
-					return line.Substring(4);
-				}
-			}
-			return null;
 		}
 
 		static string[] GetFiles(string[] filenames) {
