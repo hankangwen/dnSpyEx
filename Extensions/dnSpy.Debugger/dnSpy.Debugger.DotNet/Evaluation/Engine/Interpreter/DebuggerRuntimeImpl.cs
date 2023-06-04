@@ -895,7 +895,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 			var appDomain = value.Type.AppDomain;
 			var typeType = appDomain.System_Type;
-			if (value.Type != typeType)
+			if (!value.Type.CanCastTo(typeType))
 				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 
 			var getAssemblyQualifiedNameMethod = typeType.GetMethod("get_" + nameof(Type.AssemblyQualifiedName), DmdSignatureCallingConvention.Default | DmdSignatureCallingConvention.HasThis, 0, appDomain.System_String, Array.Empty<DmdType>(), throwOnError: true)!;
@@ -938,7 +938,9 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			return new Guid(arr);
 		}
 
-		byte[] IDebuggerRuntime.ToByteArray(ILValue value) {
+		byte[]? IDebuggerRuntime.ToByteArray(ILValue value) {
+			if (value is NullObjectRefILValue)
+				return null;
 			if (value is not ArrayILValue arrayIlValue)
 				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 			if (value.Type is null || !value.Type.IsSZArray ||
@@ -1033,7 +1035,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			return value;
 		}
 
-		void IDebuggerRuntime.CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[] customTypeInfoPayload) {
+		void IDebuggerRuntime.CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[]? customTypeInfoPayload) {
 			//TODO:
 			throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 		}

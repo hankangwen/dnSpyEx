@@ -114,15 +114,15 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter.Hooks {
 			// "This returns a reference (or L-value) to a pseudo-variable. It is used to assign values to pseudo-variables
 			// created using CreateVariable. It cannot be used for object IDs because they are immutable."
 			case ExpressionCompilerConstants.GetVariableAddressMethodName:
-				// public unsafe static T* GetVariableAddress<T>(string name)
-				if (!sig.ReturnType.IsPointer)
+				// public unsafe static ref T GetVariableAddress<T>(string name)
+				if (!sig.ReturnType.IsByRef)
 					break;
 				type = sig.ReturnType.GetElementType()!;
 				var origMethod = method.ReflectedType!.GetMethod(method.Module, method.MetadataToken);
 				Debug2.Assert(origMethod is not null);
 				sig = origMethod.GetMethodSignature();
 				ps = sig.GetParameterTypes();
-				if (sig.GenericParameterCount == 1 && sig.ReturnType.IsPointer &&
+				if (sig.GenericParameterCount == 1 && sig.ReturnType.IsByRef &&
 					sig.ReturnType.GetElementType()!.TypeSignatureKind == DmdTypeSignatureKind.MethodGenericParameter &&
 					sig.ReturnType.GetElementType()!.GenericParameterPosition == 0 && ps.Count == 1 && ps[0] == appDomain.System_String) {
 					name = runtime.ToString(arguments[0]);
