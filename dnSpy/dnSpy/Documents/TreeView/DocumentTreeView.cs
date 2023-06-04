@@ -743,6 +743,7 @@ namespace dnSpy.Documents.TreeView {
 			filenames = GetFiles(filenames);
 
 			ResolveWindowsShortcutFiles(filenames);
+			ResolveInternetShortcutFiles(filenames);
 
 			var origFilenames = filenames;
 			var documents = DocumentService.GetDocuments();
@@ -841,6 +842,22 @@ namespace dnSpy.Documents.TreeView {
 				catch {
 					break;
 				}
+			}
+		}
+
+		static void ResolveInternetShortcutFiles(string[] filenames) {
+			for (var i = 0; i < filenames.Length; i++) {
+				var filename = filenames[i];
+				if (!filename.EndsWith(".url", StringComparison.OrdinalIgnoreCase))
+					continue;
+				if (!File.Exists(filename))
+					continue;
+				var urlString = InternetShortcutFileFormat.GetUrlFromInternetShortcutFile(filename);
+				if (!Uri.TryCreate(urlString, UriKind.Absolute, out var urlUri))
+					continue;
+				if (!urlUri.IsFile)
+					continue;
+				filenames[i] = urlUri.AbsolutePath;
 			}
 		}
 
