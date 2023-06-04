@@ -743,6 +743,7 @@ namespace dnSpy.Documents.TreeView {
 			filenames = GetFiles(filenames);
 
 			ResolveWindowsShortcutFiles(filenames);
+			ResolveInternetShortcutFiles(filenames);
 
 			var origFilenames = filenames;
 			var documents = DocumentService.GetDocuments();
@@ -842,6 +843,38 @@ namespace dnSpy.Documents.TreeView {
 					break;
 				}
 			}
+		}
+
+		static void ResolveInternetShortcutFiles(string[] filenames) {
+			for (var i = 0; i < filenames.Length; i++) {
+				var filename = filenames[i];
+				if (!filename.EndsWith(".url", StringComparison.OrdinalIgnoreCase))
+					continue;
+				if (!File.Exists(filename))
+					continue;
+				try {
+					var urlString = GetUrlFromInternetShortcutFile(filename);
+					if (urlString == null)
+						continue;
+					var urlUri = new Uri(urlString);
+					if (urlUri is { IsAbsoluteUri: true, IsFile: true }) {
+						filenames[i] = urlUri.AbsolutePath;
+					}
+				}
+				catch {
+					// ignore any unexpected parsing errors
+				}
+			}
+		}
+
+		// get the URL from a Microsoft [InternetShortcut] .url file
+		static string? GetUrlFromInternetShortcutFile(string filename) {
+			foreach (var line in File.ReadAllLines(filename)) {
+				if (line.StartsWith("URL=")) {
+					return line.Substring(4);
+				}
+			}
+			return null;
 		}
 
 		static string[] GetFiles(string[] filenames) {
