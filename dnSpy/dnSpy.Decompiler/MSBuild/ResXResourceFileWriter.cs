@@ -182,20 +182,8 @@ namespace dnSpy.Decompiler.MSBuild {
 					throw new ArgumentOutOfRangeException();
 				}
 			}
-			if (resourceData is BinaryResourceData binaryResourceData) {
-				var commaIndex = binaryResourceData.TypeName.IndexOf(',');
-				string actualName = commaIndex == -1 ? binaryResourceData.TypeName : binaryResourceData.TypeName.Remove(commaIndex);
-				// These 4 are common types which are known to have a byte array converter.
-				// We check for them first to avoid the slow hasByteArrayConverter() call.
-				string mimeType = actualName switch {
-					"System.Drawing.Icon" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
-					"System.Drawing.Bitmap" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
-					"System.Drawing.Metafile" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
-					"System.Drawing.Image" => ResXResourceWriter.ByteArraySerializedObjectMimeType,
-					_ => hasByteArrayConverter(binaryResourceData.TypeName) ? ResXResourceWriter.ByteArraySerializedObjectMimeType : ResXResourceWriter.BinSerializedObjectMimeType
-				};
-				return new ResXResourceInfo(ToBase64WrappedString(binaryResourceData.Data), binaryResourceData.TypeName, mimeType);
-			}
+			if (resourceData is BinaryResourceData binaryResourceData)
+				return new ResXResourceInfo(ToBase64WrappedString(binaryResourceData.Data), binaryResourceData.TypeName, ResXResourceWriter.BinSerializedObjectMimeType);
 
 			throw new ArgumentOutOfRangeException();
 		}
