@@ -742,8 +742,7 @@ namespace dnSpy.Documents.TreeView {
 				return;
 			filenames = GetFiles(filenames);
 
-			ResolveWindowsShortcutFiles(filenames);
-			ResolveInternetShortcutFiles(filenames);
+			ResolveShortcutFiles(filenames);
 
 			var origFilenames = filenames;
 			var documents = DocumentService.GetDocuments();
@@ -809,55 +808,61 @@ namespace dnSpy.Documents.TreeView {
 				TreeView.SelectItems(new[] { newSelectedNode });
 		}
 
-		static void ResolveWindowsShortcutFiles(string[] filenames) {
+		static void ResolveShortcutFiles(string[] filenames) {
 			const string WshShellClassGUID = "72C24DD5-D70A-438B-8A42-98424B88AFB8";
 
 			IWshRuntimeLibrary.WshShell? ws;
 			try {
 				var typeFromClsid = Marshal.GetTypeFromCLSID(new Guid(WshShellClassGUID));
 				if (typeFromClsid is null)
-					return;
-				ws = (IWshRuntimeLibrary.WshShell?)Activator.CreateInstance(typeFromClsid);
+					ws = null;
+				else
+					ws = (IWshRuntimeLibrary.WshShell?)Activator.CreateInstance(typeFromClsid);
 			}
 			catch {
-				return;
+				ws = null;
 			}
 
-			if (ws is null)
-				return;
+			var visitedFilenames = new HashSet<string>();
 
-			for (var i = 0; i < filenames.Length; i++) {
-				// The method seems to only accept files with a lnk extension. If it has no such
-				// extension, it's not a shortcut and we won't get a slow thrown exception.
-				if (!filenames[i].EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
-					continue;
-				// Check if the file exists. If it doesn't we won't get a slow thrown exception.
-				if (!File.Exists(filenames[i]))
-					continue;
-				try {
-					var sc = (IWshRuntimeLibrary.IWshShortcut?)ws.CreateShortcut(filenames[i]);
-					if (sc is not null)
-						filenames[i] = sc.TargetPath;
-				}
-				catch {
-					break;
-				}
-			}
-		}
-
-		static void ResolveInternetShortcutFiles(string[] filenames) {
 			for (var i = 0; i < filenames.Length; i++) {
 				var filename = filenames[i];
-				if (!filename.EndsWith(".url", StringComparison.OrdinalIgnoreCase))
-					continue;
-				if (!File.Exists(filename))
-					continue;
-				var urlString = InternetShortcutFileFormat.GetUrlFromInternetShortcutFile(filename);
-				if (!Uri.TryCreate(urlString, UriKind.Absolute, out var urlUri))
-					continue;
-				if (!urlUri.IsFile)
-					continue;
-				filenames[i] = urlUri.AbsolutePath;
+
+				visitedFilenames.Clear();
+				// Process file resolving shortcuts to their targets until either of the conditions is met:
+				// 1. 'filename' does not exist
+				// 2. 'filename' is not a shortcut file
+				// 3. 'filename' is a file already visited (avoid infinite loops due to circular links)
+				while (true) {
+					if (!File.Exists(filename))
+						break;
+					if (!visitedFilenames.Add(filename))
+						break;
+					var extension = Path.GetExtension(filename);
+					if (extension.Equals(".lnk", StringComparison.OrdinalIgnoreCase) && ws is not null) {
+						try {
+							var sc = (IWshRuntimeLibrary.IWshShortcut?)ws.CreateShortcut(filename);
+							if (sc is null)
+								break;
+							filename = sc.TargetPath;
+						}
+						catch {
+							break;
+						}
+					}
+					else if (extension.Equals(".url", StringComparison.OrdinalIgnoreCase)) {
+						var urlString = InternetShortcutFileFormat.GetUrlFromInternetShortcutFile(filename);
+						if (!Uri.TryCreate(urlString, UriKind.Absolute, out var urlUri))
+							break;
+						if (!urlUri.IsFile)
+							break;
+						filename = urlUri.AbsolutePath;
+					}
+					else
+						break;
+				}
+
+				filenames[i] = filename;
 			}
 		}
 
