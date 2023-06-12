@@ -547,7 +547,7 @@ namespace dnSpy.AsmEditor.Module {
 				return;
 
 			var filename = pickFilename.GetFilename(null, null, PickFilenameConstants.NetModuleFilter);
-			if (string.IsNullOrEmpty(filename))
+			if (string2.IsNullOrEmpty(filename))
 				return;
 
 			var fm = appService.DocumentTreeView.DocumentService;
