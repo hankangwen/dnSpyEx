@@ -563,6 +563,30 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			}
 		}
 
+		internal DbgDotNetValue CreateInstance2(DmdConstructorInfo ctor, ILValue[] arguments) {
+			DbgDotNetValueResult res;
+			DbgDotNetArrayDimensionInfo[] dimensionInfos;
+			switch (ctor.SpecialMethodKind) {
+			case DmdSpecialMethodKind.Array_Constructor1:
+				dimensionInfos = new DbgDotNetArrayDimensionInfo[arguments.Length];
+				for (int i = 0; i < dimensionInfos.Length; i++)
+					dimensionInfos[i] = new DbgDotNetArrayDimensionInfo(0, (uint)ReadInt32(arguments[i]));
+				res = runtime.CreateArray(evalInfo, ctor.ReflectedType!.GetElementType()!, dimensionInfos);
+				return RecordValue(res);
+
+			case DmdSpecialMethodKind.Array_Constructor2:
+				dimensionInfos = new DbgDotNetArrayDimensionInfo[arguments.Length / 2];
+				for (int i = 0; i < dimensionInfos.Length; i++)
+					dimensionInfos[i] = new DbgDotNetArrayDimensionInfo(ReadInt32(arguments[i * 2]), (uint)ReadInt32(arguments[i * 2 + 1]));
+				res = runtime.CreateArray(evalInfo, ctor.ReflectedType!.GetElementType()!, dimensionInfos);
+				return RecordValue(res);
+
+			default:
+				res = CreateInstanceCore(ctor, arguments);
+				return RecordValue(res);
+			}
+		}
+
 		DbgDotNetValueResult CreateInstanceCore(DmdConstructorInfo ctor, ILValue[] arguments) {
 			if (ctor.IsStatic)
 				return DbgDotNetValueResult.CreateError(PredefinedEvaluationErrorMessages.InternalDebuggerError);
@@ -603,6 +627,21 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		}
 
 		public override bool CallStaticIndirect(DmdMethodSignature methodSig, ILValue methodAddress, ILValue[] arguments, out ILValue? returnValue) {
+			if (methodAddress is FunctionPointerILValue fnPtrValue) {
+				var targetMethod = fnPtrValue.Method;
+
+				if (!methodSig.Equals(fnPtrValue.Method.GetMethodSignature())) {
+					returnValue = null;
+					return false;
+				}
+
+				if (!targetMethod.IsStatic || fnPtrValue.IsVirtual && !fnPtrValue.VirtualThisObject!.IsNull) {
+					returnValue = null;
+					return false;
+				}
+
+				return CallStatic(targetMethod, arguments, out returnValue);
+			}
 			returnValue = null;
 			return false;//TODO:
 		}
@@ -856,7 +895,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 			var appDomain = value.Type.AppDomain;
 			var typeType = appDomain.System_Type;
-			if (value.Type != typeType)
+			if (!value.Type.CanCastTo(typeType))
 				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 
 			var getAssemblyQualifiedNameMethod = typeType.GetMethod("get_" + nameof(Type.AssemblyQualifiedName), DmdSignatureCallingConvention.Default | DmdSignatureCallingConvention.HasThis, 0, appDomain.System_String, Array.Empty<DmdType>(), throwOnError: true)!;
@@ -899,7 +938,9 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			return new Guid(arr);
 		}
 
-		byte[] IDebuggerRuntime.ToByteArray(ILValue value) {
+		byte[]? IDebuggerRuntime.ToByteArray(ILValue value) {
+			if (value is NullObjectRefILValue)
+				return null;
 			if (value is not ArrayILValue arrayIlValue)
 				throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 			if (value.Type is null || !value.Type.IsSZArray ||
@@ -994,7 +1035,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 			return value;
 		}
 
-		void IDebuggerRuntime.CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[] customTypeInfoPayload) {
+		void IDebuggerRuntime.CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[]? customTypeInfoPayload) {
 			//TODO:
 			throw new InterpreterMessageException(PredefinedEvaluationErrorMessages.InternalDebuggerError);
 		}

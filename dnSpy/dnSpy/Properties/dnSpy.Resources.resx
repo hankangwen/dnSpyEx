@@ -195,6 +195,9 @@
   <data name="CopyMDTokenCommand" xml:space="preserve">
     <value>_Copy MD Token</value>
   </data>
+  <data name="CopyFullNameCommand" xml:space="preserve">
+    <value>Copy Full Name</value>
+  </data>
   <data name="CouldNotStartBrowser" xml:space="preserve">
     <value>Could not start browser</value>
   </data>

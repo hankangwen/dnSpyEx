@@ -26,7 +26,7 @@ using System.IO;
 using System.Text;
 
 namespace dnSpy.BamlDecompiler.Xaml {
-	class XamlPathDeserializer {
+	static class XamlPathDeserializer {
 		enum PathOpCodes {
 			BeginFigure,
 			LineTo,
@@ -79,7 +79,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 		}
 
 		public static string Deserialize(BinaryReader reader) {
-			bool end = false;
+			bool end = false, addFinalZ = false;
 			var sb = new StringBuilder();
 
 			Point pt1, pt2, pt3;
@@ -92,6 +92,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 					case PathOpCodes.BeginFigure: {
 						ReadPointBoolBool(reader, b, out pt1, out bool filled, out bool closed);
 
+						addFinalZ = closed;
 						sb.AppendFormat("M{0} ", pt1);
 						break;
 					}
@@ -171,6 +172,9 @@ namespace dnSpy.BamlDecompiler.Xaml {
 					}
 				}
 			}
+
+			if (addFinalZ)
+				sb.Append('Z');
 
 			return sb.ToString().Trim();
 		}

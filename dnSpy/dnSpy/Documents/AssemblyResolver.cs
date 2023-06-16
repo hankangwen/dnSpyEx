@@ -526,7 +526,7 @@ namespace dnSpy.Documents {
 			var fwkKind = GetFrameworkKind(sourceModule, out var netVersion, out var sourceModuleDirectoryHint);
 			if (fwkKind == FrameworkKind.DotNetStandard) {
 				if (netVersion is not null &&
-					dotNetPathProvider.TryGetLatestNetStandardCompatibleVersion(netVersion, out var coreVersion))
+					dotNetPathProvider.TryGetClosestNetStandardCompatibleVersion(netVersion, out var coreVersion))
 					netVersion = coreVersion;
 				else {
 					fwkKind = FrameworkKind.DotNetFramework4;

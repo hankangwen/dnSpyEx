@@ -249,7 +249,6 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 		internal void RaiseModulesRefreshed(DbgModule module) => dbgModuleMemoryRefreshedNotifier.RaiseModulesRefreshed(new[] { module });
 
 		internal DmdDynamicModuleHelperImpl GetDynamicModuleHelper(DnModule dnModule) {
-			Debug.Assert(dnModule.IsDynamic);
 			lock (lockObj) {
 				if (!toDynamicModuleHelper.TryGetValue(dnModule.CorModule, out var helper))
 					toDynamicModuleHelper.Add(dnModule.CorModule, helper = new DmdDynamicModuleHelperImpl(this));
@@ -272,12 +271,13 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				token = MDAPI.GetTypeDefEnclosingType(mdi, token);
 			}
 
-			list.Reverse();
-
 			if (list.Count == 0)
 				return null;
 			if (list.Count == 1)
 				return list[0];
+
+			list.Reverse();
+
 			var sb = new StringBuilder();
 			for (int i = 0; i < list.Count; i++) {
 				if (i > 0)
@@ -811,8 +811,12 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 					else
 						errMsg = dnSpy_Debugger_DotNet_CorDebug_Resources.Error_CouldNotStartDebuggerRequireAdminPrivLvl;
 				}
-				else
-					errMsg = string.Format(dnSpy_Debugger_DotNet_CorDebug_Resources.Error_CouldNotStartDebuggerCheckAccessToFile, options.Filename ?? "<???>", ex.Message);
+				else {
+					string exMessage = ex.Message;
+					if (cex is not null)
+						exMessage += $" (0x{cex.ErrorCode:X8})";
+					errMsg = string.Format(dnSpy_Debugger_DotNet_CorDebug_Resources.Error_CouldNotStartDebuggerCheckAccessToFile, options.Filename ?? "<???>", exMessage);
+				}
 
 				SendMessage(new DbgMessageConnected(errMsg, GetMessageFlags()));
 				return;

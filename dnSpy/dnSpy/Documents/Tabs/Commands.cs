@@ -34,6 +34,7 @@ using dnSpy.Contracts.Documents.TreeView;
 using dnSpy.Contracts.Extension;
 using dnSpy.Contracts.Images;
 using dnSpy.Contracts.Menus;
+using dnSpy.Contracts.MVVM;
 using dnSpy.Contracts.Settings.AppearanceCategory;
 using dnSpy.Contracts.Text.Classification;
 using dnSpy.Contracts.ToolBars;
@@ -51,26 +52,22 @@ namespace dnSpy.Documents.Tabs {
 		readonly IDocumentTreeView documentTreeView;
 		readonly IAppWindow appWindow;
 		readonly AssemblyExplorerMostRecentlyUsedList mruList;
+		readonly IPickFilename pickFilename;
 
 		[ImportingConstructor]
-		OpenFileInit(IDocumentTreeView documentTreeView, IAppWindow appWindow, AssemblyExplorerMostRecentlyUsedList mruList) {
+		OpenFileInit(IDocumentTreeView documentTreeView, IAppWindow appWindow, AssemblyExplorerMostRecentlyUsedList mruList, IPickFilename pickFilename) {
 			this.documentTreeView = documentTreeView;
 			this.appWindow = appWindow;
 			this.mruList = mruList;
+			this.pickFilename = pickFilename;
 			appWindow.MainWindowCommands.Add(ApplicationCommands.Open, (s, e) => { Open(); e.Handled = true; }, (s, e) => e.CanExecute = true);
 		}
 
-		static readonly string DotNetAssemblyOrModuleFilter = $"{dnSpy_Resources.DotNetExes} (*.exe, *.dll, *.netmodule, *.winmd)|*.exe;*.dll;*.netmodule;*.winmd|{dnSpy_Resources.AllFiles} (*.*)|*.*";
-
 		void Open() {
-			var openDlg = new OpenFileDialog {
-				Filter = DotNetAssemblyOrModuleFilter,
-				RestoreDirectory = true,
-				Multiselect = true,
-			};
-			if (openDlg.ShowDialog() != true)
+			var fileNames = pickFilename.GetFilenames(null, null, PickFilenameConstants.DotNetAssemblyOrModuleFilter);
+			if (fileNames.Length == 0)
 				return;
-			OpenDocumentsHelper.OpenDocuments(documentTreeView, appWindow.MainWindow, mruList, openDlg.FileNames);
+			OpenDocumentsHelper.OpenDocuments(documentTreeView, appWindow.MainWindow, mruList, fileNames);
 		}
 	}
 

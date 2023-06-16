@@ -33,9 +33,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 		internal const TypeFormatterOptions TypeFormatterOptions = Formatters.TypeFormatterOptions.IntrinsicTypeKeywords | Formatters.TypeFormatterOptions.Namespaces;
 		const string Keyword_this = "this";
 		const string Keyword_params = "params";
-		const string Keyword_out = "out";
-		const string Keyword_ref = "ref";
-		const string Keyword_in = "in";
+		const string Keyword_arglist = "__arglist";
 		const string GenericsParenOpen = "<";
 		const string GenericsParenClose = ">";
 		const string IndexerParenOpen = "[";
@@ -88,7 +86,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 			AddParens(sb, baseExpression, addParens);
 			AddCastEnd(sb, castType);
 			sb.Append('[');
-			sb.Append(index.ToString());
+			sb.Append(index);
 			sb.Append(']');
 			return ObjectCache.FreeAndToString(ref sb);
 		}
@@ -103,7 +101,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 			for (int i = 0; i < indexes.Length; i++) {
 				if (i > 0)
 					sb.Append(',');
-				sb.Append(indexes[i].ToString());
+				sb.Append(indexes[i]);
 			}
 			sb.Append(']');
 			return ObjectCache.FreeAndToString(ref sb);
@@ -153,7 +151,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 						WriteGenericMethodArguments(output, method, typeFormatter);
 						if (isExplicitOrImplicit) {
 							output.Write(DbgTextColor.Text, " ");
-							typeFormatter.Format(methodInfo.ReturnType, null);
+							typeFormatter.Format(methodInfo.ReturnType, null, CustomAttributeAdditionalTypeInfoProvider.Create(methodInfo.ReturnParameter), methodInfo.ReturnParameter, TypeFormatterUtils.IsReadOnlyMethod(methodInfo));
 						}
 					}
 					else {
@@ -177,7 +175,6 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 		void WriteMethodParameterList(IDbgTextWriter output, DmdMethodBase method, Formatters.CSharp.CSharpTypeFormatter typeFormatter, IList<DmdType> parameterTypes, string openParen, string closeParen) {
 			output.Write(DbgTextColor.Punctuation, openParen);
 
-			int baseIndex = method.IsStatic ? 0 : 1;
 			var parameters = method.GetParameters();
 			for (int i = 0; i < parameterTypes.Count; i++) {
 				if (i > 0) {
@@ -190,34 +187,19 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.CSharp {
 					output.Write(DbgTextColor.Keyword, Keyword_params);
 					output.Write(DbgTextColor.Text, " ");
 				}
-				var parameterType = parameterTypes[i];
-				WriteRefIfByRef(output, param);
-				if (parameterType.IsByRef)
-					parameterType = parameterType.GetElementType()!;
-				typeFormatter.Format(parameterType, null);
+				typeFormatter.Format(parameterTypes[i], null, CustomAttributeAdditionalTypeInfoProvider.Create(param), param);
+			}
+
+			var signature = method.GetMethodSignature();
+			if ((signature.Flags & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.VarArg) {
+				if (parameters.Count > 0) {
+					output.Write(DbgTextColor.Punctuation, ",");
+					output.Write(DbgTextColor.Text, " ");
+				}
+				output.Write(DbgTextColor.Keyword, Keyword_arglist);
 			}
 
 			output.Write(DbgTextColor.Punctuation, closeParen);
-		}
-
-		void WriteRefIfByRef(IDbgTextWriter output, DmdParameterInfo? param) {
-			if (param is null)
-				return;
-			var type = param.ParameterType;
-			if (!type.IsByRef)
-				return;
-			if (!param.IsIn && param.IsOut) {
-				output.Write(DbgTextColor.Keyword, Keyword_out);
-				output.Write(DbgTextColor.Text, " ");
-			}
-			else if (!param.IsIn && !param.IsOut && TypeFormatterUtils.IsReadOnlyParameter(param)) {
-				output.Write(DbgTextColor.Keyword, Keyword_in);
-				output.Write(DbgTextColor.Text, " ");
-			}
-			else {
-				output.Write(DbgTextColor.Keyword, Keyword_ref);
-				output.Write(DbgTextColor.Text, " ");
-			}
 		}
 
 		void WriteGenericMethodArguments(IDbgTextWriter output, DmdMethodBase method, Formatters.CSharp.CSharpTypeFormatter typeFormatter) {

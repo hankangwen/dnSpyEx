@@ -124,7 +124,16 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 
 		void WriteIdentifier(string? id, DbgTextColor color) => OutputWrite(GetFormattedIdentifier(id), color);
 
-		public void Format(DmdType type, DbgDotNetValue? value) {
+		struct TypeFormatterState {
+			public int TupleNameIndex;
+		}
+
+		public void Format(DmdType type, DbgDotNetValue? value, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null) {
+			TypeFormatterState state = default;
+			FormatCore(type, value, additionalTypeInfoProvider, ref state);
+		}
+
+		void FormatCore(DmdType type, DbgDotNetValue? value, IAdditionalTypeInfoProvider? additionalTypeInfoProvider, ref TypeFormatterState state) {
 			if (type is null)
 				throw new ArgumentNullException(nameof(type));
 
@@ -144,7 +153,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 						type = type.GetElementType()!;
 					} while (type.IsArray);
 					var t = arrayTypesList[arrayTypesList.Count - 1];
-					Format(t.type.GetElementType()!, null);
+					FormatCore(t.type.GetElementType()!, null, additionalTypeInfoProvider, ref state);
 					foreach (var tuple in arrayTypesList) {
 						var aryType = tuple.type;
 						var aryValue = tuple.value;
@@ -193,14 +202,14 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 					break;
 
 				case DmdTypeSignatureKind.Pointer:
-					Format(type.GetElementType()!, null);
+					FormatCore(type.GetElementType()!, null, additionalTypeInfoProvider, ref state);
 					OutputWrite("*", DbgTextColor.Operator);
 					break;
 
 				case DmdTypeSignatureKind.ByRef:
 					OutputWrite(BYREF_KEYWORD, DbgTextColor.Keyword);
 					WriteSpace();
-					Format(type.GetElementType()!, disposeThisValue = value?.LoadIndirect().Value);
+					FormatCore(type.GetElementType()!, disposeThisValue = value?.LoadIndirect().Value, additionalTypeInfoProvider, ref state);
 					break;
 
 				case DmdTypeSignatureKind.TypeGenericParameter:
@@ -214,63 +223,68 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 				case DmdTypeSignatureKind.Type:
 				case DmdTypeSignatureKind.GenericInstance:
 					if (type.IsNullable) {
-						Format(type.GetNullableElementType(), null);
+						FormatCore(type.GetNullableElementType(), null, additionalTypeInfoProvider, ref state);
 						OutputWrite("?", DbgTextColor.Operator);
+						break;
 					}
-					else if (TypeFormatterUtils.IsTupleType(type)) {
-						OutputWrite(TUPLE_OPEN_PAREN, DbgTextColor.Punctuation);
-						DmdType? tupleType = type;
-						int tupleIndex = 0;
-						for (;;) {
-							tupleType = WriteTupleFields(tupleType, ref tupleIndex);
-							if (tupleType is not null)
-								WriteCommaSpace();
-							else
-								break;
+					if (TypeFormatterUtils.IsSystemValueTuple(type, out int tupleCardinality)) {
+						int tupleIndex = state.TupleNameIndex;
+						state.TupleNameIndex += tupleCardinality;
+						if (tupleCardinality > 1) {
+							OutputWrite(TUPLE_OPEN_PAREN, DbgTextColor.Punctuation);
+							var tupleType = type;
+							for (;;) {
+								tupleType = WriteTupleFields(tupleType, ref tupleIndex, additionalTypeInfoProvider, ref state);
+								if (tupleType is not null) {
+									WriteCommaSpace();
+									state.TupleNameIndex += TypeFormatterUtils.GetTupleArity(tupleType);
+								}
+								else
+									break;
+							}
+							OutputWrite(TUPLE_CLOSE_PAREN, DbgTextColor.Punctuation);
+							break;
 						}
-						OutputWrite(TUPLE_CLOSE_PAREN, DbgTextColor.Punctuation);
+					}
+					var genericArgs = type.GetGenericArguments();
+					int genericArgsIndex = 0;
+					KeywordType keywordType;
+					if (type.DeclaringType is null) {
+						keywordType = GetKeywordType(type);
+						if (keywordType == KeywordType.NoKeyword)
+							WriteNamespace(type);
+						WriteTypeName(type, keywordType);
+						WriteGenericArguments(type, genericArgs, ref genericArgsIndex, additionalTypeInfoProvider, ref state);
 					}
 					else {
-						var genericArgs = type.GetGenericArguments();
-						int genericArgsIndex = 0;
-						KeywordType keywordType;
-						if (type.DeclaringType is null) {
-							keywordType = GetKeywordType(type);
-							if (keywordType == KeywordType.NoKeyword)
-								WriteNamespace(type);
-							WriteTypeName(type, keywordType);
-							WriteGenericArguments(type, genericArgs, ref genericArgsIndex);
-						}
-						else {
-							var typesList = new List<DmdType>();
+						var typesList = new List<DmdType>();
+						typesList.Add(type);
+						while (type.DeclaringType is not null) {
+							type = type.DeclaringType;
 							typesList.Add(type);
-							while (type.DeclaringType is not null) {
-								type = type.DeclaringType;
-								typesList.Add(type);
-							}
-							keywordType = GetKeywordType(type);
-							if (keywordType == KeywordType.NoKeyword)
-								WriteNamespace(type);
-							for (int i = typesList.Count - 1; i >= 0; i--) {
-								WriteTypeName(typesList[i], i == 0 ? keywordType : KeywordType.NoKeyword);
-								WriteGenericArguments(typesList[i], genericArgs, ref genericArgsIndex);
-								if (i != 0)
-									OutputWrite(".", DbgTextColor.Operator);
-							}
+						}
+						keywordType = GetKeywordType(type);
+						if (keywordType == KeywordType.NoKeyword)
+							WriteNamespace(type);
+						for (int i = typesList.Count - 1; i >= 0; i--) {
+							WriteTypeName(typesList[i], i == 0 ? keywordType : KeywordType.NoKeyword);
+							WriteGenericArguments(typesList[i], genericArgs, ref genericArgsIndex, additionalTypeInfoProvider, ref state);
+							if (i != 0)
+								OutputWrite(".", DbgTextColor.Operator);
 						}
 					}
 					break;
 
 				case DmdTypeSignatureKind.FunctionPointer:
 					var sig = type.GetFunctionPointerMethodSignature();
-					Format(sig.ReturnType, null);
+					FormatCore(sig.ReturnType, null, additionalTypeInfoProvider, ref state);
 					WriteSpace();
 					OutputWrite(METHOD_OPEN_PAREN, DbgTextColor.Punctuation);
 					var types = sig.GetParameterTypes();
 					for (int i = 0; i < types.Count; i++) {
 						if (i > 0)
 							WriteCommaSpace();
-						Format(types[i], null);
+						FormatCore(types[i], null, additionalTypeInfoProvider, ref state);
 					}
 					types = sig.GetVarArgsParameterTypes();
 					if (types.Count > 0) {
@@ -279,7 +293,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 						OutputWrite("...", DbgTextColor.Punctuation);
 						for (int i = 0; i < types.Count; i++) {
 							WriteCommaSpace();
-							Format(types[i], null);
+							FormatCore(types[i], null, additionalTypeInfoProvider, ref state);
 						}
 					}
 					OutputWrite(METHOD_CLOSE_PAREN, DbgTextColor.Punctuation);
@@ -301,7 +315,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 			}
 		}
 
-		void WriteGenericArguments(DmdType type, IList<DmdType> genericArgs, ref int genericArgsIndex) {
+		void WriteGenericArguments(DmdType type, IList<DmdType> genericArgs, ref int genericArgsIndex, IAdditionalTypeInfoProvider? additionalTypeInfoProvider, ref TypeFormatterState state) {
 			var gas = type.GetGenericArguments();
 			if (genericArgsIndex < genericArgs.Count && genericArgsIndex < gas.Count) {
 				OutputWrite(GENERICS_OPEN_PAREN, DbgTextColor.Punctuation);
@@ -311,13 +325,13 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 				for (int j = startIndex; j < genericArgs.Count && j < gas.Count; j++, genericArgsIndex++) {
 					if (j > startIndex)
 						WriteCommaSpace();
-					Format(genericArgs[j], null);
+					FormatCore(genericArgs[j], null, additionalTypeInfoProvider, ref state);
 				}
 				OutputWrite(GENERICS_CLOSE_PAREN, DbgTextColor.Punctuation);
 			}
 		}
 
-		DmdType? WriteTupleFields(DmdType type, ref int index) {
+		DmdType? WriteTupleFields(DmdType type, ref int index, IAdditionalTypeInfoProvider? additionalTypeInfoProvider, ref TypeFormatterState state) {
 			var args = type.GetGenericArguments();
 			Debug.Assert(0 < args.Count && args.Count <= TypeFormatterUtils.MAX_TUPLE_ARITY);
 			if (args.Count > TypeFormatterUtils.MAX_TUPLE_ARITY) {
@@ -327,16 +341,14 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 			for (int i = 0; i < args.Count && i < TypeFormatterUtils.MAX_TUPLE_ARITY - 1; i++) {
 				if (i > 0)
 					WriteCommaSpace();
-				//TODO: Write tuple name used in source
-				string? fieldName = null;
+				string? fieldName = additionalTypeInfoProvider?.GetTupleElementName(index++);
 				if (fieldName is not null) {
 					OutputWrite(fieldName, DbgTextColor.InstanceField);
 					WriteSpace();
 					OutputWrite("As", DbgTextColor.Keyword);
 					WriteSpace();
 				}
-				Format(args[i], null);
-				index++;
+				FormatCore(args[i], null, additionalTypeInfoProvider, ref state);
 			}
 			if (args.Count == TypeFormatterUtils.MAX_TUPLE_ARITY)
 				return args[TypeFormatterUtils.MAX_TUPLE_ARITY - 1];

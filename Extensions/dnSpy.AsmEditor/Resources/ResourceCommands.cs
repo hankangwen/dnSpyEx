@@ -519,16 +519,18 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory) {
+			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateFileResourceCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateFileResourceCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateFileResourceCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_EDIT_GUID, Header = "res:CreateFileResourceCommand", Group = MenuConstants.GROUP_APP_MENU_EDIT_ASMED_NEW, Order = 100)]
@@ -536,17 +538,19 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateFileResourceCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateFileResourceCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateFileResourceCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(Header = "res:CreateFileResourceCommand", Group = MenuConstants.GROUP_CTX_DOCVIEWER_ASMED_NEW, Order = 100)]
@@ -554,22 +558,24 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsEnabled(CodeContext context) => context.IsDefinition && CreateFileResourceCommand.CanExecute(context.Nodes);
-			public override void Execute(CodeContext context) => CreateFileResourceCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(CodeContext context) => CreateFileResourceCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		static bool CanExecute(DocumentTreeNodeData[] nodes) => ResUtils.CanExecuteResourceListCommand(nodes);
 
-		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, DocumentTreeNodeData[] nodes) {
+		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename, DocumentTreeNodeData[] nodes) {
 			if (!CanExecute(nodes))
 				return;
 
@@ -580,13 +586,7 @@ namespace dnSpy.AsmEditor.Resources {
 			if (module is null)
 				throw new InvalidOperationException();
 
-			var dlg = new WF.OpenFileDialog {
-				RestoreDirectory = true,
-				Multiselect = true,
-			};
-			if (dlg.ShowDialog() != WF.DialogResult.OK)
-				return;
-			var fnames = dlg.FileNames;
+			var fnames = pickFilename.GetFilenames(null, null);
 			if (fnames.Length == 0)
 				return;
 
@@ -1175,16 +1175,18 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory) {
+			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateImageResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateImageResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateImageResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_EDIT_GUID, Header = "res:CreateBitMapIconResourceCommand", Icon = DsImagesAttribute.NewImage, Group = MenuConstants.GROUP_APP_MENU_EDIT_ASMED_NEW, Order = 140)]
@@ -1192,17 +1194,19 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateImageResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateImageResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateImageResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(Header = "res:CreateBitMapIconResourceCommand", Icon = DsImagesAttribute.NewImage, Group = MenuConstants.GROUP_CTX_DOCVIEWER_ASMED_NEW, Order = 140)]
@@ -1210,24 +1214,26 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsEnabled(CodeContext context) => context.IsDefinition && CreateImageResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(CodeContext context) => CreateImageResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(CodeContext context) => CreateImageResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		static bool CanExecute(DocumentTreeNodeData[] nodes) =>
 			nodes.Length == 1 &&
 			(nodes[0] is ResourceElementSetNode || nodes[0].TreeNode.Parent?.Data is ResourceElementSetNode);
 
-		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, DocumentTreeNodeData[] nodes) {
+		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename, DocumentTreeNodeData[] nodes) {
 			if (!CanExecute(nodes))
 				return;
 
@@ -1241,14 +1247,7 @@ namespace dnSpy.AsmEditor.Resources {
 			if (module is null)
 				throw new InvalidOperationException();
 
-			var dlg = new WF.OpenFileDialog {
-				RestoreDirectory = true,
-				Multiselect = true,
-				Filter = PickFilenameConstants.ImagesFilter,
-			};
-			if (dlg.ShowDialog() != WF.DialogResult.OK)
-				return;
-			var fnames = dlg.FileNames;
+			var fnames = pickFilename.GetFilenames(null, null, PickFilenameConstants.ImagesFilter);
 			if (fnames.Length == 0)
 				return;
 
@@ -1404,16 +1403,18 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory) {
+			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateByteArrayResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_EDIT_GUID, Header = "res:CreateByteArrayResourceCommand", Group = MenuConstants.GROUP_APP_MENU_EDIT_ASMED_NEW, Order = 170)]
@@ -1421,17 +1422,19 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateByteArrayResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(Header = "res:CreateByteArrayResourceCommand", Group = MenuConstants.GROUP_CTX_DOCVIEWER_ASMED_NEW, Order = 170)]
@@ -1439,30 +1442,32 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsEnabled(CodeContext context) => context.IsDefinition && CreateByteArrayResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(CodeContext context) => CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(CodeContext context) => CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		static bool CanExecute(DocumentTreeNodeData[] nodes) =>
 			nodes.Length == 1 &&
 			(nodes[0] is ResourceElementSetNode || nodes[0].TreeNode.Parent?.Data is ResourceElementSetNode);
 
-		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, DocumentTreeNodeData[] nodes) {
+		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename, DocumentTreeNodeData[] nodes) {
 			if (!CanExecute(nodes))
 				return;
-			Execute(undoCommandService, appService, resourceNodeFactory, nodes, ResourceTypeCode.ByteArray, (a, b) => new CreateByteArrayResourceElementCommand(a, b));
+			Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, nodes, ResourceTypeCode.ByteArray, (a, b) => new CreateByteArrayResourceElementCommand(a, b));
 		}
 
-		internal static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, DocumentTreeNodeData[] nodes, ResourceTypeCode typeCode, Func<ResourceElementSetNode, NodeAndResourceElement[], IUndoCommand> createCommand) {
+		internal static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename, DocumentTreeNodeData[] nodes, ResourceTypeCode typeCode, Func<ResourceElementSetNode, NodeAndResourceElement[], IUndoCommand> createCommand) {
 			var rsrcSetNode = nodes[0] as ResourceElementSetNode;
 			if (rsrcSetNode is null)
 				rsrcSetNode = nodes[0].TreeNode.Parent!.Data as ResourceElementSetNode;
@@ -1473,14 +1478,7 @@ namespace dnSpy.AsmEditor.Resources {
 			if (module is null)
 				throw new InvalidOperationException();
 
-			var dlg = new WF.OpenFileDialog {
-				RestoreDirectory = true,
-				Multiselect = true,
-				Filter = PickFilenameConstants.AnyFilenameFilter,
-			};
-			if (dlg.ShowDialog() != WF.DialogResult.OK)
-				return;
-			var fnames = dlg.FileNames;
+			var fnames = pickFilename.GetFilenames(null, null);
 			if (fnames.Length == 0)
 				return;
 
@@ -1520,16 +1518,18 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory) {
+			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateStreamResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateStreamResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateStreamResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_EDIT_GUID, Header = "res:CreateStreamResourceCommand", Group = MenuConstants.GROUP_APP_MENU_EDIT_ASMED_NEW, Order = 180)]
@@ -1537,17 +1537,19 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => CreateStreamResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => CreateStreamResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(AsmEditorContext context) => CreateStreamResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(Header = "res:CreateStreamResourceCommand", Group = MenuConstants.GROUP_CTX_DOCVIEWER_ASMED_NEW, Order = 180)]
@@ -1555,27 +1557,29 @@ namespace dnSpy.AsmEditor.Resources {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
 			readonly IResourceNodeFactory resourceNodeFactory;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory)
+			CodeCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
 				this.resourceNodeFactory = resourceNodeFactory;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsEnabled(CodeContext context) => context.IsDefinition && CreateStreamResourceElementCommand.CanExecute(context.Nodes);
-			public override void Execute(CodeContext context) => CreateStreamResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, context.Nodes);
+			public override void Execute(CodeContext context) => CreateStreamResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, context.Nodes);
 		}
 
 		static bool CanExecute(DocumentTreeNodeData[] nodes) =>
 			nodes.Length == 1 &&
 			(nodes[0] is ResourceElementSetNode || nodes[0].TreeNode.Parent?.Data is ResourceElementSetNode);
 
-		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, DocumentTreeNodeData[] nodes) {
+		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IResourceNodeFactory resourceNodeFactory, IPickFilename pickFilename, DocumentTreeNodeData[] nodes) {
 			if (!CanExecute(nodes))
 				return;
-			CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, nodes, ResourceTypeCode.Stream, (a, b) => new CreateStreamResourceElementCommand(a, b));
+			CreateByteArrayResourceElementCommand.Execute(undoCommandService, appService, resourceNodeFactory, pickFilename, nodes, ResourceTypeCode.Stream, (a, b) => new CreateStreamResourceElementCommand(a, b));
 		}
 
 		CreateStreamResourceElementCommand(ResourceElementSetNode rsrcSetNode, NodeAndResourceElement[] nodes)

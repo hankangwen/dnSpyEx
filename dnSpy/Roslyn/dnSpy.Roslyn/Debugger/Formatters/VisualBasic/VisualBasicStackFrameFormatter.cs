@@ -49,6 +49,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 		const string Keyword_ReadOnly = "ReadOnly";
 		const string Keyword_Property = "Property";
 		const string Keyword_Event = "Event";
+		const string Keyword_Arglist = "__ArgList";
 		const string MethodParenOpen = "(";
 		const string MethodParenClose = ")";
 		const string GenericsParenOpen = "(";
@@ -113,9 +114,10 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 			return res;
 		}
 
-		void FormatType(DmdType type) {
+		void FormatType(DmdType type, IDmdCustomAttributeProvider? customAttributes = null) {
 			var typeOptions = GetValueFormatterOptions().ToTypeFormatterOptions(showArrayValueSizes: false);
-			new VisualBasicTypeFormatter(output, typeOptions, cultureInfo).Format(type, null);
+			var typeInfoProvider = CustomAttributeAdditionalTypeInfoProvider.Create(customAttributes);
+			new VisualBasicTypeFormatter(output, typeOptions, cultureInfo).Format(type, null, typeInfoProvider);
 		}
 
 		void WriteToken(DmdMemberInfo member) {
@@ -246,10 +248,17 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 						WriteSpace();
 					needSpace = true;
 
-					FormatType(parameterType);
+					FormatType(parameterType, param);
 				}
 				if (showParameterValues)
 					needSpace = FormatValue((uint)(baseIndex + i), needSpace);
+			}
+
+			var signature = method.GetMethodSignature();
+			if ((signature.Flags & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.VarArg) {
+				if (parameters.Count > 0)
+					WriteCommaSpace();
+				OutputWrite(Keyword_Arglist, DbgTextColor.Keyword);
 			}
 
 			OutputWrite(closeParen, DbgTextColor.Punctuation);
@@ -262,12 +271,13 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 			try {
 				parameterValue = runtime.GetParameterValue(evalInfo, index);
 				if (parameterValue.IsNormalResult) {
-					if (needSpace) {
+					if (needSpace)
 						WriteSpace();
-						OutputWrite("=", DbgTextColor.Operator);
-						WriteSpace();
-					}
 					needSpace = true;
+
+					WriteSpace();
+					OutputWrite("=", DbgTextColor.Operator);
+					WriteSpace();
 
 					var valueFormatter = new VisualBasicValueFormatter(output, evalInfo, languageFormatter, valueOptions, cultureInfo);
 					var value = parameterValue.Value;
@@ -425,7 +435,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 			WriteSpace();
 			OutputWrite(Keyword_As, DbgTextColor.Keyword);
 			WriteSpace();
-			FormatType(@event.EventHandlerType);
+			FormatType(@event.EventHandlerType, @event);
 			WriteOffset();
 		}
 
@@ -488,7 +498,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 			WriteSpace();
 			OutputWrite(Keyword_As, DbgTextColor.Keyword);
 			WriteSpace();
-			FormatType(sig.ReturnType);
+			FormatType(sig.ReturnType, method is DmdMethodInfo mi ? mi.ReturnParameter : null);
 		}
 
 		void WriteOperatorInfoString(string s) => OutputWrite(s, 'A' <= s[0] && s[0] <= 'Z' ? DbgTextColor.Keyword : DbgTextColor.Operator);

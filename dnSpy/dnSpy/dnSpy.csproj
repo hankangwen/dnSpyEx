@@ -27,6 +27,20 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
+  <Choose>
+    <!-- Use the x86 icon when publishing the .NET x86 build -->
+    <When Condition="'$(RuntimeIdentifier)' == 'win-x86' And '$(IsDotNetFramework)' == 'false'">
+      <PropertyGroup>
+        <ApplicationIcon>Images\dnSpy-x86.ico</ApplicationIcon>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ApplicationIcon>Images\dnSpy.ico</ApplicationIcon>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
   <ItemGroup>
     <Compile Remove="MainApp\DevBuildWarning.cs" />
     <None Include="MainApp\DevBuildWarning.cs" />
@@ -72,18 +86,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>dnSpy.Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(HasCOMReference)' == 'true' ">
-    <COMReference Include="IWshRuntimeLibrary">
-      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(IsDotNetFramework)' == 'true' ">

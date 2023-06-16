@@ -47,13 +47,13 @@ namespace dnSpy.Contracts.Utilities {
 					throw new ArgumentException();
 			}
 #endif
+			IsReferencePath = isRef;
 			var allPaths = paths.Select(a => a.Path).ToArray();
 			Array.Sort(allPaths, SortPaths);
 			Paths = allPaths;
 			Bitness = firstPath.Bitness;
 			Version = firstPath.Version;
 			SystemVersion = new Version(firstPath.Version.Major, firstPath.Version.Minor, firstPath.Version.Patch, 0);
-			IsReferencePath = isRef;
 
 			foreach (var p in Paths) {
 				if (StringComparer.OrdinalIgnoreCase.Equals(Path.GetFileName(Path.GetDirectoryName(p)), IsReferencePath ? DotNetAppRefDir : DotNetAppDir)) {
@@ -128,6 +128,7 @@ namespace dnSpy.Contracts.Utilities {
 		public readonly string Path;
 		public readonly int Bitness;
 		public readonly FrameworkVersion Version;
+
 		public FrameworkPath(string path, int bitness, FrameworkVersion version) {
 			Path = path ?? throw new ArgumentNullException(nameof(path));
 			Bitness = bitness;
@@ -140,12 +141,14 @@ namespace dnSpy.Contracts.Utilities {
 		public readonly int Minor;
 		public readonly int Patch;
 		public readonly string Extra;
+
 		public FrameworkVersion(int major, int minor, int patch, string extra) {
 			Major = major;
 			Minor = minor;
 			Patch = patch;
 			Extra = extra;
 		}
+
 		public override string ToString() {
 			if (Extra.Length == 0)
 				return $"{Major}.{Minor}.{Patch}";

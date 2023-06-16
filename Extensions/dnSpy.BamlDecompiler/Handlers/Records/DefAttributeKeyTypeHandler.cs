@@ -25,7 +25,7 @@ using dnSpy.BamlDecompiler.Baml;
 using dnSpy.BamlDecompiler.Xaml;
 
 namespace dnSpy.BamlDecompiler.Handlers {
-	internal class DefAttributeTypeHandler : IHandler, IDeferHandler {
+	sealed class DefAttributeTypeHandler : IHandler, IDeferHandler {
 		public BamlRecordType Type => BamlRecordType.DefAttributeKeyType;
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
@@ -36,7 +36,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 		public BamlElement TranslateDefer(XamlContext ctx, BamlNode node, BamlElement parent) {
 			var record = (DefAttributeKeyTypeRecord)((BamlRecordNode)node).Record;
 			var type = ctx.ResolveType(record.TypeId);
-			var typeName = ctx.ToString(parent.Xaml, type);
+			var typeName = type.ToMarkupExtensionName(ctx, parent.Xaml);
 			var key = (XamlResourceKey)node.Annotation;
 
 			var bamlElem = new BamlElement(node);
@@ -45,7 +45,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 			var typeElem = new XElement(ctx.GetKnownNamespace("TypeExtension", XamlContext.KnownNamespace_Xaml, parent.Xaml));
 			typeElem.AddAnnotation(ctx.ResolveType(0xfd4d)); // Known type - TypeExtension
-			typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), typeName));
+			typeElem.Add(new XElement(ctx.GetPseudoName("Ctor"), new XText(typeName).WithAnnotation(IsMemberNameAnnotation.Instance)));
 			bamlElem.Xaml.Element.Add(typeElem);
 
 			key.KeyElement = bamlElem;

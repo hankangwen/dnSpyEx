@@ -49,7 +49,10 @@ namespace dnSpy.Roslyn.Debugger.Formatters {
 			}
 		}
 
-		public static bool IsTupleType(DmdType type) => GetTupleArity(type) >= 0;
+		public static bool IsSystemValueTuple(DmdType type, out int cardinality) {
+			cardinality = GetTupleArity(type);
+			return cardinality > 0;
+		}
 
 		public static int GetTupleArity(DmdType type) {
 			int arity = 0;

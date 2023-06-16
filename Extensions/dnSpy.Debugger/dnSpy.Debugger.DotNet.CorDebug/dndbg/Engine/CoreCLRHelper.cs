@@ -24,6 +24,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using dndbg.COM.CorDebug;
+using dndbg.COM.MetaHost;
+using dnlib.PE;
+using dnSpy.Contracts.Utilities;
 using dnSpy.Debugger.Shared;
 
 namespace dndbg.Engine {
@@ -37,6 +40,87 @@ namespace dndbg.Engine {
 		}
 	}
 
+	sealed class CLRDebuggingLibraryProvider : ICLRDebuggingLibraryProvider2, ICLRDebuggingLibraryProvider3 {
+		readonly string coreclrFileName;
+		readonly DotNetPathProvider dotNetPathProvider;
+
+		public CLRDebuggingLibraryProvider(string coreclrFileName) {
+			this.coreclrFileName = coreclrFileName;
+			dotNetPathProvider = new DotNetPathProvider();
+		}
+
+		public int ProvideLibrary2(string pwszFileName, int dwTimestamp, int dwSizeOfImage, out IntPtr ppResolvedModulePath) {
+			var resultFile = LocateDebuggingLibrary(coreclrFileName, pwszFileName, dwTimestamp, dwSizeOfImage);
+			if (resultFile is not null) {
+				ppResolvedModulePath = Marshal.StringToCoTaskMemUni(resultFile);
+				return 0;
+			}
+
+			ppResolvedModulePath = IntPtr.Zero;
+			return -1;
+		}
+
+		public int ProvideWindowsLibrary(string pwszFileName, string pwszRuntimeModule, LIBRARY_PROVIDER_INDEX_TYPE indexType, int dwTimestamp, int dwSizeOfImage, out IntPtr ppResolvedModulePath) {
+			Debug2.Assert(indexType == LIBRARY_PROVIDER_INDEX_TYPE.Identity);
+			Debug2.Assert(pwszRuntimeModule == coreclrFileName);
+
+			var resultFile = LocateDebuggingLibrary(pwszRuntimeModule, pwszFileName, dwTimestamp, dwSizeOfImage);
+			if (resultFile is not null) {
+				ppResolvedModulePath = Marshal.StringToCoTaskMemUni(resultFile);
+				return 0;
+			}
+
+			ppResolvedModulePath = IntPtr.Zero;
+			return -1;
+		}
+
+		string? LocateDebuggingLibrary(string clrFileName, string libraryName, int timeStamp, int sizeOfImage) {
+			// Check to see if the file is available next to the runtime dll.
+			var runtimeDirectory = Path.GetDirectoryName(clrFileName);
+			string? defaultFileName = null;
+			if (runtimeDirectory is not null) {
+				defaultFileName = Path.Combine(runtimeDirectory, libraryName);
+				if (File.Exists(defaultFileName) && VerifyPEMatches(defaultFileName, timeStamp, sizeOfImage))
+					return defaultFileName;
+			}
+
+			// Check if the user has a matching .NET runtime installed, if so, try to load the file from there.
+			var clrFileVersion = FileVersionInfo.GetVersionInfo(clrFileName);
+			var dotNetVersion = new Version(clrFileVersion.FileMajorPart, clrFileVersion.FileMinorPart, clrFileVersion.FileBuildPart / 100, 0);
+			var dotNetPaths = dotNetPathProvider.TryFindExactRuntimePaths(dotNetVersion, IntPtr.Size * 8);
+			foreach (string dotNetPath in dotNetPaths) {
+				var fileName = Path.Combine(dotNetPath, libraryName);
+				if (File.Exists(fileName) && VerifyPEMatches(fileName, timeStamp, sizeOfImage))
+					return fileName;
+			}
+
+			// Fall back to file path net to the runtime dll
+			return defaultFileName;
+		}
+
+		static bool VerifyPEMatches(string fileName, int timeStamp, int sizeOfImage) {
+			using (var peImage = new PEImage(fileName)) {
+				if (peImage.ImageNTHeaders.FileHeader.TimeDateStamp != timeStamp)
+					return false;
+				if (peImage.ImageNTHeaders.OptionalHeader.SizeOfImage != sizeOfImage)
+					return false;
+
+				switch (peImage.ImageNTHeaders.OptionalHeader.Magic) {
+				case 0x010B when IntPtr.Size == 4:
+				case 0x020B when IntPtr.Size == 8:
+					return true;
+				default:
+					return false;
+				}
+			}
+		}
+
+		public int ProvideUnixLibrary(string pwszFileName, string pwszRuntimeModule, LIBRARY_PROVIDER_INDEX_TYPE indexType, byte[] pbBuildId, int iBuildIdSize, out IntPtr ppResolvedModulePath) {
+			ppResolvedModulePath = IntPtr.Zero;
+			return -1;
+		}
+	}
+
 	static class CoreCLRHelper {
 		static readonly string dbgshimFilename = FileUtilities.GetNativeDllFilename("dbgshim");
 		delegate int GetStartupNotificationEvent(uint debuggeePID, out IntPtr phStartupEvent);
@@ -44,6 +128,7 @@ namespace dndbg.Engine {
 		delegate int EnumerateCLRs(uint debuggeePID, out IntPtr ppHandleArrayOut, out IntPtr ppStringArrayOut, out uint pdwArrayLengthOut);
 		delegate int CreateVersionStringFromModule(uint pidDebuggee, [MarshalAs(UnmanagedType.LPWStr)] string szModuleName, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pBuffer, uint cchBuffer, out uint pdwLength);
 		delegate int CreateDebuggingInterfaceFromVersionEx(CorDebugInterfaceVersion iDebuggerVersion, [MarshalAs(UnmanagedType.LPWStr)] string? szDebuggeeVersion, [MarshalAs(UnmanagedType.IUnknown)] out object ppCordb);
+		delegate int CreateDebuggingInterfaceFromVersion3(CorDebugInterfaceVersion iDebuggerVersion, [MarshalAs(UnmanagedType.LPWStr)] string? szDebuggeeVersion, [MarshalAs(UnmanagedType.LPWStr)] string? szApplicationGroupId, [MarshalAs(UnmanagedType.Interface)] ICLRDebuggingLibraryProvider3 pLibraryProvider, [MarshalAs(UnmanagedType.IUnknown)] out object ppCordb);
 
 		/// <summary>
 		/// Searches for CoreCLR runtimes in a process
@@ -125,6 +210,7 @@ namespace dndbg.Engine {
 			dbgShimState.EnumerateCLRs = GetDelegate<EnumerateCLRs>(handle, "EnumerateCLRs");
 			dbgShimState.CreateVersionStringFromModule = GetDelegate<CreateVersionStringFromModule>(handle, "CreateVersionStringFromModule");
 			dbgShimState.CreateDebuggingInterfaceFromVersionEx = GetDelegate<CreateDebuggingInterfaceFromVersionEx>(handle, "CreateDebuggingInterfaceFromVersionEx");
+			dbgShimState.CreateDebuggingInterfaceFromVersion3 = GetDelegate<CreateDebuggingInterfaceFromVersion3>(handle, "CreateDebuggingInterfaceFromVersion3");
 			if (dbgShimState.GetStartupNotificationEvent is null ||
 				dbgShimState.CloseCLREnumeration is null ||
 				dbgShimState.EnumerateCLRs is null ||
@@ -146,6 +232,7 @@ namespace dndbg.Engine {
 			public EnumerateCLRs? EnumerateCLRs;
 			public CreateVersionStringFromModule? CreateVersionStringFromModule;
 			public CreateDebuggingInterfaceFromVersionEx? CreateDebuggingInterfaceFromVersionEx;
+			public CreateDebuggingInterfaceFromVersion3? CreateDebuggingInterfaceFromVersion3;
 		}
 
 		static T? GetDelegate<T>(IntPtr handle, string funcName) where T : class {
@@ -162,6 +249,23 @@ namespace dndbg.Engine {
 			catch {
 			}
 			return null;
+		}
+
+		static ICorDebug CreateDebuggingInterfaceFromVersion(DbgShimState dbgShimState, string? debuggeeVersion, string coreclrFilename) {
+			int hr;
+			object obj;
+			const CorDebugInterfaceVersion interfaceVersion = CorDebugInterfaceVersion.CorDebugVersion_4_5;
+			if (dbgShimState.CreateDebuggingInterfaceFromVersion3 is not null) {
+				var libraryProvider = new CLRDebuggingLibraryProvider(coreclrFilename);
+
+				hr = dbgShimState.CreateDebuggingInterfaceFromVersion3(interfaceVersion, debuggeeVersion, null, libraryProvider, out obj);
+			}
+			else
+				hr = dbgShimState.CreateDebuggingInterfaceFromVersionEx!(interfaceVersion, debuggeeVersion, out obj);
+
+			if (obj is not ICorDebug corDebug)
+				throw new Exception($"Could not create a ICorDebug: hr=0x{hr:X8}");
+			return corDebug;
 		}
 
 		public static ICorDebug? CreateCorDebug(int pid, CoreCLRTypeAttachInfo info, out string coreclrFilename, out string? otherVersion) {
@@ -182,9 +286,7 @@ namespace dndbg.Engine {
 			var dbgShimState = GetOrCreateDbgShimState(null, info.DbgShimFilename);
 			if (dbgShimState is null)
 				return null;
-
-			int hr = dbgShimState.CreateDebuggingInterfaceFromVersionEx!(CorDebugInterfaceVersion.CorDebugVersion_4_5, otherVersion, out object obj);
-			return obj as ICorDebug;
+			return CreateDebuggingInterfaceFromVersion(dbgShimState, otherVersion, coreclrFilename);
 		}
 
 		public unsafe static DnDebugger CreateDnDebugger(DebugProcessOptions options, CoreCLRTypeDebugInfo info, IntPtr outputHandle, IntPtr errorHandle, Func<bool> keepWaiting, Func<ICorDebug, string, uint, string?, DnDebugger> createDnDebugger) {
@@ -233,7 +335,7 @@ namespace dndbg.Engine {
 
 				NativeMethods.ResumeThread(hThread);
 
-				const uint WAIT_MS = 5000;
+				uint WAIT_MS = (uint)info.ConnectionTimeout.TotalMilliseconds;
 				for (;;) {
 					uint res = NativeMethods.WaitForSingleObject(startupEvent, WAIT_MS);
 					if (res == 0)
@@ -266,10 +368,7 @@ namespace dndbg.Engine {
 				var pha = (IntPtr*)pHandleArray;
 				const int index = 0;
 				var version = GetVersionStringFromModule(dbgShimState, pi.dwProcessId, psa[index], out string coreclrFilename);
-				hr = dbgShimState.CreateDebuggingInterfaceFromVersionEx!(CorDebugInterfaceVersion.CorDebugVersion_4_5, version, out object obj);
-				var corDebug = obj as ICorDebug;
-				if (corDebug is null)
-					throw new Exception($"Could not create a ICorDebug: hr=0x{hr:X8}");
+				var corDebug = CreateDebuggingInterfaceFromVersion(dbgShimState, version, coreclrFilename);
 				var dbg = createDnDebugger(corDebug, coreclrFilename, pi.dwProcessId, version);
 				for (uint i = 0; i < dwArrayLength; i++)
 					NativeMethods.SetEvent(pha[i]);

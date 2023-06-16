@@ -49,4 +49,8 @@ namespace dnSpy.Debugger.DotNet.Mono.AntiAntiDebug {
 	[ExportDbgNativeFunctionHook("kernel32.dll", "IsDebuggerPresent", new DbgArchitecture[0], new[] { DbgOperatingSystem.Windows }, 0)]
 	sealed class DisableAntiIsDebuggerPresent : DisableAntiAntiDebugCode {
 	}
+
+	[ExportDbgNativeFunctionHook("kernel32.dll", "CloseHandle", new DbgArchitecture[0], new[] { DbgOperatingSystem.Windows }, 0)]
+	sealed class DisableAntiCloseHandle : DisableAntiAntiDebugCode {
+	}
 }

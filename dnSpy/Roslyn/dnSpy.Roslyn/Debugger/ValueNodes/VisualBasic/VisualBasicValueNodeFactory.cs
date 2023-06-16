@@ -81,7 +81,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.VisualBasic {
 			AddParens(sb, baseExpression, addParens);
 			AddCastEnd(sb, castType);
 			sb.Append('(');
-			sb.Append(index.ToString());
+			sb.Append(index);
 			sb.Append(')');
 			return ObjectCache.FreeAndToString(ref sb);
 		}
@@ -96,7 +96,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes.VisualBasic {
 			for (int i = 0; i < indexes.Length; i++) {
 				if (i > 0)
 					sb.Append(',');
-				sb.Append(indexes[i].ToString());
+				sb.Append(indexes[i]);
 			}
 			sb.Append(')');
 			return ObjectCache.FreeAndToString(ref sb);

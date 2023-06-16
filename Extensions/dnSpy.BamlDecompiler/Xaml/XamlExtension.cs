@@ -20,12 +20,13 @@
 	THE SOFTWARE.
 */
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
 namespace dnSpy.BamlDecompiler.Xaml {
-	internal class XamlExtension {
+	sealed class XamlExtension {
 		public XamlType ExtensionType { get; }
 		public object[] Initializer { get; set; }
 		public IDictionary<string, object> NamedArguments { get; }
@@ -36,18 +37,22 @@ namespace dnSpy.BamlDecompiler.Xaml {
 		}
 
 		static void WriteObject(StringBuilder sb, XamlContext ctx, XElement ctxElement, object value) {
-			if (value is XamlExtension)
-				sb.Append(((XamlExtension)value).ToString(ctx, ctxElement));
+			if (value is XamlExtension extension)
+				sb.Append(extension.ToString(ctx, ctxElement));
+			else if (value is XamlMemberName memberName)
+				sb.Append(memberName.MemberName);
+			else if (value is string str)
+				sb.Append(EscapeOrEncapsulateInQuotes(str));
 			else
-				sb.Append(value.ToString());
+				sb.Append(value);
 		}
 
 		public string ToString(XamlContext ctx, XElement ctxElement) {
 			var sb = new StringBuilder();
 			sb.Append('{');
 
-			var typeName = ctx.ToString(ctxElement, ExtensionType);
-			if (typeName.EndsWith("Extension"))
+			var typeName = ExtensionType.ToMarkupExtensionName(ctx, ctxElement);
+			if (typeName.EndsWith("Extension", StringComparison.Ordinal))
 				sb.Append(typeName.Substring(0, typeName.Length - 9));
 			else
 				sb.Append(typeName);
@@ -79,5 +84,40 @@ namespace dnSpy.BamlDecompiler.Xaml {
 			sb.Append('}');
 			return sb.ToString();
 		}
+
+		static string EscapeOrEncapsulateInQuotes(string value) {
+			var escaped = EscapeAttributeValue(value);
+			for (int i = 0; i < escaped.Length; i++) {
+				char c = escaped[i];
+				if (char.IsWhiteSpace(c) || c == '\'' || c == ',' || c == '=')
+					return $"'{value.Replace("'", "\\'")}'";
+			}
+			return escaped;
+		}
+
+		static string EscapeAttributeValue(string value) {
+			if (string.IsNullOrEmpty(value))
+				return string.Empty;
+			StringBuilder stringBuilder = null;
+			for (int i = 0; i < value.Length; i++) {
+				char c = value[i];
+				if (c == '"' || c == '<' || c == '>' || c == '&') {
+					stringBuilder ??= new StringBuilder(value.Length + 8).Append(value, 0, i);
+					stringBuilder.Append(EscapeChar(c));
+				}
+				else
+					stringBuilder?.Append(c);
+			}
+			return stringBuilder is not null ? stringBuilder.ToString() : value;
+		}
+
+		static string EscapeChar(char c) => c switch {
+			'"' => "&quot;",
+			'&' => "&amp;",
+			'\'' => "&apos;",
+			'<' => "&lt;",
+			'>' => "&gt;",
+			_ => null
+		};
 	}
 }

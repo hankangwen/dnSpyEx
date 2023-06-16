@@ -24,7 +24,7 @@ using dnSpy.Debugger.DotNet.Metadata;
 
 namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 	interface IDebuggerRuntime {
-		void CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[] customTypeInfoPayload);
+		void CreateVariable(DmdType type, string name, Guid customTypeInfoPayloadTypeId, byte[]? customTypeInfoPayload);
 		DbgDotNetValue CreateValue(object? value, DmdType targetType);
 		DbgDotNetValue GetException();
 		DbgDotNetValue GetStowedException();
@@ -38,7 +38,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine.Interpreter {
 		string ToString(ILValue value);
 		DmdType ToType(ILValue value);
 		Guid ToGuid(ILValue value);
-		byte[] ToByteArray(ILValue value);
+		byte[]? ToByteArray(ILValue value);
 		DbgDotNetValue ToDotNetValue(ILValue value);
 	}
 }

@@ -30,6 +30,7 @@ using dnSpy.Contracts.Text.Operations;
 using dnSpy.Text.Editor;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Editor.OptionsExtensionMethods;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Operations;
 
@@ -208,7 +209,7 @@ namespace dnSpy.Text.Operations {
 		public bool CutSelection() {
 			if (!UpdateCaretForEdit())
 				return false;
-			var text = wpfTextView.Selection.GetText();
+			var text = wpfTextView.Selection.GetText(Options.GetNewLineCharacter());
 			try {
 				Clipboard.SetText(text);
 			}
@@ -260,8 +261,7 @@ namespace dnSpy.Text.Operations {
 			if (!UpdateCaretForEdit())
 				return false;
 
-			//TODO: Add spaces if we should convert tabs to spaces
-			AddUserInput("\t");
+			AddUserInput(Options.IsConvertTabsToSpacesEnabled() ? new string(' ', Options.GetTabSize()) : "\t");
 
 			return true;
 		}

@@ -1089,6 +1089,15 @@ namespace dnSpy.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy Full Name.
+        /// </summary>
+        public static string CopyFullNameCommand {
+            get {
+                return ResourceManager.GetString("CopyFullNameCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ctrl+C.
         /// </summary>
         public static string CopyKey {

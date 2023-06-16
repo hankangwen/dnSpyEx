@@ -66,6 +66,7 @@ namespace dnSpy.Text.Editor {
 			containerMargins[3] = CreateContainerMargin(wpfTextViewMarginProviderCollectionProvider, PredefinedMarginNames.Left, false, 1, 0, 1);
 			containerMargins[4] = CreateContainerMargin(wpfTextViewMarginProviderCollectionProvider, PredefinedMarginNames.Right, false, 1, 2, 1);
 			Add(TextView.VisualElement, 1, 1, 1);
+			TextView.SetContainer(grid);
 			Debug2.Assert(!containerMargins.Any(a => a is null));
 
 			if (setFocus) {
@@ -162,6 +163,10 @@ namespace dnSpy.Text.Editor {
 						editorOperations.ZoomIn();
 					else
 						editorOperations.ZoomOut();
+				}
+				else if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) {
+					var pixelCount = -(double)e.Delta * TextView.FormattedLineSource.ColumnWidth * 10 / 120.0;
+					TextView.ViewScroller.ScrollViewportHorizontallyByPixels(pixelCount);
 				}
 				else {
 					int lines = GetScrollWheelLines();

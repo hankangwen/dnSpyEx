@@ -23,6 +23,7 @@ using dnSpy.Contracts.App;
 using dnSpy.Contracts.Hex.Editor;
 using dnSpy.Contracts.Hex.Editor.HexGroups;
 using dnSpy.Contracts.Hex.Files;
+using dnSpy.Contracts.MVVM;
 
 namespace dnSpy.Hex.Commands {
 	abstract class HexCommandOperationsFactoryService {
@@ -32,12 +33,14 @@ namespace dnSpy.Hex.Commands {
 	[Export(typeof(HexCommandOperationsFactoryService))]
 	sealed class HexCommandOperationsFactoryServiceImpl : HexCommandOperationsFactoryService {
 		readonly IMessageBoxService messageBoxService;
+		readonly IPickSaveFilename pickSaveFilename;
 		readonly Lazy<HexEditorGroupFactoryService> hexEditorGroupFactoryService;
 		readonly Lazy<HexBufferFileServiceFactory> hexBufferFileServiceFactory;
 
 		[ImportingConstructor]
-		HexCommandOperationsFactoryServiceImpl(IMessageBoxService messageBoxService, Lazy<HexEditorGroupFactoryService> hexEditorGroupFactoryService, Lazy<HexBufferFileServiceFactory> hexBufferFileServiceFactory) {
+		HexCommandOperationsFactoryServiceImpl(IMessageBoxService messageBoxService, IPickSaveFilename pickSaveFilename, Lazy<HexEditorGroupFactoryService> hexEditorGroupFactoryService, Lazy<HexBufferFileServiceFactory> hexBufferFileServiceFactory) {
 			this.messageBoxService = messageBoxService;
+			this.pickSaveFilename = pickSaveFilename;
 			this.hexEditorGroupFactoryService = hexEditorGroupFactoryService;
 			this.hexBufferFileServiceFactory = hexBufferFileServiceFactory;
 		}
@@ -46,7 +49,7 @@ namespace dnSpy.Hex.Commands {
 			if (hexView is null)
 				throw new ArgumentNullException(nameof(hexView));
 			return hexView.Properties.GetOrCreateSingletonProperty(typeof(HexCommandOperations),
-				() => new HexCommandOperationsImpl(messageBoxService, hexEditorGroupFactoryService, hexBufferFileServiceFactory, hexView));
+				() => new HexCommandOperationsImpl(messageBoxService, pickSaveFilename, hexEditorGroupFactoryService, hexBufferFileServiceFactory, hexView));
 		}
 
 		internal static void RemoveFromProperties(HexCommandOperations hexCommandOperations) =>

@@ -113,6 +113,23 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			return () => {
 				var rawMd = engine.RawMetadataService.Create(runtime, imageLayout == DbgImageLayout.File, dnModule.Address, (int)dnModule.Size);
 				try {
+					if (IsValidNETImage(rawMd.Address, (uint)rawMd.Size, rawMd.IsFileLayout)) {
+						closedListenerCollection.Closed += (s, e) => rawMd.Release();
+						return new DmdLazyMetadataBytesPtr(rawMd.Address, (uint)rawMd.Size, rawMd.IsFileLayout);
+					}
+
+					var dmdComMetadata = ExecuteOnCOMThread(engine, () => {
+						var comMetadata = dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
+						if (comMetadata is null)
+							return null;
+						return new DmdLazyMetadataBytesCom(comMetadata, engine.GetDynamicModuleHelper(dnModule), engine.DmdDispatcher);
+					});
+
+					if (dmdComMetadata is not null) {
+						rawMd.Release();
+						return dmdComMetadata;
+					}
+
 					closedListenerCollection.Closed += (s, e) => rawMd.Release();
 					return new DmdLazyMetadataBytesPtr(rawMd.Address, (uint)rawMd.Size, rawMd.IsFileLayout);
 				}
@@ -121,6 +138,29 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 					throw;
 				}
 			};
+		}
+
+		static T ExecuteOnCOMThread<T>(DbgEngineImpl engine, Func<T> func) => engine.CheckCorDebugThread() ? func() : engine.InvokeCorDebugThread(func);
+
+		static bool IsValidNETImage(IntPtr address, uint size, bool isFileLayout) {
+			if (address == IntPtr.Zero || size == 0)
+				return false;
+			try {
+				using (var peImage = new PEImage(address, size, isFileLayout ? ImageLayout.File : ImageLayout.Memory, true)) {
+					var dotNetDir = peImage.ImageNTHeaders.OptionalHeader.DataDirectories[14];
+					if (dotNetDir.VirtualAddress == 0)
+						return false;
+					var cor20HeaderReader = peImage.CreateReader(dotNetDir.VirtualAddress, 0x48);
+					var cor20Header = new ImageCor20Header(ref cor20HeaderReader, false);
+					if (cor20Header.CB < 0x48 || cor20Header.Metadata.VirtualAddress == 0)
+						return false;
+					var mdHeaderReader = peImage.CreateReader(cor20Header.Metadata.VirtualAddress);
+					return mdHeaderReader.ReadUInt32() == 0x424A5342;
+				}
+			}
+			catch {
+				return false;
+			}
 		}
 
 		static DbgImageLayout CalculateImageLayout(DnModule dnModule) {

@@ -70,7 +70,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			else
 				hostFilename = dncOptions.Host;
 			var hostCommandLine = dncOptions.HostArguments ?? string.Empty;
-			return new CoreCLRTypeDebugInfo(GetDbgShimAndVerify(), hostFilename, hostCommandLine);
+			return new CoreCLRTypeDebugInfo(GetDbgShimAndVerify(), hostFilename, hostCommandLine, dncOptions.ConnectionTimeout);
 		}
 
 		protected override CLRTypeAttachInfo CreateAttachInfo(CorDebugAttachToProgramOptions options) {

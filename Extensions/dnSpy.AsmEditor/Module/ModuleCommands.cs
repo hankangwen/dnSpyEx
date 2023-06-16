@@ -511,48 +511,47 @@ namespace dnSpy.AsmEditor.Module {
 		sealed class DocumentsCommand : DocumentsContextMenuHandler {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService) {
+			DocumentsCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IPickFilename pickFilename) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => AddExistingNetModuleToAssemblyCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => AddExistingNetModuleToAssemblyCommand.Execute(undoCommandService, appService, context.Nodes);
+			public override void Execute(AsmEditorContext context) => AddExistingNetModuleToAssemblyCommand.Execute(undoCommandService, appService, pickFilename, context.Nodes);
 		}
 
 		[ExportMenuItem(OwnerGuid = MenuConstants.APP_MENU_EDIT_GUID, Header = "res:AddExistingNetModuleToAssemblyCommand", Group = MenuConstants.GROUP_APP_MENU_EDIT_ASMED_NEW, Order = 20)]
 		sealed class EditMenuCommand : EditMenuHandler {
 			readonly Lazy<IUndoCommandService> undoCommandService;
 			readonly IAppService appService;
+			readonly IPickFilename pickFilename;
 
 			[ImportingConstructor]
-			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService)
+			EditMenuCommand(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IPickFilename pickFilename)
 				: base(appService.DocumentTreeView) {
 				this.undoCommandService = undoCommandService;
 				this.appService = appService;
+				this.pickFilename = pickFilename;
 			}
 
 			public override bool IsVisible(AsmEditorContext context) => AddExistingNetModuleToAssemblyCommand.CanExecute(context.Nodes);
-			public override void Execute(AsmEditorContext context) => AddExistingNetModuleToAssemblyCommand.Execute(undoCommandService, appService, context.Nodes);
+			public override void Execute(AsmEditorContext context) => AddExistingNetModuleToAssemblyCommand.Execute(undoCommandService, appService, pickFilename, context.Nodes);
 		}
 
-		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, DocumentTreeNodeData[] nodes) {
+		static void Execute(Lazy<IUndoCommandService> undoCommandService, IAppService appService, IPickFilename pickFilename, DocumentTreeNodeData[] nodes) {
 			if (!AddNetModuleToAssemblyCommand.CanExecute(nodes))
 				return;
 
-			var dialog = new System.Windows.Forms.OpenFileDialog() {
-				Filter = PickFilenameConstants.NetModuleFilter,
-				RestoreDirectory = true,
-			};
-			if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-				return;
-			if (string.IsNullOrEmpty(dialog.FileName))
+			var filename = pickFilename.GetFilename(null, null, PickFilenameConstants.NetModuleFilter);
+			if (string2.IsNullOrEmpty(filename))
 				return;
 
 			var fm = appService.DocumentTreeView.DocumentService;
-			var file = fm.CreateDocument(DsDocumentInfo.CreateDocument(dialog.FileName), dialog.FileName, true);
+			var file = fm.CreateDocument(DsDocumentInfo.CreateDocument(filename), filename, true);
 			if (file.ModuleDef is null || file.AssemblyDef is not null || !(file is IDsDotNetDocument)) {
 				MsgBox.Instance.Show(string.Format(dnSpy_AsmEditor_Resources.Error_NotNetModule, file.Filename), MsgBoxButton.OK);
 				if (file is IDisposable id)

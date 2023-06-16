@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="dnlib" Version="$(DnlibVersion)" />
+    <PackageReference Include="NuGet.Configuration" Version="$(NuGetVersion)" />
   </ItemGroup>
 
 </Project>

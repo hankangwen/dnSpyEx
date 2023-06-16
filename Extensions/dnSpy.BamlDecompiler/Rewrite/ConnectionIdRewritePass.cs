@@ -37,7 +37,7 @@ using ICSharpCode.Decompiler.TypeSystem;
 using ICSharpCode.Decompiler.Util;
 
 namespace dnSpy.BamlDecompiler.Rewrite {
-	internal class ConnectionIdRewritePass : IRewritePass {
+	sealed class ConnectionIdRewritePass : IRewritePass {
 		static bool Impl(MethodDef method, MethodDef ifaceMethod) {
 			if (method.HasOverrides) {
 				var comparer =
@@ -60,26 +60,53 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			if (type is null)
 				return;
 
+			var componentConnectorConnect = ctx.Baml.KnownThings.Types(KnownTypes.IComponentConnector).TypeDef.FindMethod("Connect");
+			var styleConnectorConnect = ctx.Baml.KnownThings.Types(KnownTypes.IStyleConnector).TypeDef.FindMethod("Connect");
+
 			var ts = new DecompilerTypeSystem(new PEFile(ctx.Module), TypeSystemOptions.Default);
 
 			var connIds = new Dictionary<long, Action<XamlContext, XElement>>();
-			bool hasConnector = false;
-			try {
-				DecompileConnections(ctx, connIds, ts, ctx.Baml.KnownThings.Types(KnownTypes.IComponentConnector), type, ref hasConnector);
-				DecompileConnections(ctx, connIds, ts, ctx.Baml.KnownThings.Types(KnownTypes.IStyleConnector), type, ref hasConnector);
-			}
-			catch {
-				connIds = null;
+
+			if (!CollectConnectionIds(ctx, ts, componentConnectorConnect, type, connIds)) {
+				var msg = dnSpy_BamlDecompiler_Resources.Error_IComponentConnectorConnectCannotBeParsed;
+				document.Root.AddBeforeSelf(new XComment(string.Format(msg, type.ReflectionFullName)));
 			}
 
-			if (hasConnector && connIds is null) {
-				var msg = dnSpy_BamlDecompiler_Resources.Error_IComponentConnectorConnectCannotBeParsed;
+			if (!CollectConnectionIds(ctx, ts, styleConnectorConnect, type, connIds)) {
+				var msg = dnSpy_BamlDecompiler_Resources.Error_IStyleConnectorConnectCannotBeParsed;
 				document.Root.AddBeforeSelf(new XComment(string.Format(msg, type.ReflectionFullName)));
 			}
 
 			foreach (var elem in document.Elements()) {
 				ProcessElement(ctx, elem, connIds);
 			}
+		}
+
+		bool CollectConnectionIds(XamlContext ctx, IDecompilerTypeSystem ts, MethodDef connectInterfaceMethod, TypeDef currentType, Dictionary<long, Action<XamlContext, XElement>> allConnIds) {
+			MethodDef connect = null;
+			foreach (var method in currentType.Methods) {
+				if (Impl(method, connectInterfaceMethod)) {
+					connect = method;
+					break;
+				}
+			}
+
+			if (connect is not null) {
+				Dictionary<long, Action<XamlContext, XElement>> connIds = null;
+				try {
+					connIds = ExtractConnectionId(ctx, ts, connect);
+				}
+				catch {
+				}
+
+				if (connIds is null)
+					return false;
+
+				foreach (var keyValuePair in connIds)
+					allConnIds.Add(keyValuePair.Key, keyValuePair.Value);
+			}
+
+			return true;
 		}
 
 		static void ProcessElement(XamlContext ctx, XElement elem, Dictionary<long, Action<XamlContext, XElement>> connIds) {
@@ -118,12 +145,9 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			public string MethodName;
 
 			public void Callback(XamlContext ctx, XElement elem) {
-				//TODO: test this
 				var type = elem.Annotation<XamlType>();
-				if (type?.TypeNamespace + "." + type?.TypeName == "System.Windows.Style") {
-					elem.Add(new XElement(type?.Namespace + "EventSetter",
-						new XAttribute("Event", EventName),
-						new XAttribute("Handler", MethodName)));
+				if (type is not null && type.TypeNamespace == "System.Windows" && type.TypeName == "Style") {
+					elem.Add(new XElement(type.Namespace + "EventSetter", new XAttribute("Event", EventName), new XAttribute("Handler", MethodName)));
 					return;
 				}
 
@@ -146,34 +170,21 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			public void Callback(XamlContext ctx, XElement elem) => elem.AddBeforeSelf(new XComment(Msg));
 		}
 
-		void DecompileConnections(XamlContext ctx, Dictionary<long, Action<XamlContext, XElement>> connIds,
-			IDecompilerTypeSystem typeSystem, TypeDef connectorInterface, TypeDef type, ref bool hasConnector) {
-			var connect = connectorInterface.FindMethod("Connect");
-
-			foreach (var method in type.Methods) {
-				if (Impl(method, connect)) {
-					connect = method;
-					connectorInterface = null;
-					break;
-				}
-			}
-
-			if (connectorInterface is not null)
-				return;
-			hasConnector = true;
-			var connectTs = typeSystem.MainModule.GetDefinition(connect);
+		Dictionary<long, Action<XamlContext, XElement>> ExtractConnectionId(XamlContext ctx, IDecompilerTypeSystem ts, MethodDef method) {
+			var connectTs = ts.MainModule.GetDefinition(method);
 
 			var genericContext = new GenericContext(connectTs.DeclaringType?.TypeParameters, connectTs.TypeParameters);
 
 			// decompile method and optimize the switch
-			var ilReader = new ILReader(typeSystem.MainModule);
-			var function = ilReader.ReadIL(connect, genericContext, ILFunctionKind.TopLevelFunction, ctx.CancellationToken);
+			var ilReader = new ILReader(ts.MainModule);
+			var function = ilReader.ReadIL(method, genericContext, ILFunctionKind.TopLevelFunction, ctx.CancellationToken);
 
-			var context = new ILTransformContext(function, typeSystem) { CancellationToken = ctx.CancellationToken };
+			var context = new ILTransformContext(function, ts) { CancellationToken = ctx.CancellationToken };
 			function.RunTransforms(CSharpDecompiler.GetILTransforms(), context);
 
 			var infos = GetCaseBlocks(function);
 
+			var connIds = new Dictionary<long, Action<XamlContext, XElement>>();
 			foreach (var info in infos) {
 				Action<XamlContext, XElement> cb = null;
 
@@ -249,6 +260,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 						connIds[id] = cb;
 				}
 			}
+
+			return connIds;
 		}
 
 		static List<(LongSet connIds, ILInstruction topLevelInstr)> GetCaseBlocks(ILFunction function) {

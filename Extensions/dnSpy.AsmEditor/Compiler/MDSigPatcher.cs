@@ -257,7 +257,6 @@ namespace dnSpy.AsmEditor.Compiler {
 						if (rank == 0)
 							return false;
 						num = ReadCompressedUInt32();
-						var sizes = new List<uint>((int)num);
 						for (uint i = 0; i < num; i++)
 							ReadCompressedUInt32();
 						num = ReadCompressedUInt32();
@@ -318,6 +317,7 @@ namespace dnSpy.AsmEditor.Compiler {
 				case CallingConvention.ThisCall:
 				case CallingConvention.FastCall:
 				case CallingConvention.VarArg:
+				case CallingConvention.Unmanaged:
 				case CallingConvention.NativeVarArg:
 				case CallingConvention.Property:
 					if ((callingConvention & CallingConvention.Generic) != 0)
@@ -339,10 +339,6 @@ namespace dnSpy.AsmEditor.Compiler {
 					count = ReadCompressedUInt32();
 					for (i = 0; i < count; i++)
 						PatchTypeSignature();
-					break;
-
-				case CallingConvention.Unmanaged:
-				default:
 					break;
 				}
 			}

@@ -69,14 +69,16 @@ namespace dnSpy.Hex.Commands {
 	sealed class HexCommandOperationsImpl : HexCommandOperations {
 		public override HexView HexView { get; }
 		readonly IMessageBoxService messageBoxService;
+		readonly IPickSaveFilename pickSaveFilename;
 		readonly Lazy<HexEditorGroupFactoryService> hexEditorGroupFactoryService;
 		readonly Lazy<HexBufferFileServiceFactory> hexBufferFileServiceFactory;
 
 		HexBufferFileService HexBufferFileService => __hexBufferFileService ??= hexBufferFileServiceFactory.Value.Create(HexView.Buffer);
 		HexBufferFileService? __hexBufferFileService;
 
-		public HexCommandOperationsImpl(IMessageBoxService messageBoxService, Lazy<HexEditorGroupFactoryService> hexEditorGroupFactoryService, Lazy<HexBufferFileServiceFactory> hexBufferFileServiceFactory, HexView hexView) {
+		public HexCommandOperationsImpl(IMessageBoxService messageBoxService, IPickSaveFilename pickSaveFilename, Lazy<HexEditorGroupFactoryService> hexEditorGroupFactoryService, Lazy<HexBufferFileServiceFactory> hexBufferFileServiceFactory, HexView hexView) {
 			this.messageBoxService = messageBoxService ?? throw new ArgumentNullException(nameof(messageBoxService));
+			this.pickSaveFilename = pickSaveFilename ?? throw new ArgumentNullException(nameof(pickSaveFilename));
 			this.hexEditorGroupFactoryService = hexEditorGroupFactoryService ?? throw new ArgumentNullException(nameof(hexEditorGroupFactoryService));
 			this.hexBufferFileServiceFactory = hexBufferFileServiceFactory ?? throw new ArgumentNullException(nameof(hexBufferFileServiceFactory));
 			HexView = hexView ?? throw new ArgumentNullException(nameof(hexView));
@@ -341,16 +343,12 @@ namespace dnSpy.Hex.Commands {
 			if (HexView.Selection.IsEmpty)
 				return;
 
-			var dialog = new WF.SaveFileDialog() {
-				Filter = PickFilenameConstants.AnyFilenameFilter,
-				RestoreDirectory = true,
-				ValidateNames = true,
-			};
-			if (dialog.ShowDialog() != WF.DialogResult.OK)
+			var fileName = pickSaveFilename.GetFilename(null, "bin");
+			if (fileName is null)
 				return;
 
 			var selectionSpan = HexView.Selection.StreamSelectionSpan;
-			var data = new ProgressVM(CurrentDispatcher, new HexBufferDataSaver(HexView.Buffer, selectionSpan, dialog.FileName));
+			var data = new ProgressVM(CurrentDispatcher, new HexBufferDataSaver(HexView.Buffer, selectionSpan, fileName));
 			var win = new ProgressDlg();
 			win.DataContext = data;
 			win.Owner = OwnerWindow;

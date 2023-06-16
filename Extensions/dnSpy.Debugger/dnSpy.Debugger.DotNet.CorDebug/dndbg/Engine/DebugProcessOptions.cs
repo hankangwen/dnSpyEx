@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
 
 namespace dndbg.Engine {
@@ -59,15 +60,21 @@ namespace dndbg.Engine {
 		/// </summary>
 		public string? HostCommandLine { get; set; }
 
+		/// <summary>
+		/// Connection timeout
+		/// </summary>
+		public TimeSpan ConnectionTimeout { get; set; }
+
 		public override CLRType CLRType => CLRType.CoreCLR;
 
-		public CoreCLRTypeDebugInfo(string? dbgShimFilename, string? hostFilename, string? hostCommandLine) {
+		public CoreCLRTypeDebugInfo(string? dbgShimFilename, string? hostFilename, string? hostCommandLine, TimeSpan connectionTimeout) {
 			DbgShimFilename = dbgShimFilename;
 			HostFilename = hostFilename;
 			HostCommandLine = hostCommandLine;
+			ConnectionTimeout = connectionTimeout;
 		}
 
-		public override CLRTypeDebugInfo Clone() => new CoreCLRTypeDebugInfo(DbgShimFilename, HostFilename, HostCommandLine);
+		public override CLRTypeDebugInfo Clone() => new CoreCLRTypeDebugInfo(DbgShimFilename, HostFilename, HostCommandLine, ConnectionTimeout);
 	}
 
 	sealed class DebugProcessOptions {

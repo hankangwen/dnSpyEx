@@ -20,25 +20,26 @@
 	THE SOFTWARE.
 */
 
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using dnlib.DotNet;
 using dnSpy.BamlDecompiler.Properties;
 
 namespace dnSpy.BamlDecompiler.Xaml {
-	internal class XamlType {
+	sealed class XamlType {
 		public IAssembly Assembly { get; }
 		public string TypeNamespace { get; }
-		public string TypeName { get; }
+		public XamlTypeName TypeName { get; }
 
 		public XNamespace Namespace { get; private set; }
 		public ITypeDefOrRef ResolvedType { get; set; }
 
-		public XamlType(IAssembly assembly, string ns, string name)
+		public XamlType(IAssembly assembly, string ns, XamlTypeName name)
 			: this(assembly, ns, name, null) {
 		}
 
-		public XamlType(IAssembly assembly, string ns, string name, XNamespace xmlns) {
+		public XamlType(IAssembly assembly, string ns, XamlTypeName name, XNamespace xmlns) {
 			Assembly = assembly;
 			TypeNamespace = ns;
 			TypeName = name;
@@ -53,13 +54,13 @@ namespace dnSpy.BamlDecompiler.Xaml {
 			// the namespace is resolved after processing the element body.
 
 			string xmlNs = null;
-			if (elem.Annotation<XmlnsScope>() is not null)
-				xmlNs = elem.Annotation<XmlnsScope>().LookupXmlns(Assembly, TypeNamespace);
+			var xmlnsScope = elem.Annotation<XmlnsScope>();
+			if (xmlnsScope is not null)
+				xmlNs = xmlnsScope.LookupXmlns(Assembly, TypeNamespace);
 			if (xmlNs is null)
 				xmlNs = ctx.XmlNs.LookupXmlns(Assembly, TypeNamespace);
 			// Sometimes there's no reference to System.Xaml even if x:Type is used
-			if (xmlNs is null)
-				xmlNs = ctx.TryGetXmlNamespace(Assembly, TypeNamespace);
+			xmlNs ??= ctx.TryGetXmlNamespace(Assembly, TypeNamespace);
 
 			if (xmlNs is null) {
 				if (AssemblyNameComparer.CompareAll.Equals(Assembly, ctx.Module.Assembly))
@@ -67,7 +68,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 				else
 					xmlNs = $"clr-namespace:{TypeNamespace};assembly={Assembly.Name}";
 
-				var nsSeg = TypeNamespace.Split('.');	
+				var nsSeg = TypeNamespace.Split('.');
 				var prefix = nsSeg[nsSeg.Length - 1].ToLowerInvariant();
 				if (string.IsNullOrEmpty(prefix)) {
 					if (string.IsNullOrEmpty(TypeNamespace))
@@ -96,6 +97,21 @@ namespace dnSpy.BamlDecompiler.Xaml {
 			if (Namespace is null)
 				return XmlConvert.EncodeLocalName(TypeName);
 			return Namespace + XmlConvert.EncodeLocalName(TypeName);
+		}
+
+		public string ToMarkupExtensionName(XamlContext ctx, XElement elem) {
+			ResolveNamespace(elem, ctx);
+
+			var sb = new StringBuilder();
+			if (Namespace != elem.GetDefaultNamespace()) {
+				var prefix = elem.GetPrefixOfNamespace(Namespace);
+				if (!string.IsNullOrEmpty(prefix)) {
+					sb.Append(prefix);
+					sb.Append(':');
+				}
+			}
+
+			return TypeName.AppendEncodedName(sb).ToString();
 		}
 
 		public override string ToString() => TypeName;

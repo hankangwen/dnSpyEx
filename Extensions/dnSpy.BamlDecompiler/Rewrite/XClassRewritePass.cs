@@ -26,7 +26,7 @@ using dnlib.DotNet;
 using dnSpy.BamlDecompiler.Xaml;
 
 namespace dnSpy.BamlDecompiler.Rewrite {
-	internal class XClassRewritePass : IRewritePass {
+	sealed class XClassRewritePass : IRewritePass {
 		public void Run(XamlContext ctx, XDocument document) {
 			foreach (var elem in document.Elements(ctx.GetPseudoName("Document")).Elements())
 				RewriteClass(ctx, elem);
@@ -43,7 +43,8 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 				return;
 
 			var newType = typeDef.BaseType;
-			var xamlType = new XamlType(newType.DefinitionAssembly, newType.ReflectionNamespace, newType.Name);
+			var name = XamlTypeName.From(newType, out string clrNs);
+			var xamlType = new XamlType(newType.DefinitionAssembly, clrNs, name);
 			xamlType.ResolveNamespace(elem, ctx);
 
 			elem.Name = xamlType.ToXName(ctx);

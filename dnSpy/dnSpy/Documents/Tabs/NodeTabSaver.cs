@@ -28,6 +28,7 @@ using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents.Tabs;
 using dnSpy.Contracts.Documents.Tabs.DocViewer;
 using dnSpy.Contracts.Documents.TreeView;
+using dnSpy.Contracts.MVVM;
 using dnSpy.Contracts.Text;
 using dnSpy.Decompiler;
 using dnSpy.Documents.Tabs.DocViewer;
@@ -38,14 +39,16 @@ namespace dnSpy.Documents.Tabs {
 	sealed class NodeTabSaverProvider : ITabSaverProvider {
 		readonly IDocumentTreeNodeDecompiler documentTreeNodeDecompiler;
 		readonly IMessageBoxService messageBoxService;
+		readonly IPickSaveFilename pickSaveFilename;
 
 		[ImportingConstructor]
-		NodeTabSaverProvider(IDocumentTreeNodeDecompiler documentTreeNodeDecompiler, IMessageBoxService messageBoxService) {
+		NodeTabSaverProvider(IDocumentTreeNodeDecompiler documentTreeNodeDecompiler, IMessageBoxService messageBoxService, IPickSaveFilename pickSaveFilename) {
 			this.documentTreeNodeDecompiler = documentTreeNodeDecompiler;
 			this.messageBoxService = messageBoxService;
+			this.pickSaveFilename = pickSaveFilename;
 		}
 
-		public ITabSaver? Create(IDocumentTab tab) => NodeTabSaver.TryCreate(documentTreeNodeDecompiler, tab, messageBoxService);
+		public ITabSaver? Create(IDocumentTab tab) => NodeTabSaver.TryCreate(documentTreeNodeDecompiler, tab, messageBoxService, pickSaveFilename);
 	}
 
 	sealed class NodeTabSaver : ITabSaver {
@@ -55,11 +58,12 @@ namespace dnSpy.Documents.Tabs {
 		readonly IDecompiler decompiler;
 		readonly DocumentTreeNodeData[] nodes;
 		readonly IDocumentViewer documentViewer;
+		readonly IPickSaveFilename pickSaveFilename;
 
-		public static NodeTabSaver? TryCreate(IDocumentTreeNodeDecompiler documentTreeNodeDecompiler, IDocumentTab tab, IMessageBoxService messageBoxService) {
+		public static NodeTabSaver? TryCreate(IDocumentTreeNodeDecompiler documentTreeNodeDecompiler, IDocumentTab tab, IMessageBoxService messageBoxService, IPickSaveFilename pickSaveFilename) {
 			if (tab.IsAsyncExecInProgress)
 				return null;
-			if (tab.UIContext is not IDocumentViewer uiContext)
+			if (tab.UIContext is not IDocumentViewer documentViewer)
 				return null;
 			var decompiler = (tab.Content as IDecompilerTabContent)?.Decompiler;
 			if (decompiler is null)
@@ -67,16 +71,17 @@ namespace dnSpy.Documents.Tabs {
 			var nodes = tab.Content.Nodes.ToArray();
 			if (nodes.Length == 0)
 				return null;
-			return new NodeTabSaver(messageBoxService, tab, documentTreeNodeDecompiler, decompiler, uiContext, nodes);
+			return new NodeTabSaver(messageBoxService, tab, documentTreeNodeDecompiler, decompiler, documentViewer, pickSaveFilename, nodes);
 		}
 
-		NodeTabSaver(IMessageBoxService messageBoxService, IDocumentTab tab, IDocumentTreeNodeDecompiler documentTreeNodeDecompiler, IDecompiler decompiler, IDocumentViewer documentViewer, DocumentTreeNodeData[] nodes) {
+		NodeTabSaver(IMessageBoxService messageBoxService, IDocumentTab tab, IDocumentTreeNodeDecompiler documentTreeNodeDecompiler, IDecompiler decompiler, IDocumentViewer documentViewer, IPickSaveFilename pickSaveFilename, DocumentTreeNodeData[] nodes) {
 			this.messageBoxService = messageBoxService;
 			this.tab = tab;
 			this.documentTreeNodeDecompiler = documentTreeNodeDecompiler;
 			this.decompiler = decompiler;
 			this.documentViewer = documentViewer;
 			this.nodes = nodes;
+			this.pickSaveFilename = pickSaveFilename;
 		}
 
 		public bool CanSave => !tab.IsAsyncExecInProgress;
@@ -111,14 +116,14 @@ namespace dnSpy.Documents.Tabs {
 		}
 
 		DecompileContext? CreateDecompileContext() {
-			var saveDlg = new SaveFileDialog {
-				FileName = FilenameUtils.CleanName(nodes[0].ToString(decompiler, DocumentNodeWriteOptions.Title)) + decompiler.FileExtension,
-				DefaultExt = decompiler.FileExtension,
-				Filter = $"{decompiler.GenericNameUI}|*{decompiler.FileExtension}|{dnSpy_Resources.AllFiles}|*.*",
-			};
-			if (saveDlg.ShowDialog() != DialogResult.OK)
-				return null;
-			return CreateDecompileContext(saveDlg.FileName);
+			var filename = FilenameUtils.CleanName(nodes[0].ToString(decompiler, DocumentNodeWriteOptions.Title)) + decompiler.FileExtension;
+
+			var ext = decompiler.FileExtension;
+			if (ext.StartsWith(".", StringComparison.Ordinal))
+				ext = ext.Substring(1);
+
+			filename = pickSaveFilename.GetFilename(filename, ext, $"{decompiler.GenericNameUI}|*{decompiler.FileExtension}|{PickFilenameConstants.AnyFilenameFilter}");
+			return filename is null ? null : CreateDecompileContext(filename);
 		}
 
 		public void Save() {

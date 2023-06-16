@@ -1,0 +1,14 @@
+name: Other
+description: Anything else which doesn't fit into the other templates
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before clicking `Submit new issue`, try the latest build [![](https://github.com/dnSpyEx/dnSpy/workflows/GitHub%20CI/badge.svg)](https://github.com/dnSpyEx/dnSpy/actions?query=branch%3Amaster)
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe your issue/question.
+    validations:
+      required: true

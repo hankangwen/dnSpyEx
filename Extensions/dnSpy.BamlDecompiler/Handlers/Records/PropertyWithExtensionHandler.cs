@@ -25,14 +25,14 @@ using dnSpy.BamlDecompiler.Baml;
 using dnSpy.BamlDecompiler.Xaml;
 
 namespace dnSpy.BamlDecompiler.Handlers {
-	internal class PropertyWithExtensionHandler : IHandler {
+	sealed class PropertyWithExtensionHandler : IHandler {
 		public BamlRecordType Type => BamlRecordType.PropertyWithExtension;
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
 			var record = (PropertyWithExtensionRecord)((BamlRecordNode)node).Record;
-			var extTypeId = ((short)record.Flags & 0xfff);
-			bool valTypeExt = ((short)record.Flags & 0x4000) == 0x4000;
-			bool valStaticExt = ((short)record.Flags & 0x2000) == 0x2000;
+			var extTypeId = record.ExtensionTypeId;
+			bool valTypeExt = record.IsValueTypeExtension;
+			bool valStaticExt = record.IsValueStaticExtension;
 
 			var elemType = parent.Xaml.Element.Annotation<XamlType>();
 			var xamlProp = ctx.ResolveProperty(record.AttributeId);
@@ -43,7 +43,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			if (valTypeExt || extTypeId == (short)KnownTypes.TypeExtension) {
 				var value = ctx.ResolveType(record.ValueId);
 
-				object[] initializer = new object[] { ctx.ToString(parent.Xaml, value) };
+				object[] initializer = { new XamlMemberName(value.ToMarkupExtensionName(ctx, parent.Xaml)) };
 				if (valTypeExt)
 					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfd4d)) { Initializer = initializer } }; // Known type - TypeExtension
 
@@ -53,32 +53,18 @@ namespace dnSpy.BamlDecompiler.Handlers {
 				var value = ctx.ResolveProperty(record.ValueId);
 
 				value.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
-				var xName = value.ToXName(ctx, parent.Xaml);
-
-				ext.Initializer = new object[] { ctx.ToString(parent.Xaml, xName) };
+				ext.Initializer = new object[] { new XamlMemberName(value.ToMarkupExtensionName(ctx, parent.Xaml)) };
 			}
 			else if (valStaticExt || extTypeId == (short)KnownTypes.StaticExtension) {
 				string attrName;
 				if (record.ValueId > 0x7fff) {
-					bool isKey = true;
-					short bamlId = unchecked((short)-record.ValueId);
-					if (bamlId > 232 && bamlId < 464) {
-						bamlId -= 232;
-						isKey = false;
-					}
-					else if (bamlId > 464 && bamlId < 467) {
-						bamlId -= 231;
-					}
-					else if (bamlId > 467 && bamlId < 470) {
-						bamlId -= 234;
-						isKey = false;
-					}
-					var res = ctx.Baml.KnownThings.Resources(bamlId);
+					var resId = BamlUtils.GetKnownResourceIdFromBamlId(record.ValueId, out bool isKey);
+					var res = ctx.Baml.KnownThings.Resources(resId);
 					string name;
 					if (isKey)
-						name = res.Item1 + "." + res.Item2;
+						name = res.TypeName + "." + res.KeyName;
 					else
-						name = res.Item1 + "." + res.Item3;
+						name = res.TypeName + "." + res.PropertyName;
 					var xmlns = ctx.GetXmlNamespace(XamlContext.KnownNamespace_Presentation);
 					attrName = ctx.ToString(parent.Xaml, xmlns.GetName(name));
 				}
@@ -86,12 +72,10 @@ namespace dnSpy.BamlDecompiler.Handlers {
 					var value = ctx.ResolveProperty(record.ValueId);
 
 					value.DeclaringType.ResolveNamespace(parent.Xaml, ctx);
-					var xName = value.ToXName(ctx, parent.Xaml);
-
-					attrName = ctx.ToString(parent.Xaml, xName);
+					attrName = value.ToMarkupExtensionName(ctx, parent.Xaml);
 				}
 
-				object[] initializer = new object[] { attrName };
+				object[] initializer = { new XamlMemberName(attrName) };
 				if (valStaticExt)
 					initializer = new object[] { new XamlExtension(ctx.ResolveType(0xfda6)) { Initializer = initializer } }; // Known type - StaticExtension
 

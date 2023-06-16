@@ -118,6 +118,7 @@ namespace dnSpy.Contracts.Controls {
 		IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
 			const int WM_DPICHANGED = 0x02E0;
 			const int WM_MOUSEHWHEEL = 0x020E;
+			const int WM_NCHITTEST = 0x0084;
 
 			if (msg == WM_DPICHANGED) {
 				if (WM_DPICHANGED_counter != 0)
@@ -138,15 +139,28 @@ namespace dnSpy.Contracts.Controls {
 
 			if (msg == WM_MOUSEHWHEEL) {
 				short delta = (short)unchecked((uint)(long)wParam >> 16);
-				if (delta == 0) {
+				if (delta == 0)
 					return IntPtr.Zero;
-				}
 
 				var element = Mouse.DirectlyOver;
 				if (element is null)
 					return IntPtr.Zero;
 
-				handled = HandleHoriztonalScroll(element, (short)(delta / 10));
+				handled = HandleHorizontalScroll(element, delta);
+
+				return IntPtr.Zero;
+			}
+
+			if (msg == WM_NCHITTEST) {
+				if (IntPtr.Size == 8) {
+					// Workaround for a potential OverflowException in WindowChromeWorker._HandleNCHitTest
+					// See: https://developercommunity.visualstudio.com/t/overflow-exception-in-windowchrome/167357
+					long int64 = lParam.ToInt64();
+					if (int64 > int.MaxValue || int64 < int.MinValue) {
+						handled = true;
+						return IntPtr.Zero;
+					}
+				}
 
 				return IntPtr.Zero;
 			}
@@ -154,7 +168,7 @@ namespace dnSpy.Contracts.Controls {
 			return IntPtr.Zero;
 		}
 
-		private protected virtual bool HandleHoriztonalScroll(IInputElement element, short delta) {
+		private protected virtual bool HandleHorizontalScroll(IInputElement element, short delta) {
 			ScrollViewer? scrollViewer = null;
 			if (element is ScrollViewer scViewer) {
 				scrollViewer = scViewer;
@@ -162,7 +176,7 @@ namespace dnSpy.Contracts.Controls {
 			else if (element is DependencyObject dependencyObject) {
 				var current = UIUtilities.GetParent(dependencyObject);
 
-				while (current != null) {
+				while (current is not null) {
 					if (current is ScrollViewer newScrollViewer) {
 						scrollViewer = newScrollViewer;
 						break;
@@ -172,7 +186,7 @@ namespace dnSpy.Contracts.Controls {
 			}
 
 			if (scrollViewer is not null) {
-				scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + delta);
+				scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + delta / 10.0);
 				return true;
 			}
 
@@ -767,9 +781,11 @@ namespace dnSpy.Contracts.Controls {
 		[DllImport("user32")]
 		static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 		[DllImport("user32")]
-		extern static int GetWindowLong(IntPtr hWnd, int nIndex);
+		static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 		[DllImport("user32")]
-		extern static int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+		static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+		[DllImport("user32")]
+		static extern int EnableMenuItem(IntPtr hMenu, uint uIDEnableItem, uint uEnable);
 
 		internal static void UpdateWin32Style(MetroWindow window) {
 			const int GWL_STYLE = -16;
@@ -782,6 +798,20 @@ namespace dnSpy.Contracts.Controls {
 			SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SYSMENU);
 		}
 
+		const int SC_SIZE = 61440;
+		const int SC_MOVE = 61456;
+		const int SC_MINIMIZE = 61472;
+		const int SC_MAXIMIZE = 61488;
+		const int SC_RESTORE = 61728;
+
+		const uint MF_ENABLED = 0;
+		const uint MF_GRAYED = 1;
+		const uint MF_DISABLED = 2;
+
+		const int WM_SYSCOMMAND = 274;
+
+		static uint ToMenuFlags(bool enabled) => enabled ? MF_ENABLED : MF_DISABLED | MF_GRAYED;
+
 		internal static void ShowSystemMenu(Window window, Point p) {
 			var hWnd = new WindowInteropHelper(window).Handle;
 			if (hWnd == IntPtr.Zero)
@@ -790,9 +820,16 @@ namespace dnSpy.Contracts.Controls {
 				return;
 
 			var hMenu = GetSystemMenu(hWnd, false);
+
+			EnableMenuItem(hMenu, SC_RESTORE, ToMenuFlags(window.WindowState != WindowState.Normal));
+			EnableMenuItem(hMenu, SC_MOVE, ToMenuFlags(window.WindowState == WindowState.Normal));
+			EnableMenuItem(hMenu, SC_SIZE, ToMenuFlags(window.WindowState == WindowState.Normal && (window.ResizeMode == ResizeMode.CanResize || window.ResizeMode == ResizeMode.CanResizeWithGrip)));
+			EnableMenuItem(hMenu, SC_MINIMIZE, ToMenuFlags(window.WindowState != WindowState.Minimized && window.ResizeMode != ResizeMode.NoResize));
+			EnableMenuItem(hMenu, SC_MAXIMIZE, ToMenuFlags(window.WindowState != WindowState.Maximized && window.ResizeMode != ResizeMode.NoResize));
+
 			uint res = TrackPopupMenuEx(hMenu, 0x100, (int)p.X, (int)p.Y, hWnd, IntPtr.Zero);
 			if (res != 0)
-				PostMessage(hWnd, 0x112, IntPtr.Size == 4 ? new IntPtr((int)res) : new IntPtr(res), IntPtr.Zero);
+				PostMessage(hWnd, WM_SYSCOMMAND, IntPtr.Size == 4 ? new IntPtr((int)res) : new IntPtr(res), IntPtr.Zero);
 		}
 
 		internal static void SetState(Window window, WindowState state) {

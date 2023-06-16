@@ -54,7 +54,7 @@ namespace dnSpy.Contracts.MVVM {
 	[Export(typeof(IPickFilename))]
 	public sealed class PickFilename : IPickFilename {
 		/// <inheritdoc/>
-		public string? GetFilename(string? currentFileName, string? defaultExtension, string? filter) {
+		public string? GetFilename(string? currentFileName, string? defaultExtension, string? filter = null) {
 			var dialog = new OpenFileDialog() {
 				Filter = string.IsNullOrEmpty(filter) ? PickFilenameConstants.AnyFilenameFilter : filter,
 				RestoreDirectory = true,
