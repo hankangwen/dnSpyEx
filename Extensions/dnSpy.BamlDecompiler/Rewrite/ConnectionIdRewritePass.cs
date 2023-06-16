@@ -110,23 +110,21 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		}
 
 		static void CheckConnectionId(XamlContext ctx, XElement elem, Dictionary<int, Action<XamlContext, XElement>> connIds) {
-			var connId = elem.Annotation<BamlConnectionId>();
-			if (connId is null)
-				return;
+			foreach (var connId in elem.Annotations<BamlConnectionId>()) {
+				if (!connIds.TryGetValue((int)connId.Id, out var cb)) {
+					elem.AddBeforeSelf(new XComment(string.Format(dnSpy_BamlDecompiler_Resources.Error_UnknownConnectionId, connId.Id)));
+					return;
+				}
 
-			if (!connIds.TryGetValue((int)connId.Id, out var cb)) {
-				elem.AddBeforeSelf(new XComment(string.Format(dnSpy_BamlDecompiler_Resources.Error_UnknownConnectionId, connId.Id)));
-				return;
+				cb(ctx, elem);
 			}
-
-			cb(ctx, elem);
 		}
 
 		struct FieldAssignment {
 			public string FieldName;
 
 			public void Callback(XamlContext ctx, XElement elem) {
-				var xName = ctx.GetKnownNamespace("Name", XamlContext.KnownNamespace_Xaml);
+				var xName = ctx.GetKnownNamespace("Name", XamlContext.KnownNamespace_Xaml, elem);
 				if (elem.Attribute("Name") is null && elem.Attribute(xName) is null)
 					elem.Add(new XAttribute(xName, FieldName));
 			}
