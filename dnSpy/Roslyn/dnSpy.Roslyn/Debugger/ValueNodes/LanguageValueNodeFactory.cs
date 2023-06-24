@@ -135,7 +135,8 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			const bool causesSideEffects = false;
 			var property = PropertyState.TryGetProperty(method);
 			var imageName = property is not null ? ImageNameUtils.GetImageName(property) : ImageNameUtils.GetImageName(method, SupportsModuleTypes);
-			return CreateValue(evalInfo, default, value, formatSpecifiers, options, expression, imageName, isReadOnly, causesSideEffects, value.Type, false, columnFormatter);
+			var expectedType = method is DmdMethodInfo mi ? mi.ReturnType : value.Type;
+			return CreateValue(evalInfo, default, value, formatSpecifiers, options, expression, imageName, isReadOnly, causesSideEffects, expectedType, false, columnFormatter);
 		}
 
 		internal void FormatReturnValueMethodName(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgValueFormatterOptions options, CultureInfo? cultureInfo, DmdMethodBase method) =>

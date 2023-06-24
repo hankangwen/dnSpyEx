@@ -17,6 +17,7 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation.Formatters;
@@ -38,11 +39,11 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		public override bool FormatName(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterOptions options, CultureInfo? cultureInfo) {
 			var formatString = dnSpy_Roslyn_Resources.LocalsWindow_MethodOrProperty_Returned;
 			const string pattern = "{0}";
-			int index = formatString.IndexOf(pattern);
+			int index = formatString.IndexOf(pattern, StringComparison.Ordinal);
 			Debug.Assert(index >= 0);
 			if (index < 0) {
 				formatString = "{0} returned";
-				index = formatString.IndexOf(pattern);
+				index = formatString.IndexOf(pattern, StringComparison.Ordinal);
 			}
 
 			if (index != 0)

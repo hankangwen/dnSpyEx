@@ -101,11 +101,11 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		}
 
 		public override bool FormatActualType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterTypeOptions options, DbgValueFormatterOptions valueOptions, CultureInfo? cultureInfo) =>
-			columnFormatter?.FormatActualType(evalInfo, output, formatter, options, valueOptions, cultureInfo) ??
+			columnFormatter?.FormatActualType(evalInfo, output, formatter, options, valueOptions, cultureInfo) == true ||
 			FormatDebuggerDisplayAttributeType(evalInfo, output, formatter, valueOptions, cultureInfo);
 
 		public override bool FormatExpectedType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterTypeOptions options, DbgValueFormatterOptions valueOptions, CultureInfo? cultureInfo) =>
-			columnFormatter?.FormatExpectedType(evalInfo, output, formatter, options, valueOptions, cultureInfo) ??
+			columnFormatter?.FormatExpectedType(evalInfo, output, formatter, options, valueOptions, cultureInfo) == true ||
 			FormatDebuggerDisplayAttributeType(evalInfo, output, formatter, valueOptions, cultureInfo);
 
 		bool FormatDebuggerDisplayAttributeType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterOptions options, CultureInfo? cultureInfo) {
