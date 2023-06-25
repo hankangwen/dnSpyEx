@@ -1,14 +1,14 @@
 // Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -250,7 +250,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			astBuilder.GenerateCode(output);
 		}
 
-		internal static void AddXmlDocumentation(ref BuilderState state, DecompilerSettings settings, AstBuilder astBuilder) { 
+		internal static void AddXmlDocumentation(ref BuilderState state, DecompilerSettings settings, AstBuilder astBuilder) {
 			if (settings.ShowXmlDocumentation) {
 				var module = state.AstBuilder.Context.CurrentModule;
 				var hasXmlDocFileTmp = state.State.HasXmlDocFile(module);
@@ -358,8 +358,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			AstType astType = AstBuilder.ConvertType(type, new StringBuilder(), typeAttributes, options);
 
 			if (WriteRefIfByRef(output, type.TryGetByRefSig(), typeAttributes as ParamDef)) {
-				if (astType is ComposedType && ((ComposedType)astType).PointerRank > 0)
-					((ComposedType)astType).PointerRank--;
+				if (astType is ComposedType composedType && composedType.HasRefSpecifier)
+					composedType.HasRefSpecifier = false;
 			}
 
 			var ctx = new DecompilerContext(langSettings.Settings.SettingsVersion, type.Module, MetadataTextColorProvider);

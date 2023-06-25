@@ -254,8 +254,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.VisualBasic {
 			if (type.TryGetByRefSig() is not null) {
 				output.Write("ByRef", BoxedTextColor.Keyword);
 				output.Write(" ", BoxedTextColor.Text);
-				if (astType is ICSharpCode.NRefactory.CSharp.ComposedType && ((ICSharpCode.NRefactory.CSharp.ComposedType)astType).PointerRank > 0)
-					((ICSharpCode.NRefactory.CSharp.ComposedType)astType).PointerRank--;
+				if (astType is ComposedType composedType && composedType.HasRefSpecifier)
+					composedType.HasRefSpecifier = false;
 			}
 
 			var vbAstType = astType.AcceptVisitor(converter, null);
