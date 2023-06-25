@@ -44,16 +44,18 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		readonly DbgDotNetValue instanceValue;
 		readonly DmdType expectedType;
 		readonly string valueExpression;
+		readonly bool addParens;
 		string resultsViewProxyExpression;
 		DbgDotNetValue? getResultsViewValue;
 
-		public ResultsViewMembersValueNodeProvider(DbgDotNetValueNodeProviderFactory valueNodeProviderFactory, LanguageValueNodeFactory valueNodeFactory, DmdType enumerableType, DbgDotNetValue instanceValue, DmdType expectedType, string valueExpression, DbgValueNodeEvaluationOptions evalOptions)
+		public ResultsViewMembersValueNodeProvider(DbgDotNetValueNodeProviderFactory valueNodeProviderFactory, LanguageValueNodeFactory valueNodeFactory, DmdType enumerableType, DbgDotNetValue instanceValue, DmdType expectedType, string valueExpression, bool addParens, DbgValueNodeEvaluationOptions evalOptions)
 			: base(valueNodeFactory, resultsViewName, valueExpression + ", " + PredefinedFormatSpecifiers.ResultsView, default, evalOptions) {
 			this.valueNodeProviderFactory = valueNodeProviderFactory;
 			this.enumerableType = enumerableType;
 			this.instanceValue = instanceValue;
 			this.expectedType = expectedType;
 			this.valueExpression = valueExpression;
+			this.addParens = addParens;
 			resultsViewProxyExpression = string.Empty;
 		}
 
@@ -171,7 +173,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		}
 
 		protected override (DbgDotNetValueNode node, bool canHide) CreateValueNode(DbgEvaluationInfo evalInfo, int index, DbgValueNodeEvaluationOptions options, ReadOnlyCollection<string>? formatSpecifiers) =>
-			CreateValueNode(evalInfo, false, getResultsViewValue!.Type, getResultsViewValue, index, options, resultsViewProxyExpression, formatSpecifiers);
+			CreateValueNode(evalInfo, addParens, getResultsViewValue!.Type, getResultsViewValue, index, options, resultsViewProxyExpression, formatSpecifiers);
 
 		protected override (DbgDotNetValueNode? node, bool canHide) TryCreateInstanceValueNode(DbgEvaluationInfo evalInfo, DbgDotNetValueResult valueResult) {
 			var noResultsNode = DebugViewNoResultsValueNode.TryCreate(evalInfo, Expression, valueResult);
