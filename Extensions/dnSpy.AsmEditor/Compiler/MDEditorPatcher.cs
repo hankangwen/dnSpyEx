@@ -162,6 +162,11 @@ namespace dnSpy.AsmEditor.Compiler {
 		bool CheckResolutionScopeIsSameModule(MDToken resolutionScope, ModuleDef module) {
 			switch (resolutionScope.Table) {
 			case Table.Module:
+				// ECMA II.22.38 states that in this case we should check ExportedTypes of the current module.
+				// The CLR however checks both TypeDefs and ExportedTypes.
+				if (resolutionScope.IsNull)
+					return true;
+
 				return resolutionScope.Rid == 1;
 
 			case Table.ModuleRef:
