@@ -31,6 +31,7 @@ namespace dnSpy.Hex.Files.DotNet {
 		bool bigStrings;
 		bool bigGuid;
 		bool bigBlob;
+		bool forceAllBig;
 		uint[]? rowCounts;
 		TableInfo[]? tableInfos;
 
@@ -41,11 +42,13 @@ namespace dnSpy.Hex.Files.DotNet {
 		/// <param name="bigGuid"><c>true</c> if #GUID size >= 0x10000</param>
 		/// <param name="bigBlob"><c>true</c> if #Blob size >= 0x10000</param>
 		/// <param name="rowCounts">Count of rows in each table</param>
-		public void InitializeSizes(bool bigStrings, bool bigGuid, bool bigBlob, uint[] rowCounts) {
+		/// <param name="forceAllBig">Force all columns to 4 bytes instead of 2 or 4 bytes</param>
+		public void InitializeSizes(bool bigStrings, bool bigGuid, bool bigBlob, uint[] rowCounts, bool forceAllBig) {
 			Debug2.Assert(tableInfos is not null);
-			this.bigStrings = bigStrings;
-			this.bigGuid = bigGuid;
-			this.bigBlob = bigBlob;
+			this.bigStrings = bigStrings || forceAllBig;
+			this.bigGuid = bigGuid || forceAllBig;
+			this.bigBlob = bigBlob || forceAllBig;
+			this.forceAllBig = forceAllBig;
 			this.rowCounts = rowCounts;
 			for (int i = 0; i < tableInfos.Length; i++) {
 				var tableInfo = tableInfos[i];
@@ -67,7 +70,7 @@ namespace dnSpy.Hex.Files.DotNet {
 			if (ColumnSize.Module <= columnSize && columnSize <= ColumnSize.CustomDebugInformation) {
 				int table = (int)(columnSize - ColumnSize.Module);
 				uint count = table >= rowCounts.Length ? 0 : rowCounts[table];
-				return count > 0xFFFF ? 4 : 2;
+				return forceAllBig || count > 0xFFFF ? 4 : 2;
 			}
 			else if (ColumnSize.TypeDefOrRef <= columnSize && columnSize <= ColumnSize.HasCustomDebugInformation) {
 				CodedToken info;
@@ -97,7 +100,7 @@ namespace dnSpy.Hex.Files.DotNet {
 				}
 				// Can't overflow since maxRows <= 0x00FFFFFF and info.Bits < 8
 				uint finalRows = maxRows << info.Bits;
-				return finalRows > 0xFFFF ? 4 : 2;
+				return forceAllBig || finalRows > 0xFFFF ? 4 : 2;
 			}
 			else {
 				switch (columnSize) {
@@ -106,9 +109,9 @@ namespace dnSpy.Hex.Files.DotNet {
 				case ColumnSize.UInt16:	return 2;
 				case ColumnSize.Int32:	return 4;
 				case ColumnSize.UInt32:	return 4;
-				case ColumnSize.Strings:return bigStrings ? 4 : 2;
-				case ColumnSize.GUID:	return bigGuid ? 4 : 2;
-				case ColumnSize.Blob:	return bigBlob ? 4 : 2;
+				case ColumnSize.Strings:return forceAllBig || bigStrings ? 4 : 2;
+				case ColumnSize.GUID:	return forceAllBig || bigGuid ? 4 : 2;
+				case ColumnSize.Blob:	return forceAllBig || bigBlob ? 4 : 2;
 				}
 			}
 			throw new InvalidOperationException($"Invalid ColumnSize: {columnSize}");

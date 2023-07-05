@@ -102,6 +102,10 @@ namespace dnSpy.Hex.Files.DotNet {
 			}
 		}
 
+		public override bool ForceAllBigColumns => forceAllBigColumns;
+
+		internal void SetForceAllBigColumns(bool value) => forceAllBigColumns = value;
+
 		bool initialized;
 		HexSpan headerSpan;
 		HexSpan tablesSpan;
@@ -114,6 +118,7 @@ namespace dnSpy.Hex.Files.DotNet {
 		byte log2Rid;
 		ulong validMask;
 		ulong sortedMask;
+		bool forceAllBigColumns;
 		uint extraData;
 		MDTable[]? mdTables;
 		ReadOnlyCollection<MDTable>? mdTablesReadOnly;
@@ -177,7 +182,7 @@ namespace dnSpy.Hex.Files.DotNet {
 
 			headerSpan = HexSpan.FromBounds(Span.Span.Start, pos);
 
-			dnTableSizes.InitializeSizes((flags & MDStreamFlags.BigStrings) != 0, (flags & MDStreamFlags.BigGUID) != 0, (flags & MDStreamFlags.BigBlob) != 0, sizes);
+			dnTableSizes.InitializeSizes((flags & MDStreamFlags.BigStrings) != 0, (flags & MDStreamFlags.BigGUID) != 0, (flags & MDStreamFlags.BigBlob) != 0, sizes, forceAllBigColumns);
 			mdTables = new MDTable[tableInfos.Length];
 			mdTablesReadOnly = new ReadOnlyCollection<MDTable>(mdTables);
 			tableRecordDataFactories = new TableRecordDataFactory[tableInfos.Length];
