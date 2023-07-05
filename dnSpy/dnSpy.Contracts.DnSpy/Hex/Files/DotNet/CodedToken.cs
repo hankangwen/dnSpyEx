@@ -84,8 +84,8 @@ namespace dnSpy.Contracts.Hex.Files.DotNet {
 		});
 
 		/// <summary>CustomAttributeType coded token</summary>
-		public static readonly CodedToken CustomAttributeType = new CodedToken(3, new Table[4] {
-			0, 0, Table.Method, Table.MemberRef,
+		public static readonly CodedToken CustomAttributeType = new CodedToken(3, new Table[5] {
+			0, 0, Table.Method, Table.MemberRef, 0,
 		});
 
 		/// <summary>ResolutionScope coded token</summary>
