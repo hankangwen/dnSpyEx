@@ -19,6 +19,8 @@
 
 using System;
 using System.Diagnostics;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdEventDefCOMD : DmdEventDef {
@@ -31,7 +33,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public DmdEventDefCOMD(DmdComMetadataReader reader, uint rid, DmdType declaringType, DmdType reflectedType) : base(rid, declaringType, reflectedType) {
 			this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
 			reader.Dispatcher.VerifyAccess();
-			uint token = 0x14000000 + rid;
+			uint token = new MDToken(Table.Event, rid).Raw;
 			Name = MDAPI.GetEventName(reader.MetaDataImport, token) ?? string.Empty;
 			Attributes = MDAPI.GetEventAttributes(reader.MetaDataImport, token);
 			var eventTypeToken = MDAPI.GetEventTypeToken(reader.MetaDataImport, token);
@@ -68,9 +70,10 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		}
 
 		DmdMethodInfo? Lookup_COMThread(uint token) {
-			if ((token >> 24) != 0x06 || (token & 0x00FFFFFF) == 0)
+			var methodToken = new MDToken(token);
+			if (methodToken.Table != Table.Method || methodToken.IsNull)
 				return null;
-			var method = ReflectedType!.GetMethod(Module, (int)token) as DmdMethodInfo;
+			var method = ReflectedType!.GetMethod(Module, methodToken.ToInt32()) as DmdMethodInfo;
 			Debug2.Assert(method is not null);
 			return method;
 		}

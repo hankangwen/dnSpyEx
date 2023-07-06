@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdGenericParameterType : DmdTypeBase {
@@ -36,7 +38,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		public sealed override DmdTypeAttributes Attributes => DmdTypeAttributes.Public;
 		public sealed override int GenericParameterPosition { get; }
 		public sealed override string? MetadataName { get; }
-		public sealed override int MetadataToken => (int)(0x2A000000 + rid);
+		public sealed override int MetadataToken => new MDToken(Table.GenericParam, rid).ToInt32();
 		public sealed override bool IsMetadataReference => false;
 		internal override bool HasTypeEquivalence => false;
 

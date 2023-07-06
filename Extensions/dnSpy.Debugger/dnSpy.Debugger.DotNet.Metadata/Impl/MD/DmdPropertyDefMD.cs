@@ -53,7 +53,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 			for (int i = 0; i < ridList.Count; i++) {
 				if (!reader.TablesStream.TryReadMethodSemanticsRow(ridList[i], out var row))
 					continue;
-				var method = ReflectedType!.GetMethod(Module, 0x06000000 + (int)row.Method) as DmdMethodInfo;
+				var method = ReflectedType!.GetMethod(Module, new MDToken(Table.Method, row.Method).ToInt32()) as DmdMethodInfo;
 				if (method is null)
 					continue;
 

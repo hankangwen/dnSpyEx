@@ -110,19 +110,17 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Metadata {
 			if (oldLastValid.Equals(lastValid))
 				return hash;
 
-			const uint TYPEDEF_TOKEN = 0x02000000;
-
 			// Optimization if we loaded a big file
 			if (oldLastValid.TypeDefRid == 0) {
 				for (uint rid = 1; rid <= lastValid.TypeDefRid; rid++)
-					hash.Add(TYPEDEF_TOKEN + rid);
+					hash.Add(new MDToken(Table.TypeDef, rid).Raw);
 				return hash;
 			}
 
 			var methodRids = new HashSet<uint>();
 			var gpRids = new HashSet<uint>();
 			for (uint rid = oldLastValid.TypeDefRid + 1; rid <= lastValid.TypeDefRid; rid++)
-				hash.Add(TYPEDEF_TOKEN + rid);
+				hash.Add(new MDToken(Table.TypeDef, rid).Raw);
 			for (uint rid = oldLastValid.FieldRid + 1; rid <= lastValid.FieldRid; rid++) {
 				var typeOwner = cmod.GetFieldOwnerToken(rid);
 				if (typeOwner.Rid != 0)
@@ -197,7 +195,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Metadata {
 			if (cmod is null)
 				return;
 			foreach (uint token in nonLoadedTokens)
-				cmod.ForceInitializeTypeDef(token & 0x00FFFFFF);
+				cmod.ForceInitializeTypeDef(MDToken.ToRID(token));
 		}
 
 		LastValidRids UpdateLastValidRids(DynamicModuleData data, CorModuleDef module) {

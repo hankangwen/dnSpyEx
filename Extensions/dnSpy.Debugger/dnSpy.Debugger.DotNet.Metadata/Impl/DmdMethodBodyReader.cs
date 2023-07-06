@@ -20,6 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	interface IMethodBodyResolver {
@@ -56,7 +58,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 				return null;
 
 			DmdLocalVariableInfo[] localVariables;
-			if ((localSignatureMetadataToken & 0x00FFFFFF) != 0 && (byte)(localSignatureMetadataToken >> 24) == 0x11) {
+			if (MDToken.ToRID(localSignatureMetadataToken) != 0 && MDToken.ToTable(localSignatureMetadataToken) == Table.StandAloneSig) {
 				var localTypes = methodBodyResolver.ReadLocals(localSignatureMetadataToken, genericTypeArguments, genericMethodArguments);
 				localVariables = new DmdLocalVariableInfo[localTypes.Length];
 				for (int i = 0; i < localVariables.Length; i++) {

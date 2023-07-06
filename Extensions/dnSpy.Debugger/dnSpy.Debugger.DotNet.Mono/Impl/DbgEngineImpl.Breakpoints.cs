@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using dnlib.DotNet;
 using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.Breakpoints.Code;
 using dnSpy.Contracts.Debugger.Code;
@@ -215,11 +216,11 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl {
 				}
 			}
 
-			public bool IsTypeLoaded(int metadataToken) => (metadataToken & 0x00FFFFFF) != 0 && loadedTypes.Contains(metadataToken);
+			public bool IsTypeLoaded(int metadataToken) => MDToken.ToRID(metadataToken) != 0 && loadedTypes.Contains(metadataToken);
 
 			public void OnTypeLoaded(TypeMirror monoType) {
 				int typeToken = monoType.MetadataToken;
-				if ((typeToken & 0x00FFFFFF) == 0)
+				if (MDToken.ToRID(typeToken) == 0)
 					return;
 
 				// This can fail if it's a generic instantiated type, eg. List<int> if List<string> has already been loaded

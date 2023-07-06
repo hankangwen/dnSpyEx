@@ -20,13 +20,15 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdParameterDef : DmdParameterInfoBase {
 		public sealed override DmdMemberInfo Member { get; }
 		public sealed override int Position { get; }
 		public sealed override DmdType ParameterType { get; }
-		public sealed override int MetadataToken => (int)(0x08000000 + rid);
+		public sealed override int MetadataToken => new MDToken(Table.Param, rid).ToInt32();
 
 		protected uint Rid => rid;
 		readonly uint rid;

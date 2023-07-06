@@ -21,6 +21,7 @@ using System;
 using System.Diagnostics;
 using dndbg.DotNet;
 using dndbg.Engine;
+using dnlib.DotNet;
 using dnSpy.Debugger.DotNet.Metadata;
 
 namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
@@ -94,7 +95,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				// it's the 1-byte or fat header.
 				reader = new ProcessBinaryReader(new CorProcessReader(dnModule.Process), 0);
 				uint locVarSigTok = func.LocalVarSigToken;
-				bool isBig = codeSize >= 0x40 || (locVarSigTok & 0x00FFFFFF) != 0;
+				uint locVarSigRid = MDToken.ToRID(locVarSigTok);
+				bool isBig = codeSize >= 0x40 || locVarSigRid != 0;
 				if (!isBig) {
 					reader.Position = (long)addr - 1;
 					byte b = reader.ReadByte();
@@ -108,8 +110,8 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 						uint headerCodeSize = reader.ReadUInt32();
 						uint headerLocVarSigTok = reader.ReadUInt32();
 						bool valid = headerCodeSize == codeSize &&
-							(locVarSigTok & 0x00FFFFFF) == (headerLocVarSigTok & 0x00FFFFFF) &&
-							((locVarSigTok & 0x00FFFFFF) == 0 || locVarSigTok == headerLocVarSigTok);
+							locVarSigRid == MDToken.ToRID(headerLocVarSigTok) &&
+							(locVarSigRid == 0 || locVarSigTok == headerLocVarSigTok);
 						Debug.Assert(valid);
 						if (!valid)
 							return null;

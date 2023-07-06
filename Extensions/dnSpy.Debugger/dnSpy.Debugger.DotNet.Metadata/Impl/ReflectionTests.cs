@@ -25,12 +25,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using DNE = dnlib.DotNet.Emit;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static class ReflectionTests {
 		const bool TESTEXCEPTIONS = false;
@@ -124,7 +125,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		*/
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="ad"></param>
 		public static void Test(DmdAppDomain ad) {
@@ -359,10 +360,11 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 			Test(mod1, mod2);
 
 			for (int rid = 2; ; rid++) {
-				var t1 = mod1.ResolveType(0x02000000 + rid, DmdResolveOptions.None);
+				var token = new MDToken(Table.TypeDef, rid).ToInt32();
+				var t1 = mod1.ResolveType(token, DmdResolveOptions.None);
 				Type t2;
 				try {
-					t2 = mod2.ResolveType(0x02000000 + rid);
+					t2 = mod2.ResolveType(token);
 				}
 				catch (ArgumentOutOfRangeException) {
 					t2 = null;
@@ -943,7 +945,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 				case DNE.OperandType.InlineTok:
 					token = BitConverter.ToInt32(a1, pos);
 					pos += 4;
-					switch ((Table)(token >> 24)) {
+					switch (MDToken.ToTable(token)) {
 					case Table.TypeRef:
 					case Table.TypeDef:
 					case Table.TypeSpec:

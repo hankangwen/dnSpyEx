@@ -68,24 +68,22 @@ namespace dndbg.Engine {
 			if (mod is null || mod.IsDynamic || mod.IsInMemory)
 				return false;
 
-			uint memberToken = 0;
+			uint methodToken = 0;
 			if (type == BreakProcessKind.ModuleCctorOrEntryPoint)
-				memberToken = GetGlobalStaticConstructor(mod.GetMetaDataInterface<IMetaDataImport>());
+				methodToken = GetGlobalStaticConstructor(mod.GetMetaDataInterface<IMetaDataImport>());
 
-			if (memberToken == 0) {
-				var filename = mod.Name;
-				uint epToken = GetEntryPointToken(filename);
-				if ((Table)(epToken >> 24) != Table.Method || (epToken & 0x00FFFFFF) == 0)
-					return false;
-				memberToken = epToken;
-			}
+			if (methodToken == 0)
+				methodToken = GetEntryPointToken(mod.Name);
+
+			if (MDToken.ToTable(methodToken) != Table.Method || MDToken.ToRID(methodToken) == 0)
+				return false;
 
 			debugger.RemoveBreakpoint(breakpoint!);
 			breakpoint = null;
 			Debug.Assert(!mod.IsDynamic && !mod.IsInMemory);
 			// It's not a dyn/in-mem module so id isn't used
 			var moduleId = mod.GetModuleId(uint.MaxValue);
-			SetILBreakpoint(moduleId, memberToken);
+			SetILBreakpoint(moduleId, methodToken);
 			return false;
 		}
 
@@ -102,7 +100,7 @@ namespace dndbg.Engine {
 					if ((cor20Header.Flags & ComImageFlags.NativeEntryPoint) != 0)
 						return 0;
 					uint token = cor20Header.EntryPointToken_or_RVA;
-					if ((Table)(token >> 24) == Table.Method && (token & 0x00FFFFFF) != 0)
+					if (MDToken.ToTable(token) == Table.Method && MDToken.ToRID(token) != 0)
 						return token;
 				}
 			}

@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Threading;
+using dnlib.DotNet;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdTypeRef : DmdTypeBase {
@@ -46,7 +47,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 				if (!declaringTypeRefInitd) {
 					int declTypeToken = GetDeclaringTypeRefToken();
 					DmdTypeRef? newDT;
-					if ((declTypeToken & 0x00FFFFFF) == 0)
+					if (MDToken.ToRID(declTypeToken) == 0)
 						newDT = null;
 					else
 						newDT = (DmdTypeRef?)ownerModule.ResolveType(declTypeToken, DmdResolveOptions.NoTryResolveRefs);

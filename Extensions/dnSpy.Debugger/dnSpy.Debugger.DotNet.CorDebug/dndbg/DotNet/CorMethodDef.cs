@@ -149,7 +149,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetParamTokens(mdi, token);
 			var newItems = new MemberInfo<CorParamDef>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorParamDef(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 
@@ -172,7 +172,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetGenericParamTokens(mdi2, token);
 			var newItems = new MemberInfo<CorGenericParam>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorGenericParam(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 

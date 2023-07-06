@@ -625,7 +625,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public unsafe static COR_FIELD_OFFSET[]? GetFieldOffsets(IMetaDataImport2 mdi, uint token) {
 			if (mdi is null)
 				return null;
-			if ((token & 0x00FFFFFF) == 0)
+			if (MDToken.ToRID(token) == 0)
 				return null;
 
 			int cFieldOffset = 0;
@@ -654,7 +654,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public unsafe static (IntPtr addr, uint size) GetFieldMarshalBlob(IMetaDataImport2 mdi, uint token) {
 			if (mdi is null)
 				return (IntPtr.Zero, 0);
-			if ((token & 0x00FFFFFF) == 0)
+			if (MDToken.ToRID(token) == 0)
 				return (IntPtr.Zero, 0);
 
 			int hr = mdi.GetFieldMarshal(token, out var pvNativeType, out uint cbNativeType);

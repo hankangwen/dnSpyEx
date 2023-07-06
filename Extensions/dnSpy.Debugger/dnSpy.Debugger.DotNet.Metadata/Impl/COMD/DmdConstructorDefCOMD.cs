@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdConstructorDefCOMD : DmdConstructorDef {
@@ -35,7 +37,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			MethodImplementationFlags = implementationFlags;
 			Attributes = attributes;
 			Name = name ?? throw new ArgumentNullException(nameof(name));
-			methodSignature = reader.ReadMethodSignature_COMThread(MDAPI.GetMethodSignatureBlob(reader.MetaDataImport, 0x06000000 + rid), DeclaringType!.GetGenericArguments(), GetGenericArguments(), isProperty: false);
+			uint token = new MDToken(Table.Method, rid).Raw;
+			methodSignature = reader.ReadMethodSignature_COMThread(MDAPI.GetMethodSignatureBlob(reader.MetaDataImport, token), DeclaringType!.GetGenericArguments(), GetGenericArguments(), isProperty: false);
 		}
 
 		T COMThread<T>(Func<T> action) => reader.Dispatcher.Invoke(action);
@@ -56,6 +59,6 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		}
 
 		protected override uint GetRVA() => COMThread(GetRVA_COMThread);
-		uint GetRVA_COMThread() => MDAPI.GetRVA(reader.MetaDataImport, 0x06000000 + Rid) ?? 0;
+		uint GetRVA_COMThread() => MDAPI.GetRVA(reader.MetaDataImport, (uint)MetadataToken) ?? 0;
 	}
 }

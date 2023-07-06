@@ -37,7 +37,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 				if ((Metadata.ImageCor20Header.Flags & ComImageFlags.NativeEntryPoint) != 0)
 					return null;
 				uint token = Metadata.ImageCor20Header.EntryPointToken_or_RVA;
-				if ((token >> 24) != (uint)Table.File)
+				if (MDToken.ToTable(token) != Table.File)
 					return ResolveMethod((int)token, null, null, DmdResolveOptions.None) as DmdMethodInfo;
 				return null;
 			}
@@ -206,7 +206,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 		}
 
 		internal (DmdParameterInfo? returnParameter, DmdParameterInfo[] parameters) CreateParameters(DmdMethodBase method, bool createReturnParameter) {
-			var ridList = Metadata.GetParamRidList((uint)method.MetadataToken & 0x00FFFFFF);
+			var ridList = Metadata.GetParamRidList(MDToken.ToRID(method.MetadataToken));
 			var methodSignature = method.GetMethodSignature();
 			var sigParamTypes = methodSignature.GetParameterTypes();
 			DmdParameterInfo? returnParameter = null;
@@ -272,7 +272,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 			new DmdPropertyDefMD(this, rid, declaringType, reflectedType);
 
 		internal DmdType[]? CreateGenericParameters(DmdMethodBase method) {
-			var ridList = Metadata.GetGenericParamRidList(Table.Method, (uint)method.MetadataToken & 0x00FFFFFF);
+			var ridList = Metadata.GetGenericParamRidList(Table.Method, MDToken.ToRID(method.MetadataToken));
 			if (ridList.Count == 0)
 				return null;
 			var genericParams = new DmdType[ridList.Count];
@@ -300,7 +300,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 			var rawInfo = info.containedGenericParams ? ReadMethodSignatureOrFieldType(row.Signature, null, null) : info;
 
 			bool containedGenericParams = info.containedGenericParams;
-			if ((classToken >> 24) == 0x1B)
+			if (MDToken.ToTable(classToken) == Table.TypeSpec)
 				containedGenericParams = true;
 
 			if (info.fieldType is not null) {
@@ -321,15 +321,15 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 		}
 
 		DmdType GetMemberRefParent(uint classToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
-			uint rid = classToken & 0x00FFFFFF;
-			switch ((Table)(classToken >> 24)) {
+			uint rid = MDToken.ToRID(classToken);
+			switch (MDToken.ToTable(classToken)) {
 			case Table.TypeRef:
 			case Table.TypeDef:
 			case Table.TypeSpec:
 				return ResolveType((int)classToken, genericTypeArguments, genericMethodArguments, DmdResolveOptions.None) ?? Module.AppDomain.System_Void;
 
 			case Table.ModuleRef:
-				TablesStream.TryReadModuleRefRow(classToken & 0x00FFFFFF, out var moduleRefRow);
+				TablesStream.TryReadModuleRefRow(rid, out var moduleRefRow);
 				var moduleName = StringsStream.ReadNoNull(moduleRefRow.Name);
 				if (StringComparer.OrdinalIgnoreCase.Equals(moduleName, Module.ScopeName))
 					return Module.GlobalType;
@@ -389,7 +389,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 		internal DmdMethodBody? GetMethodBody(DmdMethodBase method, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			if ((method.MethodImplementationFlags & DmdMethodImplAttributes.CodeTypeMask) != DmdMethodImplAttributes.IL)
 				return null;
-			if (!TablesStream.TryReadMethodRow((uint)method.MetadataToken & 0x00FFFFFF, out var row))
+			if (!TablesStream.TryReadMethodRow(MDToken.ToRID(method.MetadataToken), out var row))
 				return null;
 			if (row.RVA == 0)
 				return null;
@@ -402,15 +402,15 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 		}
 
 		internal uint GetRVA(DmdMethodBase method) {
-			TablesStream.TryReadMethodRow((uint)method.MetadataToken & 0x00FFFFFF, out var row);
+			TablesStream.TryReadMethodRow(MDToken.ToRID(method.MetadataToken), out var row);
 			return row.RVA;
 		}
 
 		(DmdType type, bool isPinned)[] IMethodBodyResolver.ReadLocals(int localSignatureMetadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
-			if ((localSignatureMetadataToken & 0x00FFFFFF) == 0 || (localSignatureMetadataToken >> 24) != 0x11)
+			var localSigToken = new MDToken(localSignatureMetadataToken);
+			if (localSigToken.IsNull || localSigToken.Table  != Table.StandAloneSig)
 				return Array.Empty<(DmdType, bool)>();
-			uint rid = (uint)localSignatureMetadataToken & 0x00FFFFFF;
-			if (!TablesStream.TryReadStandAloneSigRow(rid, out var row))
+			if (!TablesStream.TryReadStandAloneSigRow(localSigToken.Rid, out var row))
 				return Array.Empty<(DmdType, bool)>();
 			var reader = BlobStream.CreateReader(row.Signature);
 			return DmdSignatureReader.ReadLocalsSignature(module, new DmdDataStreamImpl(ref reader), genericTypeArguments, genericMethodArguments, resolveTypes);
@@ -674,7 +674,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 #pragma warning restore SYSLIB0003 // SecurityAction
 
 		internal DmdMarshalType? ReadMarshalType(int metadataToken, DmdModule module, IList<DmdType>? genericTypeArguments) {
-			if (!TablesStream.TryReadFieldMarshalRow(Metadata.GetFieldMarshalRid((Table)((uint)metadataToken >> 24), (uint)metadataToken & 0x00FFFFFF), out var row))
+			if (!TablesStream.TryReadFieldMarshalRow(Metadata.GetFieldMarshalRid(MDToken.ToTable(metadataToken), MDToken.ToRID(metadataToken)), out var row))
 				return null;
 			var reader = BlobStream.CreateReader(row.NativeType);
 			return DmdMarshalBlobReader.Read(module, new DmdDataStreamImpl(ref reader), genericTypeArguments);
@@ -688,7 +688,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 		}
 
 		internal (object? value, bool hasValue) ReadConstant(int metadataToken) {
-			var constantRid = Metadata.GetConstantRid((Table)((uint)metadataToken >> 24), (uint)(metadataToken & 0x00FFFFFF));
+			var constantRid = Metadata.GetConstantRid(MDToken.ToTable(metadataToken), MDToken.ToRID(metadataToken));
 			if (constantRid == 0)
 				return (null, false);
 			if (!TablesStream.TryReadConstantRow(constantRid, out var row))

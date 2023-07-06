@@ -128,7 +128,7 @@ namespace dnSpy.AsmEditor.Hex.Nodes {
 		}
 
 		public MetadataTableRecordNode? FindTokenNode(uint token) {
-			if ((token & 0x00FFFFFF) == 0)
+			if (MDToken.ToRID(token) == 0)
 				return null;
 			TreeNode.EnsureChildrenLoaded();
 			var stgStreamNode = (StorageStreamNode?)TreeNode.DataChildren.FirstOrDefault(a => a is StorageStreamNode && ((StorageStreamNode)a).HeapKind == DotNetHeapKind.Tables);

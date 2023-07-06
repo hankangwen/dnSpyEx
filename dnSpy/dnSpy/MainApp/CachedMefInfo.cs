@@ -21,6 +21,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.MainApp {
 	sealed class CachedMefInfo {
@@ -128,7 +130,7 @@ namespace dnSpy.MainApp {
 			resourceManagerTokensOffset = reader.BaseStream.Position;
 			for (int i = 0; i < tokens.Length; i++) {
 				var token = reader.ReadInt32();
-				if (!(token == 0 || ((token >> 24) == 0x06 && (token & 0x00FFFFFF) != 0)))
+				if (!(token == 0 || (MDToken.ToTable(token) == Table.Method && MDToken.ToRID(token) != 0)))
 					return false;
 				tokens[i] = token;
 			}

@@ -39,7 +39,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		protected override DmdType[]? CreateGenericParameterConstraints() => COMThread(CreateGenericParameterConstraints_COMThread);
 		DmdType[]? CreateGenericParameterConstraints_COMThread() {
 			reader.Dispatcher.VerifyAccess();
-			var tokens = MDAPI.GetGenericParamConstraintTokens(reader.MetaDataImport, 0x2A000000 + Rid);
+			var tokens = MDAPI.GetGenericParamConstraintTokens(reader.MetaDataImport, (uint)MetadataToken);
 			if (tokens.Length == 0)
 				return null;
 

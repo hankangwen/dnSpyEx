@@ -174,23 +174,25 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			return dispatcher.Invoke(action);
 		}
 
+		bool IsValidToken(Table table, uint rid) => MDAPI.IsValidToken(MetaDataImport, new MDToken(table, rid).Raw);
+
 		DmdTypeRefCOMD? TryCreateTypeRefCOMD_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			if (!MDAPI.IsValidToken(MetaDataImport, 0x01000000 + rid))
+			if (!IsValidToken(Table.TypeRef, rid))
 				return null;
 			return new DmdTypeRefCOMD(this, rid, null);
 		}
 
 		DmdTypeDefCOMD? TryCreateTypeDefCOMD_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			if (!MDAPI.IsValidToken(MetaDataImport, 0x02000000 + rid))
+			if (!IsValidToken(Table.TypeDef, rid))
 				return null;
 			return new DmdTypeDefCOMD(this, rid, null);
 		}
 
 		DmdExportedTypeCOMD? TryCreateExportedTypeCOMD_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			if (!MDAPI.IsValidToken(MetaDataImport, 0x27000000 + rid))
+			if (!IsValidToken(Table.ExportedType, rid))
 				return null;
 			return new DmdExportedTypeCOMD(this, rid, null);
 		}
@@ -231,7 +233,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			Debug2.Assert(ridToEnclosing is not null);
 			Array.Sort(tokens);
 			foreach (uint token in tokens) {
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				Debug.Assert(rid != 0);
 				Debug.Assert(!ridToNested.ContainsKey(rid));
 
@@ -260,20 +262,20 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		void DmdDynamicModuleHelper_TypeLoaded_COMThread(object? sender, DmdTypeLoadedEventArgs e) {
 			dispatcher.VerifyAccess();
-			bool b = (e.MetadataToken >> 24) == 0x02 && (e.MetadataToken & 0x00FFFFFF) != 0 && MDAPI.IsValidToken(MetaDataImport, (uint)e.MetadataToken);
+			var mdToken = new MDToken(e.MetadataToken);
+			bool b = mdToken.Table == Table.TypeDef && mdToken.Rid != 0 && MDAPI.IsValidToken(MetaDataImport, mdToken.Raw);
 			Debug.Assert(b);
 			if (!b)
 				return;
 			if (!module.IsDynamic)
 				return;
 
-			uint typeToken = (uint)e.MetadataToken;
 			uint[] newTokens;
 			if (ridToNested is not null)
-				newTokens = UpdateTypeTables_COMThread(typeToken);
+				newTokens = UpdateTypeTables_COMThread(mdToken.Raw);
 			else
-				newTokens = GetNewTokens_COMThread(typeToken);
-			typeDefList.TryGet(typeToken)?.DynamicType_InvalidateCachedMembers();
+				newTokens = GetNewTokens_COMThread(mdToken.Raw);
+			typeDefList.TryGet(mdToken.Raw)?.DynamicType_InvalidateCachedMembers();
 
 			TypesUpdated?.Invoke(this, new DmdTypesUpdatedEventArgs(newTokens));
 		}
@@ -282,18 +284,18 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		uint[] UpdateTypeTables_COMThread(uint typeToken) {
 			dispatcher.VerifyAccess();
-			uint typeRid = typeToken & 0x00FFFFFF;
+			uint typeRid = MDToken.ToRID(typeToken);
 			bool b = ridToEnclosing is not null && !ridToEnclosing.ContainsKey(typeRid);
 			Debug.Assert(b);
 			if (!b)
 				return new[] { typeToken };
 			Debug2.Assert(ridToEnclosing is not null);
 
-			var tokens = GetNewTokens_COMThread(typeRid);
+			var tokens = GetNewTokens_COMThread(typeToken);
 			UpdateTypeTables_COMThread(tokens);
 
 			foreach (var token in tokens) {
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				if (token != typeToken) {
 					b = typeDefList.TryGet(rid) is not null;
 					Debug.Assert(!b);
@@ -313,30 +315,31 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			return tokens;
 		}
 
-		uint[] GetNewTokens_COMThread(uint rid) {
+		uint[] GetNewTokens_COMThread(uint token) {
 			dispatcher.VerifyAccess();
 			if (ridToEnclosing is null)
-				return new[] { rid };
+				return new[] { token };
 			var hash = tmpHash;
 			hash.Clear();
 			for (;;) {
+				uint rid = MDToken.ToRID(token);
 				if (ridToEnclosing.ContainsKey(rid))
 					break;
 				if (rid == 0 || !hash.Add(rid))
 					break;
-				rid = MDAPI.GetTypeDefEnclosingType(MetaDataImport, 0x02000000 + rid) & 0x00FFFFFF;
+				token = MDAPI.GetTypeDefEnclosingType(MetaDataImport, token);
 			}
 			var tokens = new uint[hash.Count];
 			int i = 0;
 			foreach (uint rid2 in hash)
-				tokens[i++] = 0x02000000 + rid2;
+				tokens[i++] = new MDToken(Table.TypeDef, rid2).Raw;
 			return tokens;
 		}
 		readonly HashSet<uint> tmpHash = new HashSet<uint>();
 
 		(DmdType? type, bool containedGenericParams) TryCreateTypeSpecCOMD_COMThread(uint rid, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			dispatcher.VerifyAccess();
-			uint token = 0x1B000000 + rid;
+			uint token = new MDToken(Table.TypeSpec, rid).Raw;
 			if (!MDAPI.IsValidToken(MetaDataImport, token))
 				return (null, containedGenericParams: true);
 			var blob = MDAPI.GetTypeSpecSignatureBlob(MetaDataImport, token);
@@ -345,7 +348,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdFieldDefCOMD? CreateResolvedField_COMThread(uint rid, DmdTypeDef? declaringType) {
 			dispatcher.VerifyAccess();
-			uint token = 0x04000000 + rid;
+			uint token = new MDToken(Table.Field, rid).Raw;
 			if (!MDAPI.IsValidToken(MetaDataImport, token))
 				return null;
 			if (declaringType is null)
@@ -395,7 +398,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdMethodBase? CreateResolvedMethod_COMThread(uint rid, DmdTypeDef? declaringType) {
 			dispatcher.VerifyAccess();
-			uint token = 0x06000000 + rid;
+			uint token = new MDToken(Table.Method, rid).Raw;
 			if (!MDAPI.IsValidToken(MetaDataImport, token))
 				return null;
 			if (declaringType is null)
@@ -414,7 +417,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdMethodBase CreateMethodDefCore_COMThread(uint rid, DmdType declaringType, DmdType reflectedType) {
 			dispatcher.VerifyAccess();
-			uint token = 0x06000000 + rid;
+			uint token = new MDToken(Table.Method, rid).Raw;
 			var name = MDAPI.GetMethodName(MetaDataImport, token) ?? string.Empty;
 			MDAPI.GetMethodAttributes(MetaDataImport, token, out var attrs, out var implAttrs);
 			if ((attrs & DmdMethodAttributes.RTSpecialName) != 0 && name.Length > 0 && name[0] == '.') {
@@ -457,7 +460,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			var parameters = sigParamTypes.Count == 0 ? Array.Empty<DmdParameterInfo>() : new DmdParameterInfo[sigParamTypes.Count];
 			for (int i = 0; i < tokens.Length; i++) {
 				uint token = tokens[i];
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				var name = MDAPI.GetParamName(MetaDataImport, token);
 				if (!MDAPI.GetParamSeqAndAttrs(MetaDataImport, token, out uint seq, out var attrs))
 					continue;
@@ -485,7 +488,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdEventDef? CreateResolvedEvent_COMThread(uint rid, DmdTypeDef? declaringType) {
 			dispatcher.VerifyAccess();
-			uint token = 0x14000000 + rid;
+			uint token = new MDToken(Table.Event, rid).Raw;
 			if (!MDAPI.IsValidToken(MetaDataImport, token))
 				return null;
 			if (declaringType is null)
@@ -509,7 +512,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdPropertyDef? CreateResolvedProperty_COMThread(uint rid, DmdTypeDef? declaringType) {
 			dispatcher.VerifyAccess();
-			uint token = 0x17000000 + rid;
+			uint token = new MDToken(Table.Property, rid).Raw;
 			if (!MDAPI.IsValidToken(MetaDataImport, token))
 				return null;
 			if (declaringType is null)
@@ -539,7 +542,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			var genericParams = new DmdType[tokens.Length];
 			for (int i = 0; i < genericParams.Length; i++) {
 				uint token = tokens[i];
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				var gpName = MDAPI.GetGenericParamName(MetaDataImport, token) ?? string.Empty;
 				if (!MDAPI.GetGenericParamNumAndAttrs(MetaDataImport, token, out var gpNumber, out var gpAttrs))
 					return null;
@@ -551,7 +554,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		(DmdMemberInfo member, bool containedGenericParams) CreateResolvedMemberRef_COMThread(uint rid, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			dispatcher.VerifyAccess();
-			uint token = 0x0A000000 + rid;
+			uint token = new MDToken(Table.MemberRef, rid).Raw;
 			var signature = MDAPI.GetMemberRefSignatureBlob(MetaDataImport, token);
 			var name = MDAPI.GetMemberRefName(MetaDataImport, token) ?? string.Empty;
 
@@ -564,7 +567,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			var rawInfo = info.containedGenericParams ? ReadMethodSignatureOrFieldType_COMThread(signature, null, null) : info;
 
 			bool containedGenericParams = info.containedGenericParams;
-			if ((classToken >> 24) == 0x1B)
+			if (MDToken.ToTable(classToken) == Table.TypeSpec)
 				containedGenericParams = true;
 
 			if (info.fieldType is not null) {
@@ -586,8 +589,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdType GetMemberRefParent_COMThread(uint classToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			dispatcher.VerifyAccess();
-			uint rid = classToken & 0x00FFFFFF;
-			switch ((Table)(classToken >> 24)) {
+			switch (MDToken.ToTable(classToken)) {
 			case Table.TypeRef:
 			case Table.TypeDef:
 			case Table.TypeSpec:
@@ -601,7 +603,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 				return referencedModule?.GlobalType ?? Module.AppDomain.System_Void;
 
 			case Table.Method:
-				return ResolveMethodDef_COMThread(rid)?.DeclaringType ?? Module.AppDomain.System_Void;
+				return ResolveMethodDef_COMThread(MDToken.ToRID(classToken))?.DeclaringType ?? Module.AppDomain.System_Void;
 
 			default:
 				return Module.AppDomain.System_Void;
@@ -681,9 +683,10 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		(DmdType type, bool isPinned)[] IMethodBodyResolver.ReadLocals(int localSignatureMetadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			dispatcher.VerifyAccess();
-			if ((localSignatureMetadataToken & 0x00FFFFFF) == 0 || (localSignatureMetadataToken >> 24) != 0x11)
+			var localSigToken = new MDToken(localSignatureMetadataToken);
+			if (localSigToken.IsNull || localSigToken.Table != Table.StandAloneSig)
 				return Array.Empty<(DmdType, bool)>();
-			var signature = MDAPI.GetStandAloneSigBlob(MetaDataImport, (uint)localSignatureMetadataToken);
+			var signature = MDAPI.GetStandAloneSigBlob(MetaDataImport, localSigToken.Raw);
 			if (signature.addr == IntPtr.Zero)
 				return Array.Empty<(DmdType, bool)>();
 			return DmdSignatureReader.ReadLocalsSignature(module, new DmdPointerDataStream(signature), genericTypeArguments, genericMethodArguments, resolveTypes);
@@ -699,7 +702,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		DmdTypeDef[] GetTypes_COMThread() {
 			dispatcher.VerifyAccess();
 			var result = new List<DmdTypeDef>();
-			for (uint rid = 1; rid <= 0x00FFFFFF; rid++) {
+			for (uint rid = 1; rid <= MDToken.RID_MAX; rid++) {
 				var type = ResolveTypeDef_COMThread(rid);
 				if (type is null)
 					break;
@@ -721,7 +724,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		DmdTypeRef[] GetExportedTypes_COMThread() {
 			dispatcher.VerifyAccess();
 			List<DmdTypeRef>? result = null;
-			for (uint rid = 1; rid <= 0x00FFFFFF; rid++) {
+			for (uint rid = 1; rid <= MDToken.RID_MAX; rid++) {
 				var type = ResolveExportedType_COMThread(rid);
 				if (type is null)
 					break;
@@ -872,7 +875,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdMethodBase? ResolveMethodSpec_COMThread(uint rid, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			dispatcher.VerifyAccess();
-			uint token = 0x2B000000 + rid;
+			uint token = new MDToken(Table.MethodSpec, rid).Raw;
 			if (!MDAPI.IsValidToken(MetaDataImport, token))
 				return null;
 			var signature = MDAPI.GetMethodSpecProps(MetaDataImport, token, out var methodToken);
@@ -892,7 +895,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdMethodSignature? ResolveMethodSignature_COMThread(uint rid, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments) {
 			dispatcher.VerifyAccess();
-			var signature = MDAPI.GetStandAloneSigBlob(MetaDataImport, 0x11000000 + rid);
+			var signature = MDAPI.GetStandAloneSigBlob(MetaDataImport, new MDToken(Table.StandAloneSig, rid).Raw);
 			if (signature.addr == IntPtr.Zero)
 				return null;
 			return ReadMethodSignature_COMThread(signature, genericTypeArguments, genericMethodArguments, isProperty: false);
@@ -950,32 +953,32 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		byte[] ResolveFieldSignature_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			return GetData(MDAPI.GetFieldSignatureBlob(MetaDataImport, 0x04000000 + rid));
+			return GetData(MDAPI.GetFieldSignatureBlob(MetaDataImport, new MDToken(Table.Field, rid).Raw));
 		}
 
 		byte[] ResolveMethodSignature_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			return GetData(MDAPI.GetMethodSignatureBlob(MetaDataImport, 0x06000000 + rid));
+			return GetData(MDAPI.GetMethodSignatureBlob(MetaDataImport, new MDToken(Table.Method, rid).Raw));
 		}
 
 		byte[] ResolveMemberRefSignature_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			return GetData(MDAPI.GetMemberRefSignatureBlob(MetaDataImport, 0x0A000000 + rid));
+			return GetData(MDAPI.GetMemberRefSignatureBlob(MetaDataImport, new MDToken(Table.MemberRef, rid).Raw));
 		}
 
 		byte[] ResolveStandAloneSigSignature_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			return GetData(MDAPI.GetStandAloneSigBlob(MetaDataImport, 0x11000000 + rid));
+			return GetData(MDAPI.GetStandAloneSigBlob(MetaDataImport, new MDToken(Table.StandAloneSig, rid).Raw));
 		}
 
 		byte[] ResolveTypeSpecSignature_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			return GetData(MDAPI.GetTypeSpecSignatureBlob(MetaDataImport, 0x1B000000 + rid));
+			return GetData(MDAPI.GetTypeSpecSignatureBlob(MetaDataImport, new MDToken(Table.TypeSpec, rid).Raw));
 		}
 
 		byte[] ResolveMethodSpecSignature_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			return GetData(MDAPI.GetMethodSpecProps(MetaDataImport, 0x2B000000 + rid, out _));
+			return GetData(MDAPI.GetMethodSpecProps(MetaDataImport, new MDToken(Table.MethodSpec, rid).Raw, out _));
 		}
 
 		protected override string ResolveStringCore(uint offset) {
@@ -1043,14 +1046,14 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			for (uint token = 0x23000001; ; token++) {
 				if (!MDAPI.IsValidToken(MetaDataImport, token))
 					break;
-				list.Add(ReadAssemblyName_COMThread(token & 0x00FFFFFF));
+				list.Add(ReadAssemblyName_COMThread(MDToken.ToRID(token)));
 			}
 			return list.ToArray();
 		}
 
 		internal DmdReadOnlyAssemblyName ReadAssemblyName_COMThread(uint rid) {
 			dispatcher.VerifyAccess();
-			uint token = 0x23000000 + rid;
+			uint token = new MDToken(Table.AssemblyRef, rid).Raw;
 			var name = MDAPI.GetAssemblyRefSimpleName(MetaDataAssemblyImport, token) ?? string.Empty;
 			var version = MDAPI.GetAssemblyRefVersionAndLocale(MetaDataAssemblyImport, token, out var locale) ?? new Version(0, 0, 0, 0);
 			var cultureName = locale ?? string.Empty;
@@ -1060,16 +1063,17 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		public override unsafe bool ReadMemory(uint rva, void* destination, int size) => false;
 
-		protected override DmdCustomAttributeData[] ReadAssemblyCustomAttributes(uint rid) => ReadCustomAttributesCore(0x20000000 + rid);
-		protected override DmdCustomAttributeData[] ReadModuleCustomAttributes(uint rid) => ReadCustomAttributesCore(0x00000000 + rid);
-		protected override DmdCustomAttributeData[] ReadTypeDefCustomAttributes(uint rid) => ReadCustomAttributesCore(0x02000000 + rid);
-		protected override DmdCustomAttributeData[] ReadFieldCustomAttributes(uint rid) => ReadCustomAttributesCore(0x04000000 + rid);
-		protected override DmdCustomAttributeData[] ReadMethodCustomAttributes(uint rid) => ReadCustomAttributesCore(0x06000000 + rid);
-		protected override DmdCustomAttributeData[] ReadParamCustomAttributes(uint rid) => ReadCustomAttributesCore(0x08000000 + rid);
-		protected override DmdCustomAttributeData[] ReadEventCustomAttributes(uint rid) => ReadCustomAttributesCore(0x14000000 + rid);
-		protected override DmdCustomAttributeData[] ReadPropertyCustomAttributes(uint rid) => ReadCustomAttributesCore(0x17000000 + rid);
+		protected override DmdCustomAttributeData[] ReadAssemblyCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Assembly, rid);
+		protected override DmdCustomAttributeData[] ReadModuleCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Module, rid);
+		protected override DmdCustomAttributeData[] ReadTypeDefCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.TypeDef, rid);
+		protected override DmdCustomAttributeData[] ReadFieldCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Field, rid);
+		protected override DmdCustomAttributeData[] ReadMethodCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Method, rid);
+		protected override DmdCustomAttributeData[] ReadParamCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Param, rid);
+		protected override DmdCustomAttributeData[] ReadEventCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Event, rid);
+		protected override DmdCustomAttributeData[] ReadPropertyCustomAttributes(uint rid) => ReadCustomAttributesCore(Table.Property, rid);
 
-		DmdCustomAttributeData[] ReadCustomAttributesCore(uint token) {
+		DmdCustomAttributeData[] ReadCustomAttributesCore(Table table, uint rid) {
+			uint token = new MDToken(table, rid).Raw;
 			if (IsCOMThread)
 				return ReadCustomAttributesCore_COMThread(token);
 			else
@@ -1104,11 +1108,12 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			return res;
 		}
 
-		protected override DmdCustomAttributeData[] ReadAssemblySecurityAttributes(uint rid) => ReadSecurityAttributesCore(0x20000000 + rid);
-		protected override DmdCustomAttributeData[] ReadTypeDefSecurityAttributes(uint rid) => ReadSecurityAttributesCore(0x02000000 + rid);
-		protected override DmdCustomAttributeData[] ReadMethodSecurityAttributes(uint rid) => ReadSecurityAttributesCore(0x06000000 + rid);
+		protected override DmdCustomAttributeData[] ReadAssemblySecurityAttributes(uint rid) => ReadSecurityAttributesCore(Table.Assembly, rid);
+		protected override DmdCustomAttributeData[] ReadTypeDefSecurityAttributes(uint rid) => ReadSecurityAttributesCore(Table.TypeDef, rid);
+		protected override DmdCustomAttributeData[] ReadMethodSecurityAttributes(uint rid) => ReadSecurityAttributesCore(Table.Method, rid);
 
-		DmdCustomAttributeData[] ReadSecurityAttributesCore(uint token) {
+		DmdCustomAttributeData[] ReadSecurityAttributesCore(Table table, uint rid) {
+			uint token = new MDToken(table, rid).Raw;
 			if (IsCOMThread)
 				return ReadSecurityAttributesCore_COMThread(token);
 			else
