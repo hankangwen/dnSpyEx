@@ -89,7 +89,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 						valueResult = default;
 					}
 
-					var name = new DbgDotNetText(new DbgDotNetTextPart(DbgTextColor.InstanceField, info.DefaultName));
+					var name = new DbgDotNetText(new DbgDotNetTextPart(DbgTextColor.InstanceField, info.CustomName ?? info.DefaultName));
 					DbgDotNetValueNode newNode;
 					if (errorMessage is not null)
 						newNode = valueNodeFactory.CreateError(evalInfo, name, errorMessage, expression, false);

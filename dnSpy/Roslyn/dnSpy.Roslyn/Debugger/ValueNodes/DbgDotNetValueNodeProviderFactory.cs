@@ -288,7 +288,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 				if (info.tupleIndex < 0)
 					return null;
 				var defaultName = GetDefaultTupleName(info.tupleIndex);
-				tupleFields[info.tupleIndex] = new TupleField(defaultName, info.fields!.ToArray());
+				tupleFields[info.tupleIndex] = new TupleField(defaultName, null, info.fields!.ToArray());
 			}
 			return tupleFields;
 		}
