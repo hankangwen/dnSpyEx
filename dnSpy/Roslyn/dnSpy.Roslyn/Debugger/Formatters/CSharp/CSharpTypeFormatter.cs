@@ -158,31 +158,48 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 					foreach (var tuple in arrayTypesList) {
 						var aryType = tuple.type;
 						var aryValue = tuple.value;
-						uint elementCount;
 						if (aryType.IsVariableBoundArray) {
 							OutputWrite(ARRAY_OPEN_PAREN, DbgTextColor.Punctuation);
 							int rank = Math.Min(aryType.GetArrayRank(), MAX_ARRAY_RANK);
 							if (rank <= 0)
 								OutputWrite("???", DbgTextColor.Error);
 							else {
-								if (aryValue is null || aryValue.IsNull || !aryValue.GetArrayInfo(out elementCount, out var dimensionInfos))
-									dimensionInfos = null;
-								if (ShowArrayValueSizes && dimensionInfos is not null && dimensionInfos.Length == rank) {
-									for (int i = 0; i < rank; i++) {
-										if (i > 0) {
-											OutputWrite(",", DbgTextColor.Punctuation);
-											WriteSpace();
+								bool sizesShown = false;
+								if (ShowArrayValueSizes) {
+									if (aryValue is not null && !aryValue.IsNull && aryValue.GetArrayInfo(out _, out var dimensionInfos) && dimensionInfos.Length == rank) {
+										for (int i = 0; i < rank; i++) {
+											if (i > 0)
+												WriteCommaSpace();
+											if (dimensionInfos[i].BaseIndex == 0)
+												WriteInt32((int)dimensionInfos[i].Length);
+											else {
+												WriteInt32(dimensionInfos[i].BaseIndex);
+												OutputWrite("..", DbgTextColor.Operator);
+												WriteInt32(dimensionInfos[i].BaseIndex + (int)dimensionInfos[i].Length - 1);
+											}
 										}
-										if (dimensionInfos[i].BaseIndex == 0)
-											WriteUInt32(dimensionInfos[i].Length);
-										else {
-											WriteInt32(dimensionInfos[i].BaseIndex);
-											OutputWrite("..", DbgTextColor.Operator);
-											WriteInt32(dimensionInfos[i].BaseIndex + (int)dimensionInfos[i].Length - 1);
+										sizesShown = true;
+									}
+									else {
+										var indexes = aryType.GetArrayLowerBounds();
+										var sizes = aryType.GetArraySizes();
+										if (sizes.Count == rank) {
+											for (int i = 0; i < rank; i++) {
+												if (i > 0)
+													WriteCommaSpace();
+												if (i >= indexes.Count || indexes[i] == 0)
+													WriteInt32(sizes[i]);
+												else {
+													WriteInt32(indexes[i]);
+													OutputWrite("..", DbgTextColor.Operator);
+													WriteInt32(indexes[i] + sizes[i] - 1);
+												}
+											}
+											sizesShown = true;
 										}
 									}
 								}
-								else {
+								if (!sizesShown) {
 									if (rank == 1)
 										OutputWrite("*", DbgTextColor.Operator);
 									OutputWrite(TypeFormatterUtils.GetArrayCommas(rank), DbgTextColor.Punctuation);
@@ -194,7 +211,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 							Debug.Assert(aryType.IsSZArray);
 							OutputWrite(ARRAY_OPEN_PAREN, DbgTextColor.Punctuation);
 							if (ShowArrayValueSizes && aryValue is not null && !aryValue.IsNull) {
-								if (aryValue.GetArrayCount(out elementCount))
+								if (aryValue.GetArrayCount(out uint elementCount))
 									WriteUInt32(elementCount);
 							}
 							OutputWrite(ARRAY_CLOSE_PAREN, DbgTextColor.Punctuation);

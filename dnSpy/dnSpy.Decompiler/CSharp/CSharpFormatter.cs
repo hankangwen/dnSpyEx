@@ -928,13 +928,13 @@ namespace dnSpy.Decompiler.CSharp {
 							else {
 								var indexes = aryType.GetLowerBounds();
 								var dims = aryType.GetSizes();
-								if (ShowArrayValueSizes && (uint)indexes.Count == rank && (uint)dims.Count == rank) {
-									for (int i = 0; (uint)i < rank; i++) {
+								if (ShowArrayValueSizes && dims.Count == rank) {
+									for (int i = 0; i < rank; i++) {
 										if (i > 0)
 											WriteCommaSpace();
-										if (i < indexes.Count && indexes[i] == 0)
+										if (i >= indexes.Count || indexes[i] == 0)
 											FormatInt32((int)dims[i]);
-										else if (i < indexes.Count && i < dims.Count) {
+										else {
 											FormatInt32(indexes[i]);
 											OutputWrite("..", BoxedTextColor.Operator);
 											FormatInt32((int)(indexes[i] + dims[i] - 1));
