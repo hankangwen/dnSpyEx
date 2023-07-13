@@ -522,6 +522,8 @@ namespace dnSpy.Documents {
 			return true;
 		}
 
+		static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
+
 		IDsDocument? ResolveNormal(IAssembly assembly, ModuleDef? sourceModule) {
 			var fwkKind = GetFrameworkKind(sourceModule, out var netVersion, out var sourceModuleDirectoryHint);
 			if ((fwkKind == FrameworkKind.DotNet || fwkKind == FrameworkKind.DotNetStandard) && !dotNetPathProvider.HasDotNet)
@@ -539,6 +541,7 @@ namespace dnSpy.Documents {
 			IDsDocument? document;
 			IDsDocument? existingDocument;
 			FindAssemblyOptions options;
+			bool isValidFilename;
 			switch (fwkKind) {
 			case FrameworkKind.Unknown:
 			case FrameworkKind.DotNetFramework2:
@@ -586,27 +589,30 @@ namespace dnSpy.Documents {
 				if (existingDocument is not null)
 					return existingDocument;
 
-				(document, loaded) = LookupFromSearchPaths(assembly, sourceModule, sourceModuleDirectoryHint, netVersion);
-				if (document is not null)
-					return documentService.GetOrAddCanDispose(document, assembly, loaded);
-
-				var gacFile = GacInfo.FindInGac(assembly, gacVersion);
-				if (gacFile is not null)
-					return documentService.TryGetOrCreateInternal(DsDocumentInfo.CreateDocument(gacFile), true, true);
-				foreach (var gacPath in GacInfo.OtherGacPaths) {
-					if (gacVersion == 4) {
-						if (gacPath.Version != GacVersion.V4)
-							continue;
-					}
-					else if (gacVersion == 2) {
-						if (gacPath.Version != GacVersion.V2)
-							continue;
-					}
-					else
-						Debug.Assert(gacVersion == -1);
-					document = TryLoadFromDir(assembly, checkVersion: true, checkPublicKeyToken: true, gacPath.Path);
+				isValidFilename = assembly.Name.String?.IndexOfAny(invalidFileNameChars) < 0;
+				if (isValidFilename) {
+					(document, loaded) = LookupFromSearchPaths(assembly, sourceModule, sourceModuleDirectoryHint, netVersion);
 					if (document is not null)
-						return documentService.GetOrAddCanDispose(document, assembly, isAutoLoaded: true);
+						return documentService.GetOrAddCanDispose(document, assembly, loaded);
+
+					var gacFile = GacInfo.FindInGac(assembly, gacVersion);
+					if (gacFile is not null)
+						return documentService.TryGetOrCreateInternal(DsDocumentInfo.CreateDocument(gacFile), true, true);
+					foreach (var gacPath in GacInfo.OtherGacPaths) {
+						if (gacVersion == 4) {
+							if (gacPath.Version != GacVersion.V4)
+								continue;
+						}
+						else if (gacVersion == 2) {
+							if (gacPath.Version != GacVersion.V2)
+								continue;
+						}
+						else
+							Debug.Assert(gacVersion == -1);
+						document = TryLoadFromDir(assembly, checkVersion: true, checkPublicKeyToken: true, gacPath.Path);
+						if (document is not null)
+							return documentService.GetOrAddCanDispose(document, assembly, isAutoLoaded: true);
+					}
 				}
 				break;
 
@@ -618,12 +624,15 @@ namespace dnSpy.Documents {
 				if (document is not null)
 					return document;
 
-				// If it's a self-contained .NET app, we don't need the version since we must only search
-				// the current directory.
-				Debug2.Assert(fwkKind == FrameworkKind.DotNet || netVersion is null);
-				(document, loaded) = LookupFromSearchPaths(assembly, sourceModule, sourceModuleDirectoryHint, netVersion);
-				if (document is not null)
-					return documentService.GetOrAddCanDispose(document, assembly, loaded);
+				isValidFilename = assembly.Name.String?.IndexOfAny(invalidFileNameChars) < 0;
+				if (isValidFilename) {
+					// If it's a self-contained .NET app, we don't need the version since we must only search
+					// the current directory.
+					Debug2.Assert(fwkKind == FrameworkKind.DotNet || netVersion is null);
+					(document, loaded) = LookupFromSearchPaths(assembly, sourceModule, sourceModuleDirectoryHint, netVersion);
+					if (document is not null)
+						return documentService.GetOrAddCanDispose(document, assembly, loaded);
+				}
 
 				// If it already exists in assembly explorer, use it
 				options = DsDocumentService.DefaultOptions;
