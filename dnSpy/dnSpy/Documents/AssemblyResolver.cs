@@ -524,6 +524,8 @@ namespace dnSpy.Documents {
 
 		IDsDocument? ResolveNormal(IAssembly assembly, ModuleDef? sourceModule) {
 			var fwkKind = GetFrameworkKind(sourceModule, out var netVersion, out var sourceModuleDirectoryHint);
+			if ((fwkKind == FrameworkKind.DotNet || fwkKind == FrameworkKind.DotNetStandard) && !dotNetPathProvider.HasDotNet)
+				fwkKind = FrameworkKind.DotNetFramework4;
 			if (fwkKind == FrameworkKind.DotNetStandard) {
 				if (netVersion is not null &&
 					dotNetPathProvider.TryGetClosestNetStandardCompatibleVersion(netVersion, out var coreVersion))
@@ -533,8 +535,6 @@ namespace dnSpy.Documents {
 					netVersion = null;
 				}
 			}
-			if (fwkKind == FrameworkKind.DotNet && !dotNetPathProvider.HasDotNet)
-				fwkKind = FrameworkKind.DotNetFramework4;
 			bool loaded;
 			IDsDocument? document;
 			IDsDocument? existingDocument;
@@ -545,7 +545,7 @@ namespace dnSpy.Documents {
 			case FrameworkKind.DotNetFramework4:
 			case FrameworkKind.DotNetStandard:
 				int gacVersion;
-				if (!GacInfo.HasGAC2)
+				if (fwkKind == FrameworkKind.DotNetFramework2 && !GacInfo.HasGAC2)
 					fwkKind = FrameworkKind.DotNetFramework4;
 				bool redirected;
 				IAssembly tempAsm;
