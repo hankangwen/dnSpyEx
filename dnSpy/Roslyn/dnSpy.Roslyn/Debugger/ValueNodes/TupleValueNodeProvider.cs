@@ -28,6 +28,7 @@ using dnSpy.Contracts.Debugger.DotNet.Text;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
 using dnSpy.Debugger.DotNet.Metadata;
+using dnSpy.Roslyn.Debugger.Formatters;
 
 namespace dnSpy.Roslyn.Debugger.ValueNodes {
 	sealed class TupleValueNodeProvider : DbgDotNetValueNodeProvider {
@@ -39,12 +40,14 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 
 		readonly bool addParens;
 		readonly DmdType slotType;
+		readonly AdditionalTypeInfoState typeInfo;
 		readonly DbgDotNetValueNodeInfo nodeInfo;
 		readonly TupleField[] tupleFields;
 
-		public TupleValueNodeProvider(bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, TupleField[] tupleFields) {
+		public TupleValueNodeProvider(bool addParens, DmdType slotType, AdditionalTypeInfoState typeInfo, DbgDotNetValueNodeInfo nodeInfo, TupleField[] tupleFields) {
 			this.addParens = addParens;
 			this.slotType = slotType;
+			this.typeInfo = typeInfo;
 			this.nodeInfo = nodeInfo;
 			this.tupleFields = tupleFields;
 		}
@@ -57,6 +60,18 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			var valueResults = new List<DbgDotNetValueResult>();
 			DbgDotNetValueResult valueResult = default;
 			try {
+				var additionalTypeInfo = typeInfo;
+				additionalTypeInfo.TupleNameIndex += tupleFields.Length;
+
+				var l = Math.Min((int)index, tupleFields.Length);
+				for (var i = 0; i < l; i++) {
+					ref readonly var info = ref tupleFields[i];
+					for (int j = 0; j < info.Fields.Length; j++) {
+						if (TypeFormatterUtils.IsSystemValueTuple(info.Fields[j].FieldType, out int cardinality))
+							additionalTypeInfo.TupleNameIndex += cardinality;
+					}
+				}
+
 				for (int i = 0; i < res.Length; i++) {
 					evalInfo.CancellationToken.ThrowIfCancellationRequested();
 					ref readonly var info = ref tupleFields[(int)index + i];
@@ -96,12 +111,17 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 					else if (valueIsException)
 						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, PredefinedDbgValueNodeImageNames.Error, true, false, expectedType, false);
 					else
-						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, false);
+						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, additionalTypeInfo, false);
 
 					foreach (var vr in valueResults)
 						vr.Value?.Dispose();
 					valueResults.Clear();
 					res[i] = newNode;
+
+					for (int j = 0; j < info.Fields.Length; j++) {
+						if (TypeFormatterUtils.IsSystemValueTuple(info.Fields[j].FieldType, out int cardinality))
+							additionalTypeInfo.TupleNameIndex += cardinality;
+					}
 				}
 			}
 			catch {

@@ -43,8 +43,9 @@ namespace dnSpy.Contracts.Debugger.DotNet.Evaluation.ValueNodes {
 		/// <param name="isReadOnly">true if it's a read-only value</param>
 		/// <param name="causesSideEffects">true if the expression causes side effects</param>
 		/// <param name="expectedType">Expected type</param>
+		/// <param name="customTypeInfo">Custom type info</param>
 		/// <returns></returns>
-		public abstract DbgDotNetValueNode Create(DbgEvaluationInfo evalInfo, DbgDotNetText name, DbgDotNetValue value, ReadOnlyCollection<string>? formatSpecifiers, DbgValueNodeEvaluationOptions options, string expression, string imageName, bool isReadOnly, bool causesSideEffects, DmdType expectedType);
+		public abstract DbgDotNetValueNode Create(DbgEvaluationInfo evalInfo, DbgDotNetText name, DbgDotNetValue value, ReadOnlyCollection<string>? formatSpecifiers, DbgValueNodeEvaluationOptions options, string expression, string imageName, bool isReadOnly, bool causesSideEffects, DmdType expectedType, DbgDotNetCustomTypeInfo? customTypeInfo);
 
 		/// <summary>
 		/// Creates an exception value node

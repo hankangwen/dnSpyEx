@@ -89,7 +89,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 					if (fieldVal.HasError)
 						valueNodes[j++] = valueNodeFactory.CreateError(evalInfo, fieldExpression, fieldVal.ErrorMessage!, fieldExpression.ToString(), false);
 					else
-						valueNodes[j++] = valueNodeFactory.Create(evalInfo, fieldExpression, fieldVal.Value!, null, options, fieldExpression.ToString(), GetFieldImageName(field), false, false, field.FieldType);
+						valueNodes[j++] = valueNodeFactory.Create(evalInfo, fieldExpression, fieldVal.Value!, null, options, fieldExpression.ToString(), GetFieldImageName(field), false, false, field.FieldType, null); // TODO:
 				}
 				ObjectCache.Free(ref output);
 
