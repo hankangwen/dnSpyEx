@@ -94,11 +94,12 @@ namespace dnSpy.Documents.TreeView {
 			if (tdr is TypeDef)
 				return true;
 			if (tdr is TypeRef tr) {
-				if (tr.Scope == module)
+				var scope = tr.Scope;
+				if (scope is null || scope == module)
 					return true;
-				if (tr.Scope is AssemblyRef asmRef)
+				if (scope is AssemblyRef asmRef)
 					return AssemblyNameComparer.CompareAll.Equals(asmRef, module.Assembly);
-				if (tr.Scope is ModuleRef modRef)
+				if (scope is ModuleRef modRef)
 					return StringComparer.OrdinalIgnoreCase.Equals(modRef.Name, module.Name);
 			}
 			return false;
