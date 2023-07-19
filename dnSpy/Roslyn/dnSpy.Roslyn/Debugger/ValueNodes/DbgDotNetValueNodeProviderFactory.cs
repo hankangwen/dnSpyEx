@@ -519,7 +519,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			}
 
 			if (state.Type.IsArray && !nodeInfo.Value.IsNull) {
-				providers.Add(new ArrayValueNodeProvider(this, addParens, slotType, nodeInfo));
+				providers.Add(new ArrayValueNodeProvider(this, addParens, slotType, state.AdditionalTypeInfo, nodeInfo));
 				return;
 			}
 
@@ -618,7 +618,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			if (value.IsNull)
 				instanceMembersInfos = MemberValueNodeInfoCollection.Empty;
 			if (PointerValueNodeProvider.IsSupported(value))
-				providers.Add(new PointerValueNodeProvider(this, expression, value));
+				providers.Add(new PointerValueNodeProvider(this, expression, value, state.AdditionalTypeInfo));
 			else {
 				providers.Add(new InstanceMembersValueNodeProvider(valueNodeFactory, isRawView ? rawViewName : InstanceMembersName,
 					expression, addParens, slotType, value, instanceMembersInfos, membersEvalOptions,

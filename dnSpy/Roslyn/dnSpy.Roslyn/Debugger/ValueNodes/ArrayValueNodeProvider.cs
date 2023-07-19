@@ -27,6 +27,7 @@ using dnSpy.Contracts.Debugger.DotNet.Text;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
 using dnSpy.Debugger.DotNet.Metadata;
+using dnSpy.Roslyn.Debugger.Formatters;
 
 namespace dnSpy.Roslyn.Debugger.ValueNodes {
 	sealed class ArrayValueNodeProvider : DbgDotNetValueNodeProvider {
@@ -39,16 +40,19 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		readonly DbgDotNetValueNodeProviderFactory owner;
 		readonly bool addParens;
 		readonly DmdType slotType;
+		readonly AdditionalTypeInfoState typeInfo;
 		readonly DbgDotNetValueNodeInfo valueInfo;
 		readonly uint arrayCount;
 		readonly DbgDotNetArrayDimensionInfo[] dimensionInfos;
 		// This one's only non-null if this is an array with 2 or more dimensions
 		readonly int[]? indexes;
 
-		public ArrayValueNodeProvider(DbgDotNetValueNodeProviderFactory owner, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo valueInfo) {
+		public ArrayValueNodeProvider(DbgDotNetValueNodeProviderFactory owner, bool addParens, DmdType slotType, AdditionalTypeInfoState typeInfo, DbgDotNetValueNodeInfo valueInfo) {
 			this.owner = owner;
 			this.addParens = addParens;
 			this.slotType = slotType;
+			typeInfo.DynamicTypeIndex++;
+			this.typeInfo = typeInfo;
 			this.valueInfo = valueInfo;
 
 			bool b = valueInfo.Value.GetArrayInfo(out arrayCount, out dimensionInfos!) && dimensionInfos.Length != 0;
@@ -107,7 +111,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 							}
 						}
 						if (newNode is null)
-							newNode = valueNodeFactory.Create(evalInfo, name, newValue.Value, formatSpecifiers, options, expression, PredefinedDbgValueNodeImageNames.ArrayElement, false, false, elementType, false);
+							newNode = valueNodeFactory.Create(evalInfo, name, newValue.Value, formatSpecifiers, options, expression, PredefinedDbgValueNodeImageNames.ArrayElement, false, false, elementType, typeInfo, false);
 					}
 					newValue = default;
 					res[i] = newNode;
