@@ -886,11 +886,15 @@ namespace dnSpy.Decompiler.CSharp {
 		}
 
 		void Write(TypeSig? type, ParamDef? ownerParam, IList<TypeSig>? typeGenArgs, IList<TypeSig>? methGenArgs, bool forceReadOnly = false, IHasCustomAttribute? attributeProvider = null) {
-			WriteRefIfByRef(type, ownerParam, forceReadOnly);
 			int dynamicTypeIndex = 0;
-			if (type.RemovePinnedAndModifiers() is ByRefSig byRef) {
-				type = byRef.Next;
+			while (type.RemovePinned() is ModifierSig mod) {
 				dynamicTypeIndex++;
+				type = mod.Next;
+			}
+			WriteRefIfByRef(type, ownerParam, forceReadOnly);
+			if (type is ByRefSig byRef) {
+				dynamicTypeIndex++;
+				type = byRef.Next;
 			}
 			int tupleNameIndex = 0;
 			int nativeIntIndex = 0;
