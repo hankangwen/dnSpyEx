@@ -23,6 +23,10 @@
     <DnSpyRuntimeIdentifiers>win-x86;win-x64</DnSpyRuntimeIdentifiers>
     <SatelliteResourceLanguages>cs;de;es;es-ES;fa;fr;hu;it;pt-BR;pt-PT;ru;tr;uk;zh-CN;vi</SatelliteResourceLanguages>
 
+    <!-- Enable Visual Studio Build Acceleration -->
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+
     <!-- Update app.config whenever this value changes -->
     <DnSpyAssemblyVersion>6.4.0.0</DnSpyAssemblyVersion>
     <!-- This is shown in the title bar -->
