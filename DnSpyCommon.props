@@ -23,6 +23,9 @@
     <DnSpyRuntimeIdentifiers>win-x86;win-x64</DnSpyRuntimeIdentifiers>
     <SatelliteResourceLanguages>cs;de;es;es-ES;fa;fr;hu;it;pt-BR;pt-PT;ru;tr;uk;zh-CN;vi</SatelliteResourceLanguages>
 
+    <!-- Allow compiling for windows on non-windows platforms -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+
     <!-- Enable Visual Studio Build Acceleration -->
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
