@@ -40,19 +40,43 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 
 		readonly bool addParens;
 		readonly DmdType slotType;
-		readonly AdditionalTypeInfoState typeInfo;
 		readonly DbgDotNetValueNodeInfo nodeInfo;
 		readonly TupleField[] tupleFields;
+		readonly AdditionalTypeInfoState[] cachedTypeInfoStates;
+		int cachedIndex;
 
 		public TupleValueNodeProvider(bool addParens, DmdType slotType, AdditionalTypeInfoState typeInfo, DbgDotNetValueNodeInfo nodeInfo, TupleField[] tupleFields) {
 			this.addParens = addParens;
 			this.slotType = slotType;
-			this.typeInfo = typeInfo;
 			this.nodeInfo = nodeInfo;
 			this.tupleFields = tupleFields;
+			cachedTypeInfoStates = new AdditionalTypeInfoState[tupleFields.Length];
+			typeInfo.TupleNameIndex += tupleFields.Length;
+			cachedTypeInfoStates[0] = typeInfo;
+			cachedIndex = 0;
 		}
 
 		public override ulong GetChildCount(DbgEvaluationInfo evalInfo) => (uint)tupleFields.Length;
+
+		AdditionalTypeInfoState GetCachedTypeInfoState(int tupleFieldIndex) {
+			if (cachedIndex >= tupleFieldIndex)
+				return cachedTypeInfoStates[tupleFieldIndex];
+
+			var typeInfo = cachedTypeInfoStates[cachedIndex];
+			while (cachedIndex < tupleFieldIndex) {
+				ref readonly var info = ref tupleFields[cachedIndex];
+				for (int k = 0; k < info.Fields.Length; k++) {
+					typeInfo.DynamicTypeIndex++;
+					if (TypeFormatterUtils.IsSystemValueTuple(info.Fields[k].FieldType, out int cardinality)) {
+						typeInfo.TupleNameIndex += cardinality;
+						typeInfo.DynamicTypeIndex++;
+					}
+				}
+				cachedTypeInfoStates[++cachedIndex] = typeInfo;
+			}
+
+			return typeInfo;
+		}
 
 		public override DbgDotNetValueNode[] GetChildren(LanguageValueNodeFactory valueNodeFactory, DbgEvaluationInfo evalInfo, ulong index, int count, DbgValueNodeEvaluationOptions options, ReadOnlyCollection<string>? formatSpecifiers) {
 			var runtime = evalInfo.Runtime.GetDotNetRuntime();
@@ -60,21 +84,10 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			var valueResults = new List<DbgDotNetValueResult>();
 			DbgDotNetValueResult valueResult = default;
 			try {
-				var additionalTypeInfo = typeInfo;
-				additionalTypeInfo.TupleNameIndex += tupleFields.Length;
-
-				var l = Math.Min((int)index, tupleFields.Length);
-				for (var i = 0; i < l; i++) {
-					ref readonly var info = ref tupleFields[i];
-					for (int j = 0; j < info.Fields.Length; j++) {
-						if (TypeFormatterUtils.IsSystemValueTuple(info.Fields[j].FieldType, out int cardinality))
-							additionalTypeInfo.TupleNameIndex += cardinality;
-					}
-				}
-
 				for (int i = 0; i < res.Length; i++) {
 					evalInfo.CancellationToken.ThrowIfCancellationRequested();
-					ref readonly var info = ref tupleFields[(int)index + i];
+					int tupleFieldIndex = (int)index + i;
+					ref readonly var info = ref tupleFields[tupleFieldIndex];
 					var castType = NeedCast(slotType, nodeInfo.Value.Type) ? nodeInfo.Value.Type : null;
 					var expression = valueNodeFactory.GetFieldExpression(nodeInfo.Expression, info.DefaultName, castType, addParens);
 					const string imageName = PredefinedDbgValueNodeImageNames.FieldPublic;
@@ -111,17 +124,12 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 					else if (valueIsException)
 						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, PredefinedDbgValueNodeImageNames.Error, true, false, expectedType, false);
 					else
-						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, additionalTypeInfo, false);
+						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, GetCachedTypeInfoState(tupleFieldIndex), false);
 
 					foreach (var vr in valueResults)
 						vr.Value?.Dispose();
 					valueResults.Clear();
 					res[i] = newNode;
-
-					for (int j = 0; j < info.Fields.Length; j++) {
-						if (TypeFormatterUtils.IsSystemValueTuple(info.Fields[j].FieldType, out int cardinality))
-							additionalTypeInfo.TupleNameIndex += cardinality;
-					}
 				}
 			}
 			catch {
