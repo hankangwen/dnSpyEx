@@ -1013,8 +1013,9 @@ namespace dnSpy.Decompiler.CSharp {
 
 				case ElementType.ByRef:
 					dynamicTypeIndex++;
+					OutputWrite(Keyword_ref, BoxedTextColor.Keyword);
+					WriteSpace();
 					Write(type.Next, typeGenArgs, methGenArgs, ref dynamicTypeIndex, ref tupleNameIndex, ref nativeIntIndex, attributeProvider);
-					OutputWrite("&", BoxedTextColor.Operator);
 					break;
 
 				case ElementType.ValueType:
