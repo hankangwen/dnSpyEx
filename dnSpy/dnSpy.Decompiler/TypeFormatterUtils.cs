@@ -512,9 +512,12 @@ namespace dnSpy.Decompiler {
 					continue;
 				if (a.ConstructorArguments.Count == 0)
 					return true;
-				if (a.ConstructorArguments.Count == 1 && a.ConstructorArguments[0].Value is IList<CAArgument> values && typeIndex < values.Count &&
-					values[typeIndex].Value is bool b)
-					return b;
+				if (a.ConstructorArguments.Count == 1 && a.ConstructorArguments[0].Value is IList<CAArgument> values) {
+					if (typeIndex >= values.Count)
+						return true;
+					if (values[typeIndex].Value is bool b)
+						return b;
+				}
 			}
 			return false;
 		}
@@ -551,9 +554,12 @@ namespace dnSpy.Decompiler {
 					continue;
 				if (a.ConstructorArguments.Count == 0)
 					return true;
-				if (a.ConstructorArguments.Count == 1 && a.ConstructorArguments[0].Value is IList<CAArgument> values && typeIndex < values.Count &&
-				    values[typeIndex].Value is bool b)
-					return b;
+				if (a.ConstructorArguments.Count == 1 && a.ConstructorArguments[0].Value is IList<CAArgument> values) {
+					if (typeIndex >= values.Count)
+						return true;
+					if (values[typeIndex].Value is bool b)
+						return b;
+				}
 			}
 			return false;
 		}

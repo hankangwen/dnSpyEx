@@ -41,7 +41,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters {
 				dynamicValuesInitialized = true;
 			}
 
-			return dynamicMatchAll || dynamicValues is not null && typeIndex < dynamicValues.Count && dynamicValues[typeIndex].Value is bool b && b;
+			return dynamicMatchAll || dynamicValues is not null && (typeIndex >= dynamicValues.Count || dynamicValues[typeIndex].Value is bool b && b);
 		}
 
 		bool tupleElementNamesInitialized;
@@ -87,7 +87,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters {
 				nativeIntegerValuesInitialized = true;
 			}
 
-			return nativeIntegerMatchAll || nativeIntegerValues is not null && typeIndex < nativeIntegerValues.Count && nativeIntegerValues[typeIndex].Value is bool b && b;
+			return nativeIntegerMatchAll || nativeIntegerValues is not null && (typeIndex >= nativeIntegerValues.Count || nativeIntegerValues[typeIndex].Value is bool b && b);
 		}
 	}
 }
