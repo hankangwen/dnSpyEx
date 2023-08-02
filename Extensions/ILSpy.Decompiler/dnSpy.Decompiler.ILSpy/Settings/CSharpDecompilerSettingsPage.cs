@@ -165,14 +165,14 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			if (g.SortMembers != d.SortMembers) flags |= RefreshFlags.CSharp;
 			if (g.ForceShowAllMembers != d.ForceShowAllMembers) flags |= RefreshFlags.CSharp | RefreshFlags.ShowMember;
 			if (g.SortSystemUsingStatementsFirst != d.SortSystemUsingStatementsFirst) flags |= RefreshFlags.CSharp;
-			// if (g.MaxArrayElements != d.MaxArrayElements) flags |= RefreshFlags.CSharp;
+			if (g.MaxArrayElements != d.MaxArrayElements) flags |= RefreshFlags.CSharp;
 			if (g.MaxStringLength != d.MaxStringLength) flags |= RefreshFlags.CSharp;
 			if (g.SortCustomAttributes != d.SortCustomAttributes) flags |= RefreshFlags.CSharp;
 			if (g.UseSourceCodeOrder != d.UseSourceCodeOrder) flags |= RefreshFlags.CSharp;
 			if (g.AllowFieldInitializers != d.AllowFieldInitializers) flags |= RefreshFlags.CSharp;
 			if (g.OneCustomAttributePerLine != d.OneCustomAttributePerLine) flags |= RefreshFlags.CSharp;
-			// if (g.TypeAddInternalModifier != d.TypeAddInternalModifier) flags |= RefreshFlags.CSharp;
-			// if (g.MemberAddPrivateModifier != d.MemberAddPrivateModifier) flags |= RefreshFlags.CSharp;
+			if (g.TypeAddInternalModifier != d.TypeAddInternalModifier) flags |= RefreshFlags.CSharp;
+			if (g.MemberAddPrivateModifier != d.MemberAddPrivateModifier) flags |= RefreshFlags.CSharp;
 			if (g.HexadecimalNumbers != d.HexadecimalNumbers) flags |= RefreshFlags.CSharp;
 			//if (g.EmitCalliAsInvocationExpression != d.EmitCalliAsInvocationExpression) flags |= RefreshFlags.CSharp;
 			if (g.InsertParenthesesForReadability != d.InsertParenthesesForReadability) flags |= RefreshFlags.CSharp | RefreshFlags.VB;
