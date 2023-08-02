@@ -78,6 +78,10 @@ namespace dnSpy.Decompiler.CSharp {
 		const string GenericParenClose = ">";
 		const string DefaultParamValueParenOpen = "[";
 		const string DefaultParamValueParenClose = "]";
+		const string FunctionPointerParenOpen = "<";
+		const string FunctionPointerParenClose = ">";
+		const string FunctionPointerCallConvParenOpen = "[";
+		const string FunctionPointerCallConvParenClose = "]";
 
 		int recursionCounter;
 		int lineLength;
@@ -675,7 +679,7 @@ namespace dnSpy.Decompiler.CSharp {
 				}
 				if (prop.SetMethods.Count > 0) {
 					if (prop.SetMethods.Count == 1 && prop.SetMethod.ReturnType is CModReqdSig modReq &&
-					    modReq.Modifier.FullName == "System.Runtime.CompilerServices.IsExternalInit") {
+						FullNameFactory.FullName(modReq.Modifier, false, null, sb.Clear()) == "System.Runtime.CompilerServices.IsExternalInit") {
 						WriteSpace();
 						OutputWrite(Keyword_init, BoxedTextColor.Keyword);
 						OutputWrite(";", BoxedTextColor.Punctuation);
@@ -1106,27 +1110,107 @@ namespace dnSpy.Decompiler.CSharp {
 				case ElementType.FnPtr:
 					var sig = ((FnPtrSig)type).MethodSig;
 
-					state.DynamicTypeIndex++;
-					Write(sig.RetType, typeGenArgs, methGenArgs, ref state, attributeProvider);
+					OutputWrite(Keyword_delegate, BoxedTextColor.Keyword);
+					OutputWrite("*", BoxedTextColor.Operator);
 
-					WriteSpace();
-					OutputWrite(MethodParenOpen, BoxedTextColor.Punctuation);
-					for (int i = 0; i < sig.Params.Count; i++) {
-						if (i > 0)
-							WriteCommaSpace();
-						state.DynamicTypeIndex++;
-						Write(sig.Params[i], typeGenArgs, methGenArgs, ref state, attributeProvider);
+					if (sig.IsUnmanaged || !sig.IsDefault) {
+						WriteSpace();
+						OutputWrite("unmanaged", BoxedTextColor.Keyword);
 					}
-					if (sig.ParamsAfterSentinel is not null) {
-						if (sig.Params.Count > 0)
-							WriteCommaSpace();
-						OutputWrite("...", BoxedTextColor.Punctuation);
-						for (int i = 0; i < sig.ParamsAfterSentinel.Count; i++) {
-							WriteCommaSpace();
-							Write(sig.ParamsAfterSentinel[i], typeGenArgs, methGenArgs, ref state, attributeProvider);
+
+					var returnType = sig.GetRetType().RemovePinned();
+					var customCallConvs = new List<ITypeDefOrRef>();
+					while (returnType is ModifierSig modReturn) {
+						if (modReturn.Modifier.Name.StartsWith("CallConv", StringComparison.Ordinal) && modReturn.Modifier.Namespace == "System.Runtime.CompilerServices") {
+							returnType = modReturn.Next.RemovePinned();
+							state.DynamicTypeIndex++;
+							customCallConvs.Add(modReturn.Modifier);
 						}
+						else
+							break;
 					}
-					OutputWrite(MethodParenClose, BoxedTextColor.Punctuation);
+
+					bool needsComma = false;
+					if (!sig.IsDefault || customCallConvs.Count > 0) {
+						OutputWrite(FunctionPointerCallConvParenOpen, BoxedTextColor.Punctuation);
+						if (!sig.IsDefault) {
+							OutputWrite((sig.CallingConvention & CallingConvention.Mask) switch {
+								CallingConvention.C => "Cdecl",
+								CallingConvention.StdCall => "Stdcall",
+								CallingConvention.ThisCall => "Thiscall",
+								CallingConvention.FastCall => "Fastcall",
+								CallingConvention.VarArg => "Varargs",
+								_ => sig.CallingConvention.ToString()
+							}, BoxedTextColor.Keyword);
+							needsComma = true;
+						}
+
+						for (var i = 0; i < customCallConvs.Count; i++) {
+							if (needsComma)
+								WriteCommaSpace();
+							needsComma = true;
+							var customCallConv = customCallConvs[i];
+							if (customCallConv.Name.StartsWith("CallConv", StringComparison.Ordinal) &&
+								customCallConv.Name.Length > 8)
+								OutputWrite(customCallConv.Name.Substring(8), BoxedTextColor.Keyword);
+							else
+								Write(customCallConv);
+						}
+
+						OutputWrite(FunctionPointerCallConvParenClose, BoxedTextColor.Punctuation);
+					}
+
+					OutputWrite(FunctionPointerParenOpen, BoxedTextColor.Punctuation);
+
+					state.DynamicTypeIndex++;
+					var parametersState = state;
+					UpdateTypeState(returnType, ref parametersState);
+
+					needsComma = false;
+					for (int i = 0; i < sig.Params.Count; i++) {
+						if (needsComma)
+							WriteCommaSpace();
+						needsComma = true;
+
+						parametersState.DynamicTypeIndex++;
+						var paramType = sig.Params[i].RemovePinned();
+						bool modifierWritten = false;
+						if (paramType is CModReqdSig modreq) {
+							string modifier = FullNameFactory.FullName(modreq.Modifier, false, null, sb.Clear());
+							if (modifier == "System.Runtime.InteropServices.InAttribute") {
+								modifierWritten = true;
+								OutputWrite(Keyword_in, BoxedTextColor.Keyword);
+								WriteSpace();
+								parametersState.DynamicTypeIndex++;
+								paramType = modreq.Next.RemovePinned();
+							}
+							else if (modifier == "System.Runtime.InteropServices.OutAttribute") {
+								modifierWritten = true;
+								OutputWrite(Keyword_out, BoxedTextColor.Keyword);
+								WriteSpace();
+								parametersState.DynamicTypeIndex++;
+								paramType = modreq.Next.RemovePinned();
+							}
+						}
+						if (paramType is ByRefSig byRef) {
+							if (!modifierWritten) {
+								OutputWrite(Keyword_ref, BoxedTextColor.Keyword);
+								WriteSpace();
+							}
+							parametersState.DynamicTypeIndex++;
+							paramType = byRef.Next;
+						}
+
+						Write(paramType, typeGenArgs, methGenArgs, ref parametersState, attributeProvider);
+					}
+
+					if (needsComma)
+						WriteCommaSpace();
+					Write(returnType, typeGenArgs, methGenArgs, ref state, attributeProvider);
+
+					OutputWrite(FunctionPointerParenClose, BoxedTextColor.Punctuation);
+
+					state = parametersState;
 					break;
 
 				case ElementType.CModReqd:
@@ -1153,6 +1237,75 @@ namespace dnSpy.Decompiler.CSharp {
 			}
 			finally {
 				recursionCounter--;
+			}
+		}
+
+		static void UpdateTypeState(TypeSig type, ref TypeState state) {
+			type = type.RemovePinned();
+			while (type is NonLeafSig) {
+				switch (type.ElementType) {
+				case ElementType.Array:
+				case ElementType.SZArray:
+				case ElementType.Ptr:
+				case ElementType.ByRef:
+				case ElementType.CModOpt:
+				case ElementType.CModReqd:
+					state.DynamicTypeIndex++;
+					break;
+				}
+				type = type.Next.RemovePinned();
+			}
+
+			switch (type.ElementType) {
+			case ElementType.I:
+			case ElementType.U:
+				state.NativeIntIndex++;
+				return;
+			case ElementType.GenericInst:
+				var gis = (GenericInstSig?)type;
+				Debug2.Assert(gis is not null);
+				if (TypeFormatterUtils.IsSystemNullable(gis)) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(gis.GenericArguments[0], ref state);
+					break;
+				}
+				if (TypeFormatterUtils.IsSystemValueTuple(gis, out int tupleCardinality)) {
+					state.TupleNameIndex += tupleCardinality;
+					if (tupleCardinality > 1) {
+						for (int i = 0; i < 1000; i++) {
+							for (int j = 0; j < gis.GenericArguments.Count && j < 7; j++) {
+								state.DynamicTypeIndex++;
+								UpdateTypeState(gis.GenericArguments[j], ref state);
+							}
+							if (gis.GenericArguments.Count != 8)
+								break;
+							gis = gis.GenericArguments[gis.GenericArguments.Count - 1] as GenericInstSig;
+							state.DynamicTypeIndex++;
+							if (gis is null)
+								break;
+							state.TupleNameIndex += TypeFormatterUtils.GetSystemValueTupleRank(gis);
+						}
+						break;
+					}
+				}
+
+				UpdateTypeState(gis.GenericType, ref state);
+				for (int i = 0; i < gis.GenericArguments.Count; i++) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(gis.GenericArguments[i], ref state);
+				}
+				break;
+			case ElementType.FnPtr:
+				var sig = ((FnPtrSig)type).MethodSig;
+
+				state.DynamicTypeIndex++;
+				UpdateTypeState(sig.RetType, ref state);
+
+				for (int i = 0; i < sig.Params.Count; i++) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(sig.Params[i], ref state);
+				}
+				break;
 			}
 		}
 
