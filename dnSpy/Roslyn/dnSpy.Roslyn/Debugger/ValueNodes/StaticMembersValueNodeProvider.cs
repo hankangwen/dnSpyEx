@@ -27,6 +27,7 @@ using dnSpy.Contracts.Debugger.Engine.Evaluation;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
 using dnSpy.Debugger.DotNet.Metadata;
+using dnSpy.Roslyn.Debugger.Formatters;
 
 namespace dnSpy.Roslyn.Debugger.ValueNodes {
 	sealed class StaticMembersValueNodeProvider : MembersValueNodeProvider {
@@ -92,8 +93,10 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 					newNode = valueNodeFactory.CreateError(evalInfo, info.Name, valueResult.ErrorMessage!, expression, false);
 				else if (valueResult.ValueIsException)
 					newNode = valueNodeFactory.Create(evalInfo, info.Name, valueResult.Value!, formatSpecifiers, options, expression, PredefinedDbgValueNodeImageNames.Error, true, false, expectedType, false);
-				else
-					newNode = valueNodeFactory.Create(evalInfo, info.Name, valueResult.Value!, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, false);
+				else {
+					var customTypeInfoProvider = CustomAttributeAdditionalTypeInfoProvider.Create(info.Member);
+					newNode = valueNodeFactory.Create(evalInfo, info.Name, valueResult.Value!, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, customTypeInfoProvider, false);
+				}
 
 				valueResult = default;
 				return (newNode, true);
