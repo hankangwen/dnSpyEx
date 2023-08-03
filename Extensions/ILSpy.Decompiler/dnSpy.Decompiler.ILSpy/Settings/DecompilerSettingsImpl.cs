@@ -31,7 +31,7 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 		readonly ISettingsService settingsService;
 
 		[ImportingConstructor]
-		DecompilerSettingsImpl(ISettingsService settingsService) : base(LanguageVersion.CSharp9_0) {
+		DecompilerSettingsImpl(ISettingsService settingsService) : base(LanguageVersion.CSharp11_0) {
 			this.settingsService = settingsService;
 
 			disableSave = true;

@@ -36,7 +36,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 		public override event EventHandler? VersionChanged;
 
 		public CSharpVBDecompilerSettings(DecompilerSettings? decompilerSettings = null) {
-			this.decompilerSettings = decompilerSettings ?? new DecompilerSettings(LanguageVersion.CSharp9_0);
+			this.decompilerSettings = decompilerSettings ?? new DecompilerSettings(LanguageVersion.CSharp11_0)
+				{ FileScopedNamespaces = false, NumericIntPtr = false };
 			options = CreateOptions().ToArray();
 			this.decompilerSettings.SettingsVersionChanged += DecompilerSettings_SettingsVersionChanged;
 		}
