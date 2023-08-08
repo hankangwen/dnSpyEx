@@ -52,6 +52,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			this.tupleFields = tupleFields;
 			cachedTypeInfoStates = new AdditionalTypeInfoState[tupleFields.Length];
 			typeInfo.TupleNameIndex += tupleFields.Length;
+			typeInfo.DynamicTypeIndex++;
 			cachedTypeInfoStates[0] = typeInfo;
 			cachedIndex = 0;
 		}
@@ -64,18 +65,62 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 
 			var typeInfo = cachedTypeInfoStates[cachedIndex];
 			while (cachedIndex < tupleFieldIndex) {
-				ref readonly var info = ref tupleFields[cachedIndex];
-				for (int k = 0; k < info.Fields.Length; k++) {
-					typeInfo.DynamicTypeIndex++;
-					if (TypeFormatterUtils.IsSystemValueTuple(info.Fields[k].FieldType, out int cardinality)) {
-						typeInfo.TupleNameIndex += cardinality;
+				ref readonly var previousField = ref tupleFields[cachedIndex];
+				UpdateTypeState(previousField.Fields[previousField.Fields.Length - 1].FieldType, ref typeInfo);
+
+				typeInfo.DynamicTypeIndex++;
+
+				ref readonly var field = ref tupleFields[cachedIndex + 1];
+				if (field.Fields.Length > 1) {
+					var item1 = field.Fields[field.Fields.Length - 1];
+					var rest = field.Fields[field.Fields.Length - 2];
+					if (item1.Name == "Item1" && rest.Name == "Rest") {
 						typeInfo.DynamicTypeIndex++;
+						typeInfo.TupleNameIndex += TypeFormatterUtils.GetTupleArity(rest.FieldType);
 					}
 				}
+
 				cachedTypeInfoStates[++cachedIndex] = typeInfo;
 			}
 
 			return typeInfo;
+		}
+
+		static void UpdateTypeState(DmdType type, ref AdditionalTypeInfoState state) {
+			state.DynamicTypeIndex += type.GetCustomModifiers().Count;
+
+			while (type.HasElementType) {
+				state.DynamicTypeIndex++;
+				type = type.GetElementType()!;
+			}
+
+			switch (type.TypeSignatureKind) {
+			case DmdTypeSignatureKind.Type:
+			case DmdTypeSignatureKind.TypeGenericParameter:
+			case DmdTypeSignatureKind.MethodGenericParameter:
+				return;
+			case DmdTypeSignatureKind.GenericInstance:
+				if (TypeFormatterUtils.IsSystemValueTuple(type, out int cardinality))
+					state.TupleNameIndex += cardinality;
+
+				var gen = type.GetGenericArguments();
+				for (int i = 0; i < gen.Count; i++) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(gen[i], ref state);
+				}
+				break;
+			case DmdTypeSignatureKind.FunctionPointer:
+				var sig = type.GetFunctionPointerMethodSignature();
+				state.DynamicTypeIndex++;
+				UpdateTypeState(sig.ReturnType, ref state);
+
+				var types = sig.GetParameterTypes();
+				for (int i = 0; i < types.Count; i++) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(types[i], ref state);
+				}
+				break;
+			}
 		}
 
 		public override DbgDotNetValueNode[] GetChildren(LanguageValueNodeFactory valueNodeFactory, DbgEvaluationInfo evalInfo, ulong index, int count, DbgValueNodeEvaluationOptions options, ReadOnlyCollection<string>? formatSpecifiers) {
