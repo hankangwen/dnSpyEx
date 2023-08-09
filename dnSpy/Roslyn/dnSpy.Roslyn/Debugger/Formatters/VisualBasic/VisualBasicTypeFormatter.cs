@@ -124,10 +124,10 @@ namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 
 		void WriteIdentifier(string? id, DbgTextColor color) => OutputWrite(GetFormattedIdentifier(id), color);
 
-		public void Format(DmdType type, DbgDotNetValue? value, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null) {
-			var state = new AdditionalTypeInfoState(additionalTypeInfoProvider);
-			FormatCore(type, value, ref state);
-		}
+		public void Format(DmdType type, DbgDotNetValue? value = null, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null) =>
+			Format(type,new AdditionalTypeInfoState(additionalTypeInfoProvider), value);
+
+		public void Format(DmdType type, AdditionalTypeInfoState state, DbgDotNetValue? value = null) => FormatCore(type, value, ref state);
 
 		void FormatCore(DmdType type, DbgDotNetValue? value, ref AdditionalTypeInfoState state) {
 			if (type is null)

@@ -115,9 +115,11 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 		void WriteIdentifier(string? id, DbgTextColor color) => OutputWrite(GetFormattedIdentifier(id), color);
 
-		public void Format(DmdType type, DbgDotNetValue? value = null, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null, DmdParameterInfo? pd = null, bool forceReadOnly = false) {
+		public void Format(DmdType type, DbgDotNetValue? value = null, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null, DmdParameterInfo? pd = null, bool forceReadOnly = false) =>
+			Format(type, new AdditionalTypeInfoState(additionalTypeInfoProvider), value, pd, forceReadOnly);
+
+		public void Format(DmdType type, AdditionalTypeInfoState state, DbgDotNetValue? value = null, DmdParameterInfo? pd = null, bool forceReadOnly = false) {
 			WriteRefIfByRef(type, pd, forceReadOnly);
-			var state = new AdditionalTypeInfoState(additionalTypeInfoProvider);
 			if (type.IsByRef) {
 				type = type.GetElementType()!;
 				state.DynamicTypeIndex++;

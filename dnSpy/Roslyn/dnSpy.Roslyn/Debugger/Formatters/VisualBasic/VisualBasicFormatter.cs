@@ -27,8 +27,8 @@ using dnSpy.Debugger.DotNet.Metadata;
 namespace dnSpy.Roslyn.Debugger.Formatters.VisualBasic {
 	[ExportDbgDotNetFormatter(DbgDotNetLanguageGuids.VisualBasic)]
 	sealed class VisualBasicFormatter : LanguageFormatter {
-		public override void FormatType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DmdType type, DbgDotNetValue? value, DbgValueFormatterTypeOptions options, CultureInfo? cultureInfo) =>
-			new VisualBasicTypeFormatter(output, options.ToTypeFormatterOptions(), cultureInfo).Format(type, value);
+		public override void FormatType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DmdType type, AdditionalTypeInfoState additionalTypeInfo, DbgDotNetValue? value, DbgValueFormatterTypeOptions options, CultureInfo? cultureInfo) =>
+			new VisualBasicTypeFormatter(output, options.ToTypeFormatterOptions(), cultureInfo).Format(type, additionalTypeInfo, value);
 
 		public override void FormatValue(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetValue value, DbgValueFormatterOptions options, CultureInfo? cultureInfo) =>
 			new VisualBasicValueFormatter(output, evalInfo, this, options.ToValueFormatterOptions(), cultureInfo).Format(value);
