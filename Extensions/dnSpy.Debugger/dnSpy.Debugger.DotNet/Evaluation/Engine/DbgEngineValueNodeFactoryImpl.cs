@@ -64,7 +64,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 						newNode = valueNodeFactory.CreateError(evalInfo, evalRes.Name, evalRes.Error, info.Expression, causesSideEffects);
 					else {
 						bool isReadOnly = (evalRes.Flags & DbgEvaluationResultFlags.ReadOnly) != 0;
-						newNode = valueNodeFactory.Create(evalInfo, evalRes.Name, evalRes.Value!, evalRes.FormatSpecifiers, info.NodeOptions, info.Expression, evalRes.ImageName, isReadOnly, causesSideEffects, evalRes.Type!);
+						newNode = valueNodeFactory.Create(evalInfo, evalRes.Name, evalRes.Value!, evalRes.FormatSpecifiers, info.NodeOptions, info.Expression, evalRes.ImageName, isReadOnly, causesSideEffects, evalRes.Type!, evalRes.CustomTypeInfo);
 					}
 					res[i] = newNode;
 				}
@@ -109,7 +109,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 					if (objectIdValue is null)
 						res[i] = valueNodeFactory.CreateError(evalInfo, name, "Could not get Object ID value", expression, false);
 					else
-						res[i] = valueNodeFactory.Create(evalInfo, name, objectIdValue, null, options, expression, PredefinedDbgValueNodeImageNames.ObjectId, true, false, objectIdValue.Type);
+						res[i] = valueNodeFactory.Create(evalInfo, name, objectIdValue, null, options, expression, PredefinedDbgValueNodeImageNames.ObjectId, true, false, objectIdValue.Type, null);
 				}
 				ObjectCache.Free(ref output);
 				return res;

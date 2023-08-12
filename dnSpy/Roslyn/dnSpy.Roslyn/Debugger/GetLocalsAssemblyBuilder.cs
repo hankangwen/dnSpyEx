@@ -194,9 +194,17 @@ namespace dnSpy.Roslyn.Debugger {
 				if (dynamicAttr.ConstructorArguments.Count == 0)
 					dynamicFlags = new ReadOnlyCollection<byte>(new byte[] { 1 });
 				else if (dynamicAttr.ConstructorArguments.Count == 1 && dynamicAttr.ConstructorArguments[0].Value is IList<CAArgument> flags) {
-					bool[]? array = new bool[flags.Count];
-					for (var i = 0; i < flags.Count; i++) {
-						var argValue = flags[i].Value;
+					int offset = 0;
+					var type = parameter.Type.RemovePinned();
+					while (type is ModifierSig) {
+						type = type.Next.RemovePinned();
+						offset++;
+					}
+					if (type.IsByRef)
+						offset++;
+					bool[]? array = new bool[flags.Count - offset];
+					for (var i = 0; i < array.Length; i++) {
+						var argValue = flags[i + offset].Value;
 						if (argValue is bool b)
 							array[i] = b;
 						else {
