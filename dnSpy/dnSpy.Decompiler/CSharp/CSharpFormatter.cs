@@ -1264,30 +1264,9 @@ namespace dnSpy.Decompiler.CSharp {
 			case ElementType.GenericInst:
 				var gis = (GenericInstSig?)type;
 				Debug2.Assert(gis is not null);
-				if (TypeFormatterUtils.IsSystemNullable(gis)) {
-					state.DynamicTypeIndex++;
-					UpdateTypeState(gis.GenericArguments[0], ref state);
-					break;
-				}
-				if (TypeFormatterUtils.IsSystemValueTuple(gis, out int tupleCardinality)) {
+
+				if (TypeFormatterUtils.IsSystemValueTuple(gis, out int tupleCardinality))
 					state.TupleNameIndex += tupleCardinality;
-					if (tupleCardinality > 1) {
-						for (int i = 0; i < 1000; i++) {
-							for (int j = 0; j < gis.GenericArguments.Count && j < 7; j++) {
-								state.DynamicTypeIndex++;
-								UpdateTypeState(gis.GenericArguments[j], ref state);
-							}
-							if (gis.GenericArguments.Count != 8)
-								break;
-							gis = gis.GenericArguments[gis.GenericArguments.Count - 1] as GenericInstSig;
-							state.DynamicTypeIndex++;
-							if (gis is null)
-								break;
-							state.TupleNameIndex += TypeFormatterUtils.GetSystemValueTupleRank(gis);
-						}
-						break;
-					}
-				}
 
 				UpdateTypeState(gis.GenericType, ref state);
 				for (int i = 0; i < gis.GenericArguments.Count; i++) {

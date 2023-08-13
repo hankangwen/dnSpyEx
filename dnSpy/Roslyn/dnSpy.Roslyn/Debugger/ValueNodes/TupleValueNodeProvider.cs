@@ -66,7 +66,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			var typeInfo = cachedTypeInfoStates[cachedIndex];
 			while (cachedIndex < tupleFieldIndex) {
 				ref readonly var previousField = ref tupleFields[cachedIndex];
-				UpdateTypeState(previousField.Fields[previousField.Fields.Length - 1].FieldType, ref typeInfo);
+				TypeFormatterUtils.UpdateTypeState(previousField.Fields[previousField.Fields.Length - 1].FieldType, ref typeInfo);
 
 				typeInfo.DynamicTypeIndex++;
 
@@ -84,43 +84,6 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			}
 
 			return typeInfo;
-		}
-
-		static void UpdateTypeState(DmdType type, ref AdditionalTypeInfoState state) {
-			state.DynamicTypeIndex += type.GetCustomModifiers().Count;
-
-			while (type.HasElementType) {
-				state.DynamicTypeIndex++;
-				type = type.GetElementType()!;
-			}
-
-			switch (type.TypeSignatureKind) {
-			case DmdTypeSignatureKind.Type:
-			case DmdTypeSignatureKind.TypeGenericParameter:
-			case DmdTypeSignatureKind.MethodGenericParameter:
-				return;
-			case DmdTypeSignatureKind.GenericInstance:
-				if (TypeFormatterUtils.IsSystemValueTuple(type, out int cardinality))
-					state.TupleNameIndex += cardinality;
-
-				var gen = type.GetGenericArguments();
-				for (int i = 0; i < gen.Count; i++) {
-					state.DynamicTypeIndex++;
-					UpdateTypeState(gen[i], ref state);
-				}
-				break;
-			case DmdTypeSignatureKind.FunctionPointer:
-				var sig = type.GetFunctionPointerMethodSignature();
-				state.DynamicTypeIndex++;
-				UpdateTypeState(sig.ReturnType, ref state);
-
-				var types = sig.GetParameterTypes();
-				for (int i = 0; i < types.Count; i++) {
-					state.DynamicTypeIndex++;
-					UpdateTypeState(types[i], ref state);
-				}
-				break;
-			}
 		}
 
 		public override DbgDotNetValueNode[] GetChildren(LanguageValueNodeFactory valueNodeFactory, DbgEvaluationInfo evalInfo, ulong index, int count, DbgValueNodeEvaluationOptions options, ReadOnlyCollection<string>? formatSpecifiers) {

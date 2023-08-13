@@ -40,14 +40,17 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 		const string GENERICS_CLOSE_PAREN = ">";
 		const string TUPLE_OPEN_PAREN = "(";
 		const string TUPLE_CLOSE_PAREN = ")";
-		const string METHOD_OPEN_PAREN = "(";
-		const string METHOD_CLOSE_PAREN = ")";
+		const string FNPTR_CALLCONV_OPEN_PAREN = "[";
+		const string FNPTR_CALLCONV_CLOSE_PAREN = "]";
+		const string FNPTR_OPEN_PAREN = "<";
+		const string FNPTR_CLOSE_PAREN = ">";
 		const string HEX_PREFIX = "0x";
 		const string IDENTIFIER_ESCAPE = "@";
 		const string BYREF_KEYWORD = "ref";
 		const string IN_KEYWORD = "in";
 		const string OUT_KEYWORD = "out";
 		const string READONLY_KEYWORD = "readonly";
+		const string DELEGATE_KEYWORD = "delegate";
 		const int MAX_ARRAY_RANK = 100;
 
 		bool ShowArrayValueSizes => (options & TypeFormatterOptions.ShowArrayValueSizes) != 0;
@@ -309,28 +312,109 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 				case DmdTypeSignatureKind.FunctionPointer:
 					var sig = type.GetFunctionPointerMethodSignature();
-					state.DynamicTypeIndex++;
-					FormatCore(sig.ReturnType, null, ref state);
-					WriteSpace();
-					OutputWrite(METHOD_OPEN_PAREN, DbgTextColor.Punctuation);
-					var types = sig.GetParameterTypes();
-					for (int i = 0; i < types.Count; i++) {
-						if (i > 0)
-							WriteCommaSpace();
-						state.DynamicTypeIndex++;
-						FormatCore(types[i], null, ref state);
+
+					OutputWrite(DELEGATE_KEYWORD, DbgTextColor.Keyword);
+					OutputWrite("*", DbgTextColor.Operator);
+
+					bool isUnmanaged = (sig.Flags & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.Unmanaged;
+					bool isDefault = (sig.Flags  & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.Default;
+					if (isUnmanaged || !isDefault) {
+						WriteSpace();
+						OutputWrite("unmanaged", DbgTextColor.Keyword);
 					}
-					types = sig.GetVarArgsParameterTypes();
-					if (types.Count > 0) {
-						if (sig.GetParameterTypes().Count > 0)
-							WriteCommaSpace();
-						OutputWrite("...", DbgTextColor.Punctuation);
-						for (int i = 0; i < types.Count; i++) {
-							WriteCommaSpace();
-							FormatCore(types[i], null, ref state);
+
+					var returnType = sig.ReturnType;
+					var customCallConvs = new List<DmdType>();
+					foreach (var modifier in returnType.GetCustomModifiers()) {
+						if (modifier.Type.Name.StartsWith("CallConv", StringComparison.Ordinal) && modifier.Type.Namespace == "System.Runtime.CompilerServices") {
+							state.DynamicTypeIndex++;
+							customCallConvs.Add(modifier.Type);
 						}
+						else
+							break;
 					}
-					OutputWrite(METHOD_CLOSE_PAREN, DbgTextColor.Punctuation);
+
+					bool needsComma = false;
+					if (!isDefault || customCallConvs.Count > 0) {
+						OutputWrite(FNPTR_CALLCONV_OPEN_PAREN, DbgTextColor.Punctuation);
+						if (!isDefault) {
+							OutputWrite((sig.Flags & DmdSignatureCallingConvention.Mask) switch {
+								DmdSignatureCallingConvention.C => "Cdecl",
+								DmdSignatureCallingConvention.StdCall => "Stdcall",
+								DmdSignatureCallingConvention.ThisCall => "Thiscall",
+								DmdSignatureCallingConvention.FastCall => "Fastcall",
+								DmdSignatureCallingConvention.VarArg => "Varargs",
+								_ => sig.Flags.ToString()
+							}, DbgTextColor.Keyword);
+							needsComma = true;
+						}
+
+						for (var i = 0; i < customCallConvs.Count; i++) {
+							if (needsComma)
+								WriteCommaSpace();
+							needsComma = true;
+							var customCallConv = customCallConvs[i];
+							if (customCallConv.Name.StartsWith("CallConv", StringComparison.Ordinal) &&
+								customCallConv.Name.Length > 8)
+								OutputWrite(customCallConv.Name.Substring(8), DbgTextColor.Keyword);
+							else
+								Format(customCallConv);
+						}
+
+						OutputWrite(FNPTR_CALLCONV_CLOSE_PAREN, DbgTextColor.Punctuation);
+					}
+
+					OutputWrite(FNPTR_OPEN_PAREN, DbgTextColor.Punctuation);
+
+					state.DynamicTypeIndex++;
+					var parametersState = state;
+					TypeFormatterUtils.UpdateTypeState(returnType, ref parametersState);
+
+					needsComma = false;
+					var parameters = sig.GetParameterTypes();
+					for (int i = 0; i < parameters.Count; i++) {
+						if (needsComma)
+							WriteCommaSpace();
+						needsComma = true;
+
+						parametersState.DynamicTypeIndex++;
+						var paramType = parameters[i];
+						bool modifierWritten = false;
+
+						var modifiers = paramType.GetRequiredCustomModifiers();
+
+						if (modifiers.Length > 0) {
+							string? modifier = modifiers[0].FullName;
+							if (modifier == "System.Runtime.InteropServices.InAttribute") {
+								modifierWritten = true;
+								OutputWrite(IN_KEYWORD, DbgTextColor.Keyword);
+								WriteSpace();
+								parametersState.DynamicTypeIndex++;
+							}
+							else if (modifier == "System.Runtime.InteropServices.OutAttribute") {
+								modifierWritten = true;
+								OutputWrite(OUT_KEYWORD, DbgTextColor.Keyword);
+								WriteSpace();
+								parametersState.DynamicTypeIndex++;
+							}
+						}
+						if (paramType.IsByRef) {
+							if (!modifierWritten) {
+								OutputWrite(BYREF_KEYWORD, DbgTextColor.Keyword);
+								WriteSpace();
+							}
+							parametersState.DynamicTypeIndex++;
+							paramType = paramType.GetElementType()!;
+						}
+
+						FormatCore(paramType, null, ref parametersState);
+					}
+
+					if (needsComma)
+						WriteCommaSpace();
+					FormatCore(returnType, null, ref state);
+
+					OutputWrite(FNPTR_CLOSE_PAREN, DbgTextColor.Punctuation);
 					break;
 
 				default:

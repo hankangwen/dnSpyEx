@@ -116,7 +116,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters {
 			return s.Substring(0, index);
 		}
 
-		public static (DmdPropertyInfo? property, AccessorKind kind) TryGetProperty(DmdMethodBase method) {
+		public static (DmdPropertyInfo? property, AccessorKind kind) TryGetProperty(DmdMethodBase? method) {
 			if (method is null)
 				return (null, AccessorKind.None);
 			foreach (var p in method.DeclaringType!.Properties) {
@@ -128,7 +128,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters {
 			return (null, AccessorKind.None);
 		}
 
-		public static (DmdEventInfo? @event, AccessorKind kind) TryGetEvent(DmdMethodBase method) {
+		public static (DmdEventInfo? @event, AccessorKind kind) TryGetEvent(DmdMethodBase? method) {
 			if (method is null)
 				return (null, AccessorKind.None);
 			foreach (var e in method.DeclaringType!.Events) {
@@ -251,6 +251,47 @@ namespace dnSpy.Roslyn.Debugger.Formatters {
 					return true;
 			}
 			return false;
+		}
+
+		public static void UpdateTypeState(DmdType type, ref AdditionalTypeInfoState state) {
+			state.DynamicTypeIndex += type.GetCustomModifiers().Count;
+
+			while (type.HasElementType) {
+				state.DynamicTypeIndex++;
+				type = type.GetElementType()!;
+			}
+
+			switch (type.TypeSignatureKind) {
+			case DmdTypeSignatureKind.Type:
+				if (type == type.AppDomain.System_IntPtr || type == type.AppDomain.System_UIntPtr)
+					state.NativeIntTypeIndex++;
+				return;
+			case DmdTypeSignatureKind.TypeGenericParameter:
+			case DmdTypeSignatureKind.MethodGenericParameter:
+				return;
+			case DmdTypeSignatureKind.GenericInstance:
+				if (IsSystemValueTuple(type, out int cardinality))
+					state.TupleNameIndex += cardinality;
+
+				UpdateTypeState(type.GetGenericTypeDefinition(), ref state);
+				var gen = type.GetGenericArguments();
+				for (int i = 0; i < gen.Count; i++) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(gen[i], ref state);
+				}
+				break;
+			case DmdTypeSignatureKind.FunctionPointer:
+				var sig = type.GetFunctionPointerMethodSignature();
+				state.DynamicTypeIndex++;
+				UpdateTypeState(sig.ReturnType, ref state);
+
+				var types = sig.GetParameterTypes();
+				for (int i = 0; i < types.Count; i++) {
+					state.DynamicTypeIndex++;
+					UpdateTypeState(types[i], ref state);
+				}
+				break;
+			}
 		}
 	}
 
