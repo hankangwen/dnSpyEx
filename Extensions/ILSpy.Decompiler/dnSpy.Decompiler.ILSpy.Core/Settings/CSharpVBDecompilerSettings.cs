@@ -180,11 +180,11 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_SortSystemFirst,
 				Name = DecompilerOptionConstants.SortSystemUsingStatementsFirst_NAME,
 			};
-			// yield return new DecompilerOption<int>(DecompilerOptionConstants.MaxArrayElements_GUID,
-			// 			() => decompilerSettings.MaxArrayElements, a => decompilerSettings.MaxArrayElements = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MaxArrayElements,
-			// 	Name = DecompilerOptionConstants.MaxArrayElements_NAME,
-			// };
+			yield return new DecompilerOption<int>(DecompilerOptionConstants.MaxArrayElements_GUID,
+						() => decompilerSettings.MaxArrayElements, a => decompilerSettings.MaxArrayElements = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MaxArrayElements,
+				Name = DecompilerOptionConstants.MaxArrayElements_NAME,
+			};
 			yield return new DecompilerOption<int>(DecompilerOptionConstants.MaxStringLength_GUID,
 						() => decompilerSettings.MaxStringLength, a => decompilerSettings.MaxStringLength = a) {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MaxStringLength,
@@ -210,16 +210,16 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_OneCustomAttributePerLine,
 				Name = DecompilerOptionConstants.OneCustomAttributePerLine_NAME,
 			};
-			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.TypeAddInternalModifier_GUID,
-			// 			() => decompilerSettings.TypeAddInternalModifier, a => decompilerSettings.TypeAddInternalModifier = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_TypeAddInternalModifier,
-			// 	Name = DecompilerOptionConstants.TypeAddInternalModifier_NAME,
-			// };
-			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.MemberAddPrivateModifier_GUID,
-			// 			() => decompilerSettings.MemberAddPrivateModifier, a => decompilerSettings.MemberAddPrivateModifier = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MemberAddPrivateModifier,
-			// 	Name = DecompilerOptionConstants.MemberAddPrivateModifier_NAME,
-			// };
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.TypeAddInternalModifier_GUID,
+						() => decompilerSettings.TypeAddInternalModifier, a => decompilerSettings.TypeAddInternalModifier = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_TypeAddInternalModifier,
+				Name = DecompilerOptionConstants.TypeAddInternalModifier_NAME,
+			};
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.MemberAddPrivateModifier_GUID,
+						() => decompilerSettings.MemberAddPrivateModifier, a => decompilerSettings.MemberAddPrivateModifier = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MemberAddPrivateModifier,
+				Name = DecompilerOptionConstants.MemberAddPrivateModifier_NAME,
+			};
 			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.RemoveNewDelegateClass_GUID,
 			// 			() => decompilerSettings.RemoveNewDelegateClass, a => decompilerSettings.RemoveNewDelegateClass = a) {
 			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RemoveNewDelegateClass,

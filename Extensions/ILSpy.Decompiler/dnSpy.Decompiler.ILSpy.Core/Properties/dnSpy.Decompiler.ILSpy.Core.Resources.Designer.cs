@@ -69,6 +69,24 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allow extension &apos;Add&apos; methods in collection initializer expressions.
+        /// </summary>
+        public static string DecompilerSettings_AllowExtensionAddMethodsInCollectionInitializerExpressions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_AllowExtensionAddMethodsInCollectionInitializerExpressions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use &apos;ref&apos; extension methods.
+        /// </summary>
+        public static string DecompilerSettings_AllowExtensionMethodSyntaxOnRef {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_AllowExtensionMethodSyntaxOnRef", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Allow field initializers.
         /// </summary>
         public static string DecompilerSettings_AllowFieldInitializers {
@@ -84,6 +102,24 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
             get {
                 return ResourceManager.GetString("DecompilerSettings_AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObjec" +
                         "t", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Array initializer expressions.
+        /// </summary>
+        public static string DecompilerSettings_ArrayInitializerExpressions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_ArrayInitializerExpressions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User-defined checked operators.
+        /// </summary>
+        public static string DecompilerSettings_CheckedOperators {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_CheckedOperators", resourceCulture);
             }
         }
         
@@ -106,6 +142,15 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decompile anonymous types.
+        /// </summary>
+        public static string DecompilerSettings_DecompileAnonymousTypes {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileAnonymousTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Decompile async methods (async/await).
         /// </summary>
         public static string DecompilerSettings_DecompileAsyncMethods {
@@ -124,11 +169,56 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decompile automatic events.
+        /// </summary>
+        public static string DecompilerSettings_DecompileAutomaticEvents {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileAutomaticEvents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile automatic properties.
+        /// </summary>
+        public static string DecompilerSettings_DecompileAutomaticProperties {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileAutomaticProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Decompile automatic properties.
         /// </summary>
         public static string DecompilerSettings_DecompileAutoProps {
             get {
                 return ResourceManager.GetString("DecompilerSettings_DecompileAutoProps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile await in catch/finally blocks.
+        /// </summary>
+        public static string DecompilerSettings_DecompileAwaitInCatchFinallyBlocks {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileAwaitInCatchFinallyBlocks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile C# 1.0 &apos;public unsafe fixed int arr[10];&apos; members.
+        /// </summary>
+        public static string DecompilerSettings_DecompileC10PublicUnsafeFixedIntArr10Members {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileC10PublicUnsafeFixedIntArr10Members", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile [DecimalConstant(...)] as simple literal values.
+        /// </summary>
+        public static string DecompilerSettings_DecompileDecimalConstantAsSimpleLiteralValues {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileDecimalConstantAsSimpleLiteralValues", resourceCulture);
             }
         }
         
@@ -160,6 +250,15 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decompile foreach statements with GetEnumerator extension methods.
+        /// </summary>
+        public static string DecompilerSettings_DecompileForEachWithGetEnumeratorExtension {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileForEachWithGetEnumeratorExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Decompile lock statements.
         /// </summary>
         public static string DecompilerSettings_DecompileLockStatements {
@@ -187,6 +286,15 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decompile use of the &apos;dynamic&apos; type.
+        /// </summary>
+        public static string DecompilerSettings_DecompileUseOfTheDynamicType {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DecompileUseOfTheDynamicType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Decompile using statements.
         /// </summary>
         public static string DecompilerSettings_DecompileUsingStatements {
@@ -196,11 +304,56 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Detect deconstruction assignments.
+        /// </summary>
+        public static string DecompilerSettings_Deconstruction {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_Deconstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dictionary initializer expressions.
+        /// </summary>
+        public static string DecompilerSettings_DictionaryInitializerExpressions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DictionaryInitializerExpressions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transform to do-while, if possible.
+        /// </summary>
+        public static string DecompilerSettings_DoWhileStatement {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_DoWhileStatement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Decompile calli to invocation expression.
         /// </summary>
         public static string DecompilerSettings_EmitCalliAsInvocationExpression {
             get {
                 return ResourceManager.GetString("DecompilerSettings_EmitCalliAsInvocationExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use file-scoped namespace declarations.
+        /// </summary>
+        public static string DecompilerSettings_FileScopedNamespaces {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_FileScopedNamespaces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transform to for, if possible.
+        /// </summary>
+        public static string DecompilerSettings_ForStatement {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_ForStatement", resourceCulture);
             }
         }
         
@@ -223,11 +376,38 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Function pointers.
+        /// </summary>
+        public static string DecompilerSettings_FunctionPointers {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_FunctionPointers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile getter-only automatic properties.
+        /// </summary>
+        public static string DecompilerSettings_GetterOnlyAutomaticProperties {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_GetterOnlyAutomaticProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hexadecimal numbers.
         /// </summary>
         public static string DecompilerSettings_HexadecimalNumbers {
             get {
                 return ResourceManager.GetString("DecompilerSettings_HexadecimalNumbers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow init; accessors.
+        /// </summary>
+        public static string DecompilerSettings_InitAccessors {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_InitAccessors", resourceCulture);
             }
         }
         
@@ -246,6 +426,44 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         public static string DecompilerSettings_IntroduceIncrementAndDecrement {
             get {
                 return ResourceManager.GetString("DecompilerSettings_IntroduceIncrementAndDecrement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Introduce local functions.
+        /// </summary>
+        public static string DecompilerSettings_IntroduceLocalFunctions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_IntroduceLocalFunctions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IsByRefLikeAttribute should be replaced with &apos;ref&apos; modifiers on structs.
+        /// </summary>
+        public static string DecompilerSettings_IsByRefLikeAttributeShouldBeReplacedWithRefModifiersOnStructs {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_IsByRefLikeAttributeShouldBeReplacedWithRefModifiersOnStructs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IsReadOnlyAttribute should be replaced with &apos;readonly&apos;/&apos;in&apos; modifiers on structs/parameters.
+        /// </summary>
+        public static string DecompilerSettings_IsReadOnlyAttributeShouldBeReplacedWithReadonlyInModifiersOnStructsParameters {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_IsReadOnlyAttributeShouldBeReplacedWithReadonlyInModifiersOnSt" +
+                        "ructsParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IsUnmanagedAttribute on type parameters should be replaced with &apos;unmanaged&apos; constraints.
+        /// </summary>
+        public static string DecompilerSettings_IsUnmanagedAttributeOnTypeParametersShouldBeReplacedWithUnmanagedConstraints {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_IsUnmanagedAttributeOnTypeParametersShouldBeReplacedWithUnmana" +
+                        "gedConstraints", resourceCulture);
             }
         }
         
@@ -286,6 +504,42 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use nint/nuint types.
+        /// </summary>
+        public static string DecompilerSettings_NativeIntegers {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_NativeIntegers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile ?. and ?[] operators.
+        /// </summary>
+        public static string DecompilerSettings_NullPropagation {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_NullPropagation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Treat (U)IntPtr as n(u)int.
+        /// </summary>
+        public static string DecompilerSettings_NumericIntPtr {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_NumericIntPtr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object/collection initializer expressions.
+        /// </summary>
+        public static string DecompilerSettings_ObjectCollectionInitializerExpressions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_ObjectCollectionInitializerExpressions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Decompile object or collection initializers.
         /// </summary>
         public static string DecompilerSettings_ObjectOrCollectionInitializers {
@@ -304,6 +558,33 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use pattern matching expressions.
+        /// </summary>
+        public static string DecompilerSettings_PatternMatching {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_PatternMatching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Record classes.
+        /// </summary>
+        public static string DecompilerSettings_RecordClasses {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_RecordClasses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Record structs.
+        /// </summary>
+        public static string DecompilerSettings_RecordStructs {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_RecordStructs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove empty default constructors.
         /// </summary>
         public static string DecompilerSettings_RemoveEmptyDefaultCtors {
@@ -318,6 +599,33 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         public static string DecompilerSettings_RemoveNewDelegateClass {
             get {
                 return ResourceManager.GetString("DecompilerSettings_RemoveNewDelegateClass", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove optional arguments, if possible.
+        /// </summary>
+        public static string DecompilerSettings_RemoveOptionalArgumentsIfPossible {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_RemoveOptionalArgumentsIfPossible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Required members.
+        /// </summary>
+        public static string DecompilerSettings_RequiredMembers {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_RequiredMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;scoped&apos; lifetime annotation.
+        /// </summary>
+        public static string DecompilerSettings_ScopedRef {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_ScopedRef", resourceCulture);
             }
         }
         
@@ -403,11 +711,92 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Detect switch on integer even if IL code does not use a jump table.
+        /// </summary>
+        public static string DecompilerSettings_SparseIntegerSwitch {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_SparseIntegerSwitch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decompile &apos;string.Concat(a, b)&apos; calls into &apos;a + b&apos;.
+        /// </summary>
+        public static string DecompilerSettings_StringConcat {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_StringConcat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add &apos;internal&apos; modifier to types.
         /// </summary>
         public static string DecompilerSettings_TypeAddInternalModifier {
             get {
                 return ResourceManager.GetString("DecompilerSettings_TypeAddInternalModifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsigned right shift (&gt;&gt;&gt;).
+        /// </summary>
+        public static string DecompilerSettings_UnsignedRightShift {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UnsignedRightShift", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use discards.
+        /// </summary>
+        public static string DecompilerSettings_UseDiscards {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseDiscards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use expression-bodied member syntax for get-only properties.
+        /// </summary>
+        public static string DecompilerSettings_UseExpressionBodiedMemberSyntaxForGetOnlyProperties {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseExpressionBodiedMemberSyntaxForGetOnlyProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use extension method syntax.
+        /// </summary>
+        public static string DecompilerSettings_UseExtensionMethodSyntax {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseExtensionMethodSyntax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use implicit method group conversions.
+        /// </summary>
+        public static string DecompilerSettings_UseImplicitMethodGroupConversions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseImplicitMethodGroupConversions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use lambda syntax, if possible.
+        /// </summary>
+        public static string DecompilerSettings_UseLambdaSyntaxIfPossible {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseLambdaSyntaxIfPossible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use lifted operators for nullables.
+        /// </summary>
+        public static string DecompilerSettings_UseLiftedOperatorsForNullables {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseLiftedOperatorsForNullables", resourceCulture);
             }
         }
         
@@ -421,11 +810,119 @@ namespace dnSpy.Decompiler.ILSpy.Core.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use named arguments.
+        /// </summary>
+        public static string DecompilerSettings_UseNamedArguments {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseNamedArguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use non-trailing named arguments.
+        /// </summary>
+        public static string DecompilerSettings_UseNonTrailingNamedArguments {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseNonTrailingNamedArguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use out variable declarations.
+        /// </summary>
+        public static string DecompilerSettings_UseOutVariableDeclarations {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseOutVariableDeclarations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use pattern-based fixed statement.
+        /// </summary>
+        public static string DecompilerSettings_UsePatternBasedFixedStatement {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UsePatternBasedFixedStatement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use primary constructor  syntax with records.
+        /// </summary>
+        public static string DecompilerSettings_UsePrimaryConstructorSyntax {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UsePrimaryConstructorSyntax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use ref locals to accurately represent order of evaluation.
+        /// </summary>
+        public static string DecompilerSettings_UseRefLocalsForAccurateOrderOfEvaluation {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseRefLocalsForAccurateOrderOfEvaluation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Order members in source code order.
         /// </summary>
         public static string DecompilerSettings_UseSourceCodeOrder {
             get {
                 return ResourceManager.GetString("DecompilerSettings_UseSourceCodeOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use stackalloc initializer syntax.
+        /// </summary>
+        public static string DecompilerSettings_UseStackallocInitializerSyntax {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseStackallocInitializerSyntax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use string interpolation.
+        /// </summary>
+        public static string DecompilerSettings_UseStringInterpolation {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseStringInterpolation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use throw expressions.
+        /// </summary>
+        public static string DecompilerSettings_UseThrowExpressions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseThrowExpressions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use tuple type syntax.
+        /// </summary>
+        public static string DecompilerSettings_UseTupleTypeSyntax {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_UseTupleTypeSyntax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UTF-8 string literals.
+        /// </summary>
+        public static string DecompilerSettings_Utf8StringLiterals {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_Utf8StringLiterals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;with&apos; initializer expressions.
+        /// </summary>
+        public static string DecompilerSettings_WithExpressions {
+            get {
+                return ResourceManager.GetString("DecompilerSettings_WithExpressions", resourceCulture);
             }
         }
     }

@@ -162,6 +162,171 @@
   <data name="DecompilerSettings_DecompileUsingStatements" xml:space="preserve">
     <value>Decompile using statements</value>
   </data>
+  <data name="DecompilerSettings_DecompileDecimalConstantAsSimpleLiteralValues" xml:space="preserve">
+    <value>Decompile [DecimalConstant(...)] as simple literal values</value>
+  </data>
+  <data name="DecompilerSettings_DecompileC10PublicUnsafeFixedIntArr10Members" xml:space="preserve">
+    <value>Decompile C# 1.0 'public unsafe fixed int arr[10];' members</value>
+  </data>
+  <data name="DecompilerSettings_StringConcat" xml:space="preserve">
+    <value>Decompile 'string.Concat(a, b)' calls into 'a + b'</value>
+  </data>
+  <data name="DecompilerSettings_DecompileAutomaticEvents" xml:space="preserve">
+    <value>Decompile automatic events</value>
+  </data>
+  <data name="DecompilerSettings_SparseIntegerSwitch" xml:space="preserve">
+    <value>Detect switch on integer even if IL code does not use a jump table</value>
+  </data>
+  <data name="DecompilerSettings_ArrayInitializerExpressions" xml:space="preserve">
+    <value>Array initializer expressions</value>
+  </data>
+  <data name="DecompilerSettings_ForStatement" xml:space="preserve">
+    <value>Transform to for, if possible</value>
+  </data>
+  <data name="DecompilerSettings_DoWhileStatement" xml:space="preserve">
+    <value>Transform to do-while, if possible</value>
+  </data>
+  <data name="DecompilerSettings_UseLiftedOperatorsForNullables" xml:space="preserve">
+    <value>Use lifted operators for nullables</value>
+  </data>
+  <data name="DecompilerSettings_UseImplicitMethodGroupConversions" xml:space="preserve">
+    <value>Use implicit method group conversions</value>
+  </data>
+  <data name="DecompilerSettings_DecompileAnonymousTypes" xml:space="preserve">
+    <value>Decompile anonymous types</value>
+  </data>
+  <data name="DecompilerSettings_UseLambdaSyntaxIfPossible" xml:space="preserve">
+    <value>Use lambda syntax, if possible</value>
+  </data>
+  <data name="DecompilerSettings_DecompileAutomaticProperties" xml:space="preserve">
+    <value>Decompile automatic properties</value>
+  </data>
+  <data name="DecompilerSettings_UseExtensionMethodSyntax" xml:space="preserve">
+    <value>Use extension method syntax</value>
+  </data>
+  <data name="DecompilerSettings_ObjectCollectionInitializerExpressions" xml:space="preserve">
+    <value>Object/collection initializer expressions</value>
+  </data>
+  <data name="DecompilerSettings_DecompileUseOfTheDynamicType" xml:space="preserve">
+    <value>Decompile use of the 'dynamic' type</value>
+  </data>
+  <data name="DecompilerSettings_UseNamedArguments" xml:space="preserve">
+    <value>Use named arguments</value>
+  </data>
+  <data name="DecompilerSettings_RemoveOptionalArgumentsIfPossible" xml:space="preserve">
+    <value>Remove optional arguments, if possible</value>
+  </data>
+  <data name="DecompilerSettings_DecompileAwaitInCatchFinallyBlocks" xml:space="preserve">
+    <value>Decompile await in catch/finally blocks</value>
+  </data>
+  <data name="DecompilerSettings_NullPropagation" xml:space="preserve">
+    <value>Decompile ?. and ?[] operators</value>
+  </data>
+  <data name="DecompilerSettings_GetterOnlyAutomaticProperties" xml:space="preserve">
+    <value>Decompile getter-only automatic properties</value>
+  </data>
+  <data name="DecompilerSettings_DictionaryInitializerExpressions" xml:space="preserve">
+    <value>Dictionary initializer expressions</value>
+  </data>
+  <data name="DecompilerSettings_AllowExtensionAddMethodsInCollectionInitializerExpressions" xml:space="preserve">
+    <value>Allow extension 'Add' methods in collection initializer expressions</value>
+  </data>
+  <data name="DecompilerSettings_UseRefLocalsForAccurateOrderOfEvaluation" xml:space="preserve">
+    <value>Use ref locals to accurately represent order of evaluation</value>
+  </data>
+  <data name="DecompilerSettings_UseStringInterpolation" xml:space="preserve">
+    <value>Use string interpolation</value>
+  </data>
+  <data name="DecompilerSettings_UseExpressionBodiedMemberSyntaxForGetOnlyProperties" xml:space="preserve">
+    <value>Use expression-bodied member syntax for get-only properties</value>
+  </data>
+  <data name="DecompilerSettings_UseOutVariableDeclarations" xml:space="preserve">
+    <value>Use out variable declarations</value>
+  </data>
+  <data name="DecompilerSettings_UseDiscards" xml:space="preserve">
+    <value>Use discards</value>
+  </data>
+  <data name="DecompilerSettings_UseTupleTypeSyntax" xml:space="preserve">
+    <value>Use tuple type syntax</value>
+  </data>
+  <data name="DecompilerSettings_UseThrowExpressions" xml:space="preserve">
+    <value>Use throw expressions</value>
+  </data>
+  <data name="DecompilerSettings_IntroduceLocalFunctions" xml:space="preserve">
+    <value>Introduce local functions</value>
+  </data>
+  <data name="DecompilerSettings_Deconstruction" xml:space="preserve">
+    <value>Detect deconstruction assignments</value>
+  </data>
+  <data name="DecompilerSettings_PatternMatching" xml:space="preserve">
+    <value>Use pattern matching expressions</value>
+  </data>
+  <data name="DecompilerSettings_AllowExtensionMethodSyntaxOnRef" xml:space="preserve">
+    <value>Use 'ref' extension methods</value>
+  </data>
+  <data name="DecompilerSettings_IsByRefLikeAttributeShouldBeReplacedWithRefModifiersOnStructs" xml:space="preserve">
+    <value>IsByRefLikeAttribute should be replaced with 'ref' modifiers on structs</value>
+  </data>
+  <data name="DecompilerSettings_IsReadOnlyAttributeShouldBeReplacedWithReadonlyInModifiersOnStructsParameters" xml:space="preserve">
+    <value>IsReadOnlyAttribute should be replaced with 'readonly'/'in' modifiers on structs/parameters</value>
+  </data>
+  <data name="DecompilerSettings_UseNonTrailingNamedArguments" xml:space="preserve">
+    <value>Use non-trailing named arguments</value>
+  </data>
+  <data name="DecompilerSettings_IsUnmanagedAttributeOnTypeParametersShouldBeReplacedWithUnmanagedConstraints" xml:space="preserve">
+    <value>IsUnmanagedAttribute on type parameters should be replaced with 'unmanaged' constraints</value>
+  </data>
+  <data name="DecompilerSettings_UseStackallocInitializerSyntax" xml:space="preserve">
+    <value>Use stackalloc initializer syntax</value>
+  </data>
+  <data name="DecompilerSettings_UsePatternBasedFixedStatement" xml:space="preserve">
+    <value>Use pattern-based fixed statement</value>
+  </data>
+  <data name="DecompilerSettings_NativeIntegers" xml:space="preserve">
+    <value>Use nint/nuint types</value>
+  </data>
+  <data name="DecompilerSettings_InitAccessors" xml:space="preserve">
+    <value>Allow init; accessors</value>
+  </data>
+  <data name="DecompilerSettings_RecordClasses" xml:space="preserve">
+    <value>Record classes</value>
+  </data>
+  <data name="DecompilerSettings_WithExpressions" xml:space="preserve">
+    <value>'with' initializer expressions</value>
+  </data>
+  <data name="DecompilerSettings_UsePrimaryConstructorSyntax" xml:space="preserve">
+    <value>Use primary constructor  syntax with records</value>
+  </data>
+  <data name="DecompilerSettings_FunctionPointers" xml:space="preserve">
+    <value>Function pointers</value>
+  </data>
+  <data name="DecompilerSettings_DecompileForEachWithGetEnumeratorExtension" xml:space="preserve">
+    <value>Decompile foreach statements with GetEnumerator extension methods</value>
+  </data>
+  <data name="DecompilerSettings_RecordStructs" xml:space="preserve">
+    <value>Record structs</value>
+  </data>
+  <data name="DecompilerSettings_FileScopedNamespaces" xml:space="preserve">
+    <value>Use file-scoped namespace declarations</value>
+  </data>
+  <data name="DecompilerSettings_NumericIntPtr" xml:space="preserve">
+    <value>Treat (U)IntPtr as n(u)int</value>
+  </data>
+  <data name="DecompilerSettings_ScopedRef" xml:space="preserve">
+    <value>'scoped' lifetime annotation</value>
+  </data>
+  <data name="DecompilerSettings_RequiredMembers" xml:space="preserve">
+    <value>Required members</value>
+  </data>
+  <data name="DecompilerSettings_Utf8StringLiterals" xml:space="preserve">
+    <value>UTF-8 string literals</value>
+  </data>
+  <data name="DecompilerSettings_UnsignedRightShift" xml:space="preserve">
+    <value>Unsigned right shift (&gt;&gt;&gt;)</value>
+  </data>
+  <data name="DecompilerSettings_CheckedOperators" xml:space="preserve">
+    <value>User-defined checked operators</value>
+  </data>
   <data name="DecompilerSettings_FullyQualifyAllTypes" xml:space="preserve">
     <value>Add namespaces to all types</value>
   </data>

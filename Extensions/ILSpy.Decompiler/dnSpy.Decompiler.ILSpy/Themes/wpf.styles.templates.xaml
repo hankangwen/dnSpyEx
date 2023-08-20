@@ -5,11 +5,145 @@
 
     <DataTemplate DataType="{x:Type settings:CSharpDecompilerSettingsPage}">
         <StackPanel Margin="5">
-            <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.AnonymousMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAnonMethods}"/>
-            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.YieldReturn}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileEnumerators}"/>
-            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AsyncAwait}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAsyncMethods}"/>
-            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.QueryExpressions}" IsEnabled="{Binding Settings.AnonymousMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileQueryExpr}"/>
-            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ExpressionTrees}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileExprTrees}"/>
+            <GroupBox Margin="0 0 0 0" Header="C# 1.0 / VS .NET">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.DecimalConstants}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileDecimalConstantAsSimpleLiteralValues}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.FixedBuffers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileC10PublicUnsafeFixedIntArr10Members}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.StringConcat}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_StringConcat}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AutomaticEvents}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAutomaticEvents}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UsingStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileUsingStatements}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ForEachStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileForeachStatements}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.LockStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileLockStatements}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.SwitchStatementOnString}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileSwitchOnString}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.SparseIntegerSwitch}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_SparseIntegerSwitch}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UsingDeclarations}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_AddUsingDeclarations}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ArrayInitializers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ArrayInitializerExpressions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ForStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ForStatement}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.DoWhileStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DoWhileStatement}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 2.0 / VS 2005">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.AnonymousMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAnonMethods}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.YieldReturn}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileEnumerators}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.LiftNullables}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseLiftedOperatorsForNullables}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UseImplicitMethodGroupConversion}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseImplicitMethodGroupConversions}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 3.0 / VS 2008">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.AnonymousTypes}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAnonymousTypes}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UseLambdaSyntax}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseLambdaSyntaxIfPossible}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AutomaticProperties}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAutomaticProperties}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ExtensionMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseExtensionMethodSyntax}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.QueryExpressions}" IsEnabled="{Binding Settings.AnonymousMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileQueryExpr}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ExpressionTrees}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileExprTrees}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ObjectOrCollectionInitializers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ObjectCollectionInitializerExpressions}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 4.0 / VS 2010">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.Dynamic}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileUseOfTheDynamicType}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.NamedArguments}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseNamedArguments}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.OptionalArguments}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RemoveOptionalArgumentsIfPossible}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 5.0 / VS 2012">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.AsyncAwait}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAsyncMethods}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 6.0 / VS 2015">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.AwaitInCatchFinally}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileAwaitInCatchFinallyBlocks}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.NullPropagation}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_NullPropagation}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.GetterOnlyAutomaticProperties}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_GetterOnlyAutomaticProperties}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.DictionaryInitializers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DictionaryInitializerExpressions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ExtensionMethodsInCollectionInitializers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_AllowExtensionAddMethodsInCollectionInitializerExpressions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UseRefLocalsForAccurateOrderOfEvaluation}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseRefLocalsForAccurateOrderOfEvaluation}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.StringInterpolation}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseStringInterpolation}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UseExpressionBodyForCalculatedGetterOnlyProperties}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseExpressionBodiedMemberSyntaxForGetOnlyProperties}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 7.0 / VS 2017">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.OutVariables}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseOutVariableDeclarations}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.Discards}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseDiscards}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.TupleTypes}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseTupleTypeSyntax}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ThrowExpressions}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseThrowExpressions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.LocalFunctions}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IntroduceLocalFunctions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.Deconstruction}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_Deconstruction}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.PatternMatching}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_PatternMatching}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 7.2 / VS 2017.4">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.RefExtensionMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_AllowExtensionMethodSyntaxOnRef}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.IntroduceRefModifiersOnStructs}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IsByRefLikeAttributeShouldBeReplacedWithRefModifiersOnStructs}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.IntroduceReadonlyAndInModifiers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IsReadOnlyAttributeShouldBeReplacedWithReadonlyInModifiersOnStructsParameters}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.NonTrailingNamedArguments}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseNonTrailingNamedArguments}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 7.3 / VS 2017.7">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.IntroduceUnmanagedConstraint}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IsUnmanagedAttributeOnTypeParametersShouldBeReplacedWithUnmanagedConstraints}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.StackAllocInitializers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseStackallocInitializerSyntax}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.PatternBasedFixedStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UsePatternBasedFixedStatement}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 8.0 / VS 2019">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.SwitchExpressions}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseOutVariableDeclarations}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AsyncEnumerator}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseDiscards}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UseEnhancedUsing}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseTupleTypeSyntax}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ReadOnlyMethods}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseThrowExpressions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AsyncUsingAndForEachStatement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IntroduceLocalFunctions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.StaticLocalFunctions}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_Deconstruction}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.Ranges}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_PatternMatching}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.NullableReferenceTypes}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_PatternMatching}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 9.0 / VS 2019.8">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.NativeIntegers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_NativeIntegers}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.CovariantReturns}" Content="CovariantReturns"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.InitAccessors}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_InitAccessors}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.RecordClasses}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RecordClasses}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.WithExpressions}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_WithExpressions}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UsePrimaryConstructorSyntax}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UsePrimaryConstructorSyntax}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.FunctionPointers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FunctionPointers}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ForEachWithGetEnumeratorExtension}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileForEachWithGetEnumeratorExtension}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 10.0 / VS 2022">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.RecordStructs}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RecordStructs}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.FileScopedNamespaces}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FileScopedNamespaces}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="C# 11.0 / VS 2022.4">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.NumericIntPtr}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_NumericIntPtr}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.ScopedRef}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ScopedRef}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.RequiredMembers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_RequiredMembers}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.Utf8StringLiterals}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_Utf8StringLiterals}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UnsignedRightShift}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UnsignedRightShift}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.CheckedOperators}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_CheckedOperators}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="VB.NET">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.AssumeArrayLengthFitsIntoInt32}" Content="AssumeArrayLengthFitsIntoInt32"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.IntroduceIncrementAndDecrement}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_IntroduceIncrementAndDecrement}"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.MakeAssignmentExpressions}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MakeAssignmentExpressions}"/>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="0 5 0 0" Header="F#">
+                <StackPanel Margin="5">
+                    <CheckBox Margin="0 0 0 0" IsChecked="{Binding Settings.RemoveDeadCode}" Content="RemoveDeadCode"/>
+                    <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.RemoveDeadStores}" Content="RemoveDeadStores"/>
+                </StackPanel>
+            </GroupBox>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.UseDebugSymbols}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseLocalNameFromSyms}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.FullyQualifyAllTypes}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FullyQualifyAllTypes}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.FullyQualifyAmbiguousTypeNames}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FullyQualifyAmbiguousTypeNames}"/>
@@ -26,8 +160,17 @@
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.TypeAddInternalModifier}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_TypeAddInternalModifier}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.MemberAddPrivateModifier}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MemberAddPrivateModifier}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.HexadecimalNumbers}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_HexadecimalNumbers}"/>
-            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.EmitCalliAsInvocationExpression}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_EmitCalliAsInvocationExpression}"/>
             <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.InsertParenthesesForReadability}" Content="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_InsertParenthesesForReadability}"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AlwaysUseBraces}" Content="AlwaysUseBraces"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AlwaysCastTargetsOfExplicitInterfaceImplementationCalls}" Content="AlwaysCastTargetsOfExplicitInterfaceImplementationCalls"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AlwaysQualifyMemberReferences}" Content="AlwaysQualifyMemberReferences"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AlwaysShowEnumMemberValues}" Content="AlwaysShowEnumMemberValues"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.DecompileMemberBodies}" Content="DecompileMemberBodies"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.SeparateLocalVariableDeclarations}" Content="SeparateLocalVariableDeclarations"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AggressiveScalarReplacementOfAggregates}" Content="AggressiveScalarReplacementOfAggregates"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AggressiveInlining}" Content="AggressiveInlining"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.AlwaysUseGlobal}" Content="AlwaysUseGlobal"/>
+            <CheckBox Margin="0 5 0 0" IsChecked="{Binding Settings.SortSwitchCasesByILOffset}" Content="SortSwitchCasesByILOffset"/>
             <GroupBox Margin="0 5 0 0" Header="{x:Static p:dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompilationOrder}">
                 <Grid>
                     <Grid.RowDefinitions>
