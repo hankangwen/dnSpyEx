@@ -28,7 +28,7 @@ cd dnSpy
 ./build.ps1 -NoMsbuild
 ```
 
-To debug Unity games, you need this repo too: https://github.com/dnSpyEx/dnSpy-Unity-mono (or get the binaries from https://github.com/dnSpyEx/dnSpy/releases/unity)
+To debug Unity games, you need this repo too: https://github.com/dnSpyEx/dnSpy-Unity-mono
 
 # Debugger
 
