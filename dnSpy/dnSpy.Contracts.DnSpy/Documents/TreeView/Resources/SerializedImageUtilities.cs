@@ -116,7 +116,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 
 			return new ResourceElement {
 				Name = resElem.Name,
-				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj)),
+				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj), SerializationFormat.BinaryFormatter),
 			};
 		}
 	}

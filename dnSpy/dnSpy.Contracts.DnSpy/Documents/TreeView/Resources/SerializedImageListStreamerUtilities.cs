@@ -93,7 +93,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 			var typeName = SystemWindowsFormsImageListStreamer.AssemblyQualifiedName;
 			return new ResourceElement {
 				Name = opts.Name,
-				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj)),
+				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj), SerializationFormat.BinaryFormatter),
 			};
 		}
 

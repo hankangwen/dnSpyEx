@@ -766,7 +766,7 @@ namespace dnSpy.AsmEditor.Resources {
 				return;
 
 			var outStream = new MemoryStream();
-			ResourceWriter.Write(module, outStream, new ResourceElementSet());
+			ResourceWriter.Write(module, outStream, ResourceElementSet.CreateForResourceReader(module));
 			var er = new EmbeddedResource(data.Name, outStream.ToArray(), data.Attributes);
 			var treeView = appService.DocumentTreeView.TreeView;
 			var treeNodeGroup = appService.DocumentTreeView.DocumentTreeNodeGroups.GetGroup(DocumentTreeNodeGroupType.ResourceTreeNodeGroup);
