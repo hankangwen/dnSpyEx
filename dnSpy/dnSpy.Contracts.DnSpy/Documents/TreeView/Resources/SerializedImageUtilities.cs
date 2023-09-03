@@ -20,6 +20,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 using dnlib.DotNet;
 using dnlib.DotNet.Resources;
 
@@ -36,32 +37,82 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 		/// <param name="serializedData">Serialized data</param>
 		/// <param name="imageData">Updated with the image data</param>
 		/// <returns></returns>
-		public static bool GetImageData(ModuleDef? module, string typeName, byte[] serializedData, [NotNullWhen(true)] out byte[]? imageData) {
+		public static bool GetImageData(ModuleDef? module, string typeName, byte[] serializedData, [NotNullWhen(true)] out byte[]? imageData) =>
+			GetImageData(module, typeName, serializedData, SerializationFormat.BinaryFormatter, out imageData);
+
+		/// <summary>
+		/// Gets the image data
+		/// </summary>
+		/// <param name="module">Module</param>
+		/// <param name="typeName">Name of type</param>
+		/// <param name="serializedData">Serialized data</param>
+		/// <param name="format">Format of serialized data</param>
+		/// <param name="imageData">Updated with the image data</param>
+		/// <returns></returns>
+		public static bool GetImageData(ModuleDef? module, string typeName, byte[] serializedData, SerializationFormat format, [NotNullWhen(true)] out byte[]? imageData) {
 			imageData = null;
+
 			if (CouldBeBitmap(module, typeName)) {
-				var dict = Deserializer.Deserialize(SystemDrawingBitmap.DefinitionAssembly.FullName, SystemDrawingBitmap.ReflectionFullName, serializedData);
-				// Bitmap loops over every item looking for "Data" (case insensitive)
-				foreach (var v in dict.Values) {
-					var d = v.Value as byte[];
-					if (d is null)
-						continue;
-					if ("Data".Equals(v.Name, StringComparison.OrdinalIgnoreCase)) {
-						imageData = d;
-						return true;
+				if (format == SerializationFormat.BinaryFormatter) {
+					var dict = Deserializer.Deserialize(SystemDrawingBitmap.DefinitionAssembly.FullName, SystemDrawingBitmap.ReflectionFullName, serializedData);
+					// Bitmap loops over every item looking for "Data" (case insensitive)
+					foreach (var v in dict.Values) {
+						var d = v.Value as byte[];
+						if (d is null)
+							continue;
+						if ("Data".Equals(v.Name, StringComparison.OrdinalIgnoreCase)) {
+							imageData = d;
+							return true;
+						}
 					}
+					return false;
 				}
-				return false;
+				if (format == SerializationFormat.ActivatorStream) {
+					imageData = serializedData;
+					return true;
+				}
+				if (format == SerializationFormat.TypeConverterByteArray) {
+					imageData = GetBitmapData(serializedData) ?? serializedData;
+					return true;
+				}
 			}
 
 			if (CouldBeIcon(module, typeName)) {
-				var dict = Deserializer.Deserialize(SystemDrawingIcon.DefinitionAssembly.FullName, SystemDrawingIcon.ReflectionFullName, serializedData);
-				if (!dict.TryGetValue("IconData", out var info))
-					return false;
-				imageData = info.Value as byte[];
-				return imageData is not null;
+				if (format == SerializationFormat.BinaryFormatter) {
+					var dict = Deserializer.Deserialize(SystemDrawingIcon.DefinitionAssembly.FullName, SystemDrawingIcon.ReflectionFullName, serializedData);
+					if (!dict.TryGetValue("IconData", out var info))
+						return false;
+					imageData = info.Value as byte[];
+					return imageData is not null;
+				}
+				if (format == SerializationFormat.ActivatorStream || format == SerializationFormat.TypeConverterByteArray) {
+					imageData = serializedData;
+					return true;
+				}
 			}
 
 			return false;
+		}
+
+		static byte[]? GetBitmapData(byte[] rawData) {
+			// Based on ImageConverter.GetBitmapStream
+			// See https://github.com/dotnet/winforms/blob/main/src/System.Drawing.Common/src/System/Drawing/ImageConverter.cs
+			if (rawData.Length <= 18)
+				return null;
+
+			short sig = (short)(rawData[0] | rawData[1] << 8);
+			if (sig != 0x1C15)
+				return null;
+
+			short headerSize = (short)(rawData[2] | rawData[3] << 8);
+			if (rawData.Length <= headerSize + 18)
+				return null;
+			if (Encoding.ASCII.GetString(rawData, headerSize + 12, 6) != "PBrush")
+				return null;
+
+			var newData = new byte[rawData.Length - 78];
+			Buffer.BlockCopy(rawData, 78, newData, 0, newData.Length);
+			return newData;
 		}
 
 		static bool CouldBeBitmap(ModuleDef? module, string name) => CheckType(module, name, SystemDrawingBitmap);
