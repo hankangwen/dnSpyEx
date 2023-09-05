@@ -18,6 +18,7 @@
 */
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -150,7 +151,15 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 		/// </summary>
 		/// <param name="resElem">Resource element</param>
 		/// <returns></returns>
-		public static ResourceElement Serialize(ResourceElement resElem) {
+		public static ResourceElement Serialize(ResourceElement resElem) => Serialize(resElem, SerializationFormat.BinaryFormatter);
+
+		/// <summary>
+		/// Serializes the image
+		/// </summary>
+		/// <param name="resElem">Resource element</param>
+		/// <param name="format">Serialization format to use</param>
+		/// <returns></returns>
+		public static ResourceElement Serialize(ResourceElement resElem, SerializationFormat format) {
 			var data = (byte[])((BuiltInResourceData)resElem.ResourceData).Data;
 			bool isIcon = BitConverter.ToUInt32(data, 0) == 0x00010000;
 
@@ -165,9 +174,29 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 				typeName = SystemDrawingBitmap.AssemblyQualifiedName;
 			}
 
+			byte[] serializedData;
+			if (format == SerializationFormat.BinaryFormatter) {
+				serializedData = SerializationUtilities.Serialize(obj);
+			}
+			else if (format == SerializationFormat.TypeConverterByteArray) {
+				var converter = TypeDescriptor.GetConverter(obj.GetType());
+				serializedData = (byte[])converter.ConvertTo(obj, typeof(byte[]));
+			}
+			else if (format == SerializationFormat.ActivatorStream) {
+				using (var stream = new MemoryStream()) {
+					if (obj is System.Drawing.Bitmap bitmap)
+						bitmap.Save(stream, bitmap.RawFormat);
+					else
+						((System.Drawing.Icon)obj).Save(stream);
+					serializedData = stream.ToArray();
+				}
+			}
+			else
+				throw new ArgumentOutOfRangeException();
+
 			return new ResourceElement {
 				Name = resElem.Name,
-				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj), SerializationFormat.BinaryFormatter),
+				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), serializedData, format),
 			};
 		}
 	}

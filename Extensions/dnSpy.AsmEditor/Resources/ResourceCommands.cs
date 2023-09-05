@@ -2038,7 +2038,8 @@ namespace dnSpy.AsmEditor.Resources {
 			var opts = data.CreateResourceElementOptions();
 			string? error;
 			try {
-				opts = new ResourceElementOptions(SerializedImageUtilities.Serialize(opts.Create()));
+				var format = ((BinaryResourceData)imgRsrcElNode.ResourceElement.ResourceData).Format;
+				opts = new ResourceElementOptions(SerializedImageUtilities.Serialize(opts.Create(), format));
 				error = imgRsrcElNode.CheckCanUpdateData(opts.Create());
 			}
 			catch (Exception ex) {
