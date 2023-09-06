@@ -180,7 +180,10 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 			}
 			else if (format == SerializationFormat.TypeConverterByteArray) {
 				var converter = TypeDescriptor.GetConverter(obj.GetType());
-				serializedData = (byte[])converter.ConvertTo(obj, typeof(byte[]));
+				var byteArr = converter.ConvertTo(obj, typeof(byte[]));
+				if (byteArr is not byte[] d)
+					throw new InvalidOperationException("Failed to serialize image");
+				serializedData = d;
 			}
 			else if (format == SerializationFormat.ActivatorStream) {
 				using (var stream = new MemoryStream()) {
@@ -192,7 +195,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 				}
 			}
 			else
-				throw new ArgumentOutOfRangeException();
+				throw new ArgumentOutOfRangeException(nameof(format));
 
 			return new ResourceElement {
 				Name = resElem.Name,
