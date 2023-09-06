@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright (C) 2023 ElektroKill
 
     This file is part of dnSpy
@@ -182,8 +182,19 @@ namespace dnSpy.Decompiler.MSBuild {
 					throw new ArgumentOutOfRangeException();
 				}
 			}
-			if (resourceData is BinaryResourceData binaryResourceData)
-				return new ResXResourceInfo(ToBase64WrappedString(binaryResourceData.Data), binaryResourceData.TypeName, ResXResourceWriter.BinSerializedObjectMimeType);
+			if (resourceData is BinaryResourceData binaryResourceData) {
+				switch (binaryResourceData.Format) {
+				case SerializationFormat.BinaryFormatter:
+					return new ResXResourceInfo(ToBase64WrappedString(binaryResourceData.Data), binaryResourceData.TypeName, ResXResourceWriter.BinSerializedObjectMimeType);
+				case SerializationFormat.TypeConverterByteArray:
+				case SerializationFormat.ActivatorStream:
+					// RESX does not have a way to represent creation of an object using Activator.CreateInstance,
+					// so we fallback to the same representation as data passed into TypeConverter.
+					return new ResXResourceInfo(ToBase64WrappedString(binaryResourceData.Data), binaryResourceData.TypeName, ResXResourceWriter.ByteArraySerializedObjectMimeType);
+				case SerializationFormat.TypeConverterString:
+					return new ResXResourceInfo(Encoding.UTF8.GetString(binaryResourceData.Data), binaryResourceData.TypeName);
+				}
+			}
 
 			throw new ArgumentOutOfRangeException();
 		}

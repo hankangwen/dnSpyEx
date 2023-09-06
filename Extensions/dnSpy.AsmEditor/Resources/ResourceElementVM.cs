@@ -292,7 +292,7 @@ namespace dnSpy.AsmEditor.Resources {
 			case ResourceElementType.TimeSpan:	return new BuiltInResourceData((ResourceTypeCode)code, TimeSpanVM.Value);
 			case ResourceElementType.ByteArray: return new BuiltInResourceData((ResourceTypeCode)code, Data ?? Array.Empty<byte>());
 			case ResourceElementType.Stream:	return new BuiltInResourceData((ResourceTypeCode)code, Data ?? Array.Empty<byte>());
-			case ResourceElementType.SerializedType: return new BinaryResourceData(new UserResourceType(UserTypeVM.TypeFullName, ResourceTypeCode.UserTypes), UserTypeVM.GetSerializedData());
+			case ResourceElementType.SerializedType: return new BinaryResourceData(new UserResourceType(UserTypeVM.TypeFullName, ResourceTypeCode.UserTypes), UserTypeVM.GetSerializedData(), SerializationFormat.BinaryFormatter);
 			default: throw new InvalidOperationException();
 			}
 		}
