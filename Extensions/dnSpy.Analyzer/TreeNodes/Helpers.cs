@@ -86,7 +86,8 @@ namespace dnSpy.Analyzer.TreeNodes {
 		}
 
 		internal static bool CheckEquals(IMemberRef? mr1, IMemberRef? mr2) =>
-			new SigComparer(SigComparerOptions.CompareDeclaringTypes | SigComparerOptions.PrivateScopeIsComparable).Equals(mr1, mr2);
+			new SigComparer(SigComparerOptions.CompareDeclaringTypes | SigComparerOptions.PrivateScopeIsComparable |
+							SigComparerOptions.ReferenceCompareForMemberDefsInSameModule).Equals(mr1, mr2);
 
 		static MethodDef? FindVariableOfTypeUsageInType(TypeDef type, TypeDef variableType) {
 			foreach (MethodDef method in type.Methods) {
