@@ -92,7 +92,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Dialogs.AttachToProcess {
 			}
 		}
 
-		static readonly Regex playerAnnounceStringRegex = new Regex(@"^\[IP\] (\S+) \[Port\] (\d+) \[Flags\] (-?\d+) \[Guid\] (\d+) \[EditorId\] (\d+) \[Version\] (\d+) \[Id\] ([^\(]+)\(([^\)]+)\)(:(\d+))? \[Debug\] (\d+)");
+		static readonly Regex playerAnnounceStringRegex = new Regex(@"^\[IP\] (\S+) \[Port\] (\d+) \[Flags\] (-?\d+) \[Guid\] (\d+) \[EditorId\] (\d+) \[Version\] (\d+) \[Id\] ([^\(]+)\((?:\d+,)?([^\)]+)\)(:(\d+))? \[Debug\] (\d+)");
 		bool TryParseUnityPlayerData(string s, [NotNullWhen(true)] out string? ipAddress, out ushort port, [NotNullWhen(true)] out string? playerId) {
 			ipAddress = null;
 			port = 0;
