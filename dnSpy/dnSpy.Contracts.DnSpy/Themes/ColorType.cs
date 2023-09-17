@@ -789,6 +789,11 @@ namespace dnSpy.Contracts.Themes {
 		HyperlinkNormal,
 		HyperlinkMouseOver,
 		HyperlinkDisabled,
+		InfoBarBackground,
+		InfoBarText,
+		InfoBarInteractionText,
+		InfoBarCloseButton,
+		InfoBarCloseButtonHover,
 
 		// Add new color types before this comment
 
