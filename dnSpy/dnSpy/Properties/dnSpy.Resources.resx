@@ -483,8 +483,14 @@
   <data name="OptionsTitle" xml:space="preserve">
     <value>Options</value>
   </data>
+  <data name="Options_Misc_CheckForUpdatesOnStartup" xml:space="preserve">
+    <value>Check for updates on startup</value>
+  </data>
   <data name="Options_Misc_Button_EnableAllWarnings" xml:space="preserve">
     <value>Enable all warning messages</value>
+  </data>
+  <data name="Options_Misc_Button_ResetIgnoredUpdates" xml:space="preserve">
+    <value>Reset ignored updates</value>
   </data>
   <data name="Options_Misc_UseMmapdIO" xml:space="preserve">
     <value>Use memory mapped I/O</value>
@@ -1099,6 +1105,15 @@
   </data>
   <data name="IncrementalSearchCommand" xml:space="preserve">
     <value>Incremental Search</value>
+  </data>
+  <data name="InfoBar_NewUpdateAvailable" xml:space="preserve">
+    <value>A new version of dnSpy is available: {0}</value>
+  </data>
+  <data name="InfoBar_OpenDownloadPage" xml:space="preserve">
+    <value>Open download page</value>
+  </data>
+  <data name="InfoBar_IgnoreThisUpdate" xml:space="preserve">
+    <value>Ignore this update</value>
   </data>
   <data name="ShortCutKeyCtrlI" xml:space="preserve">
     <value>Ctrl+I</value>

@@ -2909,6 +2909,33 @@ namespace dnSpy.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore this update.
+        /// </summary>
+        public static string InfoBar_IgnoreThisUpdate {
+            get {
+                return ResourceManager.GetString("InfoBar_IgnoreThisUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new version of dnSpy is available: {0}.
+        /// </summary>
+        public static string InfoBar_NewUpdateAvailable {
+            get {
+                return ResourceManager.GetString("InfoBar_NewUpdateAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open download page.
+        /// </summary>
+        public static string InfoBar_OpenDownloadPage {
+            get {
+                return ResourceManager.GetString("InfoBar_OpenDownloadPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Integrate with Windows Explorer.
         /// </summary>
         public static string IntegrateWithWindowsExplorer {
@@ -3688,6 +3715,24 @@ namespace dnSpy.Properties {
         public static string Options_Misc_Button_EnableAllWarnings {
             get {
                 return ResourceManager.GetString("Options_Misc_Button_EnableAllWarnings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset ignored updates.
+        /// </summary>
+        public static string Options_Misc_Button_ResetIgnoredUpdates {
+            get {
+                return ResourceManager.GetString("Options_Misc_Button_ResetIgnoredUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for updates on startup.
+        /// </summary>
+        public static string Options_Misc_CheckForUpdatesOnStartup {
+            get {
+                return ResourceManager.GetString("Options_Misc_CheckForUpdatesOnStartup", resourceCulture);
             }
         }
         
