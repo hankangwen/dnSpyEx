@@ -35,6 +35,8 @@ namespace dnSpy.BamlDecompiler.Xaml {
 
 		public ITypeDefOrRef ResolvedMemberDeclaringType { get; set; }
 
+		public XamlPropertyKind PropertyKind { get; set; }
+
 		public XamlProperty(XamlType type, string name) {
 			DeclaringType = type;
 			PropertyName = name;
