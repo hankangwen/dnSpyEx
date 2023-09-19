@@ -24,6 +24,7 @@ using System.Linq;
 using System.Xml.Linq;
 using dnlib.DotNet;
 using dnSpy.BamlDecompiler.Xaml;
+using dnSpy.Contracts.Decompiler;
 
 namespace dnSpy.BamlDecompiler.Rewrite {
 	sealed class XClassRewritePass : IRewritePass {
@@ -56,7 +57,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 				var classModifierName = ctx.GetKnownNamespace("ClassModifier", XamlContext.KnownNamespace_Xaml, elem);
 				attrs.Insert(0, new XAttribute(classModifierName, ctx.BamlDecompilerOptions.InternalClassModifier));
 			}
-			attrs.Insert(0, new XAttribute(attrName, type.ResolvedType.ReflectionFullName));
+			attrs.Insert(0, new XAttribute(attrName, IdentifierEscaper.Escape(type.ResolvedType.ReflectionFullName)));
 			elem.ReplaceAttributes(attrs);
 		}
 	}

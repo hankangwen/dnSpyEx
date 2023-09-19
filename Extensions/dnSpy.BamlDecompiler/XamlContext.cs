@@ -162,6 +162,8 @@ namespace dnSpy.BamlDecompiler {
 			if (xmlns is null)
 				return null;
 
+			xmlns = IdentifierEscaper.Escape(xmlns);
+
 			if (!xmlnsMap.TryGetValue(xmlns, out var ns))
 				xmlnsMap[xmlns] = ns = XNamespace.Get(xmlns);
 			return ns;

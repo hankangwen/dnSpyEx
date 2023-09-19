@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using dnlib.DotNet;
 using dnSpy.BamlDecompiler.Baml;
@@ -126,7 +127,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			public void Callback(XamlContext ctx, XElement elem) {
 				var xName = ctx.GetKnownNamespace("Name", XamlContext.KnownNamespace_Xaml, elem);
 				if (elem.Attribute("Name") is null && elem.Attribute(xName) is null)
-					elem.Add(new XAttribute(xName, FieldName));
+					elem.Add(new XAttribute(xName, IdentifierEscaper.Escape(FieldName)));
 			}
 		}
 
@@ -138,20 +139,27 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 			public void Callback(XamlContext ctx, XElement elem) {
 				var type = elem.Annotation<XamlType>();
 				if (type is not null && type.TypeNamespace == "System.Windows" && type.TypeName == "Style") {
-					elem.Add(new XElement(type.Namespace + "EventSetter", new XAttribute("Event", EventName), new XAttribute("Handler", MethodName)));
+					elem.Add(new XElement(type.Namespace + "EventSetter",
+						new XAttribute("Event", IdentifierEscaper.Escape(EventName)),
+						new XAttribute("Handler", IdentifierEscaper.Escape(MethodName))));
 					return;
 				}
 
+				string encodedEventName = XmlConvert.EncodeName(EventName);
 				XName name;
 				if (AttachedType is not null) {
 					var clrNs = AttachedType.ReflectionNamespace;
 					var xmlNs = ctx.XmlNs.LookupXmlns(AttachedType.DefinitionAssembly, clrNs);
-					name = ctx.GetXmlNamespace(xmlNs)?.GetName(EventName) ?? AttachedType.Name + "." + EventName;
+					var xmlNamespace = ctx.GetXmlNamespace(xmlNs);
+					if (xmlNamespace is not null)
+						name = xmlNamespace.GetName(encodedEventName);
+					else
+						name = $"{XmlConvert.EncodeName(AttachedType.Name)}.{encodedEventName}";
 				}
 				else
-					name = EventName;
+					name = encodedEventName;
 
-				elem.Add(new XAttribute(name, MethodName));
+				elem.Add(new XAttribute(name, IdentifierEscaper.Escape(MethodName)));
 			}
 		}
 
@@ -190,7 +198,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 					switch (expr.Code) {
 					case ILCode.Stfld:
 						cb += new FieldAssignment {
-							FieldName = IdentifierEscaper.Escape(((IField)expr.Operand).Name)
+							FieldName = ((IField)expr.Operand).Name
 						}.Callback;
 						break;
 
@@ -218,7 +226,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 							cb += new EventAttachment {
 								AttachedType = reField.DeclaringType.ResolveTypeDef() ?? reField.DeclaringType,
 								EventName = evName,
-								MethodName = IdentifierEscaper.Escape(handler.Name)
+								MethodName = handler.Name
 							}.Callback;
 						}
 						else {
@@ -243,7 +251,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 							cb += new EventAttachment {
 								EventName = eventName,
-								MethodName = IdentifierEscaper.Escape(handler.Name)
+								MethodName = handler.Name
 							}.Callback;
 						}
 						break;
@@ -312,7 +320,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 
 			i += 3;
 
-			@event = new EventAttachment { EventName = evName, MethodName = IdentifierEscaper.Escape(handlerMethod.Name) };
+			@event = new EventAttachment { EventName = evName, MethodName = handlerMethod.Name };
 			return true;
 		}
 
