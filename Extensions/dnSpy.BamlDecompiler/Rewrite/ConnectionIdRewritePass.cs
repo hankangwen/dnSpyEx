@@ -131,7 +131,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 		}
 
 		struct EventAttachment {
-			public TypeDef AttachedType;
+			public ITypeDefOrRef AttachedType;
 			public string EventName;
 			public string MethodName;
 
@@ -216,7 +216,7 @@ namespace dnSpy.BamlDecompiler.Rewrite {
 								evName = evName.Substring(0, evName.Length - 5);
 
 							cb += new EventAttachment {
-								AttachedType = reField.DeclaringType.ResolveTypeDefThrow(),
+								AttachedType = reField.DeclaringType.ResolveTypeDef() ?? reField.DeclaringType,
 								EventName = evName,
 								MethodName = IdentifierEscaper.Escape(handler.Name)
 							}.Callback;
