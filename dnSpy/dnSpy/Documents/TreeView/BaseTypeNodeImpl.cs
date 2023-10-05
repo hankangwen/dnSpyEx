@@ -91,7 +91,7 @@ namespace dnSpy.Documents.TreeView {
 
 			if (td.BaseType is not null)
 				yield return new BaseTypeNodeImpl(Context.DocumentTreeView.DocumentTreeNodeGroups.GetGroup(DocumentTreeNodeGroupType.BaseTypeTreeNodeGroupBaseType), td.BaseType, true);
-			foreach (var iface in type.Interfaces.Where(I => I.Interface.Name != type.Name))
+			foreach (var iface in td.Interfaces.Where(I => I.Interface.Name != type.Name))
 				yield return new BaseTypeNodeImpl(Context.DocumentTreeView.DocumentTreeNodeGroups.GetGroup(DocumentTreeNodeGroupType.InterfaceBaseTypeTreeNodeGroupBaseType), iface.Interface, false);
 		}
 
