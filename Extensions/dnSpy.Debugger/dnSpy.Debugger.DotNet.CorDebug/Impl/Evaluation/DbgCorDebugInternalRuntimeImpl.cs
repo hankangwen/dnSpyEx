@@ -114,6 +114,9 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl.Evaluation {
 				return state.ToDbgDotNetRawModuleBytes();
 
 			var md = dnModule.GetOrCreateCorModuleDef();
+			if (md is null)
+				return DbgDotNetRawModuleBytes.None;
+
 			try {
 				md.DisableMDAPICalls = false;
 				md.LoadEverything(null);

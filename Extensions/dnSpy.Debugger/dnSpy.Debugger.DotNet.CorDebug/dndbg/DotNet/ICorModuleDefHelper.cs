@@ -26,7 +26,7 @@ namespace dndbg.DotNet {
 		/// <summary>
 		/// Gets the currently loaded core library (eg. mscorlib)
 		/// </summary>
-		IAssembly CorLib { get; }
+		IAssembly? CorLib { get; }
 
 		/// <summary>
 		/// true if it's a dynamic module (types can be added at runtime)

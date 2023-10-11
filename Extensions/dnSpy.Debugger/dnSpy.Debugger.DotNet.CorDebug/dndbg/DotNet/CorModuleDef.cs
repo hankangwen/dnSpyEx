@@ -180,7 +180,7 @@ namespace dndbg.DotNet {
 			corLibTypes = new CorLibTypes(this, UpdateRowId(corLibAsmRef));
 		}
 
-		IAssembly GetCorAssemblyRef() {
+		IAssembly? GetCorAssemblyRef() {
 			if (corModuleDefHelper.IsCorLib == true)
 				return Assembly;
 			if (corModuleDefHelper.IsDynamic)

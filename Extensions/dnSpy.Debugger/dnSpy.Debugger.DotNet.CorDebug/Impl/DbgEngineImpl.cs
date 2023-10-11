@@ -648,7 +648,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			}
 			if (updatedModules is not null) {
 				foreach (var info in updatedModules) {
-					var mdi = info.dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
+					var mdi = info.dnModule.CorModule.GetMetaDataInterface<IMetaDataImport>();
 					var scopeName = MDAPI.GetModuleName(mdi) ?? string.Empty;
 					((DbgCorDebugInternalModuleImpl)info.dbgModule.InternalModule).ReflectionModule!.ScopeName = scopeName;
 				}

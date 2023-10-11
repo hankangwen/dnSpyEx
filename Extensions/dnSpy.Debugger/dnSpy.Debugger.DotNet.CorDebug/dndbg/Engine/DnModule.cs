@@ -32,7 +32,7 @@ namespace dndbg.Engine {
 		/// Returns the created module or creates one if none has been created
 		/// </summary>
 		/// <returns></returns>
-		public CorModuleDef GetOrCreateCorModuleDef() {
+		public CorModuleDef? GetOrCreateCorModuleDef() {
 			Debugger.DebugVerifyThread();
 			if (CorModuleDef is not null)
 				return CorModuleDef;

@@ -59,7 +59,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 				return null;
 			if (!engine.TryGetDnModule(dbgModule, out var dnModule))
 				return null;
-			return dnModule.GetOrCreateCorModuleDef().Assembly;
+			return dnModule.GetOrCreateCorModuleDef()?.Assembly;
 		}
 	}
 }

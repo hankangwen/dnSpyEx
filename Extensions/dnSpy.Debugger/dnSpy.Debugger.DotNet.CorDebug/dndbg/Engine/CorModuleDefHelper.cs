@@ -37,7 +37,7 @@ namespace dndbg.Engine {
 			Debug.Assert(!module.IsDynamic || module.Address == 0);
 		}
 
-		public IAssembly CorLib {
+		public IAssembly? CorLib {
 			get {
 				var corAsm = module.AppDomain.Assemblies.FirstOrDefault();
 				Debug2.Assert(corAsm is not null);
@@ -47,7 +47,7 @@ namespace dndbg.Engine {
 				Debug2.Assert(corMod is not null);
 				if (corMod is null)
 					return AssemblyRefUser.CreateMscorlibReferenceCLR20();
-				return corMod.GetOrCreateCorModuleDef().Assembly;
+				return corMod.GetOrCreateCorModuleDef()?.Assembly;
 			}
 		}
 
