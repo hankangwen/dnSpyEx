@@ -63,8 +63,11 @@ namespace dnSpy.Debugger.DotNet.Modules {
 				loadOptions |= DbgLoadModuleOptions.ForceMemory;
 			bool canShowMessageBox = true;
 			var md = LoadModule(moduleRef.Module, loadOptions, ref canShowMessageBox);
-			if (md is null)
+			if (md is null) {
+				if (canShowMessageBox)
+					messageBoxService.Value.Show(dnSpy_Debugger_DotNet_Resources.FailedToObtainValidInMemoryMetadataForModule);
 				return false;
+			}
 
 			// The file could've been added lazily to the list so add a short delay before we select it
 			bool newTab = options.Any(a => StringComparer.Ordinal.Equals(PredefinedReferenceNavigatorOptions.NewTab, a));
@@ -73,8 +76,10 @@ namespace dnSpy.Debugger.DotNet.Modules {
 		}
 
 		ModuleDef? LoadModule(DbgModule module, DbgLoadModuleOptions options, ref bool canShowMessageBox) {
-			if (!module.IsDotNetModule())
+			if (!module.IsDotNetModule()) {
+				canShowMessageBox = false;
 				return null;
+			}
 
 			if (module.IsDynamic && !module.Runtime.IsClosed && module.Process.IsRunning) {
 				if (canShowMessageBox) {
