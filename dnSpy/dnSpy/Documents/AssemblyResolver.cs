@@ -440,31 +440,28 @@ namespace dnSpy.Documents {
 				//		5.0: System.Runtime, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 				//		6.0: System.Runtime, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
 				//		7.0: System.Runtime, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+				//		...
 				if (frameworkName != TFM_netstandard) {
-					if (module.IsClr40Exactly && systemRuntimeRef.Version >= minSystemRuntimeNetCoreVersion) {
+					var systemRuntimeVersion = systemRuntimeRef.Version;
+					if (module.IsClr40Exactly && systemRuntimeVersion >= minSystemRuntimeNetCoreVersion) {
 						version = aspNetCoreRef?.Version;
 						if (version is null) {
 							// .NET Core 1.0 or 1.1
-							if (systemRuntimeRef.Version == version_4_1_0_0)
+							if (systemRuntimeVersion == version_4_1_0_0)
 								version = version_1_0_0_0;
 							// .NET Core 2.0
-							else if (systemRuntimeRef.Version == version_4_2_0_0)
+							else if (systemRuntimeVersion== version_4_2_0_0)
 								version = version_2_0_0_0;
 							// .NET Core 2.1, 2.2 or 3.0
-							else if (systemRuntimeRef.Version == version_4_2_1_0)
+							else if (systemRuntimeVersion == version_4_2_1_0)
 								version = version_2_1_0_0;
 							// .NET Core 3.1
-							else if (systemRuntimeRef.Version == version_4_2_2_0)
+							else if (systemRuntimeVersion == version_4_2_2_0)
 								version = version_3_1_0_0;
-							// .NET 5
-							else if (systemRuntimeRef.Version == version_5_0_0_0)
-								version = version_5_0_0_0;
-							// .NET 6
-							else if (systemRuntimeRef.Version == version_6_0_0_0)
-								version = version_6_0_0_0;
-							// .NET 7
-							else if (systemRuntimeRef.Version == version_7_0_0_0)
-								version = version_7_0_0_0;
+							// .NET 5+
+							else if (systemRuntimeVersion.Major >= 5 && systemRuntimeVersion.Minor == 0 &&
+									 systemRuntimeVersion.Build == 0 && systemRuntimeVersion.Revision == 0)
+								version = systemRuntimeRef.Version;
 							else
 								Debug.Fail("Unknown .NET Core version");
 						}
@@ -501,9 +498,6 @@ namespace dnSpy.Documents {
 		static readonly Version version_4_2_0_0 = new Version(4, 2, 0, 0);
 		static readonly Version version_4_2_1_0 = new Version(4, 2, 1, 0);
 		static readonly Version version_4_2_2_0 = new Version(4, 2, 2, 0);
-		static readonly Version version_5_0_0_0 = new Version(5, 0, 0, 0);
-		static readonly Version version_6_0_0_0 = new Version(6, 0, 0, 0);
-		static readonly Version version_7_0_0_0 = new Version(7, 0, 0, 0);
 
 		// Silverlight uses 5.0.5.0
 		static bool IsValidMscorlibVersion(Version? version) => version is not null && (uint)version.Major <= 5;
