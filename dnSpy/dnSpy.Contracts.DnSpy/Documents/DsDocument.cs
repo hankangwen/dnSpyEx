@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using dnlib.DotNet;
 using dnlib.PE;
+using dnSpy.Contracts.Bundles;
 using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.Contracts.Documents {
@@ -42,6 +43,8 @@ namespace dnSpy.Contracts.Documents {
 		public virtual IPEImage? PEImage => (ModuleDef as ModuleDefMD)?.Metadata?.PEImage;
 		/// <inheritdoc/>
 		public virtual SingleFileBundle? SingleFileBundle => null;
+		/// <inheritdoc/>
+		public virtual BundleEntry? BundleEntry => null;
 
 		/// <inheritdoc/>
 		public string Filename {
@@ -138,6 +141,9 @@ namespace dnSpy.Contracts.Documents {
 		public override IDsDocumentNameKey Key => FilenameKey.CreateFullPath(Filename);
 		/// <inheritdoc/>
 		public override IPEImage? PEImage { get; }
+		/// <inheritdoc/>
+		public override BundleEntry? BundleEntry => bundleEntry;
+		BundleEntry? bundleEntry;
 
 		/// <summary>
 		/// Constructor
@@ -147,6 +153,8 @@ namespace dnSpy.Contracts.Documents {
 			PEImage = peImage;
 			Filename = peImage.Filename ?? string.Empty;
 		}
+
+		internal void SetBundleEntry(BundleEntry bundleEntry) => this.bundleEntry = bundleEntry;
 
 		/// <inheritdoc/>
 		public void Dispose() => PEImage!.Dispose();
@@ -229,6 +237,10 @@ namespace dnSpy.Contracts.Documents {
 		public override DsDocumentInfo? SerializedDocument => documentInfo;
 		DsDocumentInfo documentInfo;
 
+		/// <inheritdoc/>
+		public override BundleEntry? BundleEntry => bundleEntry;
+		BundleEntry? bundleEntry;
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
@@ -292,6 +304,8 @@ namespace dnSpy.Contracts.Documents {
 			return list;
 		}
 
+		internal void SetBundleEntry(BundleEntry bundleEntry) => this.bundleEntry = bundleEntry;
+
 		/// <inheritdoc/>
 		public void Dispose() => ModuleDef!.Dispose();
 	}
@@ -327,7 +341,6 @@ namespace dnSpy.Contracts.Documents {
 		/// </summary>
 		public override SingleFileBundle? SingleFileBundle { get; }
 
-		readonly ModuleCreationOptions opts;
 		readonly string directoryOfBundle;
 
 		/// <summary>
@@ -335,31 +348,38 @@ namespace dnSpy.Contracts.Documents {
 		/// </summary>
 		/// <param name="peImage">PE image</param>
 		/// <param name="bundle">Parsed bundle</param>
-		/// <param name="options">Module creation options</param>
-		public DsBundleDocument(IPEImage peImage, SingleFileBundle bundle, ModuleCreationOptions options) {
+		public DsBundleDocument(IPEImage peImage, SingleFileBundle bundle) {
 			PEImage = peImage;
 			Filename = peImage.Filename ?? string.Empty;
 			directoryOfBundle = Path.GetDirectoryName(Filename) ?? string.Empty;
 			SingleFileBundle = bundle;
-			opts = options;
 		}
 
 		/// <inheritdoc/>
 		protected override TList<IDsDocument> CreateChildren() {
 			var list = new TList<IDsDocument>();
 			foreach (var entry in SingleFileBundle!.Entries) {
-				if (entry.Type == BundleFileType.Assembly) {
-					var mod = ModuleDefMD.Load(entry.Data, opts);
-					mod.Location = Path.Combine(directoryOfBundle, entry.RelativePath);
+				if (entry is AssemblyBundleEntry asmEntry) {
+					var mod = asmEntry.Module;
+					mod.Location = Path.Combine(directoryOfBundle, asmEntry.RelativePath);
 
-					var document = entry.Document = DsDotNetDocument.CreateAssembly(
-						DsDocumentInfo.CreateInMemory(() => (entry.Data, true), mod.Location),
-						mod, true);
+					var data = asmEntry.GetEntryData();
 
+					DsDocumentInfo documentInfo;
+					if (data is not null)
+						documentInfo = DsDocumentInfo.CreateInMemory(() => (data, true), asmEntry.FileName);
+					else
+						documentInfo = DsDocumentInfo.CreateDocument(string.Empty);
+
+					var document = DsDotNetDocument.CreateAssembly(documentInfo, mod, true);
+					document.SetBundleEntry(entry);
 					list.Add(document);
 				}
-				else if (entry.Type == BundleFileType.NativeBinary)
-					list.Add(entry.Document = new DsPEDocument(new PEImage(entry.Data, Path.Combine(directoryOfBundle, entry.RelativePath))));
+				else if (entry is NativeBinaryBundleEntry nativeEntry) {
+					var peDocument = new DsPEDocument(nativeEntry.PEImage);
+					peDocument.SetBundleEntry(entry);
+					list.Add(peDocument);
+				}
 			}
 
 			return list;

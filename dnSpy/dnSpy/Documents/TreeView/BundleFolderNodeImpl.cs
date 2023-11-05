@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using dnSpy.Contracts.Bundles;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents;
 using dnSpy.Contracts.Documents.TreeView;
@@ -24,21 +26,29 @@ namespace dnSpy.Documents.TreeView {
 		}
 
 		public override IEnumerable<TreeNodeData> CreateChildren() {
-			foreach (var folder in bundleFolder.Folders) {
+			foreach (var folder in bundleFolder.NestedFolders) {
 				yield return new BundleFolderNodeImpl(owner, folder);
 			}
 
+			var children = owner.Document.Children;
+
+			var documentMap = new Dictionary<BundleEntry, IDsDocument>();
+			foreach (var childDocument in children) {
+				if (childDocument.BundleEntry is not null && childDocument.BundleEntry.ParentFolder == bundleFolder)
+					documentMap[childDocument.BundleEntry] = childDocument;
+			}
+
 			foreach (var entry in bundleFolder.Entries) {
-				if (entry.Document is not null)
-					yield return Context.DocumentTreeView.CreateNode(owner, entry.Document);
+				if (documentMap.TryGetValue(entry, out var document))
+					yield return Context.DocumentTreeView.CreateNode(owner, document);
 				else {
 					switch (entry.Type) {
-					case BundleFileType.Unknown:
-					case BundleFileType.Symbols:
+					case BundleEntryType.Unknown:
+					case BundleEntryType.Symbols:
 						yield return new UnknownBundleEntryNodeImpl(entry);
 						break;
-					case BundleFileType.DepsJson:
-					case BundleFileType.RuntimeConfigJson:
+					case BundleEntryType.DepsJson:
+					case BundleEntryType.RuntimeConfigJson:
 						yield return new JsonBundleEntryNodeImpl(entry);
 						break;
 					default:
@@ -58,9 +68,9 @@ namespace dnSpy.Documents.TreeView {
 					output.Write(BoxedTextColor.Text, $"Entries: {bundleFolder.Entries.Count}");
 				}
 
-				if (bundleFolder.Folders.Count != 0) {
+				if (bundleFolder.NestedFolders.Count != 0) {
 					// TODO: localize string
-					output.Write(BoxedTextColor.Text, $"Subfolders: {bundleFolder.Folders.Count}");
+					output.Write(BoxedTextColor.Text, $"Subfolders: {bundleFolder.NestedFolders.Count}");
 				}
 			}
 		}

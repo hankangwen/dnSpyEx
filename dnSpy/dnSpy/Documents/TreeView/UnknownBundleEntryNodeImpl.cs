@@ -1,4 +1,5 @@
 ﻿using System;
+using dnSpy.Contracts.Bundles;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents;
 using dnSpy.Contracts.Documents.TreeView;

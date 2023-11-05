@@ -1,11 +1,11 @@
-﻿namespace dnSpy.Contracts.Documents {
+﻿namespace dnSpy.Contracts.Bundles {
 	/// <summary>
-	/// BundleFileType: Identifies the type of file embedded into the bundle.
+	/// BundleEntryType: Identifies the type of file embedded into the bundle.
 	///
 	/// The bundler differentiates a few kinds of files via the manifest,
 	/// with respect to the way in which they'll be used by the runtime.
 	/// </summary>
-	public enum BundleFileType : byte {
+	public enum BundleEntryType : byte {
 		/// <summary>
 		/// Type not determined.
 		/// </summary>

@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading;
 using dnlib.DotNet;
 using dnlib.PE;
+using dnSpy.Contracts.Bundles;
 using dnSpy.Contracts.DnSpy.Metadata;
 using dnSpy.Contracts.Documents;
 
@@ -459,11 +460,11 @@ namespace dnSpy.Documents {
 					}
 				}
 
-				var bundle = SingleFileBundle.FromPEImage(peImage);
-				if (bundle != null) {
+				if (SingleFileBundle.IsBundle(peImage, out var bundleHeaderOffset)) {
 					var options = new ModuleCreationOptions(DsDotNetDocumentBase.CreateModuleContext(assemblyResolver));
 					options.TryToLoadPdbFromDisk = false;
-					return new DsBundleDocument(peImage, bundle, options);
+					var bundle = SingleFileBundle.FromPEImage(peImage, bundleHeaderOffset, options);
+					return new DsBundleDocument(peImage, bundle);
 				}
 
 				return new DsPEDocument(peImage);

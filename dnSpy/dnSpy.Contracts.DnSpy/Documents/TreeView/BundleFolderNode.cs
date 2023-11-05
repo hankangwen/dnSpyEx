@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using dnSpy.Contracts.Bundles;
 
 namespace dnSpy.Contracts.Documents.TreeView {
 	/// <summary>

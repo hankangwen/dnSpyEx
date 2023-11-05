@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using dnSpy.Contracts.Bundles;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents;
 using dnSpy.Contracts.Documents.Tabs.DocViewer;
@@ -26,7 +27,7 @@ namespace dnSpy.Documents.TreeView {
 
 		public bool Decompile(IDecompileNodeContext context) {
 			//TODO: implement syntax highlighting
-			context.Output.Write(Encoding.UTF8.GetString(bundleEntry.Data), BoxedTextColor.Text);
+			context.Output.Write(((ConfigJSONBundleEntry)bundleEntry).JsonText, BoxedTextColor.Text);
 			return true;
 		}
 	}

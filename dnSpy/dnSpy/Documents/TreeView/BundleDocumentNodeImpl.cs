@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using dnSpy.Contracts.Bundles;
 using dnSpy.Contracts.Decompiler;
 using dnSpy.Contracts.Documents;
 using dnSpy.Contracts.Documents.TreeView;
@@ -20,25 +21,28 @@ namespace dnSpy.Documents.TreeView {
 		public override IEnumerable<TreeNodeData> CreateChildren() {
 			Debug2.Assert(Document.SingleFileBundle is not null);
 
-			// Ensure docuemt children are initialized.
-			// This is needed as loading the Children of the docment will assign the Document property of BundleEntry objects.
-			var _ = Document.Children;
+			var children = Document.Children;
 
-			foreach (var bundleFolder in Document.SingleFileBundle.TopLevelFolders) {
+			foreach (var bundleFolder in Document.SingleFileBundle.TopLevelFolders)
 				yield return new BundleFolderNodeImpl(this, bundleFolder);
+
+			var documentMap = new Dictionary<BundleEntry, IDsDocument>();
+			foreach (var childDocument in children) {
+				if (childDocument.BundleEntry is not null && childDocument.BundleEntry.ParentFolder is null)
+					documentMap[childDocument.BundleEntry] = childDocument;
 			}
 
 			foreach (var entry in Document.SingleFileBundle.TopLevelEntries) {
-				if (entry.Document is not null)
-					yield return Context.DocumentTreeView.CreateNode(this, entry.Document);
+				if (documentMap.TryGetValue(entry, out var document))
+					yield return Context.DocumentTreeView.CreateNode(this, document);
 				else {
 					switch (entry.Type) {
-					case BundleFileType.Unknown:
-					case BundleFileType.Symbols:
+					case BundleEntryType.Unknown:
+					case BundleEntryType.Symbols:
 						yield return new UnknownBundleEntryNodeImpl(entry);
 						break;
-					case BundleFileType.DepsJson:
-					case BundleFileType.RuntimeConfigJson:
+					case BundleEntryType.DepsJson:
+					case BundleEntryType.RuntimeConfigJson:
 						yield return new JsonBundleEntryNodeImpl(entry);
 						break;
 					default:

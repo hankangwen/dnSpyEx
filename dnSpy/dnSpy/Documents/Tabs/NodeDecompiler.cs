@@ -303,7 +303,7 @@ namespace dnSpy.Documents.Tabs {
 				decompiler.WriteCommentLine(output, ".NET Bundle:");
 				decompiler.WriteCommentLine(output, $"Format Version: {bundle.MajorVersion}.{bundle.MinorVersion}");
 				decompiler.WriteCommentLine(output, $"ID: {bundle.BundleID}");
-				decompiler.WriteCommentLine(output, $"Entry Count: {bundle.Entries.Count}");
+				decompiler.WriteCommentLine(output, $"Entry Count: {bundle.EntryCount}");
 			}
 		}
 
