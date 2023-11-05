@@ -20,27 +20,47 @@
 #if DEBUG
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using dnSpy.Contracts.Decompiler;
 
 namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 	sealed class ILAstDecompilerSettings : DecompilerSettingsBase {
-		public override int Version => 0;
-		public override event EventHandler? VersionChanged { add { } remove { } }
+		public override int Version => settingsVersion;
+		int settingsVersion;
 
-		public ILAstDecompilerSettings() {
-		}
-
-		ILAstDecompilerSettings(ILAstDecompilerSettings other) {
-		}
-
-		public override DecompilerSettingsBase Clone() => new ILAstDecompilerSettings(this);
+		public override event EventHandler? VersionChanged;
 
 		public override IEnumerable<IDecompilerOption> Options {
 			get { yield break; }
 		}
 
-		public override bool Equals(object? obj) => obj is ILAstDecompilerSettings;
-		public override int GetHashCode() => 0;
+		public int StepLimit {
+			get => stepLimit;
+			set {
+				if (stepLimit == value)
+					return;
+				stepLimit = value;
+				OnPropertyChanged();
+			}
+		}
+		int stepLimit = int.MaxValue;
+
+		public ILAstDecompilerSettings() { }
+
+		ILAstDecompilerSettings(ILAstDecompilerSettings other) => stepLimit = other.stepLimit;
+
+		void OnPropertyChanged([CallerMemberName] string? propertyName = null) {
+			Interlocked.Increment(ref settingsVersion);
+			VersionChanged?.Invoke(this, EventArgs.Empty);
+		}
+
+		public override DecompilerSettingsBase Clone() => new ILAstDecompilerSettings(this);
+
+		public override bool Equals(object? obj) => obj is ILAstDecompilerSettings settings && settings.stepLimit == stepLimit;
+
+		// ReSharper disable once NonReadonlyMemberInGetHashCode
+		public override int GetHashCode() => stepLimit;
 	}
 }
 #endif

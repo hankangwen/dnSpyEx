@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using dnlib.DotNet;
 using dnSpy.Contracts.Decompiler;
@@ -66,8 +65,13 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 		readonly string uniqueNameUI;
 		Guid uniqueGuid;
 
+		// Hacky fields and properties for Stepper functionality
+		MethodDef? lastMethod;
+		public Stepper Stepper { get; set; } = new Stepper();
+		public event EventHandler? StepperUpdated;
+		void OnStepperUpdated(EventArgs? e = null) => StepperUpdated?.Invoke(this, e ?? EventArgs.Empty);
+
 		public override DecompilerSettingsBase Settings { get; }
-		const int settingsVersion = 1;
 
 		ILAstDecompiler(ILAstDecompilerSettings langSettings, double orderUI, string uniqueNameUI) {
 			Settings = langSettings;
@@ -96,7 +100,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 			var bodyInfo = StartKeywordBlock(output, ".body", method);
 
 			var ts = new DecompilerTypeSystem(new PEFile(method.Module), TypeSystemOptions.Default);
-			var reader = new ILReader(ts.MainModule) { CalculateILSpans = true };
+			var reader = new ILReader(ts.MainModule) { UseDebugSymbols = true, CalculateILSpans = true };
 			var il = reader.ReadIL(method, kind: ILFunctionKind.TopLevelFunction, cancellationToken: ctx.CancellationToken);
 
 			var settings = new DecompilerSettings(LanguageVersion.Latest);
@@ -104,9 +108,11 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 			var context = run.CreateILTransformContext(il);
 			context.CalculateILSpans = true;
 
-			//context.Stepper.StepLimit = options.StepLimit;
-			context.Stepper.IsDebug = Debugger.IsAttached;
+			if (lastMethod != method && Settings is ILAstDecompilerSettings s)
+				s.StepLimit = int.MaxValue;
 
+			int stepLimit = (Settings as ILAstDecompilerSettings)?.StepLimit ?? int.MaxValue;
+			context.Stepper.StepLimit = stepLimit;
 
 			try
 			{
@@ -125,18 +131,19 @@ namespace dnSpy.Decompiler.ILSpy.Core.ILAst {
 			}
 			finally
 			{
-				// update stepper even if a transform crashed unexpectedly
-				// if (options.StepLimit == int.MaxValue)
-				// {
-				// 	Stepper = context.Stepper;
-				// 	OnStepperUpdated(new EventArgs());
-				// }
+				if (stepLimit == int.MaxValue)
+				{
+					Stepper = context.Stepper;
+					OnStepperUpdated();
+				}
 			}
 			output.WriteLine();
 
-			il.WriteTo(output, new ILAstWritingOptions());
+			il.WriteTo(output, new ILAstWritingOptions() {ShowILRanges = true});
 
 			EndKeywordBlock(output, bodyInfo, CodeBracesRangeFlags.MethodBraces, true);
+
+			lastMethod = method;
 		}
 
 		struct BraceInfo {
