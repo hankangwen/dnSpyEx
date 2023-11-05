@@ -1,6 +1,6 @@
 # dnSpyEx
 
-dnSpyEx is a unofficial continuation of the [dnSpy](https://github.com/dnSpy/dnSpy) project which is a debugger and .NET assembly editor. You can use it to edit and debug assemblies even if you don't have any source code available. Main features:
+dnSpyEx is an unofficial continuation of the [dnSpy](https://github.com/dnSpy/dnSpy) project which is a debugger and .NET assembly editor. You can use it to edit and debug assemblies even if you don't have any source code available. Main features:
 
 - Debug .NET and Unity assemblies
 - Edit .NET and Unity assemblies
