@@ -129,18 +129,17 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Utilities {
 		}
 
 		public static string GetDebugShimFilename(int bitness) {
-#if NETFRAMEWORK
-			var basePath = Contracts.App.AppDirectories.BinDirectory;
-			basePath = Path.Combine(basePath, "debug", "core");
 			var filename = FileUtilities.GetNativeDllFilename("dbgshim");
+			var basePath = Contracts.App.AppDirectories.BinDirectory;
+#if NETFRAMEWORK
+			basePath = Path.Combine(basePath, "debug", "core");
 			switch (bitness) {
 			case 32:	return Path.Combine(basePath, "x86", filename);
 			case 64:	return Path.Combine(basePath, "x64", filename);
 			default:	throw new ArgumentOutOfRangeException(nameof(bitness));
 			}
 #elif NET
-			var filename = FileUtilities.GetNativeDllFilename("dbgshim");
-			return Path.Combine(Path.GetDirectoryName(typeof(void).Assembly.Location)!, filename);
+			return Path.Combine(basePath, "runtimes", RuntimeInformation.RuntimeIdentifier, "native", filename);
 #else
 #error Unknown target framework
 #endif

@@ -38,12 +38,5 @@ namespace dnSpy.Debugger.DotNet.Interpreter {
 		/// <param name="message">Error message</param>
 		/// <param name="innerException">Other exception</param>
 		public InterpreterMessageException(string message, Exception innerException) : base(message, innerException) { }
-
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="info"></param>
-		/// <param name="context"></param>
-		protected InterpreterMessageException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 	}
 }

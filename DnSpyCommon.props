@@ -6,7 +6,7 @@
         - .github/workflows/build.yml
         - DnSpyRoslyn.props
     NOTE: Update the ABOVE files when TargetFrameworks is updated -->
-    <TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
     <IsDotNetFramework>false</IsDotNetFramework>
     <IsDotNet>false</IsDotNet>
     <IsSelfContainedDotNet>false</IsSelfContainedDotNet>
@@ -35,11 +35,13 @@
     <DnSpyAssemblyVersion>6.4.1.0</DnSpyAssemblyVersion>
     <!-- This is shown in the title bar -->
     <DnSpyAssemblyInformationalVersion>v6.4.1</DnSpyAssemblyInformationalVersion>
+    <!-- Prevent .NET SDK from appening the git commit hash to the information version -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <DnSpyAssemblyCopyright>Copyright (C) 2014-2020 de4dot@gmail.com</DnSpyAssemblyCopyright>
 
     <!-- AD0001: buggy Roslyn analyzer(s) crash, disable that warning -->
     <!-- WFAC010: Prevent warning about app.manifest properties -->
-    <NoWarn>NU1701;AD0001;WFAC010</NoWarn>
+    <NoWarn>NU1701;AD0001;WFAC010;NETSDK1189</NoWarn>
     <NoWarn Condition=" '$(IsDotNetFramework)' == 'true' ">$(NoWarn);CS8767</NoWarn>
 
     <!-- Update app.config whenever some of these versions change (eg. dnlib version) -->
@@ -54,8 +56,9 @@
     <NewtonsoftJsonVersion>13.0.3</NewtonsoftJsonVersion>
     <OokiiDialogsWpfVersion>5.0.1</OokiiDialogsWpfVersion>
     <RoslynVersion>4.7.0</RoslynVersion>
-    <SCCompositionVersion>7.0.0</SCCompositionVersion>
+    <SCCompositionVersion>8.0.0</SCCompositionVersion>
     <NuGetVersion>6.7.0</NuGetVersion>
+    <DbgShimVersion>8.0.452401</DbgShimVersion>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Build\ConvertToNetstandardReferences\ConvertToNetstandardReferences.tasks" Condition=" '$(IsDotNet)' == 'true' " />
