@@ -97,15 +97,15 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 			var binaryResourceData = ((BinaryResourceData)ResourceElement.ResourceData);
 			var serializedData = binaryResourceData.Data;
 			if (binaryResourceData.Format == SerializationFormat.BinaryFormatter) {
+#pragma warning disable SYSLIB0011
 				var formatter = new BinaryFormatter();
 				try {
-#pragma warning disable SYSLIB0011
 					deserializedData = formatter.Deserialize(new MemoryStream(serializedData));
-#pragma warning restore SYSLIB0011
 				}
 				catch {
 					return;
 				}
+#pragma warning restore SYSLIB0011
 			}
 			else if (binaryResourceData.Format == SerializationFormat.TypeConverterByteArray) {
 				try {

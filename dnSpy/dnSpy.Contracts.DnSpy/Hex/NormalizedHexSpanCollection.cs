@@ -31,7 +31,11 @@ namespace dnSpy.Contracts.Hex {
 		/// <summary>
 		/// An empty collection
 		/// </summary>
+#if NETFRAMEWORK
 		public static readonly NormalizedHexSpanCollection Empty = new NormalizedHexSpanCollection();
+#else
+		public new static readonly NormalizedHexSpanCollection Empty = new NormalizedHexSpanCollection();
+#endif
 
 		/// <summary>
 		/// Constructor

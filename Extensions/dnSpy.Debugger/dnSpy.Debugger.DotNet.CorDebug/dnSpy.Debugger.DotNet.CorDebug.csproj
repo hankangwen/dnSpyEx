@@ -65,6 +65,7 @@
     <PackageReference Include="Iced" Version="$(IcedVersion)" />
     <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="$(MSDiagRuntimeVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf" Version="$(MSVSTextVersion)" />
+    <PackageReference Include="Microsoft.Diagnostics.DbgShim" Version="$(DbgShimVersion)" />
   </ItemGroup>
 
 </Project>
