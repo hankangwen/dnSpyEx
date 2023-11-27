@@ -204,7 +204,7 @@ namespace dnSpy.Images {
 			type.Name == "Exception" &&
 			type.DefinitionAssembly.IsCorLib();
 		public ImageReference GetImageReference(FieldDef field) {
-			if (field.DeclaringType.IsEnum && !field.IsSpecialName) {
+			if (field.DeclaringType is not null && field.DeclaringType.IsEnum && !field.IsSpecialName) {
 				switch (field.Access) {
 				default:
 				case FieldAttributes.Public:

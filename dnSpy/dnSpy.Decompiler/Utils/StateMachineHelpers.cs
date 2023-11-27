@@ -211,7 +211,7 @@ namespace dnSpy.Decompiler.Utils {
 			var declType = method.DeclaringType;
 
 			// Assume all state machine types are nested types
-			if (!declType.IsNested)
+			if (declType is null || !declType.IsNested)
 				return false;
 
 			if (ImplementsInterface(declType, System_Runtime_CompilerServices, IAsyncStateMachine)) {
