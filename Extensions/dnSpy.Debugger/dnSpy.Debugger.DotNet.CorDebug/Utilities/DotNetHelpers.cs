@@ -21,10 +21,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using dndbg.COM.MetaHost;
 using dnlib.DotNet;
 using dnlib.PE;
+using dnSpy.Debugger.DotNet.CorDebug.Native;
 using dnSpy.Debugger.Shared;
 using Microsoft.Win32;
 
@@ -187,6 +191,33 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Utilities {
 			catch {
 			}
 			return false;
+		}
+
+		public static string? GetLatestInstalledFrameworkVersion() =>
+			GetInstalledFrameworkVersions().OrderByDescending(x => x).FirstOrDefault();
+
+		public static IEnumerable<string> GetInstalledFrameworkVersions() {
+			var clsid = new Guid("9280188D-0E8E-4867-B30C-7FA83884E8DE");
+			var riid = typeof(ICLRMetaHost).GUID;
+			var mh = (ICLRMetaHost)NativeMethods.CLRCreateInstance(ref clsid, ref riid);
+
+			int hr = mh.EnumerateInstalledRuntimes(out var iter);
+			if (hr < 0)
+				yield break;
+			for (;;) {
+				hr = iter.Next(1, out object obj, out uint fetched);
+				if (hr < 0 || fetched == 0)
+					break;
+
+				var rtInfo = (ICLRRuntimeInfo)obj;
+				uint chBuffer = 0;
+				var sb = new StringBuilder(300);
+				hr = rtInfo.GetVersionString(sb, ref chBuffer);
+				sb.EnsureCapacity((int)chBuffer);
+				hr = rtInfo.GetVersionString(sb, ref chBuffer);
+
+				yield return sb.ToString();
+			}
 		}
 	}
 }

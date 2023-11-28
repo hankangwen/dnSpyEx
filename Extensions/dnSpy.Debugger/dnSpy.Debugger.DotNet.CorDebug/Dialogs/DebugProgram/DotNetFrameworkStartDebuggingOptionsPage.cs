@@ -18,12 +18,15 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.DotNet.CorDebug;
 using dnSpy.Contracts.Debugger.StartDebugging;
 using dnSpy.Contracts.Debugger.StartDebugging.Dialog;
 using dnSpy.Contracts.MVVM;
+using dnSpy.Debugger.DotNet.CorDebug.Properties;
 using dnSpy.Debugger.DotNet.CorDebug.Utilities;
 
 namespace dnSpy.Debugger.DotNet.CorDebug.Dialogs.DebugProgram {
@@ -33,6 +36,16 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Dialogs.DebugProgram {
 		public override double DisplayOrder => PredefinedStartDebuggingOptionsPageDisplayOrders.DotNetFramework;
 		// Shouldn't be localized
 		public override string DisplayName => ".NET Framework";
+
+		public ListVM<string> RuntimeVersionsVM { get; } = new ListVM<string>(CreateRuntimeVersions());
+
+		static string[] CreateRuntimeVersions() {
+			var list = new List<string> {
+				dnSpy_Debugger_DotNet_CorDebug_Resources.DbgAsm_Autodetect,
+			};
+			list.AddRange(DotNetHelpers.GetInstalledFrameworkVersions().OrderByDescending(x => x));
+			return list.ToArray();
+		}
 
 		public DotNetFrameworkStartDebuggingOptionsPage(IPickFilename pickFilename, IPickDirectory pickDirectory)
 			: base(pickFilename, pickDirectory) {
@@ -74,10 +87,18 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Dialogs.DebugProgram {
 		DotNetFrameworkStartDebuggingOptions CreateOptions(string breakKind) =>
 			InitializeDefault(new DotNetFrameworkStartDebuggingOptions(), breakKind);
 
-		void Initialize(DotNetFrameworkStartDebuggingOptions options) => base.Initialize(options);
+		void Initialize(DotNetFrameworkStartDebuggingOptions options) {
+			base.Initialize(options);
+			if (options.DebuggeeVersion is null)
+				RuntimeVersionsVM.SelectedIndex = 0;
+			else
+				RuntimeVersionsVM.SelectedItem = options.DebuggeeVersion;
+		}
 
 		public override StartDebuggingOptionsInfo GetOptions() {
-			var options = GetOptions(new DotNetFrameworkStartDebuggingOptions());
+			var options = GetOptions(new DotNetFrameworkStartDebuggingOptions {
+				DebuggeeVersion = RuntimeVersionsVM.SelectedIndex == 0 ? null : RuntimeVersionsVM.SelectedItem
+			});
 			var flags = StartDebuggingOptionsInfoFlags.None;
 			if (File.Exists(options.Filename)) {
 				var extension = Path.GetExtension(options.Filename);

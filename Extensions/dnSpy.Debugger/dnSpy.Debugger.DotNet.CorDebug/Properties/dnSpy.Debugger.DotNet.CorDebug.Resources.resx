@@ -129,6 +129,12 @@
   <data name="DbgAsm_HostArgs" xml:space="preserve">
     <value>Host Ar_guments</value>
   </data>
+  <data name="DbgAsm_RuntimeVersion" xml:space="preserve">
+    <value>_Runtime Version</value>
+  </data>
+  <data name="DbgAsm_Autodetect" xml:space="preserve">
+    <value>Autodetect</value>
+  </data>
   <data name="DbgAsm_Timeout" xml:space="preserve">
     <value>_Timeout</value>
   </data>
