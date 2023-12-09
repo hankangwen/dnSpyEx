@@ -1306,6 +1306,10 @@ namespace dnSpy.Decompiler.CSharp {
 			OutputWrite(isLocal ? dnSpy_Decompiler_Resources.ToolTip_Local : dnSpy_Decompiler_Resources.ToolTip_Parameter, BoxedTextColor.Text);
 			OutputWrite(DescriptionParenClose, BoxedTextColor.Punctuation);
 			WriteSpace();
+			if (pd is not null && pd.CustomAttributes.IsDefined("System.ParamArrayAttribute")) {
+				OutputWrite(Keyword_params, BoxedTextColor.Keyword);
+				WriteSpace();
+			}
 			Write(variable.Type, !isLocal ? pd : null, null, null, forceReadOnly: (variable.Flags & SourceVariableFlags.ReadOnlyReference) != 0, attributeProvider: pd);
 			WriteSpace();
 			WriteIdentifier(TypeFormatterUtils.GetName(variable), isLocal ? BoxedTextColor.Local : BoxedTextColor.Parameter);

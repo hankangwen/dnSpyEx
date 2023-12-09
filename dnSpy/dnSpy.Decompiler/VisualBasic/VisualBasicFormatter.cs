@@ -1106,6 +1106,10 @@ namespace dnSpy.Decompiler.VisualBasic {
 				OutputWrite(Keyword_ByRef, BoxedTextColor.Keyword);
 				WriteSpace();
 			}
+			if (pd is not null && pd.CustomAttributes.IsDefined("System.ParamArrayAttribute")) {
+				OutputWrite(Keyword_params, BoxedTextColor.Keyword);
+				WriteSpace();
+			}
 			WriteIdentifier(TypeFormatterUtils.GetName(variable), isLocal ? BoxedTextColor.Local : BoxedTextColor.Parameter);
 			if (pd is not null)
 				WriteToken(pd);
