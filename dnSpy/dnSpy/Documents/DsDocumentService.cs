@@ -346,11 +346,12 @@ namespace dnSpy.Documents {
 						return existing;
 				}
 
+				// Disable mmap'd I/O before adding it to the temp cache to prevent another thread from
+				// getting the same file while we're disabling mmap'd I/O. Could lead to crashes.
+				DisableMMapdIO(document);
+
 				tempCacheLock.EnterWriteLock();
 				try {
-					// Disable mmap'd I/O before adding it to the temp cache to prevent another thread from
-					// getting the same file while we're disabling mmap'd I/O. Could lead to crashes.
-					DisableMMapdIO(document);
 					if (!AssemblyLoadEnabled)
 						tempCache.Add(document);
 				}
