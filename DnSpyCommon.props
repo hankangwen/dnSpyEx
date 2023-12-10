@@ -50,14 +50,14 @@
     <IcedVersion>1.20.0</IcedVersion>
     <MSBuildNuGetVersion>17.1.0</MSBuildNuGetVersion>
     <MSDiagRuntimeVersion>1.1.142101</MSDiagRuntimeVersion>
-    <MSVSCompositionVersion>17.7.18</MSVSCompositionVersion>
+    <MSVSCompositionVersion>17.7.26</MSVSCompositionVersion>
     <MSVSIntellisenseVersion>15.5.27130</MSVSIntellisenseVersion>
     <MSVSTextVersion>15.5.27130</MSVSTextVersion>
     <NewtonsoftJsonVersion>13.0.3</NewtonsoftJsonVersion>
     <OokiiDialogsWpfVersion>5.0.1</OokiiDialogsWpfVersion>
     <RoslynVersion>4.8.0</RoslynVersion>
     <SCCompositionVersion>8.0.0</SCCompositionVersion>
-    <NuGetVersion>6.7.0</NuGetVersion>
+    <NuGetVersion>6.8.0</NuGetVersion>
     <DbgShimVersion>8.0.452401</DbgShimVersion>
   </PropertyGroup>
 
