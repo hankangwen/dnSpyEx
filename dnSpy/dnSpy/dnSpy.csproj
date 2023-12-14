@@ -25,6 +25,10 @@
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
   </PropertyGroup>
 
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Switch.System.Windows.Media.EnableHardwareAccelerationInRdp" Value="true" />
+  </ItemGroup>
+
   <PropertyGroup>
     <ApplicationIcon>Images\dnSpy.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
