@@ -143,6 +143,11 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Utilities {
 			default:	throw new ArgumentOutOfRangeException(nameof(bitness));
 			}
 #elif NET
+			string path = Path.Combine(basePath, filename);
+			// If dnSpy is published, the file will be located in the app directory
+			if (File.Exists(path))
+				return path;
+			// If dnSpy is ran from source, the file will be located in a different directory
 			return Path.Combine(basePath, "runtimes", RuntimeInformation.RuntimeIdentifier, "native", filename);
 #else
 #error Unknown target framework
