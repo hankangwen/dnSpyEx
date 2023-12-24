@@ -115,16 +115,16 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_DecompileQueryExpr,
 				Name = DecompilerOptionConstants.QueryExpressions_NAME,
 			};
-			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.FullyQualifyAmbiguousTypeNames_GUID,
-			// 			() => decompilerSettings.FullyQualifyAmbiguousTypeNames, a => decompilerSettings.FullyQualifyAmbiguousTypeNames = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FullyQualifyAmbiguousTypeNames,
-			// 	Name = DecompilerOptionConstants.FullyQualifyAmbiguousTypeNames_NAME,
-			// };
-			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.FullyQualifyAllTypes_GUID,
-			// 			() => decompilerSettings.FullyQualifyAllTypes, a => decompilerSettings.FullyQualifyAllTypes = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FullyQualifyAllTypes,
-			// 	Name = DecompilerOptionConstants.FullyQualifyAllTypes_NAME,
-			// };
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.FullyQualifyAmbiguousTypeNames_GUID,
+						() => decompilerSettings.FullyQualifyAmbiguousTypeNames, a => decompilerSettings.FullyQualifyAmbiguousTypeNames = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FullyQualifyAmbiguousTypeNames,
+				Name = DecompilerOptionConstants.FullyQualifyAmbiguousTypeNames_NAME,
+			};
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.FullyQualifyAllTypes_GUID,
+						() => decompilerSettings.FullyQualifyAllTypes, a => decompilerSettings.FullyQualifyAllTypes = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_FullyQualifyAllTypes,
+				Name = DecompilerOptionConstants.FullyQualifyAllTypes_NAME,
+			};
 			yield return new DecompilerOption<bool>(DecompilerOptionConstants.UseDebugSymbols_GUID,
 						() => decompilerSettings.UseDebugSymbols, a => decompilerSettings.UseDebugSymbols = a) {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_UseLocalNameFromSyms,
@@ -155,11 +155,11 @@ namespace dnSpy.Decompiler.ILSpy.Core.Settings {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_MakeAssignmentExpressions,
 				Name = DecompilerOptionConstants.MakeAssignmentExpressions_NAME,
 			};
-			// yield return new DecompilerOption<bool>(DecompilerOptionConstants.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject_GUID,
-			// 			() => decompilerSettings.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject, a => decompilerSettings.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject = a) {
-			// 	Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject,
-			// 	Name = DecompilerOptionConstants.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject_NAME,
-			// };
+			yield return new DecompilerOption<bool>(DecompilerOptionConstants.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject_GUID,
+						() => decompilerSettings.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject, a => decompilerSettings.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject = a) {
+				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject,
+				Name = DecompilerOptionConstants.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject_NAME,
+			};
 			yield return new DecompilerOption<bool>(DecompilerOptionConstants.ShowTokenAndRvaComments_GUID,
 						() => decompilerSettings.ShowTokenAndRvaComments, a => decompilerSettings.ShowTokenAndRvaComments = a) {
 				Description = dnSpy_Decompiler_ILSpy_Core_Resources.DecompilerSettings_ShowTokensRvasOffsets,

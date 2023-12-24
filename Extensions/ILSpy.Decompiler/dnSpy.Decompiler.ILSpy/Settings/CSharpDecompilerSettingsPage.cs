@@ -243,9 +243,9 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			if (g.HexadecimalNumbers != d.HexadecimalNumbers) flags |= RefreshFlags.CSharp;
 			if (g.SortSwitchCasesByILOffset != d.SortSwitchCasesByILOffset) flags |= RefreshFlags.ILAst;
 			if (g.InsertParenthesesForReadability != d.InsertParenthesesForReadability) flags |= RefreshFlags.CSharp;
-
-			// if (g.FullyQualifyAmbiguousTypeNames != d.FullyQualifyAmbiguousTypeNames) flags |= RefreshFlags.CSharp;
-			// if (g.FullyQualifyAllTypes != d.FullyQualifyAllTypes) flags |= RefreshFlags.CSharp;
+			if (g.FullyQualifyAmbiguousTypeNames != d.FullyQualifyAmbiguousTypeNames) flags |= RefreshFlags.CSharp;
+			if (g.FullyQualifyAllTypes != d.FullyQualifyAllTypes) flags |= RefreshFlags.CSharp;
+			if (g.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject != d.AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject) flags |= RefreshFlags.CSharp;
 
 			if ((flags & RefreshFlags.ShowMember) != 0)
 				appRefreshSettings.Add(AppSettingsConstants.REFRESH_LANGUAGE_SHOWMEMBER);

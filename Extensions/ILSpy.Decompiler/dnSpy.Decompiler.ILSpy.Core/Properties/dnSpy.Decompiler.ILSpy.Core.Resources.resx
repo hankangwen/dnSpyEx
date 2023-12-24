@@ -120,11 +120,38 @@
   <data name="DecompilerSettings_AddUsingDeclarations" xml:space="preserve">
     <value>Add using declarations</value>
   </data>
+  <data name="DecompilerSettings_AggressiveInlining" xml:space="preserve">
+    <value>Always inline local variables if possible</value>
+  </data>
   <data name="DecompilerSettings_AllowFieldInitializers" xml:space="preserve">
     <value>Allow field initializers</value>
   </data>
+  <data name="DecompilerSettings_AlwaysCastTargetsOfExplicitInterfaceImplementationCalls" xml:space="preserve">
+    <value>Always cast targets of explicit interface implementation calls</value>
+  </data>
   <data name="DecompilerSettings_AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject" xml:space="preserve">
     <value>Always generate exception variables in catch blocks unless type is Object</value>
+  </data>
+  <data name="DecompilerSettings_AlwaysQualifyMemberReferences" xml:space="preserve">
+    <value>Always qualify member references</value>
+  </data>
+  <data name="DecompilerSettings_AlwaysShowEnumMemberValues" xml:space="preserve">
+    <value>Always show enum member values</value>
+  </data>
+  <data name="DecompilerSettings_AlwaysUseBraces" xml:space="preserve">
+    <value>Always use braces</value>
+  </data>
+  <data name="DecompilerSettings_AlwaysUseGlobal" xml:space="preserve">
+    <value>Always fully qualify namespaces using the "global::" prefix</value>
+  </data>
+  <data name="DecompilerSettings_CodeStyle" xml:space="preserve">
+    <value>Code style</value>
+  </data>
+  <data name="DecompilerSettings_DecompilerBehavior" xml:space="preserve">
+    <value>Decompiler behavior</value>
+  </data>
+  <data name="DecompilerSettings_MemberOrderingAndSorting" xml:space="preserve">
+    <value>Member ordering and sorting</value>
   </data>
   <data name="DecompilerSettings_DecompilationOrder" xml:space="preserve">
     <value>Decompilation order</value>
@@ -176,6 +203,9 @@
   </data>
   <data name="DecompilerSettings_SparseIntegerSwitch" xml:space="preserve">
     <value>Detect switch on integer even if IL code does not use a jump table</value>
+  </data>
+  <data name="DecompilerSettings_SeparateLocalVariableDeclarations" xml:space="preserve">
+    <value>Separate local variable declarations and initializers (int x = 5; -&gt; int x; x = 5;), if possible</value>
   </data>
   <data name="DecompilerSettings_ArrayInitializerExpressions" xml:space="preserve">
     <value>Array initializer expressions</value>
@@ -363,6 +393,12 @@
   <data name="DecompilerSettings_OneCustomAttributePerLine" xml:space="preserve">
     <value>Show one custom attribute per line</value>
   </data>
+  <data name="DecompilerSettings_RemoveDeadCode" xml:space="preserve">
+    <value>Remove dead and side effect free code (use with caution!)</value>
+  </data>
+  <data name="DecompilerSettings_RemoveDeadStores" xml:space="preserve">
+    <value>Remove dead stores (use with caution!)</value>
+  </data>
   <data name="DecompilerSettings_RemoveEmptyDefaultCtors" xml:space="preserve">
     <value>Remove empty default constructors</value>
   </data>
@@ -395,6 +431,9 @@
   </data>
   <data name="DecompilerSettings_SortSystemFirst" xml:space="preserve">
     <value>Place 'System' directives first when sorting usings</value>
+  </data>
+  <data name="DecompilerSettings_SortSwitchCasesByILOffset" xml:space="preserve">
+    <value>Sort switch cases by IL instruction offset</value>
   </data>
   <data name="DecompilerSettings_TypeAddInternalModifier" xml:space="preserve">
     <value>Add 'internal' modifier to types</value>

@@ -152,9 +152,10 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			HexadecimalNumbers = sect.Attribute<bool?>(nameof(HexadecimalNumbers)) ?? HexadecimalNumbers;
 			SortSwitchCasesByILOffset = sect.Attribute<bool?>(nameof(SortSwitchCasesByILOffset)) ?? SortSwitchCasesByILOffset;
 			InsertParenthesesForReadability = sect.Attribute<bool?>(nameof(InsertParenthesesForReadability)) ?? InsertParenthesesForReadability;
+			FullyQualifyAmbiguousTypeNames = sect.Attribute<bool?>(nameof(FullyQualifyAmbiguousTypeNames)) ?? FullyQualifyAmbiguousTypeNames;
+			FullyQualifyAllTypes = sect.Attribute<bool?>(nameof(FullyQualifyAllTypes)) ?? FullyQualifyAllTypes;
+			AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject = sect.Attribute<bool?>(nameof(AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject)) ?? AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject;
 
-			//FullyQualifyAmbiguousTypeNames = sect.Attribute<bool?>(nameof(FullyQualifyAmbiguousTypeNames)) ?? FullyQualifyAmbiguousTypeNames;
-			//FullyQualifyAllTypes = sect.Attribute<bool?>(nameof(FullyQualifyAllTypes)) ?? FullyQualifyAllTypes;
 			//TODO: CSharpFormattingOptions
 			disableSave = false;
 		}
@@ -277,9 +278,10 @@ namespace dnSpy.Decompiler.ILSpy.Settings {
 			sect.Attribute(nameof(HexadecimalNumbers), HexadecimalNumbers);
 			sect.Attribute(nameof(SortSwitchCasesByILOffset), SortSwitchCasesByILOffset);
 			sect.Attribute(nameof(InsertParenthesesForReadability), InsertParenthesesForReadability);
+			sect.Attribute(nameof(FullyQualifyAmbiguousTypeNames), FullyQualifyAmbiguousTypeNames);
+			sect.Attribute(nameof(FullyQualifyAllTypes), FullyQualifyAllTypes);
+			sect.Attribute(nameof(AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject), AlwaysGenerateExceptionVariableForCatchBlocksUnlessTypeIsObject);
 
-
-			//sect.Attribute(nameof(FullyQualifyAmbiguousTypeNames), FullyQualifyAmbiguousTypeNames);
 			//sect.Attribute(nameof(FullyQualifyAllTypes), FullyQualifyAllTypes);
 			//TODO: CSharpFormattingOptions
 		}
