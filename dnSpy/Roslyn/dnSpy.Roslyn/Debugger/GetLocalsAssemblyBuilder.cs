@@ -61,7 +61,8 @@ namespace dnSpy.Roslyn.Debugger {
 			}
 			else {
 				var methodModule = method.Module;
-				generatedModule = new ModuleDefUser(Guid.NewGuid().ToString(), Guid.NewGuid(), methodModule.CorLibTypes.AssemblyRef);
+				generatedModule = new ModuleDefUser(Guid.NewGuid().ToString(), Guid.NewGuid(),
+					PickCorLibFromAttribute(methodModule) ?? methodModule.CorLibTypes.AssemblyRef);
 				generatedModule.RuntimeVersion = methodModule.RuntimeVersion;
 				generatedModule.Machine = methodModule.Machine;
 				var asm = new AssemblyDefUser(Guid.NewGuid().ToString());
@@ -72,6 +73,29 @@ namespace dnSpy.Roslyn.Debugger {
 				foreach (var gp in method.DeclaringType.GenericParameters)
 					getLocalsType.GenericParameters.Add(Clone(gp));
 			}
+		}
+
+		static AssemblyRef? PickCorLibFromAttribute(ModuleDef moduleDef) {
+			var ca = moduleDef.Assembly?.CustomAttributes.Find("System.Runtime.Versioning.TargetFrameworkAttribute");
+			if (ca is null)
+				return null;
+			if (ca.ConstructorArguments.Count != 1)
+				return null;
+			var arg = ca.ConstructorArguments[0];
+			if (arg.Type.GetElementType() != ElementType.String)
+				return null;
+			var s = (arg.Value as UTF8String)?.String ?? arg.Value as string;
+			if (s is null)
+				return null;
+			var idx = s.IndexOf(',');
+			if (idx == -1)
+				return null;
+			var fw = s.Remove(idx, s.Length - idx).Trim();
+			if (fw == ".NETCoreApp")
+				return moduleDef.GetAssemblyRef("System.Runtime") ?? moduleDef.GetAssemblyRef("System.Private.CoreLib");
+			if (fw == ".NETStandard")
+				return moduleDef.GetAssemblyRef("netstandard");
+			return null;
 		}
 
 		GenericParam Clone(GenericParam gp) {
