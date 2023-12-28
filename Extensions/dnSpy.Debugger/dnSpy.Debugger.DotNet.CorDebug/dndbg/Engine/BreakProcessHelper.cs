@@ -19,10 +19,12 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using dndbg.COM.MetaData;
 using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using dnlib.PE;
+using dnSpy.Contracts.Utilities;
 
 namespace dndbg.Engine {
 	sealed class BreakProcessHelper {
@@ -65,7 +67,7 @@ namespace dndbg.Engine {
 		bool OnLoadModule(DebugEventBreakpointConditionContext ctx) {
 			var lmArgs = (LoadModuleDebugCallbackEventArgs)ctx.EventArgs;
 			var mod = lmArgs.CorModule;
-			if (mod is null || mod.IsDynamic || mod.IsInMemory)
+			if (mod is null || !IsPrimaryProgramModule(mod))
 				return false;
 
 			uint methodToken = 0;
@@ -85,6 +87,33 @@ namespace dndbg.Engine {
 			var moduleId = mod.GetModuleId(uint.MaxValue);
 			SetILBreakpoint(moduleId, methodToken);
 			return false;
+		}
+
+		bool IsPrimaryProgramModule(CorModule module) {
+			if (module.IsDynamic)
+				return false;
+
+			if (module.IsInMemory)
+				return true;
+
+			var filename = module.Name;
+			if (!File.Exists(filename))
+				return true;
+
+			if (GacInfo.IsGacPath(filename))
+				return false;
+			if (IsInDirOrSubDir(Path.GetDirectoryName(debugger.CLRPath)!, filename))
+				return false;
+
+			return true;
+		}
+
+		static bool IsInDirOrSubDir(string dir, string filename) {
+			dir = dir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+			if (dir.Length > 0 && dir[dir.Length - 1] != Path.DirectorySeparatorChar)
+				dir += Path.DirectorySeparatorChar.ToString();
+			filename = filename.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+			return filename.StartsWith(dir, StringComparison.OrdinalIgnoreCase);
 		}
 
 		static uint GetEntryPointToken(string? filename) {
