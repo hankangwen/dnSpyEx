@@ -60,3 +60,4 @@ jobs:
           name: dnSpy-${{matrix.package-name}}
           path: C:\builtfiles\dnSpy-${{matrix.platform}}
           if-no-files-found: error
+          compression-level: 9
