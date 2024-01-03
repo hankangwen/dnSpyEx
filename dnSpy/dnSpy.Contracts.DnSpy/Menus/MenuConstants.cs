@@ -211,23 +211,26 @@ namespace dnSpy.Contracts.Menus {
 		/// <summary>Group: App Menu: Edit, Group: AsmEditor Misc</summary>
 		public const string GROUP_APP_MENU_EDIT_ASMED_MISC = "3000,3DCA360E-3CCD-4F27-AF50-A254CD5F9C83";
 
+		/// <summary>Group: App Menu: Edit, Group: AsmEditor Bundle</summary>
+		public const string GROUP_APP_MENU_EDIT_ASMED_BUNDLE = "4000,160236C6-6827-4C0C-9902-9B80EBD62B7E";
+
 		/// <summary>Group: App Menu: Edit, Group: AsmEditor New</summary>
-		public const string GROUP_APP_MENU_EDIT_ASMED_NEW = "4000,178A6FD0-2F22-466D-8F2E-664E5531F50B";
+		public const string GROUP_APP_MENU_EDIT_ASMED_NEW = "5000,178A6FD0-2F22-466D-8F2E-664E5531F50B";
 
 		/// <summary>Group: App Menu: Edit, Group: AsmEditor Settings</summary>
-		public const string GROUP_APP_MENU_EDIT_ASMED_SETTINGS = "5000,69EA4DD7-8220-43A5-9812-F1EC221AD7D8";
+		public const string GROUP_APP_MENU_EDIT_ASMED_SETTINGS = "6000,69EA4DD7-8220-43A5-9812-F1EC221AD7D8";
 
 		/// <summary>Group: App Menu: Edit, Group: Hex</summary>
-		public const string GROUP_APP_MENU_EDIT_HEX = "6000,6D8CA476-8D3D-468E-A895-40F3A9D5A25C";
+		public const string GROUP_APP_MENU_EDIT_HEX = "7000,6D8CA476-8D3D-468E-A895-40F3A9D5A25C";
 
 		/// <summary>Group: App Menu: Edit, Group: Hex MD</summary>
-		public const string GROUP_APP_MENU_EDIT_HEX_MD = "7000,36F0A9CA-5D14-4F56-8F64-ED3628FB5F30";
+		public const string GROUP_APP_MENU_EDIT_HEX_MD = "8000,36F0A9CA-5D14-4F56-8F64-ED3628FB5F30";
 
 		/// <summary>Group: App Menu: Edit, Group: Hex MD Go To</summary>
-		public const string GROUP_APP_MENU_EDIT_HEX_GOTO_MD = "8000,1E0213F3-0578-43D9-A12D-14AE30EFD0EA";
+		public const string GROUP_APP_MENU_EDIT_HEX_GOTO_MD = "9000,1E0213F3-0578-43D9-A12D-14AE30EFD0EA";
 
 		/// <summary>Group: App Menu: Edit, Group: Hex Copy</summary>
-		public const string GROUP_APP_MENU_EDIT_HEX_COPY = "9000,32791A7F-4CFC-49D2-B066-A611A9E362DB";
+		public const string GROUP_APP_MENU_EDIT_HEX_COPY = "10000,32791A7F-4CFC-49D2-B066-A611A9E362DB";
 
 		/// <summary>Group: App Menu: View, Group: Options</summary>
 		public const string GROUP_APP_MENU_VIEW_OPTS = "0,FCBA133F-F62B-4DB2-BEC9-5AE11C95873B";
@@ -439,26 +442,29 @@ namespace dnSpy.Contracts.Menus {
 		/// <summary>Group: Context Menu, Type: Documents, Group: AsmEditor Misc</summary>
 		public const string GROUP_CTX_DOCUMENTS_ASMED_MISC = "3000,928EDD44-E4A9-4EA9-93FF-55709943A088";
 
+		/// <summary>Group: Context Menu, Type: Documents, Group: AsmEditor Bundle</summary>
+		public const string GROUP_CTX_DOCUMENTS_ASMED_BUNDLE = "4000,3740F959-0171-4DC3-9B98-1EE944EF78AE";
+
 		/// <summary>Group: Context Menu, Type: Documents, Group: AsmEditor New</summary>
-		public const string GROUP_CTX_DOCUMENTS_ASMED_NEW = "4000,05FD56B0-CAF9-48E1-9CED-5221E8A13140";
+		public const string GROUP_CTX_DOCUMENTS_ASMED_NEW = "5000,05FD56B0-CAF9-48E1-9CED-5221E8A13140";
 
 		/// <summary>Group: Context Menu, Type: Documents, Group: AsmEditor Settings</summary>
-		public const string GROUP_CTX_DOCUMENTS_ASMED_SETTINGS = "5000,2247C4DB-73B8-4926-96EB-1C16EAF4A3E4";
+		public const string GROUP_CTX_DOCUMENTS_ASMED_SETTINGS = "6000,2247C4DB-73B8-4926-96EB-1C16EAF4A3E4";
 
 		/// <summary>Group: Context Menu, Type: Documents, Group: AsmEditor IL ED</summary>
-		public const string GROUP_CTX_DOCUMENTS_ASMED_ILED = "6000,9E0E8539-751E-47EA-A0E9-EAB3A45724E3";
+		public const string GROUP_CTX_DOCUMENTS_ASMED_ILED = "7000,9E0E8539-751E-47EA-A0E9-EAB3A45724E3";
 
 		/// <summary>Group: Context Menu, Type: Documents, Group: Tokens</summary>
-		public const string GROUP_CTX_DOCUMENTS_TOKENS = "7000,C98101AD-1A59-42AE-B446-16545F39DC7A";
+		public const string GROUP_CTX_DOCUMENTS_TOKENS = "9000,C98101AD-1A59-42AE-B446-16545F39DC7A";
 
 		/// <summary>Group: Context Menu, Type: Documents, Group: Debug RT</summary>
-		public const string GROUP_CTX_DOCUMENTS_DEBUGRT = "9000,9A151E30-AC16-4745-A819-24AA199E82CB";
+		public const string GROUP_CTX_DOCUMENTS_DEBUGRT = "10000,9A151E30-AC16-4745-A819-24AA199E82CB";
 
 		/// <summary>Group: Context Menu, Type: Documents, Group: Debug</summary>
-		public const string GROUP_CTX_DOCUMENTS_DEBUG = "10000,080A553F-F066-41DC-9CC6-B4CCF2C48675";
+		public const string GROUP_CTX_DOCUMENTS_DEBUG = "11000,080A553F-F066-41DC-9CC6-B4CCF2C48675";
 
 		/// <summary>Group: Context Menu, Type: Document, Group: Other</summary>
-		public const string GROUP_CTX_DOCUMENTS_OTHER = "11000,15776535-8A1D-4255-8C3D-331163324C7C";
+		public const string GROUP_CTX_DOCUMENTS_OTHER = "12000,15776535-8A1D-4255-8C3D-331163324C7C";
 
 		/// <summary>Group: Context Menu, Type: Bookmarks, Group: Copy</summary>
 		public const string GROUP_CTX_BOOKMARKS_COPY = "0,1633C2A1-5A65-41FF-B83D-E6B0E1B565EC";
