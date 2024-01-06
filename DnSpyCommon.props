@@ -58,7 +58,7 @@
     <RoslynVersion>4.8.0</RoslynVersion>
     <SCCompositionVersion>8.0.0</SCCompositionVersion>
     <NuGetVersion>6.8.0</NuGetVersion>
-    <DbgShimVersion>8.0.452401</DbgShimVersion>
+    <DbgShimVersion>8.0.505301</DbgShimVersion>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Build\ConvertToNetstandardReferences\ConvertToNetstandardReferences.tasks" Condition=" '$(IsDotNet)' == 'true' " />
