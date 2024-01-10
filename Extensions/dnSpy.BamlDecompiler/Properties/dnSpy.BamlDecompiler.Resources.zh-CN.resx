@@ -153,4 +153,16 @@
   <data name="Plugin_ShortDescription" xml:space="preserve">
     <value>BAML 反编译器</value>
   </data>
+  <data name="SaveBAML" xml:space="preserve">
+    <value>保存 BAML(_S)...</value>
+  </data>
+  <data name="SaveXAML" xml:space="preserve">
+    <value>保存 XAML(_S)...</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>保存中...</value>
+  </data>
+  <data name="XAMLFile" xml:space="preserve">
+    <value>XAML 文件</value>
+  </data>
 </root>
