@@ -151,15 +151,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 				return XmlConvert.EncodeLocalName(PropertyName);
 
 			var sb = new StringBuilder();
-			if (DeclaringType.Namespace != parent.GetDefaultNamespace()) {
-				var prefix = parent.GetPrefixOfNamespace(DeclaringType.Namespace);
-				if (!string.IsNullOrEmpty(prefix)) {
-					sb.Append(prefix);
-					sb.Append(':');
-				}
-			}
-
-			DeclaringType.TypeName.AppendEncodedName(sb);
+			DeclaringType.AppendMarkupExtensionName(sb, parent);
 			sb.Append('.');
 			sb.Append(XmlConvert.EncodeLocalName(PropertyName));
 			return sb.ToString();
