@@ -23,6 +23,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Threading.Tasks;
 using dnSpy.Contracts.Settings;
 using Newtonsoft.Json.Linq;
@@ -100,6 +101,7 @@ namespace dnSpy.MainApp {
 		}
 
 		static readonly Version currentVersion = GetCurrentVersion();
+		static readonly bool isFinalRelease = GetIsFinalRelease();
 
 		static Version GetCurrentVersion() {
 			var currentAsm = typeof(StartUpClass).Assembly;
@@ -113,10 +115,21 @@ namespace dnSpy.MainApp {
 			return currentAsm.GetName().Version!;
 		}
 
+		static bool GetIsFinalRelease() {
+			var currentAsm = typeof(StartUpClass).Assembly;
+			try {
+				var infoVerAttr = currentAsm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+				return infoVerAttr.InformationalVersion is null || !infoVerAttr.InformationalVersion.Contains("-");
+			}
+			catch {
+			}
+			return false;
+		}
+
 		public async Task<UpdateCheckInfo> CheckForUpdatesAsync() {
 			var updateInfo = await TryGetLatestVersionAsync();
 			if (updateInfo is not null) {
-				if (updateInfo.Value.Version > currentVersion)
+				if (updateInfo.Value.Version > currentVersion || !isFinalRelease && updateInfo.Value.Version == currentVersion)
 					return new UpdateCheckInfo(true, updateInfo.Value);
 				return new UpdateCheckInfo(false, default);
 			}
@@ -140,8 +153,11 @@ namespace dnSpy.MainApp {
 					return null;
 				if (tagName[0] == 'v')
 					tagName = tagName.Remove(0, 1);
-				if (Version.TryParse(tagName, out var version))
+				if (Version.TryParse(tagName, out var version)) {
+					if (version.Revision == -1)
+						version = new Version(version.Major, version.Minor, version.Build, 0);
 					return new VersionInfo(version, htmlUrl);
+				}
 			}
 			catch {
 			}
