@@ -119,7 +119,7 @@ namespace dnSpy.MainApp {
 			var currentAsm = typeof(StartUpClass).Assembly;
 			try {
 				var infoVerAttr = currentAsm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-				return infoVerAttr.InformationalVersion is null || !infoVerAttr.InformationalVersion.Contains("-");
+				return infoVerAttr?.InformationalVersion is null || !infoVerAttr.InformationalVersion.Contains("-");
 			}
 			catch {
 			}
