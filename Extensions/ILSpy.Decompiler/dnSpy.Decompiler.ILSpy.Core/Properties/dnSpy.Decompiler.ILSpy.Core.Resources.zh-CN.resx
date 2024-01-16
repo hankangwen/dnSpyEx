@@ -171,6 +171,12 @@
   <data name="DecompilerSettings_HexadecimalNumbers" xml:space="preserve">
     <value>以十六进制显示数字</value>
   </data>
+  <data name="DecompilerSettings_EmitCalliAsInvocationExpression" xml:space="preserve">
+    <value>反编译 calli 指令为调用表达式</value>
+  </data>
+  <data name="DecompilerSettings_InsertParenthesesForReadability" xml:space="preserve">
+    <value>插入括号以增强可读性</value>
+  </data>
   <data name="DecompilerSettings_IntroduceIncrementAndDecrement" xml:space="preserve">
     <value>使用增量和减量运算符</value>
   </data>
