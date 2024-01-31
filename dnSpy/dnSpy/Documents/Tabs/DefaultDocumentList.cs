@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -46,6 +47,60 @@ namespace dnSpy.Documents.Tabs {
 		}
 
 		public void Add(DsDocumentInfo file) => files.Add(file);
+	}
+
+	sealed class DotnetReferenceFileFinder {
+		readonly CancellationToken cancellationToken;
+		readonly List<DefaultDocumentList> allLists;
+
+		public DotnetReferenceFileFinder(CancellationToken cancellationToken) {
+			this.cancellationToken = cancellationToken;
+			allLists = new List<DefaultDocumentList>();
+		}
+
+		public IEnumerable<DefaultDocumentList> AllFiles => allLists.ToArray();
+
+		public void Find() {
+			cancellationToken.ThrowIfCancellationRequested();
+
+			if (!TryGetRuntimeFolder(out var runtimesFolder)) {
+				return;
+			}
+
+			foreach (var appDir in Directory.EnumerateDirectories(runtimesFolder)) {
+				foreach (var versionDir in Directory.EnumerateDirectories(appDir)) {
+					var appName = $"{Path.GetFileName(appDir)} {Path.GetFileName(versionDir)}";
+					allLists.Add(new DefaultDocumentList(appName, Directory.GetFiles(versionDir, "*.dll").Where(FilterFiles).Select(DsDocumentInfo.CreateDocument)));
+				}
+			}
+		}
+
+		static bool FilterFiles(string file) {
+
+			var fileName = Path.GetFileName(file);
+
+			//Here, only DLLs that are obviously not .NET assemblies are filtered out; other files are not filtered, and should not be affected, so to speak.
+			if (fileName.StartsWith("api-ms-win")) {
+				return false;
+			}
+
+			return true;
+		}
+
+		static bool TryGetRuntimeFolder([NotNullWhen(true)] out string path) {
+			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"dotnet\shared");
+			if (Directory.Exists(path)) {
+				return true;
+			}
+
+			//The previous dotnet installation was in the x86 folder
+			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"dotnet\shared");
+			if (Directory.Exists(path)) {
+				return true;
+			}
+
+			return false;
+		}
 	}
 
 	sealed class ReferenceFileFinder {
@@ -356,6 +411,9 @@ namespace dnSpy.Documents.Tabs {
 			var finder = new ReferenceFileFinder(cancellationToken);
 			finder.Find();
 
+			var dotnetFinder = new DotnetReferenceFileFinder(cancellationToken);
+			dotnetFinder.Find();
+
 			var xmlFiles = new List<(DefaultDocumentList list, bool isDefault)>();
 			foreach (var dir in FilesDirs) {
 				cancellationToken.ThrowIfCancellationRequested();
@@ -379,6 +437,9 @@ namespace dnSpy.Documents.Tabs {
 			}
 
 			foreach (var f in finder.AllFiles)
+				dict[f.Name] = f;
+
+			foreach (var f in dotnetFinder.AllFiles)
 				dict[f.Name] = f;
 
 			foreach (var t in xmlFiles) {
