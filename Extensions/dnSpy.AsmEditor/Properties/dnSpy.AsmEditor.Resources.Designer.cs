@@ -556,6 +556,15 @@ namespace dnSpy.AsmEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Close All Framework Assemblies.
+        /// </summary>
+        public static string CloseAllFrameworkAssembliesCommand {
+            get {
+                return ResourceManager.GetString("CloseAllFrameworkAssembliesCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Close All Missing Files.
         /// </summary>
         public static string CloseAllMissingFilesCommand {

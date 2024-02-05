@@ -2327,4 +2327,7 @@
   <data name="ReplaceMethodBodyWithStubCommand2" xml:space="preserve">
     <value>Заменить тело метода заглушкой</value>
   </data>
+  <data name="CloseAllFrameworkAssembliesCommand" xml:space="preserve">
+    <value>Закрыть все сборки фреймворка</value>
+  </data>
 </root>
