@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -1531,7 +1531,7 @@
     <value>Загрузить</value>
   </data>
   <data name="DetachingWillCauseTerminationOfDebuggeeProcess" xml:space="preserve">
-    <value>Отсоединение приведет к завершению процесса отладки. Вы хотите продолжить?</value>
+    <value>Отсоединение приведет к завершению отлаживаемого процесса. Вы точно хотите продолжить?</value>
   </data>
   <data name="Window_StaticFields" xml:space="preserve">
     <value>Статические поля</value>
@@ -1542,17 +1542,17 @@
   <data name="StartDebuggingWarning_UnknownBitness" xml:space="preserve">
     <value>Разрядность целевого файла определить не удалось. Отладка может привести к нежелательному/неконтролируемому выполнению образа.
 
-Вы хотите продолжить?</value>
+Вы точно хотите продолжить?</value>
   </data>
   <data name="StartDebuggingWarning_IncorrectBitness" xml:space="preserve">
     <value>Разрядность целевого файла не соответствует текущей версии dnSpy. Отладка может привести к нежелательному/неконтролируемому выполнению образа.
 
 Рекомендуется использовать 32-разрядный dnSpy для отладки 32-разрядных образов и 64-разрядный dnSpy для отладки 64-разрядных образов.
 
-Вы хотите продолжить?</value>
+Вы точно хотите продолжить?</value>
   </data>
   <data name="DbgSettings_EnableJustMyCodeDebugging" xml:space="preserve">
-    <value>Включите поддержку отладки только моего кода</value>
+    <value>Включить поддержку отладки только моего кода</value>
   </data>
   <data name="DbgSettings_StepOverCodeInSystemModules" xml:space="preserve">
     <value>Переступать код в системных модулях</value>
