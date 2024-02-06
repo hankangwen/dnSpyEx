@@ -2327,4 +2327,7 @@ Most options will be re-initialized when this checkbox is clicked</value>
   <data name="Type_Flags_Visibility" xml:space="preserve">
     <value>Visibilit_y</value>
   </data>
+  <data name="CloseAllFrameworkAssembliesCommand" xml:space="preserve">
+    <value>Close All Framework Assemblies</value>
+  </data>
 </root>
