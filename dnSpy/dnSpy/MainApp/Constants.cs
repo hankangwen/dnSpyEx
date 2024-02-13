@@ -17,10 +17,19 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System.Security.Principal;
+
 namespace dnSpy.MainApp {
 	static class Constants {
 		public const string DnSpy = "dnSpy";
 		// Used in filenames so must only have valid filename chars
 		public const string DnSpyFile = DnSpy;
+
+		public static bool IsRunningAsAdministrator { get; }
+
+		static Constants() {
+			using var id = WindowsIdentity.GetCurrent();
+			IsRunningAsAdministrator = new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);
+		}
 	}
 }
