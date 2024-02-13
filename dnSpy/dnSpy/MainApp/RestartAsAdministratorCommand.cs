@@ -45,13 +45,8 @@ namespace dnSpy.MainApp {
 			// If a different handler canceled the close operation, don't restart.
 			if (args.Cancel)
 				return;
-			var location = Assembly.GetEntryAssembly()?.Location;
-			if (location is null) {
-				args.Cancel = true;
-				return;
-			}
 			try {
-				Process.Start(new ProcessStartInfo(location) { UseShellExecute = true, Verb = "runas" });
+				Process.Start(new ProcessStartInfo(Constants.ExecutablePath) { UseShellExecute = true, Verb = "runas" });
 			}
 			catch {
 				args.Cancel = true;
