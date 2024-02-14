@@ -18,6 +18,8 @@
 */
 
 using System;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdFieldDefCOMD : DmdFieldDef {
@@ -31,8 +33,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public DmdFieldDefCOMD(DmdComMetadataReader reader, uint rid, DmdType declaringType, DmdType reflectedType) : base(rid, declaringType, reflectedType) {
 			this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
 			reader.Dispatcher.VerifyAccess();
-
-			uint token = 0x04000000 + rid;
+			uint token = new MDToken(Table.Field, rid).Raw;
 			Attributes = MDAPI.GetFieldAttributes(reader.MetaDataImport, token);
 			Name = MDAPI.GetFieldName(reader.MetaDataImport, token) ?? string.Empty;
 			FieldType = reader.ReadFieldType_COMThread(MDAPI.GetFieldSignatureBlob(reader.MetaDataImport, token), DeclaringType!.GetGenericArguments());
@@ -50,7 +51,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			reader.Dispatcher.VerifyAccess();
 			var marshalType = reader.ReadFieldMarshalType_COMThread(MetadataToken, ReflectedType!.Module, null);
 			var cas = reader.ReadCustomAttributesCore_COMThread((uint)MetadataToken);
-			var fieldOffset = MDAPI.GetFieldOffset(reader.MetaDataImport, (uint)ReflectedType.MetadataToken, 0x04000000 + Rid);
+			var fieldOffset = MDAPI.GetFieldOffset(reader.MetaDataImport, (uint)ReflectedType.MetadataToken, (uint)MetadataToken);
 			return (cas, fieldOffset, marshalType);
 		}
 	}

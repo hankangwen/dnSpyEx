@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdTypeRefCOMD : DmdTypeRef {
@@ -32,29 +34,29 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public DmdTypeRefCOMD(DmdComMetadataReader reader, uint rid, IList<DmdCustomModifier>? customModifiers) : base(reader.Module, rid, customModifiers) {
 			this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
 			reader.Dispatcher.VerifyAccess();
-			uint token = 0x01000000 + rid;
+			uint token = new MDToken(Table.TypeRef, rid).Raw;
 			DmdTypeUtilities.SplitFullName(MDAPI.GetTypeRefName(reader.MetaDataImport, token) ?? string.Empty, out var @namespace, out var name);
 			MetadataNamespace = @namespace;
 			MetadataName = name;
 
-			var resScopeToken = MDAPI.GetTypeRefResolutionScope(reader.MetaDataImport, token);
-			switch (resScopeToken >> 24) {
-			case 0x00:
+			var resScopeToken = new MDToken(MDAPI.GetTypeRefResolutionScope(reader.MetaDataImport, token));
+			switch (resScopeToken.Table) {
+			case Table.Module:
 				TypeScope = new DmdTypeScope(reader.Module);
 				break;
 
-			case 0x01:
+			case Table.TypeRef:
 				TypeScope = DmdTypeScope.Invalid;
-				declTypeToken = (int)resScopeToken;
+				declTypeToken = resScopeToken.ToInt32();
 				break;
 
-			case 0x1A:
-				var moduleName = MDAPI.GetModuleRefName(reader.MetaDataImport, resScopeToken) ?? string.Empty;
+			case Table.ModuleRef:
+				var moduleName = MDAPI.GetModuleRefName(reader.MetaDataImport, resScopeToken.Raw) ?? string.Empty;
 				TypeScope = new DmdTypeScope(reader.GetName(), moduleName);
 				break;
 
-			case 0x23:
-				TypeScope = new DmdTypeScope(reader.ReadAssemblyName_COMThread(resScopeToken & 0x00FFFFFF));
+			case Table.AssemblyRef:
+				TypeScope = new DmdTypeScope(reader.ReadAssemblyName_COMThread(resScopeToken.Rid));
 				break;
 
 			default:

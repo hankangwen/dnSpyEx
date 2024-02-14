@@ -42,16 +42,18 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		readonly DbgDotNetValue instanceValue;
 		readonly DmdType expectedType;
 		readonly string valueExpression;
+		readonly bool addParens;
 		readonly DmdAppDomain appDomain;
 		string dynamicViewProxyExpression;
 		DbgDotNetValue? getDynamicViewValue;
 
-		public DynamicViewMembersValueNodeProvider(DbgDotNetValueNodeProviderFactory valueNodeProviderFactory, LanguageValueNodeFactory valueNodeFactory, DbgDotNetValue instanceValue, DmdType expectedType, string valueExpression, DmdAppDomain appDomain, DbgValueNodeEvaluationOptions evalOptions)
+		public DynamicViewMembersValueNodeProvider(DbgDotNetValueNodeProviderFactory valueNodeProviderFactory, LanguageValueNodeFactory valueNodeFactory, DbgDotNetValue instanceValue, DmdType expectedType, string valueExpression, bool addParens, DmdAppDomain appDomain, DbgValueNodeEvaluationOptions evalOptions)
 			: base(valueNodeFactory, dynamicViewName, valueExpression + ", " + PredefinedFormatSpecifiers.DynamicView, default, evalOptions) {
 			this.valueNodeProviderFactory = valueNodeProviderFactory;
 			this.instanceValue = instanceValue;
 			this.expectedType = expectedType;
 			this.valueExpression = valueExpression;
+			this.addParens = addParens;
 			this.appDomain = appDomain;
 			dynamicViewProxyExpression = string.Empty;
 		}
@@ -101,7 +103,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			"Microsoft.CSharp.dll";
 
 		protected override (DbgDotNetValueNode node, bool canHide) CreateValueNode(DbgEvaluationInfo evalInfo, int index, DbgValueNodeEvaluationOptions options, ReadOnlyCollection<string>? formatSpecifiers) =>
-			CreateValueNode(evalInfo, false, getDynamicViewValue!.Type, getDynamicViewValue, index, options, dynamicViewProxyExpression, formatSpecifiers);
+			CreateValueNode(evalInfo, addParens, getDynamicViewValue!.Type, getDynamicViewValue, index, options, dynamicViewProxyExpression, formatSpecifiers);
 
 		protected override (DbgDotNetValueNode? node, bool canHide) TryCreateInstanceValueNode(DbgEvaluationInfo evalInfo, DbgDotNetValueResult valueResult) {
 			var noResultsNode = DebugViewNoResultsValueNode.TryCreate(evalInfo, Expression, valueResult);

@@ -123,23 +123,27 @@ namespace dnSpy.BamlDecompiler {
 			XamlType type;
 			string name;
 			IMemberDef member;
+			XamlPropertyKind propertyKind;
 
 			if (id > 0x7fff) {
 				var knownProp = Baml.KnownThings.Members((KnownMembers)unchecked((short)-(short)id));
 				type = ResolveType(unchecked((ushort)(short)-(short)knownProp.Parent));
 				name = knownProp.Name;
 				member = knownProp.Property;
+				propertyKind = XamlPropertyKind.Default;
 			}
 			else {
 				var attrRec = Baml.AttributeIdMap[id];
 				type = ResolveType(attrRec.OwnerTypeId);
 				name = attrRec.Name;
+				propertyKind = (XamlPropertyKind)attrRec.AttributeUsage;
 
 				member = null;
 			}
 
 			propertyMap[id] = xamlProp = new XamlProperty(type, name) {
-				ResolvedMember = member
+				ResolvedMember = member,
+				PropertyKind = propertyKind
 			};
 			xamlProp.TryResolve();
 
@@ -157,6 +161,8 @@ namespace dnSpy.BamlDecompiler {
 		public XNamespace GetXmlNamespace(string xmlns) {
 			if (xmlns is null)
 				return null;
+
+			xmlns = IdentifierEscaper.Escape(xmlns);
 
 			if (!xmlnsMap.TryGetValue(xmlns, out var ns))
 				xmlnsMap[xmlns] = ns = XNamespace.Get(xmlns);

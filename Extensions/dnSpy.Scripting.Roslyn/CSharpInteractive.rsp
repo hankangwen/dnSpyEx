@@ -14,6 +14,13 @@
 /u:System.Text
 /u:System.Threading.Tasks
 
+# Add additional references for modern language and runtime features
+/r:System.Runtime.CompilerServices.Unsafe.dll
+/r:System.Buffers.dll
+/r:System.Numerics.Vectors.dll
+/r:System.Memory.dll
+/r:System.Collections.Immutable.dll
+
 # Add extra stuff
 /r:dnSpy.Contracts.Logic.dll
 /r:dnSpy.Contracts.DnSpy.dll

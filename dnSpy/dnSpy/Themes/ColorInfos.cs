@@ -1877,6 +1877,26 @@ namespace dnSpy.Themes {
 				DefaultBackground = "#FF6D6D6D",
 				BackgroundResourceKey = "HyperlinkDisabled",
 			},
+			new BrushColorInfo(ColorType.InfoBarBackground, "") {
+				DefaultBackground = "#FFFDFBAC",
+				BackgroundResourceKey = "InfoBarBackground",
+			},
+			new BrushColorInfo(ColorType.InfoBarText, "") {
+				DefaultBackground = "#FF000000",
+				BackgroundResourceKey = "InfoBarText",
+			},
+			new BrushColorInfo(ColorType.InfoBarInteractionText, "") {
+				DefaultBackground = "#FF3399FF",
+				BackgroundResourceKey = "InfoBarInteractionText",
+			},
+			new BrushColorInfo(ColorType.InfoBarCloseButton, "") {
+				DefaultBackground = "#FF696969",
+				BackgroundResourceKey = "InfoBarCloseButton",
+			},
+			new BrushColorInfo(ColorType.InfoBarCloseButtonHover, "") {
+				DefaultBackground = "#FF000000",
+				BackgroundResourceKey = "InfoBarCloseButtonHover",
+			},
 			new BrushColorInfo(ColorType.LineNumber, "Line number"),
 			new BrushColorInfo(ColorType.ReplLineNumberInput1, "REPL line number #1 (input)"),
 			new BrushColorInfo(ColorType.ReplLineNumberInput2, "REPL line number #2 (input)"),

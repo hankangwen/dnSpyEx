@@ -155,7 +155,7 @@ namespace dnSpy.AsmEditor.Hex.Nodes {
 		}
 
 		public MetadataTableRecordNode? FindTokenNode(uint token) {
-			uint rid = token & 0x00FFFFFF;
+			uint rid = MDToken.ToRID(token);
 			if (rid - 1 >= MetadataTableVM.Rows)
 				return null;
 			TreeNode.EnsureChildrenLoaded();

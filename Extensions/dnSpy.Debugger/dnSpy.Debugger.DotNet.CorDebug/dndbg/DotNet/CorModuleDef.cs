@@ -180,7 +180,7 @@ namespace dndbg.DotNet {
 			corLibTypes = new CorLibTypes(this, UpdateRowId(corLibAsmRef));
 		}
 
-		IAssembly GetCorAssemblyRef() {
+		IAssembly? GetCorAssemblyRef() {
 			if (corModuleDefHelper.IsCorLib == true)
 				return Assembly;
 			if (corModuleDefHelper.IsDynamic)
@@ -234,7 +234,7 @@ namespace dndbg.DotNet {
 		}
 
 		public bool IsValidToken(uint token) {
-			if ((token & 0x00FFFFFF) == 0)
+			if (MDToken.ToRID(token) == 0)
 				return false;
 			return MDAPI.IsValidToken(mdi, token);
 		}
@@ -979,7 +979,7 @@ namespace dndbg.DotNet {
 		void UpdateTypeTables(uint[] tokens) {
 			Array.Sort(tokens);
 			foreach (uint token in tokens) {
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				Debug.Assert(rid != 0);
 				Debug.Assert(!ridToNested.ContainsKey(rid));
 
@@ -1016,7 +1016,7 @@ namespace dndbg.DotNet {
 			foreach (var token in tokens) {
 				bool b;
 				CorTypeDef td;
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				if (token == type.OriginalToken.Raw)
 					td = type;
 				else {
@@ -1056,7 +1056,7 @@ namespace dndbg.DotNet {
 					break;
 				if (rid == 0 || !hash.Add(rid))
 					break;
-				rid = MDAPI.GetTypeDefEnclosingType(mdi, new MDToken(Table.TypeDef, rid).Raw) & 0x00FFFFFF;
+				rid = MDToken.ToRID(MDAPI.GetTypeDefEnclosingType(mdi, new MDToken(Table.TypeDef, rid).Raw));
 			}
 			var tokens = new uint[hash.Count];
 			int i = 0;

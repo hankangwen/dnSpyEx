@@ -114,12 +114,12 @@ namespace dnSpy.Documents.Tabs.DocViewer.ToolTips {
 
 			provider.CreateNewOutput();
 			try {
-				var docProvider = XmlDocLoader.LoadDocumentation(gp.Module);
-				if (docProvider is not null) {
-					if (!provider.Output.WriteXmlDocGeneric(GetDocumentation(docProvider, gp.Owner), gp.Name) && gp.Owner is TypeDef) {
+				if (gp.Module is not null) {
+					var docProvider = XmlDocLoader.LoadDocumentation(gp.Module);
+					if (docProvider is not null && !provider.Output.WriteXmlDocGeneric(GetDocumentation(docProvider, gp.Owner), gp.Name) && gp.Owner is TypeDef def) {
 						// If there's no doc available, use the parent class' documentation if this
 						// is a generic type parameter (and not a generic method parameter).
-						var owner = ((TypeDef)gp.Owner).DeclaringType;
+						var owner = def.DeclaringType;
 						while (owner is not null) {
 							if (provider.Output.WriteXmlDocGeneric(GetDocumentation(docProvider, owner), gp.Name))
 								break;
@@ -149,7 +149,7 @@ namespace dnSpy.Documents.Tabs.DocViewer.ToolTips {
 			context.Decompiler.WriteToolTip(provider.Output, @ref, null);
 			provider.CreateNewOutput();
 			try {
-				if (resolvedRef is IMemberDef) {
+				if (resolvedRef is IMemberDef && resolvedRef.Module is not null) {
 					var docProvider = XmlDocLoader.LoadDocumentation(resolvedRef.Module);
 					if (docProvider is not null)
 						provider.Output.WriteXmlDoc(GetDocumentation(docProvider, resolvedRef));
@@ -177,9 +177,9 @@ namespace dnSpy.Documents.Tabs.DocViewer.ToolTips {
 			provider.CreateNewOutput();
 			var method = parameter.Parameter.Method;
 			try {
-				var docProvider = XmlDocLoader.LoadDocumentation(method.Module);
-				if (docProvider is not null) {
-					if (!provider.Output.WriteXmlDocParameter(GetDocumentation(docProvider, method), parameter.Name)) {
+				if (method.Module is not null) {
+					var docProvider = XmlDocLoader.LoadDocumentation(method.Module);
+					if (docProvider is not null && !provider.Output.WriteXmlDocParameter(GetDocumentation(docProvider, method), parameter.Name)) {
 						var owner = method.DeclaringType;
 						while (owner is not null) {
 							if (provider.Output.WriteXmlDocParameter(GetDocumentation(docProvider, owner), parameter.Name))

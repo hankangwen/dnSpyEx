@@ -21,10 +21,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using dndbg.COM.MetaHost;
 using dnlib.DotNet;
 using dnlib.PE;
+using dnSpy.Debugger.DotNet.CorDebug.Native;
 using dnSpy.Debugger.Shared;
 using Microsoft.Win32;
 
@@ -129,18 +133,22 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Utilities {
 		}
 
 		public static string GetDebugShimFilename(int bitness) {
-#if NETFRAMEWORK
-			var basePath = Contracts.App.AppDirectories.BinDirectory;
-			basePath = Path.Combine(basePath, "debug", "core");
 			var filename = FileUtilities.GetNativeDllFilename("dbgshim");
+			var basePath = Contracts.App.AppDirectories.BinDirectory;
+#if NETFRAMEWORK
+			basePath = Path.Combine(basePath, "debug", "core");
 			switch (bitness) {
 			case 32:	return Path.Combine(basePath, "x86", filename);
 			case 64:	return Path.Combine(basePath, "x64", filename);
 			default:	throw new ArgumentOutOfRangeException(nameof(bitness));
 			}
 #elif NET
-			var filename = FileUtilities.GetNativeDllFilename("dbgshim");
-			return Path.Combine(Path.GetDirectoryName(typeof(void).Assembly.Location)!, filename);
+			string path = Path.Combine(basePath, filename);
+			// If dnSpy is published, the file will be located in the app directory
+			if (File.Exists(path))
+				return path;
+			// If dnSpy is ran from source, the file will be located in a different directory
+			return Path.Combine(basePath, "runtimes", RuntimeInformation.RuntimeIdentifier, "native", filename);
 #else
 #error Unknown target framework
 #endif
@@ -188,6 +196,33 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Utilities {
 			catch {
 			}
 			return false;
+		}
+
+		public static string? GetLatestInstalledFrameworkVersion() =>
+			GetInstalledFrameworkVersions().OrderByDescending(x => x).FirstOrDefault();
+
+		public static IEnumerable<string> GetInstalledFrameworkVersions() {
+			var clsid = new Guid("9280188D-0E8E-4867-B30C-7FA83884E8DE");
+			var riid = typeof(ICLRMetaHost).GUID;
+			var mh = (ICLRMetaHost)NativeMethods.CLRCreateInstance(ref clsid, ref riid);
+
+			int hr = mh.EnumerateInstalledRuntimes(out var iter);
+			if (hr < 0)
+				yield break;
+			for (;;) {
+				hr = iter.Next(1, out object obj, out uint fetched);
+				if (hr < 0 || fetched == 0)
+					break;
+
+				var rtInfo = (ICLRRuntimeInfo)obj;
+				uint chBuffer = 0;
+				var sb = new StringBuilder(300);
+				hr = rtInfo.GetVersionString(sb, ref chBuffer);
+				sb.EnsureCapacity((int)chBuffer);
+				hr = rtInfo.GetVersionString(sb, ref chBuffer);
+
+				yield return sb.ToString();
+			}
 		}
 	}
 }

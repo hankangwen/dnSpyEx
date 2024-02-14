@@ -54,7 +54,7 @@ namespace dnSpy.Contracts.Hex.Files.DotNet {
 		public abstract DotNetMetadataHeaders Metadata { get; }
 
 		/// <summary>
-		/// Gets a structure or null 
+		/// Gets a structure or null
 		/// </summary>
 		/// <param name="position">Position</param>
 		/// <returns></returns>
@@ -136,6 +136,11 @@ namespace dnSpy.Contracts.Hex.Files.DotNet {
 		/// Gets the sorted mask, this value is cached
 		/// </summary>
 		public abstract ulong SortedMask { get; }
+
+		/// <summary>
+		/// All columns that can be 2 or 4 bytes are forced to be 4 bytes.
+		/// </summary>
+		public abstract bool ForceAllBigColumns { get; }
 
 		/// <summary>
 		/// Constructor

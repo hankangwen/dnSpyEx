@@ -51,7 +51,7 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 					if (res.ErrorMessage is not null)
 						return valueNodeFactory.CreateError(evalInfo, compExprInfo.Name, res.ErrorMessage, compExprInfo.Expression, (compExprInfo.Flags & DbgEvaluationResultFlags.SideEffects) != 0);
 					//TODO: Pass in compExprInfo.CustomTypeInfo, or attach it to the DbgDotNetValueNode
-					return valueNodeFactory.Create(evalInfo, compExprInfo.Name, res.Value!, compExprInfo.FormatSpecifiers, nodeOptions, compExprInfo.Expression, compExprInfo.ImageName, (compExprInfo.Flags & DbgEvaluationResultFlags.ReadOnly) != 0, (compExprInfo.Flags & DbgEvaluationResultFlags.SideEffects) != 0, expectedType);
+					return valueNodeFactory.Create(evalInfo, compExprInfo.Name, res.Value!, compExprInfo.FormatSpecifiers, nodeOptions, compExprInfo.Expression, compExprInfo.ImageName, (compExprInfo.Flags & DbgEvaluationResultFlags.ReadOnly) != 0, (compExprInfo.Flags & DbgEvaluationResultFlags.SideEffects) != 0, expectedType, compExprInfo.CustomTypeInfo);
 				}
 				catch {
 					res.Value?.Dispose();

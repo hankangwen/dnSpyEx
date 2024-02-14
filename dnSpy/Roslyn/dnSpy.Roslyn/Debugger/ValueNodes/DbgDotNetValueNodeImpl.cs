@@ -51,8 +51,9 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		readonly DbgDotNetText valueText;
 		ReadOnlyCollection<string>? formatSpecifiers;
 		readonly ColumnFormatter? columnFormatter;
+		readonly AdditionalTypeInfoState additionalTypeInfo;
 
-		public DbgDotNetValueNodeImpl(LanguageValueNodeFactory valueNodeFactory, DbgDotNetValueNodeProvider? childNodeProvider, DbgDotNetText name, DbgDotNetValueNodeInfo? nodeInfo, string expression, string imageName, bool isReadOnly, bool causesSideEffects, DmdType? expectedType, DmdType? actualType, string? errorMessage, DbgDotNetText valueText, ReadOnlyCollection<string>? formatSpecifiers, ColumnFormatter? columnFormatter) {
+		public DbgDotNetValueNodeImpl(LanguageValueNodeFactory valueNodeFactory, DbgDotNetValueNodeProvider? childNodeProvider, DbgDotNetText name, DbgDotNetValueNodeInfo? nodeInfo, string expression, string imageName, bool isReadOnly, bool causesSideEffects, DmdType? expectedType, AdditionalTypeInfoState additionalTypeInfo, DmdType? actualType, string? errorMessage, DbgDotNetText valueText, ReadOnlyCollection<string>? formatSpecifiers, ColumnFormatter? columnFormatter) {
 			if (name.Parts is null && columnFormatter is null)
 				throw new ArgumentException();
 			this.valueNodeFactory = valueNodeFactory ?? throw new ArgumentNullException(nameof(valueNodeFactory));
@@ -67,6 +68,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			ExpectedType = expectedType;
 			ActualType = actualType;
 			ErrorMessage = errorMessage;
+			this.additionalTypeInfo = additionalTypeInfo;
 			this.valueText = valueText;
 			this.formatSpecifiers = formatSpecifiers;
 			this.columnFormatter = columnFormatter;
@@ -101,12 +103,14 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		}
 
 		public override bool FormatActualType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterTypeOptions options, DbgValueFormatterOptions valueOptions, CultureInfo? cultureInfo) =>
-			columnFormatter?.FormatActualType(evalInfo, output, formatter, options, valueOptions, cultureInfo) ??
-			FormatDebuggerDisplayAttributeType(evalInfo, output, formatter, valueOptions, cultureInfo);
+			columnFormatter?.FormatActualType(evalInfo, output, formatter, options, valueOptions, cultureInfo) == true ||
+			FormatDebuggerDisplayAttributeType(evalInfo, output, formatter, valueOptions, cultureInfo) ||
+			FormatActualTypeLanguageFormatter(evalInfo, output, formatter, options, cultureInfo);
 
 		public override bool FormatExpectedType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterTypeOptions options, DbgValueFormatterOptions valueOptions, CultureInfo? cultureInfo) =>
-			columnFormatter?.FormatExpectedType(evalInfo, output, formatter, options, valueOptions, cultureInfo) ??
-			FormatDebuggerDisplayAttributeType(evalInfo, output, formatter, valueOptions, cultureInfo);
+			columnFormatter?.FormatExpectedType(evalInfo, output, formatter, options, valueOptions, cultureInfo) == true ||
+			FormatDebuggerDisplayAttributeType(evalInfo, output, formatter, valueOptions, cultureInfo) ||
+			FormatExpectedTypeLanguageFormatter(evalInfo, output, formatter, options, cultureInfo);
 
 		bool FormatDebuggerDisplayAttributeType(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterOptions options, CultureInfo? cultureInfo) {
 			if (Value is null)
@@ -119,6 +123,28 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 				return false;
 			var displayAttrFormatter = new DebuggerDisplayAttributeFormatter(evalInfo, languageFormatter, output, options, cultureInfo);
 			return displayAttrFormatter.FormatType(Value);
+		}
+
+		bool FormatActualTypeLanguageFormatter(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterTypeOptions options, CultureInfo? cultureInfo) {
+			if (formatter is not LanguageFormatter languageFormatter)
+				return false;
+			if (ActualType is null || ExpectedType is null)
+				return false;
+			if (ActualType != ExpectedType)
+				return false;
+
+			languageFormatter.FormatType(evalInfo, output, ActualType, additionalTypeInfo, Value, options, cultureInfo);
+			return true;
+		}
+
+		bool FormatExpectedTypeLanguageFormatter(DbgEvaluationInfo evalInfo, IDbgTextWriter output, DbgDotNetFormatter formatter, DbgValueFormatterTypeOptions options, CultureInfo? cultureInfo) {
+			if (formatter is not LanguageFormatter languageFormatter)
+				return false;
+			if (ExpectedType is null)
+				return false;
+
+			languageFormatter.FormatType(evalInfo, output, ExpectedType, additionalTypeInfo, Value, options, cultureInfo);
+			return true;
 		}
 
 		public override ulong GetChildCount(DbgEvaluationInfo evalInfo) =>

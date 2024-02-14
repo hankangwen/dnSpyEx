@@ -93,7 +93,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 			var typeName = SystemWindowsFormsImageListStreamer.AssemblyQualifiedName;
 			return new ResourceElement {
 				Name = opts.Name,
-				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj)),
+				ResourceData = new BinaryResourceData(new UserResourceType(typeName, ResourceTypeCode.UserTypes), SerializationUtilities.Serialize(obj), SerializationFormat.BinaryFormatter),
 			};
 		}
 
@@ -125,12 +125,14 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 		/// <returns></returns>
 		public static ImageListOptions ReadImageData(byte[] imageData) {
 			var imageList = new ImageList();
+#pragma warning disable SYSLIB0050
 			var info = new SerializationInfo(typeof(ImageListStreamer), new FormatterConverter());
 			info.AddValue("Data", imageData);
 			var ctor = typeof(ImageListStreamer).GetConstructor(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }, null);
 			if (ctor is null)
 				throw new InvalidOperationException();
 			var streamer = (ImageListStreamer)ctor.Invoke(new object[] { info, new StreamingContext(StreamingContextStates.All) });
+#pragma warning restore SYSLIB0050
 			imageList.ImageStream = streamer;
 
 			var opts = new ImageListOptions();

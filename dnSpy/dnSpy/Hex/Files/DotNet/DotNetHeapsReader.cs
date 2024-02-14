@@ -129,7 +129,8 @@ namespace dnSpy.Hex.Files.DotNet {
 			USHeap? usHeap = null;
 			BlobHeap? blobHeap = null;
 			GUIDHeap? guidHeap = null;
-			TablesHeap? tablesHeap = null;
+			TablesHeapImpl? tablesHeap = null;
+			bool forceAllBig = false;
 			foreach (var ssh in storageStreamHeaders) {
 				var span = new HexBufferSpan(file.Buffer, ssh.DataSpan);
 
@@ -166,6 +167,11 @@ namespace dnSpy.Hex.Files.DotNet {
 					}
 					break;
 
+				case "#JTD":
+					forceAllBig = true;
+					list.Add(new UnknownHeapImpl(span));
+					continue;
+
 				case "#~":	// Only if #Schema is used
 				case "#-":
 					if (tablesHeap is null && span.Length >= TablesHeapImpl.MinimumSize) {
@@ -177,6 +183,7 @@ namespace dnSpy.Hex.Files.DotNet {
 				}
 				list.Add(new UnknownHeapImpl(span));
 			}
+			tablesHeap?.SetForceAllBigColumns(forceAllBig);
 			return list.ToArray();
 		}
 

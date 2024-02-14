@@ -25,6 +25,7 @@ using dnSpy.Contracts.Debugger.DotNet.Evaluation;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation.ValueNodes;
 using dnSpy.Contracts.Debugger.DotNet.Text;
 using dnSpy.Contracts.Debugger.Evaluation;
+using dnSpy.Roslyn.Debugger.Formatters;
 
 namespace dnSpy.Roslyn.Debugger.ValueNodes {
 	sealed class PointerValueNodeProvider : DbgDotNetValueNodeProvider {
@@ -35,13 +36,16 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 
 		readonly DbgDotNetValueNodeProviderFactory valueNodeProviderFactory;
 		readonly DbgDotNetValue value;
+		readonly AdditionalTypeInfoState typeInfo;
 		DbgDotNetValue? derefValue;
 		bool initialized;
 
-		public PointerValueNodeProvider(DbgDotNetValueNodeProviderFactory valueNodeProviderFactory, string expression, DbgDotNetValue value) {
+		public PointerValueNodeProvider(DbgDotNetValueNodeProviderFactory valueNodeProviderFactory, string expression, DbgDotNetValue value, AdditionalTypeInfoState typeInfo) {
 			Debug.Assert(IsSupported(value));
 			this.valueNodeProviderFactory = valueNodeProviderFactory;
 			this.value = value;
+			typeInfo.DynamicTypeIndex++;
+			this.typeInfo = typeInfo;
 			Expression = expression;
 		}
 
@@ -64,7 +68,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			var derefExpr = valueNodeProviderFactory.GetDereferenceExpression(Expression);
 			ref readonly var derefName = ref valueNodeProviderFactory.GetDereferencedName();
 			var nodeInfo = new DbgDotNetValueNodeInfo(derefValue, derefExpr);
-			var res = valueNodeProviderFactory.Create(evalInfo, true, derefValue.Type, nodeInfo, options);
+			var res = valueNodeProviderFactory.Create(evalInfo, true, derefValue.Type, typeInfo, nodeInfo, options);
 			DbgDotNetValueNode valueNode;
 			if (res.ErrorMessage is not null)
 				valueNode = valueNodeFactory.CreateError(evalInfo, DbgDotNetText.Empty, res.ErrorMessage, derefExpr, false);

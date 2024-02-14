@@ -20,7 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using dnlib.DotNet;
 using dnSpy.Contracts.Debugger.CallStack;
@@ -33,6 +35,7 @@ using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
 using dnSpy.Contracts.Debugger.Text.DnSpy;
 using dnSpy.Contracts.Decompiler;
+using dnSpy.Debugger.DotNet.Metadata;
 using dnSpy.Roslyn.Text;
 using dnSpy.Roslyn.Text.Classification;
 using Microsoft.CodeAnalysis;
@@ -563,6 +566,56 @@ namespace dnSpy.Roslyn.Debugger.ExpressionCompiler {
 		protected abstract bool IsCaseSensitive { get; }
 		public override bool TryGetAliasInfo(string aliasName, out DbgDotNetParsedAlias aliasInfo) =>
 			AliasConstants.TryGetAliasInfo(aliasName, IsCaseSensitive, out aliasInfo);
+
+		public override DbgDotNetCustomTypeInfo? CreateCustomTypeInfo(IDmdCustomAttributeProvider customAttributeProvider) {
+			var tupleAttr = customAttributeProvider.FindCustomAttribute("System.Runtime.CompilerServices.TupleElementNamesAttribute", false);
+			var dynamicAttr = customAttributeProvider.FindCustomAttribute("System.Runtime.CompilerServices.DynamicAttribute", false);
+
+			ReadOnlyCollection<string?>? tupleNames = null;
+			if (tupleAttr is not null && tupleAttr.ConstructorArguments.Count == 1 && tupleAttr.ConstructorArguments[0].Value is IList<DmdCustomAttributeTypedArgument> names) {
+				string?[]? array = new string?[names.Count];
+				for (var i = 0; i < names.Count; i++) {
+					var argValue = names[i].Value;
+					if (argValue is string str)
+						array[i] = str;
+					else if (argValue is null)
+						array[i] = null;
+					else {
+						array = null;
+						break;
+					}
+				}
+
+				if (array is not null)
+					tupleNames = new ReadOnlyCollection<string?>(array);
+			}
+
+			ReadOnlyCollection<byte>? dynamicFlags = null;
+			if (dynamicAttr is not null) {
+				if (dynamicAttr.ConstructorArguments.Count == 0)
+					dynamicFlags = new ReadOnlyCollection<byte>(new byte[] { 1 });
+				else if (dynamicAttr.ConstructorArguments.Count == 1 && dynamicAttr.ConstructorArguments[0].Value is IList<DmdCustomAttributeTypedArgument> flags) {
+					bool[]? array = new bool[flags.Count];
+					for (var i = 0; i < flags.Count; i++) {
+						var argValue = flags[i].Value;
+						if (argValue is bool b)
+							array[i] = b;
+						else {
+							array = null;
+							break;
+						}
+					}
+
+					if (array is not null)
+						dynamicFlags = DynamicFlagsCustomTypeInfo.ToBytes(array);
+				}
+			}
+
+			var encoded = CustomTypeInfo.Encode(dynamicFlags, tupleNames);
+			if (encoded is null)
+				return null;
+			return new DbgDotNetCustomTypeInfo(CustomTypeInfo.PayloadTypeId, encoded);
+		}
 
 		protected DbgDotNetText CreateText(DbgDotNetAliasKind kind, string expression) {
 			DbgTextColor color;

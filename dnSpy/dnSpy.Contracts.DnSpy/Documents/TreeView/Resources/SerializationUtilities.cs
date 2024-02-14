@@ -56,7 +56,7 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 			var userType = new UserResourceType(typeName, ResourceTypeCode.UserTypes);
 			var rsrcElem = new ResourceElement {
 				Name = Path.GetFileName(filename),
-				ResourceData = new BinaryResourceData(userType, serializedData),
+				ResourceData = new BinaryResourceData(userType, serializedData, SerializationFormat.BinaryFormatter),
 			};
 
 			return rsrcElem;
@@ -67,12 +67,15 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 		/// </summary>
 		/// <param name="obj">Data</param>
 		/// <returns></returns>
-		public static byte[] Serialize(object obj) {
+		public static byte[] Serialize(object? obj) {
+			if (obj is null)
+				return Array.Empty<byte>();
+
 			//TODO: The asm names of the saved types are saved in the serialized data. If the current
 			//		module is eg. a .NET 2.0 asm, you should replace the versions from 4.0.0.0 to 2.0.0.0.
+#pragma warning disable SYSLIB0011
 			var formatter = new BinaryFormatter();
 			var outStream = new MemoryStream();
-#pragma warning disable SYSLIB0011
 			formatter.Serialize(outStream, obj);
 #pragma warning restore SYSLIB0011
 			return outStream.ToArray();

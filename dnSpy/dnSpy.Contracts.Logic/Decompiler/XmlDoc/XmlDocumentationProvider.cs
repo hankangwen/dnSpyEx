@@ -328,6 +328,17 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				return h;
 			}
 		}
+
+		static int GetHashCode(StringBuilder key)
+		{
+			unchecked {
+				int h = 0;
+				for (int i = 0; i < key.Length; i++) {
+					h = (h << 5) - h + key[i];
+				}
+				return h;
+			}
+		}
 		#endregion
 
 		#region GetDocumentation
@@ -348,8 +359,7 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 		{
 			if (key is null)
 				return null;
-			//TODO: Try to prevent ToString()
-			return GetDocumentation(key.ToString(), true);
+			return GetDocumentation(key, true);
 		}
 
 		string? GetDocumentation(string key, bool allowReload)
@@ -383,6 +393,44 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 					} catch (XmlException) {
 						// may happen if the documentation file was changed so that the file position no longer starts on a valid XML element
 						return allowReload ? ReloadAndGetDocumentation(key) : null;
+					}
+				}
+				return val;
+			}
+		}
+
+		string? GetDocumentation(StringBuilder key, bool allowReload)
+		{
+			int hashcode = GetHashCode(key);
+			var index = this.index; // read volatile field
+			// index is sorted, so we can use binary search
+			int m = Array.BinarySearch(index, new IndexEntry(hashcode, 0));
+			if (m < 0)
+				return null;
+			// correct hash code found.
+			// possibly there are multiple items with the same hash, so go to the first.
+			while (--m >= 0 && index[m].HashCode == hashcode);
+			// m is now 1 before the first item with the correct hash
+
+			var keyStr = key.ToString();
+			XmlDocumentationCache cache = this.cache;
+			lock (cache) {
+				if (!cache.TryGet(keyStr, out string? val)) {
+					try {
+						// go through all items that have the correct hash
+						while (++m < index.Length && index[m].HashCode == hashcode) {
+							val = LoadDocumentation(keyStr, index[m].PositionInFile);
+							if (val is not null)
+								break;
+						}
+						// cache the result (even if it is null)
+						cache.Add(keyStr, val);
+					} catch (IOException) {
+						// may happen if the documentation file was deleted/is inaccessible/changed (EndOfStreamException)
+						return allowReload ? ReloadAndGetDocumentation(keyStr) : null;
+					} catch (XmlException) {
+						// may happen if the documentation file was changed so that the file position no longer starts on a valid XML element
+						return allowReload ? ReloadAndGetDocumentation(keyStr) : null;
 					}
 				}
 				return val;

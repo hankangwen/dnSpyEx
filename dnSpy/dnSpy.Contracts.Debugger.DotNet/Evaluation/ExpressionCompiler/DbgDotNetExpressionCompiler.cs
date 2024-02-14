@@ -81,6 +81,12 @@ namespace dnSpy.Contracts.Debugger.DotNet.Evaluation.ExpressionCompiler {
 		/// <param name="aliasInfo">Updated with alias info</param>
 		/// <returns></returns>
 		public abstract bool TryGetAliasInfo(string aliasName, out DbgDotNetParsedAlias aliasInfo);
+
+		/// <summary>
+		///	Creates encoded custom type information for use by the EE.
+		/// </summary>
+		/// <param name="customAttributeProvider">Custom attributes used to construct the custom type info</param>
+		public abstract DbgDotNetCustomTypeInfo? CreateCustomTypeInfo(IDmdCustomAttributeProvider customAttributeProvider);
 	}
 
 	/// <summary>Metadata</summary>

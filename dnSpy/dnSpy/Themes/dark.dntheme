@@ -749,5 +749,10 @@
 		<color name="hyperlinknormal" bg="#FF59B1CC" />
 		<color name="hyperlinkmouseover" bg="#FFB0CC80" />
 		<color name="hyperlinkdisabled" bg="#FF6D6D6D" />
+		<color name="infobarbackground" bg="#FFFDFBAC" />
+		<color name="infobartext" bg="#FF000000" />
+		<color name="infobarinteractiontext" bg="#FF297ACC" />
+		<color name="infobarclosebutton" bg="#FF696969" />
+		<color name="infobarclosebuttonhover" bg="#FF000000" />
 	</colors>
 </theme>

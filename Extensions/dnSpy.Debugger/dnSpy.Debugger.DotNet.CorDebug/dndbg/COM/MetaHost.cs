@@ -49,8 +49,8 @@ namespace dndbg.COM.MetaHost {
 		[return: MarshalAs(UnmanagedType.Interface)]
 		object GetRuntime([MarshalAs(UnmanagedType.LPWStr)] [In] string pwzVersion, [In] ref Guid riid);
 		void GetVersionFromFile([MarshalAs(UnmanagedType.LPWStr)] [In] string pwzFilePath, [MarshalAs(UnmanagedType.LPWStr)] [Out] StringBuilder pwzBuffer, [In] [Out] ref uint pcchBuffer);
-		[return: MarshalAs(UnmanagedType.Interface)]
-		IEnumUnknown EnumerateInstalledRuntimes();
+		[PreserveSig]
+		int EnumerateInstalledRuntimes([MarshalAs(UnmanagedType.Interface)] out IEnumUnknown ppEnumerator);
 		[PreserveSig]
 		int EnumerateLoadedRuntimes([In] IntPtr hndProcess, [MarshalAs(UnmanagedType.Interface)] out IEnumUnknown ppEnumerator);
 		void RequestRuntimeLoadedNotification([MarshalAs(UnmanagedType.Interface)] [In] ICLRMetaHost pCallbackFunction);

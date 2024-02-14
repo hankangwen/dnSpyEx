@@ -19,10 +19,13 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using dndbg.COM.MetaData;
+using dndbg.DotNet;
 using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using dnlib.PE;
+using dnSpy.Contracts.Utilities;
 
 namespace dndbg.Engine {
 	sealed class BreakProcessHelper {
@@ -65,50 +68,98 @@ namespace dndbg.Engine {
 		bool OnLoadModule(DebugEventBreakpointConditionContext ctx) {
 			var lmArgs = (LoadModuleDebugCallbackEventArgs)ctx.EventArgs;
 			var mod = lmArgs.CorModule;
-			if (mod is null || mod.IsDynamic || mod.IsInMemory)
+			if (mod is null || !IsPrimaryProgramModule(mod))
 				return false;
 
-			uint memberToken = 0;
+			uint methodToken = 0;
 			if (type == BreakProcessKind.ModuleCctorOrEntryPoint)
-				memberToken = GetGlobalStaticConstructor(mod.GetMetaDataInterface<IMetaDataImport>());
+				methodToken = GetGlobalStaticConstructor(mod.GetMetaDataInterface<IMetaDataImport>());
 
-			if (memberToken == 0) {
-				var filename = mod.Name;
-				uint epToken = GetEntryPointToken(filename);
-				if ((Table)(epToken >> 24) != Table.Method || (epToken & 0x00FFFFFF) == 0)
-					return false;
-				memberToken = epToken;
-			}
+			if (methodToken == 0)
+				methodToken = GetEntryPointToken(mod);
+
+			if (MDToken.ToTable(methodToken) != Table.Method || MDToken.ToRID(methodToken) == 0)
+				return false;
 
 			debugger.RemoveBreakpoint(breakpoint!);
 			breakpoint = null;
 			Debug.Assert(!mod.IsDynamic && !mod.IsInMemory);
 			// It's not a dyn/in-mem module so id isn't used
-			var moduleId = mod.GetModuleId(uint.MaxValue);
-			SetILBreakpoint(moduleId, memberToken);
+			var moduleId = debugger.TryGetModuleId(mod) ?? mod.GetModuleId(uint.MaxValue);
+			SetILBreakpoint(moduleId, methodToken);
 			return false;
 		}
 
-		static uint GetEntryPointToken(string? filename) {
-			try {
-				using (var peImage = new PEImage(filename)) {
-					var dotNetDir = peImage.ImageNTHeaders.OptionalHeader.DataDirectories[14];
-					if (dotNetDir.VirtualAddress == 0)
-						return 0;
-					if (dotNetDir.Size < 0x48)
-						return 0;
-					var cor20HeaderReader = peImage.CreateReader(dotNetDir.VirtualAddress, 0x48);
-					var cor20Header = new ImageCor20Header(ref cor20HeaderReader, true);
-					if ((cor20Header.Flags & ComImageFlags.NativeEntryPoint) != 0)
-						return 0;
-					uint token = cor20Header.EntryPointToken_or_RVA;
-					if ((Table)(token >> 24) == Table.Method && (token & 0x00FFFFFF) != 0)
-						return token;
+		bool IsPrimaryProgramModule(CorModule module) {
+			if (module.IsDynamic)
+				return false;
+
+			if (module.IsInMemory)
+				return true;
+
+			var filename = module.Name;
+			if (!File.Exists(filename))
+				return true;
+
+			if (GacInfo.IsGacPath(filename))
+				return false;
+			if (IsInDirOrSubDir(Path.GetDirectoryName(debugger.CLRPath)!, filename))
+				return false;
+
+			return true;
+		}
+
+		static bool IsInDirOrSubDir(string dir, string filename) {
+			dir = dir.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+			if (dir.Length > 0 && dir[dir.Length - 1] != Path.DirectorySeparatorChar)
+				dir += Path.DirectorySeparatorChar.ToString();
+			filename = filename.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+			return filename.StartsWith(dir, StringComparison.OrdinalIgnoreCase);
+		}
+
+		static uint GetEntryPointToken(CorModule mod) {
+			if (File.Exists(mod.Name)) {
+				try {
+					using var peImage = new PEImage(mod.Name);
+					if (GetEntryPointToken(peImage, out uint entryPointToken))
+						return entryPointToken;
+				}
+				catch {
 				}
 			}
-			catch {
+			var process = mod.Process;
+			if (process is not null) {
+				try {
+					using var moduleReader = new ProcessBinaryReader(new CorProcessReader(process), mod.Address);
+					using var dataReaderFactory = new ProcessDataReaderFactory(moduleReader, mod.Size);
+
+					var imageLayout = !mod.IsDynamic && mod.IsInMemory ? ImageLayout.File : ImageLayout.Memory;
+					using var peImage = new PEImage(dataReaderFactory, imageLayout, true);
+
+					if (GetEntryPointToken(peImage, out uint entryPointToken))
+						return entryPointToken;
+				}
+				catch {
+				}
 			}
 			return 0;
+		}
+
+		static bool GetEntryPointToken(PEImage peImage, out uint entryPointToken) {
+			entryPointToken = 0;
+			var dotNetDir = peImage.ImageNTHeaders.OptionalHeader.DataDirectories[14];
+			if (dotNetDir.VirtualAddress == 0)
+				return false;
+			var cor20HeaderReader = peImage.CreateReader(dotNetDir.VirtualAddress, 0x48);
+			var cor20Header = new ImageCor20Header(ref cor20HeaderReader, true);
+			if ((cor20Header.Flags & ComImageFlags.NativeEntryPoint) != 0)
+				return false;
+			uint token = cor20Header.EntryPointToken_or_RVA;
+			if (MDToken.ToTable(token) == Table.Method && MDToken.ToRID(token) != 0) {
+				entryPointToken = token;
+				return true;
+			}
+			return false;
 		}
 
 		static uint GetGlobalStaticConstructor(IMetaDataImport? mdi) {

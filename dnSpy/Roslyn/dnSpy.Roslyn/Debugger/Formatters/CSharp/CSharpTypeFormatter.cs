@@ -40,14 +40,17 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 		const string GENERICS_CLOSE_PAREN = ">";
 		const string TUPLE_OPEN_PAREN = "(";
 		const string TUPLE_CLOSE_PAREN = ")";
-		const string METHOD_OPEN_PAREN = "(";
-		const string METHOD_CLOSE_PAREN = ")";
+		const string FNPTR_CALLCONV_OPEN_PAREN = "[";
+		const string FNPTR_CALLCONV_CLOSE_PAREN = "]";
+		const string FNPTR_OPEN_PAREN = "<";
+		const string FNPTR_CLOSE_PAREN = ">";
 		const string HEX_PREFIX = "0x";
 		const string IDENTIFIER_ESCAPE = "@";
 		const string BYREF_KEYWORD = "ref";
 		const string IN_KEYWORD = "in";
 		const string OUT_KEYWORD = "out";
 		const string READONLY_KEYWORD = "readonly";
+		const string DELEGATE_KEYWORD = "delegate";
 		const int MAX_ARRAY_RANK = 100;
 
 		bool ShowArrayValueSizes => (options & TypeFormatterOptions.ShowArrayValueSizes) != 0;
@@ -115,23 +118,19 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 		void WriteIdentifier(string? id, DbgTextColor color) => OutputWrite(GetFormattedIdentifier(id), color);
 
-		struct TypeFormatterState {
-			public int DynamicTypeIndex;
-			public int NativeIntTypeIndex;
-			public int TupleNameIndex;
-		}
+		public void Format(DmdType type, DbgDotNetValue? value = null, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null, DmdParameterInfo? pd = null, bool forceReadOnly = false) =>
+			Format(type, new AdditionalTypeInfoState(additionalTypeInfoProvider), value, pd, forceReadOnly);
 
-		public void Format(DmdType type, DbgDotNetValue? value = null, IAdditionalTypeInfoProvider? additionalTypeInfoProvider = null, DmdParameterInfo? pd = null, bool forceReadOnly = false) {
+		public void Format(DmdType type, AdditionalTypeInfoState state, DbgDotNetValue? value = null, DmdParameterInfo? pd = null, bool forceReadOnly = false) {
 			WriteRefIfByRef(type, pd, forceReadOnly);
-			TypeFormatterState state = default;
 			if (type.IsByRef) {
 				type = type.GetElementType()!;
 				state.DynamicTypeIndex++;
 			}
-			FormatCore(type, value, additionalTypeInfoProvider, ref state);
+			FormatCore(type, value, ref state);
 		}
 
-		void FormatCore(DmdType type, DbgDotNetValue? value, IAdditionalTypeInfoProvider? additionalTypeInfoProvider, ref TypeFormatterState state) {
+		void FormatCore(DmdType type, DbgDotNetValue? value, ref AdditionalTypeInfoState state) {
 			if (type is null)
 				throw new ArgumentNullException(nameof(type));
 
@@ -154,35 +153,52 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 						state.DynamicTypeIndex++;
 					} while (type.IsArray);
 					var t = arrayTypesList[arrayTypesList.Count - 1];
-					FormatCore(t.type.GetElementType()!, null, additionalTypeInfoProvider, ref state);
+					FormatCore(t.type.GetElementType()!, null, ref state);
 					foreach (var tuple in arrayTypesList) {
 						var aryType = tuple.type;
 						var aryValue = tuple.value;
-						uint elementCount;
 						if (aryType.IsVariableBoundArray) {
 							OutputWrite(ARRAY_OPEN_PAREN, DbgTextColor.Punctuation);
 							int rank = Math.Min(aryType.GetArrayRank(), MAX_ARRAY_RANK);
 							if (rank <= 0)
 								OutputWrite("???", DbgTextColor.Error);
 							else {
-								if (aryValue is null || aryValue.IsNull || !aryValue.GetArrayInfo(out elementCount, out var dimensionInfos))
-									dimensionInfos = null;
-								if (ShowArrayValueSizes && dimensionInfos is not null && dimensionInfos.Length == rank) {
-									for (int i = 0; i < rank; i++) {
-										if (i > 0) {
-											OutputWrite(",", DbgTextColor.Punctuation);
-											WriteSpace();
+								bool sizesShown = false;
+								if (ShowArrayValueSizes) {
+									if (aryValue is not null && !aryValue.IsNull && aryValue.GetArrayInfo(out _, out var dimensionInfos) && dimensionInfos.Length == rank) {
+										for (int i = 0; i < rank; i++) {
+											if (i > 0)
+												WriteCommaSpace();
+											if (dimensionInfos[i].BaseIndex == 0)
+												WriteInt32((int)dimensionInfos[i].Length);
+											else {
+												WriteInt32(dimensionInfos[i].BaseIndex);
+												OutputWrite("..", DbgTextColor.Operator);
+												WriteInt32(dimensionInfos[i].BaseIndex + (int)dimensionInfos[i].Length - 1);
+											}
 										}
-										if (dimensionInfos[i].BaseIndex == 0)
-											WriteUInt32(dimensionInfos[i].Length);
-										else {
-											WriteInt32(dimensionInfos[i].BaseIndex);
-											OutputWrite("..", DbgTextColor.Operator);
-											WriteInt32(dimensionInfos[i].BaseIndex + (int)dimensionInfos[i].Length - 1);
+										sizesShown = true;
+									}
+									else {
+										var indexes = aryType.GetArrayLowerBounds();
+										var sizes = aryType.GetArraySizes();
+										if (sizes.Count == rank) {
+											for (int i = 0; i < rank; i++) {
+												if (i > 0)
+													WriteCommaSpace();
+												if (i >= indexes.Count || indexes[i] == 0)
+													WriteInt32(sizes[i]);
+												else {
+													WriteInt32(indexes[i]);
+													OutputWrite("..", DbgTextColor.Operator);
+													WriteInt32(indexes[i] + sizes[i] - 1);
+												}
+											}
+											sizesShown = true;
 										}
 									}
 								}
-								else {
+								if (!sizesShown) {
 									if (rank == 1)
 										OutputWrite("*", DbgTextColor.Operator);
 									OutputWrite(TypeFormatterUtils.GetArrayCommas(rank), DbgTextColor.Punctuation);
@@ -194,7 +210,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 							Debug.Assert(aryType.IsSZArray);
 							OutputWrite(ARRAY_OPEN_PAREN, DbgTextColor.Punctuation);
 							if (ShowArrayValueSizes && aryValue is not null && !aryValue.IsNull) {
-								if (aryValue.GetArrayCount(out elementCount))
+								if (aryValue.GetArrayCount(out uint elementCount))
 									WriteUInt32(elementCount);
 							}
 							OutputWrite(ARRAY_CLOSE_PAREN, DbgTextColor.Punctuation);
@@ -204,7 +220,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 				case DmdTypeSignatureKind.Pointer:
 					state.DynamicTypeIndex++;
-					FormatCore(type.GetElementType()!, null, additionalTypeInfoProvider, ref state);
+					FormatCore(type.GetElementType()!, null, ref state);
 					OutputWrite("*", DbgTextColor.Operator);
 					break;
 
@@ -212,7 +228,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 					state.DynamicTypeIndex++;
 					OutputWrite(BYREF_KEYWORD, DbgTextColor.Keyword);
 					WriteSpace();
-					FormatCore(type.GetElementType()!, disposeThisValue = value?.LoadIndirect().Value, additionalTypeInfoProvider, ref state);
+					FormatCore(type.GetElementType()!, disposeThisValue = value?.LoadIndirect().Value, ref state);
 					break;
 
 				case DmdTypeSignatureKind.TypeGenericParameter:
@@ -227,7 +243,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 				case DmdTypeSignatureKind.GenericInstance:
 					if (type.IsNullable) {
 						state.DynamicTypeIndex++;
-						FormatCore(type.GetNullableElementType(), null, additionalTypeInfoProvider, ref state);
+						FormatCore(type.GetNullableElementType(), null, ref state);
 						OutputWrite("?", DbgTextColor.Operator);
 						break;
 					}
@@ -238,7 +254,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 							OutputWrite(TUPLE_OPEN_PAREN, DbgTextColor.Punctuation);
 							var tupleType = type;
 							for (;;) {
-								tupleType = WriteTupleFields(tupleType, ref tupleIndex, additionalTypeInfoProvider, ref state);
+								tupleType = WriteTupleFields(tupleType, ref tupleIndex, ref state);
 								if (tupleType is not null) {
 									WriteCommaSpace();
 									state.DynamicTypeIndex++;
@@ -256,16 +272,16 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 					KeywordType keywordType;
 					if (type.DeclaringType is null) {
 						keywordType = GetKeywordType(type);
-						if (additionalTypeInfoProvider is not null) {
-							if (keywordType == KeywordType.Object && additionalTypeInfoProvider.IsDynamicType(state.DynamicTypeIndex)) {
+						if (state.TypeInfoProvider is not null) {
+							if (keywordType == KeywordType.Object && state.TypeInfoProvider.IsDynamicType(state.DynamicTypeIndex)) {
 								OutputWrite("dynamic", DbgTextColor.Keyword);
 								break;
 							}
-							if (type == type.AppDomain.System_IntPtr && additionalTypeInfoProvider.IsNativeIntegerType(state.NativeIntTypeIndex++)) {
+							if (type == type.AppDomain.System_IntPtr && state.TypeInfoProvider.IsNativeIntegerType(state.NativeIntTypeIndex++)) {
 								OutputWrite("nint", DbgTextColor.Keyword);
 								break;
 							}
-							if (type == type.AppDomain.System_UIntPtr && additionalTypeInfoProvider.IsNativeIntegerType(state.NativeIntTypeIndex++)) {
+							if (type == type.AppDomain.System_UIntPtr && state.TypeInfoProvider.IsNativeIntegerType(state.NativeIntTypeIndex++)) {
 								OutputWrite("nuint", DbgTextColor.Keyword);
 								break;
 							}
@@ -273,7 +289,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 						if (keywordType == KeywordType.NoKeyword)
 							WriteNamespace(type);
 						WriteTypeName(type, keywordType);
-						WriteGenericArguments(type, genericArgs, ref genericArgsIndex, additionalTypeInfoProvider, ref state);
+						WriteGenericArguments(type, genericArgs, ref genericArgsIndex, ref state);
 					}
 					else {
 						var typesList = new List<DmdType>();
@@ -287,7 +303,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 							WriteNamespace(type);
 						for (int i = typesList.Count - 1; i >= 0; i--) {
 							WriteTypeName(typesList[i], i == 0 ? keywordType : KeywordType.NoKeyword);
-							WriteGenericArguments(typesList[i], genericArgs, ref genericArgsIndex, additionalTypeInfoProvider, ref state);
+							WriteGenericArguments(typesList[i], genericArgs, ref genericArgsIndex, ref state);
 							if (i != 0)
 								OutputWrite(".", DbgTextColor.Operator);
 						}
@@ -296,28 +312,109 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 
 				case DmdTypeSignatureKind.FunctionPointer:
 					var sig = type.GetFunctionPointerMethodSignature();
-					state.DynamicTypeIndex++;
-					FormatCore(sig.ReturnType, null, additionalTypeInfoProvider, ref state);
-					WriteSpace();
-					OutputWrite(METHOD_OPEN_PAREN, DbgTextColor.Punctuation);
-					var types = sig.GetParameterTypes();
-					for (int i = 0; i < types.Count; i++) {
-						if (i > 0)
-							WriteCommaSpace();
-						state.DynamicTypeIndex++;
-						FormatCore(types[i], null, additionalTypeInfoProvider, ref state);
+
+					OutputWrite(DELEGATE_KEYWORD, DbgTextColor.Keyword);
+					OutputWrite("*", DbgTextColor.Operator);
+
+					bool isUnmanaged = (sig.Flags & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.Unmanaged;
+					bool isDefault = (sig.Flags  & DmdSignatureCallingConvention.Mask) == DmdSignatureCallingConvention.Default;
+					if (isUnmanaged || !isDefault) {
+						WriteSpace();
+						OutputWrite("unmanaged", DbgTextColor.Keyword);
 					}
-					types = sig.GetVarArgsParameterTypes();
-					if (types.Count > 0) {
-						if (sig.GetParameterTypes().Count > 0)
-							WriteCommaSpace();
-						OutputWrite("...", DbgTextColor.Punctuation);
-						for (int i = 0; i < types.Count; i++) {
-							WriteCommaSpace();
-							FormatCore(types[i], null, additionalTypeInfoProvider, ref state);
+
+					var returnType = sig.ReturnType;
+					var customCallConvs = new List<DmdType>();
+					foreach (var modifier in returnType.GetCustomModifiers()) {
+						if (modifier.Type.Name.StartsWith("CallConv", StringComparison.Ordinal) && modifier.Type.Namespace == "System.Runtime.CompilerServices") {
+							state.DynamicTypeIndex++;
+							customCallConvs.Add(modifier.Type);
 						}
+						else
+							break;
 					}
-					OutputWrite(METHOD_CLOSE_PAREN, DbgTextColor.Punctuation);
+
+					bool needsComma = false;
+					if (!isDefault || customCallConvs.Count > 0) {
+						OutputWrite(FNPTR_CALLCONV_OPEN_PAREN, DbgTextColor.Punctuation);
+						if (!isDefault) {
+							OutputWrite((sig.Flags & DmdSignatureCallingConvention.Mask) switch {
+								DmdSignatureCallingConvention.C => "Cdecl",
+								DmdSignatureCallingConvention.StdCall => "Stdcall",
+								DmdSignatureCallingConvention.ThisCall => "Thiscall",
+								DmdSignatureCallingConvention.FastCall => "Fastcall",
+								DmdSignatureCallingConvention.VarArg => "Varargs",
+								_ => sig.Flags.ToString()
+							}, DbgTextColor.Keyword);
+							needsComma = true;
+						}
+
+						for (var i = 0; i < customCallConvs.Count; i++) {
+							if (needsComma)
+								WriteCommaSpace();
+							needsComma = true;
+							var customCallConv = customCallConvs[i];
+							if (customCallConv.Name.StartsWith("CallConv", StringComparison.Ordinal) &&
+								customCallConv.Name.Length > 8)
+								OutputWrite(customCallConv.Name.Substring(8), DbgTextColor.Keyword);
+							else
+								Format(customCallConv);
+						}
+
+						OutputWrite(FNPTR_CALLCONV_CLOSE_PAREN, DbgTextColor.Punctuation);
+					}
+
+					OutputWrite(FNPTR_OPEN_PAREN, DbgTextColor.Punctuation);
+
+					state.DynamicTypeIndex++;
+					var parametersState = state;
+					TypeFormatterUtils.UpdateTypeState(returnType, ref parametersState);
+
+					needsComma = false;
+					var parameters = sig.GetParameterTypes();
+					for (int i = 0; i < parameters.Count; i++) {
+						if (needsComma)
+							WriteCommaSpace();
+						needsComma = true;
+
+						parametersState.DynamicTypeIndex++;
+						var paramType = parameters[i];
+						bool modifierWritten = false;
+
+						var modifiers = paramType.GetRequiredCustomModifiers();
+
+						if (modifiers.Length > 0) {
+							string? modifier = modifiers[0].FullName;
+							if (modifier == "System.Runtime.InteropServices.InAttribute") {
+								modifierWritten = true;
+								OutputWrite(IN_KEYWORD, DbgTextColor.Keyword);
+								WriteSpace();
+								parametersState.DynamicTypeIndex++;
+							}
+							else if (modifier == "System.Runtime.InteropServices.OutAttribute") {
+								modifierWritten = true;
+								OutputWrite(OUT_KEYWORD, DbgTextColor.Keyword);
+								WriteSpace();
+								parametersState.DynamicTypeIndex++;
+							}
+						}
+						if (paramType.IsByRef) {
+							if (!modifierWritten) {
+								OutputWrite(BYREF_KEYWORD, DbgTextColor.Keyword);
+								WriteSpace();
+							}
+							parametersState.DynamicTypeIndex++;
+							paramType = paramType.GetElementType()!;
+						}
+
+						FormatCore(paramType, null, ref parametersState);
+					}
+
+					if (needsComma)
+						WriteCommaSpace();
+					FormatCore(returnType, null, ref state);
+
+					OutputWrite(FNPTR_CLOSE_PAREN, DbgTextColor.Punctuation);
 					break;
 
 				default:
@@ -336,7 +433,7 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 			}
 		}
 
-		void WriteGenericArguments(DmdType type, IList<DmdType> genericArgs, ref int genericArgsIndex, IAdditionalTypeInfoProvider? additionalTypeInfoProvider, ref TypeFormatterState state) {
+		void WriteGenericArguments(DmdType type, IList<DmdType> genericArgs, ref int genericArgsIndex, ref AdditionalTypeInfoState state) {
 			var gas = type.GetGenericArguments();
 			if (genericArgsIndex < genericArgs.Count && genericArgsIndex < gas.Count) {
 				OutputWrite(GENERICS_OPEN_PAREN, DbgTextColor.Punctuation);
@@ -345,13 +442,13 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 					if (j > startIndex)
 						WriteCommaSpace();
 					state.DynamicTypeIndex++;
-					FormatCore(genericArgs[j], null, additionalTypeInfoProvider, ref state);
+					FormatCore(genericArgs[j], null, ref state);
 				}
 				OutputWrite(GENERICS_CLOSE_PAREN, DbgTextColor.Punctuation);
 			}
 		}
 
-		DmdType? WriteTupleFields(DmdType type, ref int index, IAdditionalTypeInfoProvider? additionalTypeInfoProvider, ref TypeFormatterState state) {
+		DmdType? WriteTupleFields(DmdType type, ref int index, ref AdditionalTypeInfoState state) {
 			var args = type.GetGenericArguments();
 			Debug.Assert(0 < args.Count && args.Count <= TypeFormatterUtils.MAX_TUPLE_ARITY);
 			if (args.Count > TypeFormatterUtils.MAX_TUPLE_ARITY) {
@@ -362,8 +459,8 @@ namespace dnSpy.Roslyn.Debugger.Formatters.CSharp {
 				if (i > 0)
 					WriteCommaSpace();
 				state.DynamicTypeIndex++;
-				FormatCore(args[i], null, additionalTypeInfoProvider, ref state);
-				string? fieldName = additionalTypeInfoProvider?.GetTupleElementName(index++);
+				FormatCore(args[i], null, ref state);
+				string? fieldName = state.TypeInfoProvider?.GetTupleElementName(index++);
 				if (fieldName is not null) {
 					WriteSpace();
 					OutputWrite(fieldName, DbgTextColor.InstanceField);

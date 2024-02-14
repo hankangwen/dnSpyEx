@@ -30,7 +30,6 @@ namespace dnSpy.BamlDecompiler.Handlers {
 
 		public BamlElement Translate(XamlContext ctx, BamlNode node, BamlElement parent) {
 			var record = (PropertyTypeReferenceRecord)((BamlRecordNode)node).Record;
-			var attr = ctx.ResolveProperty(record.AttributeId);
 			var type = ctx.ResolveType(record.TypeId);
 			var typeName = type.ToMarkupExtensionName(ctx, parent.Xaml);
 
@@ -39,7 +38,7 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			var elemAttr = ctx.ResolveProperty(record.AttributeId);
 			elem.Xaml = new XElement(elemAttr.ToXName(ctx, null));
 
-			if (attr.ResolvedMember?.FullName == "System.Windows.Style.TargetType")
+			if (elemAttr.DeclaringType.TypeNamespace == "System.Windows" && elemAttr.DeclaringType.TypeName == "Style" && elemAttr.PropertyName == "TargetType")
 				parent.Xaml.Element.AddAnnotation(new TargetTypeAnnotation(type));
 
 			elem.Xaml.Element.AddAnnotation(elemAttr);

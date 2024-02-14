@@ -22,12 +22,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdMethodDef : DmdMethodInfoBase {
 		public sealed override DmdType? DeclaringType { get; }
 		public sealed override DmdType? ReflectedType { get; }
-		public sealed override int MetadataToken => (int)(0x06000000 + rid);
+		public sealed override int MetadataToken => new MDToken(Table.Method, rid).ToInt32();
 		public sealed override bool IsMetadataReference => false;
 
 		public sealed override bool IsGenericMethodDefinition => GetMethodSignature().GenericParameterCount != 0;

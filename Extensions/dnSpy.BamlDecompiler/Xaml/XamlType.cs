@@ -101,9 +101,11 @@ namespace dnSpy.BamlDecompiler.Xaml {
 
 		public string ToMarkupExtensionName(XamlContext ctx, XElement elem) {
 			ResolveNamespace(elem, ctx);
+			return AppendMarkupExtensionName(new StringBuilder(), elem).ToString();
+		}
 
-			var sb = new StringBuilder();
-			if (Namespace != elem.GetDefaultNamespace()) {
+		public StringBuilder AppendMarkupExtensionName(StringBuilder sb, XElement elem) {
+			if (Namespace is not null && Namespace != elem.GetDefaultNamespace()) {
 				var prefix = elem.GetPrefixOfNamespace(Namespace);
 				if (!string.IsNullOrEmpty(prefix)) {
 					sb.Append(prefix);
@@ -111,7 +113,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 				}
 			}
 
-			return TypeName.AppendEncodedName(sb).ToString();
+			return TypeName.AppendEncodedName(sb);
 		}
 
 		public override string ToString() => TypeName;

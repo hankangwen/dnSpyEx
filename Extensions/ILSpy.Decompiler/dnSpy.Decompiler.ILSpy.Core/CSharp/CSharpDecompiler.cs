@@ -359,8 +359,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			AstType astType = ICSharpCode.Decompiler.CSharp.CSharpDecompiler.ConvertType(type, new StringBuilder(), typeAttributes, options);
 
 			if (WriteRefIfByRef(output, type.TryGetByRefSig(), typeAttributes as ParamDef)) {
-				if (astType is ComposedType && ((ComposedType)astType).PointerRank > 0)
-					((ComposedType)astType).PointerRank--;
+				if (astType is ComposedType composedType && composedType.HasRefSpecifier)
+					composedType.HasRefSpecifier = false;
 			}
 
 			var ctx = new DecompilerContext(langSettings.Settings.SettingsVersion, type.Module, MetadataTextColorProvider);

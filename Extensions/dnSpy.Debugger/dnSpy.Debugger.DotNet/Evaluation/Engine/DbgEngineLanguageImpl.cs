@@ -123,7 +123,8 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 			Debug2.Assert(context.Runtime.GetDotNetRuntime() is not null);
 
 			IDebuggerDisplayAttributeEvaluatorUtils.Initialize(context, debuggerDisplayAttributeEvaluator);
-			// Needed by DebuggerRuntimeImpl (calls expressionCompiler.TryGetAliasInfo())
+			// Needed by DebuggerRuntimeImpl (calls expressionCompiler.TryGetAliasInfo()), DbgCorDebugInternalRuntimeImpl,
+			// DbgMonoDebugInternalRuntimeImpl and DbgEngineStaticFieldsProviderImpl (calls expressionCompiler.CreateCustomTypeInfo())
 			context.GetOrCreateData(() => expressionCompiler);
 
 			if ((context.Options & DbgEvaluationContextOptions.NoMethodBody) == 0 && location is IDbgDotNetCodeLocation loc) {

@@ -20,12 +20,14 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdFieldDef : DmdFieldInfoBase {
 		public sealed override DmdType? DeclaringType { get; }
 		public sealed override DmdType? ReflectedType { get; }
-		public sealed override int MetadataToken => (int)(0x04000000 + rid);
+		public sealed override int MetadataToken => new MDToken(Table.Field, rid).ToInt32();
 		public sealed override bool IsMetadataReference => false;
 
 		protected uint Rid => rid;

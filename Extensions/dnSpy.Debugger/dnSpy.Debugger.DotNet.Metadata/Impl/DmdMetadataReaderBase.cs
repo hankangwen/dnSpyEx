@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdMetadataReaderBase : DmdMetadataReader {
@@ -30,15 +32,15 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		static DmdMethodBase TryResolve(DmdMethodBase member, DmdResolveOptions options) => (options & DmdResolveOptions.NoTryResolveRefs) != 0 ? member : member.ResolveMethodBaseNoThrow() ?? member;
 
 		public sealed override DmdMethodBase? ResolveMethod(int metadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments, DmdResolveOptions options) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x06:
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.Method:
 				var method = ResolveMethodDef(rid);
 				if (method is not null)
 					return method;
 				break;
 
-			case 0x0A:
+			case Table.MemberRef:
 				var mr = ResolveMemberRef(rid, genericTypeArguments, genericMethodArguments);
 				if (mr is not null) {
 					if (mr is DmdMethodBase methodRef)
@@ -48,7 +50,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 				}
 				break;
 
-			case 0x2B:
+			case Table.MethodSpec:
 				var methodSpec = ResolveMethodSpec(rid, genericTypeArguments, genericMethodArguments);
 				if (methodSpec is not null)
 					return TryResolve(methodSpec, options);
@@ -61,15 +63,15 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		}
 
 		public sealed override DmdFieldInfo? ResolveField(int metadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments, DmdResolveOptions options) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x04:
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.Field:
 				var field = ResolveFieldDef(rid);
 				if (field is not null)
 					return field;
 				break;
 
-			case 0x0A:
+			case Table.MemberRef:
 				var memberRef = ResolveMemberRef(rid, genericTypeArguments, genericMethodArguments);
 				if (memberRef is not null) {
 					if (memberRef is DmdFieldInfo fieldRef)
@@ -86,27 +88,27 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		}
 
 		public sealed override DmdType? ResolveType(int metadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments, DmdResolveOptions options) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x01:
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.TypeRef:
 				var typeRef = ResolveTypeRef(rid);
 				if (typeRef is not null)
 					return TryResolve(typeRef, options);
 				break;
 
-			case 0x02:
+			case Table.TypeDef:
 				var typeDef = ResolveTypeDef(rid);
 				if (typeDef is not null)
 					return typeDef;
 				break;
 
-			case 0x1B:
+			case Table.TypeSpec:
 				var typeSpec = ResolveTypeSpec(rid, genericTypeArguments, genericMethodArguments);
 				if (typeSpec is not null)
 					return TryResolve(typeSpec, options);
 				break;
 
-			case 0x27:
+			case Table.ExportedType:
 				var exportedType = ResolveExportedType(rid);
 				if (exportedType is not null)
 					return exportedType;// Don't try to resolve it, callers want the actual reference
@@ -119,51 +121,51 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		}
 
 		public sealed override DmdMemberInfo? ResolveMember(int metadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments, DmdResolveOptions options) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x01:
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.TypeRef:
 				var typeRef = ResolveTypeRef(rid);
 				if (typeRef is not null)
 					return TryResolve(typeRef, options);
 				break;
 
-			case 0x02:
+			case Table.TypeDef:
 				var typeDef = ResolveTypeDef(rid);
 				if (typeDef is not null)
 					return typeDef;
 				break;
 
-			case 0x04:
+			case Table.Field:
 				var field = ResolveFieldDef(rid);
 				if (field is not null)
 					return field;
 				break;
 
-			case 0x06:
+			case Table.Method:
 				var method = ResolveMethodDef(rid);
 				if (method is not null)
 					return method;
 				break;
 
-			case 0x0A:
+			case Table.MemberRef:
 				var memberRef = ResolveMemberRef(rid, genericTypeArguments, genericMethodArguments);
 				if (memberRef is not null)
 					return TryResolve(memberRef, options);
 				break;
 
-			case 0x1B:
+			case Table.TypeSpec:
 				var typeSpec = ResolveTypeSpec(rid, genericTypeArguments, genericMethodArguments);
 				if (typeSpec is not null)
 					return TryResolve(typeSpec, options);
 				break;
 
-			case 0x27:
+			case Table.ExportedType:
 				var exportedType = ResolveExportedType(rid);
 				if (exportedType is not null)
 					return exportedType;// Don't try to resolve it, callers want the actual reference
 				break;
 
-			case 0x2B:
+			case Table.MethodSpec:
 				var methodSpec = ResolveMethodSpec(rid, genericTypeArguments, genericMethodArguments);
 				if (methodSpec is not null)
 					return TryResolve(methodSpec, options);
@@ -176,9 +178,9 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		}
 
 		public sealed override DmdMethodSignature? ResolveMethodSignature(int metadataToken, IList<DmdType>? genericTypeArguments, IList<DmdType>? genericMethodArguments, DmdResolveOptions options) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x11:
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.StandAloneSig:
 				var methodSig = ResolveMethodSignature(rid, genericTypeArguments, genericMethodArguments);
 				if (methodSig is not null)
 					return methodSig;
@@ -204,15 +206,15 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 
 		public sealed override byte[]? ResolveSignature(int metadataToken) {
 			byte[]? res;
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x04: res = ResolveFieldSignature(rid); break;
-			case 0x06: res = ResolveMethodSignature(rid); break;
-			case 0x0A: res = ResolveMemberRefSignature(rid); break;
-			case 0x11: res = ResolveStandAloneSigSignature(rid); break;
-			case 0x1B: res = ResolveTypeSpecSignature(rid); break;
-			case 0x2B: res = ResolveMethodSpecSignature(rid); break;
-			default: res = null; break;
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.Field:			res = ResolveFieldSignature(rid); break;
+			case Table.Method:			res = ResolveMethodSignature(rid); break;
+			case Table.MemberRef:		res = ResolveMemberRefSignature(rid); break;
+			case Table.StandAloneSig:	res = ResolveStandAloneSigSignature(rid); break;
+			case Table.TypeSpec:		res = ResolveTypeSpecSignature(rid); break;
+			case Table.MethodSpec:		res = ResolveMethodSpecSignature(rid); break;
+			default:					res = null; break;
 			}
 			return res ?? throw new ArgumentOutOfRangeException(nameof(metadataToken));
 		}
@@ -236,16 +238,16 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		protected abstract string ResolveStringCore(uint offset);
 
 		public sealed override DmdCustomAttributeData[] ReadCustomAttributes(int metadataToken) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x00: return ReadModuleCustomAttributes(rid);
-			case 0x02: return ReadTypeDefCustomAttributes(rid);
-			case 0x04: return ReadFieldCustomAttributes(rid);
-			case 0x06: return ReadMethodCustomAttributes(rid);
-			case 0x08: return ReadParamCustomAttributes(rid);
-			case 0x14: return ReadEventCustomAttributes(rid);
-			case 0x17: return ReadPropertyCustomAttributes(rid);
-			case 0x20: return ReadAssemblyCustomAttributes(rid);
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.Module:		return ReadModuleCustomAttributes(rid);
+			case Table.TypeDef:		return ReadTypeDefCustomAttributes(rid);
+			case Table.Field:		return ReadFieldCustomAttributes(rid);
+			case Table.Method:		return ReadMethodCustomAttributes(rid);
+			case Table.Param:		return ReadParamCustomAttributes(rid);
+			case Table.Event:		return ReadEventCustomAttributes(rid);
+			case Table.Property:	return ReadPropertyCustomAttributes(rid);
+			case Table.Assembly:	return ReadAssemblyCustomAttributes(rid);
 			default: throw new ArgumentOutOfRangeException(nameof(metadataToken));
 			}
 		}
@@ -260,11 +262,11 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		protected abstract DmdCustomAttributeData[] ReadPropertyCustomAttributes(uint rid);
 
 		public sealed override DmdCustomAttributeData[] ReadSecurityAttributes(int metadataToken) {
-			uint rid = (uint)(metadataToken & 0x00FFFFFF);
-			switch ((uint)metadataToken >> 24) {
-			case 0x02: return ReadTypeDefSecurityAttributes(rid);
-			case 0x06: return ReadMethodSecurityAttributes(rid);
-			case 0x20: return ReadAssemblySecurityAttributes(rid);
+			uint rid = MDToken.ToRID(metadataToken);
+			switch (MDToken.ToTable(metadataToken)) {
+			case Table.TypeDef:		return ReadTypeDefSecurityAttributes(rid);
+			case Table.Method:		return ReadMethodSecurityAttributes(rid);
+			case Table.Assembly:	return ReadAssemblySecurityAttributes(rid);
 			default: throw new ArgumentOutOfRangeException(nameof(metadataToken));
 			}
 		}

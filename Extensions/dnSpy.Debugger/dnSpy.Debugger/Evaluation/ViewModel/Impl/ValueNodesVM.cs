@@ -77,6 +77,16 @@ namespace dnSpy.Debugger.Evaluation.ViewModel.Impl {
 
 			public IEnumerable<GuidObject> GetGuidObjects(GuidObjectsProviderArgs args) {
 				yield return new GuidObject(ValueNodesVMConstants.GUIDOBJ_VALUENODESVM_GUID, vm);
+
+				IList<DbgValueNode>? nodes = null;
+				for (int i = 0; i < vm.TreeView.SelectedItems.Length; i++) {
+					if (vm.TreeView.SelectedItems[i] is ValueNodeImpl { RawNode: DebuggerValueRawNode debuggerValueRawNode }) {
+						nodes ??= new List<DbgValueNode>();
+						nodes.Add(debuggerValueRawNode.DebuggerValueNode);
+					}
+				}
+				if (nodes is not null)
+					yield return new GuidObject(new Guid(MenuConstants.GUIDOBJ_DBGVALUENODES_ARRAY_GUID), nodes.ToArray());
 			}
 		}
 

@@ -113,16 +113,26 @@ namespace dndbg.Engine {
 
 			var created = new List<DnModule>();
 			var modules = this.modules.GetAll();
+			bool canCreateAssemblyDef = true;
 			for (int i = 0; i < modules.Length; i++) {
 				var module = modules[i];
 				if (module.CorModuleDef is not null) {
 					Debug2.Assert(corAssemblyDef is not null);
 					continue;
 				}
-				module.CorModuleDef = new CorModuleDef(module.CorModule.GetMetaDataInterface<IMetaDataImport>(), new CorModuleDefHelper(module));
-				if (corAssemblyDef is null)
-					corAssemblyDef = new CorAssemblyDef(module.CorModuleDef, 1);
-				corAssemblyDef.Modules.Add(module.CorModuleDef);
+
+				var mdi = module.CorModule.GetMetaDataInterface<IMetaDataImport>();
+				if (mdi is null) {
+					canCreateAssemblyDef = false;
+					continue;
+				}
+
+				module.CorModuleDef = new CorModuleDef(mdi, new CorModuleDefHelper(module));
+
+				if (canCreateAssemblyDef)
+					corAssemblyDef ??= new CorAssemblyDef(module.CorModuleDef, 1);
+				corAssemblyDef?.Modules.Add(module.CorModuleDef);
+
 				module.CorModuleDef.Initialize();
 				created.Add(module);
 			}

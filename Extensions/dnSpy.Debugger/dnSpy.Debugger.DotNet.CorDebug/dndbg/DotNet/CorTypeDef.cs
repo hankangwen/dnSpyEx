@@ -106,7 +106,7 @@ namespace dndbg.DotNet {
 			if (fieldOffsets is not null) {
 				foreach (var fo in fieldOffsets) {
 					if (fo.Offset != uint.MaxValue)
-						fieldRidToFieldOffset[fo.FieldToken & 0x00FFFFFF] = fo.Offset;
+						fieldRidToFieldOffset[MDToken.ToRID(fo.FieldToken)] = fo.Offset;
 				}
 			}
 			return fieldRidToFieldOffset;
@@ -140,7 +140,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetFieldTokens(mdi, token);
 			var newItems = new MemberInfo<CorFieldDef>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorFieldDef(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 
@@ -163,7 +163,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetMethodTokens(mdi, token);
 			var newItems = new MemberInfo<CorMethodDef>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorMethodDef(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 
@@ -186,7 +186,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetGenericParamTokens(mdi2, token);
 			var newItems = new MemberInfo<CorGenericParam>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorGenericParam(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 
@@ -209,7 +209,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetPropertyTokens(mdi, token);
 			var newItems = new MemberInfo<CorPropertyDef>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorPropertyDef(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 
@@ -232,7 +232,7 @@ namespace dndbg.DotNet {
 			var itemTokens = MDAPI.GetEventTokens(mdi, token);
 			var newItems = new MemberInfo<CorEventDef>[itemTokens.Length];
 			for (int i = 0; i < itemTokens.Length; i++) {
-				uint itemRid = itemTokens[i] & 0x00FFFFFF;
+				uint itemRid = MDToken.ToRID(itemTokens[i]);
 				newItems[i] = readerModule.Register(new CorEventDef(readerModule, itemRid, this), cmd => cmd.Initialize());
 			}
 

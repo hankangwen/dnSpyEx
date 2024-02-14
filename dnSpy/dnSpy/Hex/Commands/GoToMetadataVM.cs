@@ -216,11 +216,11 @@ namespace dnSpy.Hex.Commands {
 				var tablesStream = mdHeaders.TablesStream;
 				if (tablesStream is null)
 					return null;
-				var table = token >> 24;
+				var table = (uint)MDToken.ToTable(token);
 				if (table >= (uint)tablesStream.MDTables.Count)
 					return null;
 				var mdTable = tablesStream.MDTables[(int)table];
-				return mdTable?.IsValidRID(token & 0x00FFFFFF) == true ? mdTable : null;
+				return mdTable?.IsValidRID(MDToken.ToRID(token)) == true ? mdTable : null;
 			}
 		}
 

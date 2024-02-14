@@ -27,12 +27,18 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		public readonly string DefaultName;
 
 		/// <summary>
+		/// User defined name, if any.
+		/// </summary>
+		public readonly string? CustomName;
+
+		/// <summary>
 		/// All fields that must be accessed in order to get the value shown in the UI, eg. Rest.Rest.Item3
 		/// </summary>
 		public readonly DmdFieldInfo[] Fields;
 
-		public TupleField(string defaultName, DmdFieldInfo[] fields) {
+		public TupleField(string defaultName, string? customName, DmdFieldInfo[] fields) {
 			DefaultName = defaultName;
+			CustomName = customName;
 			Fields = fields;
 		}
 	}

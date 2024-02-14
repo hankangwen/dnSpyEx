@@ -70,7 +70,7 @@ namespace dndbg.Engine {
 		internal void ClearCachedDnlibName() => dnlibName = null;
 
 		internal UTF8String CalculateDnlibName(CorModule module) {
-			var mdi = GetMetaDataInterface<IMetaDataImport>();
+			var mdi = module.GetMetaDataInterface<IMetaDataImport>();
 			uint token = new MDToken(Table.Module, 1).Raw;
 
 			return DotNet.Utils.GetUTF8String(MDAPI.GetUtf8Name(mdi, token), MDAPI.GetModuleName(mdi) ?? string.Empty);

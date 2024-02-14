@@ -29,6 +29,7 @@ using dndbg.COM.CorDebug;
 using dndbg.COM.MetaData;
 using dndbg.DotNet;
 using dndbg.Engine;
+using dnlib.DotNet;
 using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.DotNet.Code;
 using dnSpy.Contracts.Debugger.DotNet.CorDebug;
@@ -263,7 +264,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			var mdi = exactType.GetMetaDataImport(out uint token);
 			var list = new List<string>(4);
 
-			while ((token & 0x00FFFFFF) != 0) {
+			while (MDToken.ToRID(token) != 0) {
 				var name = MDAPI.GetTypeDefName(mdi, token);
 				if (name is null)
 					break;
@@ -647,7 +648,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			}
 			if (updatedModules is not null) {
 				foreach (var info in updatedModules) {
-					var mdi = info.dnModule.CorModule.GetMetaDataInterface<IMetaDataImport2>();
+					var mdi = info.dnModule.CorModule.GetMetaDataInterface<IMetaDataImport>();
 					var scopeName = MDAPI.GetModuleName(mdi) ?? string.Empty;
 					((DbgCorDebugInternalModuleImpl)info.dbgModule.InternalModule).ReflectionModule!.ScopeName = scopeName;
 				}

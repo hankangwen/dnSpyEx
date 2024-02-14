@@ -22,6 +22,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using dndbg.COM.CorDebug;
 using dndbg.Engine;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 using dnSpy.Debugger.DotNet.Metadata;
 
 namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
@@ -59,7 +61,7 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Impl {
 			case DmdTypeSignatureKind.Type:
 				if (!engine.TryGetDnModule(type.Module.GetDebuggerModule() ?? throw new InvalidOperationException(), out dnModule))
 					throw new InvalidOperationException();
-				Debug.Assert((type.MetadataToken >> 24) == 0x02);
+				Debug.Assert(MDToken.ToTable(type.MetadataToken) == Table.TypeDef);
 				result = dnModule.CorModule.GetClassFromToken((uint)type.MetadataToken)?.GetParameterizedType(type.IsValueType ? CorElementType.ValueType : CorElementType.Class);
 				break;
 

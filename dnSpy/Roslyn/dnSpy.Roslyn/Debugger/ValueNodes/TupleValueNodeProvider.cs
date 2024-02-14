@@ -28,6 +28,7 @@ using dnSpy.Contracts.Debugger.DotNet.Text;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
 using dnSpy.Debugger.DotNet.Metadata;
+using dnSpy.Roslyn.Debugger.Formatters;
 
 namespace dnSpy.Roslyn.Debugger.ValueNodes {
 	sealed class TupleValueNodeProvider : DbgDotNetValueNodeProvider {
@@ -41,15 +42,49 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		readonly DmdType slotType;
 		readonly DbgDotNetValueNodeInfo nodeInfo;
 		readonly TupleField[] tupleFields;
+		readonly AdditionalTypeInfoState[] cachedTypeInfoStates;
+		int cachedIndex;
 
-		public TupleValueNodeProvider(bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, TupleField[] tupleFields) {
+		public TupleValueNodeProvider(bool addParens, DmdType slotType, AdditionalTypeInfoState typeInfo, DbgDotNetValueNodeInfo nodeInfo, TupleField[] tupleFields) {
 			this.addParens = addParens;
 			this.slotType = slotType;
 			this.nodeInfo = nodeInfo;
 			this.tupleFields = tupleFields;
+			cachedTypeInfoStates = new AdditionalTypeInfoState[tupleFields.Length];
+			typeInfo.TupleNameIndex += tupleFields.Length;
+			typeInfo.DynamicTypeIndex++;
+			cachedTypeInfoStates[0] = typeInfo;
+			cachedIndex = 0;
 		}
 
 		public override ulong GetChildCount(DbgEvaluationInfo evalInfo) => (uint)tupleFields.Length;
+
+		AdditionalTypeInfoState GetCachedTypeInfoState(int tupleFieldIndex) {
+			if (cachedIndex >= tupleFieldIndex)
+				return cachedTypeInfoStates[tupleFieldIndex];
+
+			var typeInfo = cachedTypeInfoStates[cachedIndex];
+			while (cachedIndex < tupleFieldIndex) {
+				ref readonly var previousField = ref tupleFields[cachedIndex];
+				TypeFormatterUtils.UpdateTypeState(previousField.Fields[previousField.Fields.Length - 1].FieldType, ref typeInfo);
+
+				typeInfo.DynamicTypeIndex++;
+
+				ref readonly var field = ref tupleFields[cachedIndex + 1];
+				if (field.Fields.Length > 1) {
+					var item1 = field.Fields[field.Fields.Length - 1];
+					var rest = field.Fields[field.Fields.Length - 2];
+					if (item1.Name == "Item1" && rest.Name == "Rest") {
+						typeInfo.DynamicTypeIndex++;
+						typeInfo.TupleNameIndex += TypeFormatterUtils.GetTupleArity(rest.FieldType);
+					}
+				}
+
+				cachedTypeInfoStates[++cachedIndex] = typeInfo;
+			}
+
+			return typeInfo;
+		}
 
 		public override DbgDotNetValueNode[] GetChildren(LanguageValueNodeFactory valueNodeFactory, DbgEvaluationInfo evalInfo, ulong index, int count, DbgValueNodeEvaluationOptions options, ReadOnlyCollection<string>? formatSpecifiers) {
 			var runtime = evalInfo.Runtime.GetDotNetRuntime();
@@ -59,7 +94,8 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			try {
 				for (int i = 0; i < res.Length; i++) {
 					evalInfo.CancellationToken.ThrowIfCancellationRequested();
-					ref readonly var info = ref tupleFields[(int)index + i];
+					int tupleFieldIndex = (int)index + i;
+					ref readonly var info = ref tupleFields[tupleFieldIndex];
 					var castType = NeedCast(slotType, nodeInfo.Value.Type) ? nodeInfo.Value.Type : null;
 					var expression = valueNodeFactory.GetFieldExpression(nodeInfo.Expression, info.DefaultName, castType, addParens);
 					const string imageName = PredefinedDbgValueNodeImageNames.FieldPublic;
@@ -89,14 +125,14 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 						valueResult = default;
 					}
 
-					var name = new DbgDotNetText(new DbgDotNetTextPart(DbgTextColor.InstanceField, info.DefaultName));
+					var name = new DbgDotNetText(new DbgDotNetTextPart(DbgTextColor.InstanceField, info.CustomName ?? info.DefaultName));
 					DbgDotNetValueNode newNode;
 					if (errorMessage is not null)
 						newNode = valueNodeFactory.CreateError(evalInfo, name, errorMessage, expression, false);
 					else if (valueIsException)
 						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, PredefinedDbgValueNodeImageNames.Error, true, false, expectedType, false);
 					else
-						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, false);
+						newNode = valueNodeFactory.Create(evalInfo, name, objValue, formatSpecifiers, options, expression, imageName, isReadOnly, false, expectedType, GetCachedTypeInfoState(tupleFieldIndex), false);
 
 					foreach (var vr in valueResults)
 						vr.Value?.Dispose();

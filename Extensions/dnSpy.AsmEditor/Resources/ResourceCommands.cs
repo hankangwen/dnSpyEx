@@ -766,7 +766,7 @@ namespace dnSpy.AsmEditor.Resources {
 				return;
 
 			var outStream = new MemoryStream();
-			ResourceWriter.Write(module, outStream, new ResourceElementSet());
+			ResourceWriter.Write(module, outStream, ResourceElementSet.CreateForResourceReader(module));
 			var er = new EmbeddedResource(data.Name, outStream.ToArray(), data.Attributes);
 			var treeView = appService.DocumentTreeView.TreeView;
 			var treeNodeGroup = appService.DocumentTreeView.DocumentTreeNodeGroups.GetGroup(DocumentTreeNodeGroupType.ResourceTreeNodeGroup);
@@ -2038,7 +2038,8 @@ namespace dnSpy.AsmEditor.Resources {
 			var opts = data.CreateResourceElementOptions();
 			string? error;
 			try {
-				opts = new ResourceElementOptions(SerializedImageUtilities.Serialize(opts.Create()));
+				var format = ((BinaryResourceData)imgRsrcElNode.ResourceElement.ResourceData).Format;
+				opts = new ResourceElementOptions(SerializedImageUtilities.Serialize(opts.Create(), format));
 				error = imgRsrcElNode.CheckCanUpdateData(opts.Create());
 			}
 			catch (Exception ex) {

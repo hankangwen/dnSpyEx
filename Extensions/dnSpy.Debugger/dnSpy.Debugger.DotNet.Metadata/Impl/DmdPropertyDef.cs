@@ -21,6 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdPropertyDef : DmdPropertyInfo {
@@ -29,7 +31,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		public sealed override DmdModule Module => DeclaringType!.Module;
 		public sealed override DmdType? DeclaringType { get; }
 		public sealed override DmdType? ReflectedType { get; }
-		public sealed override int MetadataToken => (int)(0x17000000 + rid);
+		public sealed override int MetadataToken => new MDToken(Table.Property, rid).ToInt32();
 		public sealed override DmdType PropertyType => GetMethodSignature().ReturnType;
 
 		protected uint Rid => rid;

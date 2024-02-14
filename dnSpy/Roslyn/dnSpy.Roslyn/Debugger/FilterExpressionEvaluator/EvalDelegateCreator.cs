@@ -235,10 +235,19 @@ namespace dnSpy.Roslyn.Debugger.FilterExpressionEvaluator {
 				typeSig = typeSig.Next;
 			switch (typeSig.ElementType) {
 			case ElementType.Boolean: return typeof(bool);
+			case ElementType.Char: return typeof(char);
+			case ElementType.I1: return typeof(sbyte);
+			case ElementType.U1: return typeof(byte);
+			case ElementType.I2: return typeof(short);
+			case ElementType.U2: return typeof(ushort);
 			case ElementType.I4: return typeof(int);
 			case ElementType.U4: return typeof(uint);
+			case ElementType.I8: return typeof(long);
 			case ElementType.U8: return typeof(ulong);
+			case ElementType.R4: return typeof(float);
+			case ElementType.R8: return typeof(double);
 			case ElementType.String: return typeof(string);
+			case ElementType.Object: return typeof(object);
 			default: throw new EvalDelegateCreatorException();
 			}
 		}

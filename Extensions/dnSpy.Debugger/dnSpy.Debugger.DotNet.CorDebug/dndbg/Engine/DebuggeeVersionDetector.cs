@@ -22,10 +22,17 @@ using System.Runtime.InteropServices;
 using System.Text;
 using dndbg.COM.CorDebug;
 using dndbg.COM.MetaHost;
+using dnSpy.Debugger.DotNet.CorDebug.Utilities;
 
 namespace dndbg.Engine {
 	static class DebuggeeVersionDetector {
-		public static string GetVersion(string filename) => TryGetVersion(filename) ?? RuntimeEnvironment.GetSystemVersion();
+		public static string GetVersion(string filename) => TryGetVersion(filename) ??
+															DotNetHelpers.GetLatestInstalledFrameworkVersion() ??
+#if NETFRAMEWORK
+															RuntimeEnvironment.GetSystemVersion();
+#else
+															"v4.0.30319";
+#endif
 
 		public static string? TryGetVersion(string filename) {
 			try {

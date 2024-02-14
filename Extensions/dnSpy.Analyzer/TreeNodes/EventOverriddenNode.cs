@@ -40,23 +40,23 @@ namespace dnSpy.Analyzer.TreeNodes {
 			output.Write(BoxedTextColor.Text, dnSpy_Analyzer_Resources.OverridesTreeNode);
 
 		protected override IEnumerable<AnalyzerTreeNodeData> FetchChildren(CancellationToken ct) {
-			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
-			foreach (var declType in analyzedTypes) {
-				var analyzedAccessor = GetVirtualAccessor(analyzedEvent.AddMethod) ?? GetVirtualAccessor(analyzedEvent.RemoveMethod) ?? GetVirtualAccessor(analyzedEvent.InvokeMethod);
-				if (analyzedAccessor?.Overrides is IList<MethodOverride> overrides && overrides.Count > 0) {
-					bool matched = false;
-					foreach (var o in overrides) {
-						if (o.MethodDeclaration.ResolveMethodDef() is MethodDef method && (method.IsVirtual || method.IsAbstract)) {
-							if (method.DeclaringType.Events.FirstOrDefault(a => (object?)a.AddMethod == method || (object?)a.RemoveMethod == method || (object?)a.InvokeMethod == method) is EventDef eventDef) {
-								matched = true;
-								yield return new EventNode(eventDef) { Context = Context };
-							}
+			var analyzedAccessor = GetVirtualAccessor(analyzedEvent.AddMethod) ?? GetVirtualAccessor(analyzedEvent.RemoveMethod) ?? GetVirtualAccessor(analyzedEvent.InvokeMethod);
+			if (analyzedAccessor?.Overrides is IList<MethodOverride> overrides && overrides.Count > 0) {
+				bool matched = false;
+				foreach (var o in overrides) {
+					if (o.MethodDeclaration.ResolveMethodDef() is MethodDef method && (method.IsVirtual || method.IsAbstract)) {
+						if (method.DeclaringType.Events.FirstOrDefault(a => (object?)a.AddMethod == method || (object?)a.RemoveMethod == method || (object?)a.InvokeMethod == method) is EventDef eventDef) {
+							matched = true;
+							yield return new EventNode(eventDef) { Context = Context };
 						}
 					}
-					if (matched)
-						yield break;
 				}
+				if (matched)
+					yield break;
+			}
 
+			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
+			foreach (var declType in analyzedTypes) {
 				foreach (var eventDef in TypesHierarchyHelpers.FindBaseEvents(analyzedEvent, declType)) {
 					var anyAccessor = GetVirtualAccessor(eventDef.AddMethod) ?? GetVirtualAccessor(eventDef.RemoveMethod) ?? GetVirtualAccessor(eventDef.InvokeMethod);
 					if (anyAccessor is null || !(anyAccessor.IsVirtual || anyAccessor.IsAbstract))

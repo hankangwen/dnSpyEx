@@ -523,7 +523,7 @@ namespace dnSpy.BamlDecompiler {
 				WriteFlagField("XmlSpace");
 				break;
 			case BamlAttributeUsage.RuntimeName:
-				WriteFlagField("XmlSpace");
+				WriteFlagField("RuntimeName");
 				break;
 			default:
 				WriteHexNumber((byte)record.AttributeUsage);

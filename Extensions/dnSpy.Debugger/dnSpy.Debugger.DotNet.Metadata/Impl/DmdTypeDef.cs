@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdTypeDef : DmdTypeBase {
@@ -30,7 +32,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		public override bool IsMetadataReference => false;
 		public override bool IsGenericType => GetGenericArguments().Count != 0;
 		public override bool IsGenericTypeDefinition => GetGenericArguments().Count != 0;
-		public override int MetadataToken => (int)(0x02000000 + rid);
+		public override int MetadataToken => new MDToken(Table.TypeDef, rid).ToInt32();
 		internal override bool HasTypeEquivalence {
 			get {
 				const byte BoolBit = 1;

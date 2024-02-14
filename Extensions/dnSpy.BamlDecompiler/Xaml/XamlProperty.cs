@@ -35,14 +35,18 @@ namespace dnSpy.BamlDecompiler.Xaml {
 
 		public ITypeDefOrRef ResolvedMemberDeclaringType { get; set; }
 
+		public XamlPropertyKind PropertyKind { get; set; }
+
 		public XamlProperty(XamlType type, string name) {
 			DeclaringType = type;
 			PropertyName = name;
 		}
 
 		public void TryResolve() {
-			if (ResolvedMember is not null)
+			if (ResolvedMember is not null) {
+				ResolvedMemberDeclaringType ??= ResolvedMember.DeclaringType;
 				return;
+			}
 
 			(ResolvedMember, ResolvedMemberDeclaringType) = FindProperty(DeclaringType.ResolvedType, PropertyName);
 			if (ResolvedMember is not null)
@@ -147,15 +151,7 @@ namespace dnSpy.BamlDecompiler.Xaml {
 				return XmlConvert.EncodeLocalName(PropertyName);
 
 			var sb = new StringBuilder();
-			if (DeclaringType.Namespace != parent.GetDefaultNamespace()) {
-				var prefix = parent.GetPrefixOfNamespace(DeclaringType.Namespace);
-				if (!string.IsNullOrEmpty(prefix)) {
-					sb.Append(prefix);
-					sb.Append(':');
-				}
-			}
-
-			DeclaringType.TypeName.AppendEncodedName(sb);
+			DeclaringType.AppendMarkupExtensionName(sb, parent);
 			sb.Append('.');
 			sb.Append(XmlConvert.EncodeLocalName(PropertyName));
 			return sb.ToString();

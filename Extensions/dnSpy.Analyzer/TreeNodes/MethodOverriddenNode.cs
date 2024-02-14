@@ -42,20 +42,21 @@ namespace dnSpy.Analyzer.TreeNodes {
 			output.Write(BoxedTextColor.Text, dnSpy_Analyzer_Resources.OverridesTreeNode);
 
 		protected override IEnumerable<AnalyzerTreeNodeData> FetchChildren(CancellationToken ct) {
-			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
 			var overrides = analyzedMethod.Overrides;
-			foreach (var declType in analyzedTypes) {
-				if (overrides.Count > 0) {
-					bool matched = false;
-					foreach (var o in overrides) {
-						if (o.MethodDeclaration.ResolveMethodDef() is MethodDef method && (method.IsVirtual || method.IsAbstract)) {
-							matched = true;
-							yield return new MethodNode(method) { Context = Context };
-						}
+			if (overrides.Count > 0) {
+				bool matched = false;
+				foreach (var o in overrides) {
+					if (o.MethodDeclaration.ResolveMethodDef() is MethodDef method && (method.IsVirtual || method.IsAbstract)) {
+						matched = true;
+						yield return new MethodNode(method) { Context = Context };
 					}
-					if (matched)
-						yield break;
 				}
+				if (matched)
+					yield break;
+			}
+
+			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
+			foreach (var declType in analyzedTypes) {
 				foreach (var method in TypesHierarchyHelpers.FindBaseMethods(analyzedMethod, declType)) {
 					if (!(method.IsVirtual || method.IsAbstract))
 						continue;

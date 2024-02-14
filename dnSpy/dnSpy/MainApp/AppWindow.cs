@@ -42,6 +42,9 @@ namespace dnSpy.MainApp {
 		public IAppStatusBar StatusBar => statusBar;
 		readonly AppStatusBar statusBar;
 
+		public IAppInfoBar InfoBar => infoBar;
+		readonly AppInfoBar infoBar;
+
 		Window IAppWindow.MainWindow => mainWindow!;
 		internal MainWindow MainWindow => mainWindow!;
 		MainWindow? mainWindow;
@@ -96,7 +99,7 @@ namespace dnSpy.MainApp {
 		readonly MainWindowControl mainWindowControl;
 
 		[ImportingConstructor]
-		AppWindow(ISettingsService settingsService, IDocumentTabService documentTabService, AppToolBar appToolBar, MainWindowControl mainWindowControl, IWpfCommandService wpfCommandService) {
+		AppWindow(ISettingsService settingsService, IDocumentTabService documentTabService, AppToolBar appToolBar, AppInfoBar infoBar, MainWindowControl mainWindowControl, IWpfCommandService wpfCommandService) {
 			assemblyInformationalVersion = CalculateAssemblyInformationalVersion(GetType().Assembly);
 			uiSettings = new UISettings(settingsService);
 			uiSettings.Read();
@@ -104,6 +107,7 @@ namespace dnSpy.MainApp {
 			this.documentTabService = documentTabService;
 			statusBar = new AppStatusBar();
 			this.appToolBar = appToolBar;
+			this.infoBar = infoBar;
 			this.mainWindowControl = mainWindowControl;
 			this.wpfCommandService = wpfCommandService;
 			mainWindowCommands = wpfCommandService.GetCommands(ControlConstants.GUID_MAINWINDOW);
@@ -124,6 +128,7 @@ namespace dnSpy.MainApp {
 		public Window InitializeMainWindow() {
 			var sc = new StackedContent<IStackedContentChild>(false);
 			sc.AddChild(appToolBar, StackedContentChildInfo.CreateVertical(new GridLength(0, GridUnitType.Auto)));
+			sc.AddChild(infoBar, StackedContentChildInfo.CreateVertical(new GridLength(0, GridUnitType.Auto)));
 			sc.AddChild(stackedContent, StackedContentChildInfo.CreateVertical(new GridLength(1, GridUnitType.Star)));
 			sc.AddChild(statusBar, StackedContentChildInfo.CreateVertical(new GridLength(0, GridUnitType.Auto)));
 			mainWindow = new MainWindow(sc.UIObject);

@@ -70,6 +70,15 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Autodetect.
+        /// </summary>
+        public static string DbgAsm_Autodetect {
+            get {
+                return ResourceManager.GetString("DbgAsm_Autodetect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Break at.
         /// </summary>
         public static string DbgAsm_BreakAt {
@@ -102,6 +111,15 @@ namespace dnSpy.Debugger.DotNet.CorDebug.Properties {
         public static string DbgAsm_HostArgs {
             get {
                 return ResourceManager.GetString("DbgAsm_HostArgs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to _Runtime Version.
+        /// </summary>
+        public static string DbgAsm_RuntimeVersion {
+            get {
+                return ResourceManager.GetString("DbgAsm_RuntimeVersion", resourceCulture);
             }
         }
         

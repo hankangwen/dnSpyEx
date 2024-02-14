@@ -54,6 +54,11 @@ namespace dnSpy.Contracts.App {
 		IAppStatusBar StatusBar { get; }
 
 		/// <summary>
+		/// Gets the <see cref="IAppInfoBar"/> instance
+		/// </summary>
+		IAppInfoBar InfoBar { get; }
+
+		/// <summary>
 		/// true if the app has been loaded
 		/// </summary>
 		bool AppLoaded { get; }

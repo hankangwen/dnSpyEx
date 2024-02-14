@@ -190,6 +190,13 @@ namespace dnSpy.Contracts.Decompiler.XmlDoc {
 				var found = LookupLocalizedXmlDoc(Path.Combine(directories[0], assemblyFileName));
 				if (found is not null)
 					return found;
+				// System.Private.CoreLib.dll does not have a documentation file, but System.Runtime.dll does
+				// Since System.Runtime.dll contains just type forwarders to System.Private.CoreLib, we can use it's documentation file
+				if (assemblyFileName == "System.Private.CoreLib.dll") {
+					found = LookupLocalizedXmlDoc(Path.Combine(directories[0], "System.Runtime.dll"));
+					if (found is not null)
+						return found;
+				}
 			}
 
 			return null;

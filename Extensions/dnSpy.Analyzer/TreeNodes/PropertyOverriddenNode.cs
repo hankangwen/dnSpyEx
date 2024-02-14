@@ -40,28 +40,28 @@ namespace dnSpy.Analyzer.TreeNodes {
 			output.Write(BoxedTextColor.Text, dnSpy_Analyzer_Resources.OverridesTreeNode);
 
 		protected override IEnumerable<AnalyzerTreeNodeData> FetchChildren(CancellationToken ct) {
-			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
-			foreach (var declType in analyzedTypes) {
-				var analyzedAccessor = GetVirtualAccessor(analyzedProperty.GetMethod) ?? GetVirtualAccessor(analyzedProperty.SetMethod);
-				if (analyzedAccessor?.Overrides is IList<MethodOverride> overrides && overrides.Count > 0) {
-					bool matched = false;
-					foreach (var o in overrides) {
-						if (o.MethodDeclaration.ResolveMethodDef() is MethodDef method && (method.IsVirtual || method.IsAbstract)) {
-							if (method.DeclaringType.Properties.FirstOrDefault(a => (object?)a.GetMethod == method || (object?)a.SetMethod == method) is PropertyDef property) {
-								matched = true;
-								yield return new PropertyNode(property) { Context = Context };
-							}
+			var analyzedAccessor = GetVirtualAccessor(analyzedProperty.GetMethod) ?? GetVirtualAccessor(analyzedProperty.SetMethod);
+			if (analyzedAccessor?.Overrides is IList<MethodOverride> overrides && overrides.Count > 0) {
+				bool matched = false;
+				foreach (var o in overrides) {
+					if (o.MethodDeclaration.ResolveMethodDef() is MethodDef method && (method.IsVirtual || method.IsAbstract)) {
+						if (method.DeclaringType.Properties.FirstOrDefault(a => (object?)a.GetMethod == method || (object?)a.SetMethod == method) is PropertyDef property) {
+							matched = true;
+							yield return new PropertyNode(property) { Context = Context };
 						}
 					}
-					if (matched)
-						yield break;
 				}
+				if (matched)
+					yield break;
+			}
 
+			AddTypeEquivalentTypes(Context.DocumentService, analyzedTypes[0], analyzedTypes);
+			foreach (var declType in analyzedTypes) {
 				foreach (var property in TypesHierarchyHelpers.FindBaseProperties(analyzedProperty, declType)) {
 					var anyAccessor = GetVirtualAccessor(property.GetMethod) ?? GetVirtualAccessor(property.SetMethod);
 					if (anyAccessor is null || !(anyAccessor.IsVirtual || anyAccessor.IsAbstract))
 						continue;
-						yield return new PropertyNode(property) { Context = Context };
+					yield return new PropertyNode(property) { Context = Context };
 					yield break;
 				}
 			}

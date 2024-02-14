@@ -262,9 +262,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabControl}">
-                    <Grid x:Name="templateRoot" 
-                        ClipToBounds="true" 
-                        SnapsToDevicePixels="true" 
+                    <Grid x:Name="templateRoot"
+                        ClipToBounds="true"
+                        SnapsToDevicePixels="true"
                         KeyboardNavigation.TabNavigation="Local">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition x:Name="ColumnDefinition0"/>
@@ -274,22 +274,22 @@
                             <RowDefinition x:Name="RowDefinition0" Height="Auto"/>
                             <RowDefinition x:Name="RowDefinition1" Height="*"/>
                         </Grid.RowDefinitions>
-                        <TabPanel x:Name="headerPanel" 
+                        <TabPanel x:Name="headerPanel"
                             Background="Transparent"
-                            Grid.Column="0" 
+                            Grid.Column="0"
                             Grid.Row="0"
-                            IsItemsHost="true" 
-                            Margin="2,2,2,0" 
-                            KeyboardNavigation.TabIndex="1" 
+                            IsItemsHost="true"
+                            Margin="2,2,2,0"
+                            KeyboardNavigation.TabIndex="1"
                             Panel.ZIndex="1"/>
-                        <Border x:Name="contentPanel" 
-                            Grid.Column="0" 
-                            Grid.Row="1" 
+                        <Border x:Name="contentPanel"
+                            Grid.Column="0"
+                            Grid.Row="1"
                             KeyboardNavigation.DirectionalNavigation="Contained"
-                            KeyboardNavigation.TabNavigation="Local" 
-                            KeyboardNavigation.TabIndex="2" 
-                            BorderThickness="{TemplateBinding BorderThickness}" 
-                            Background="{TemplateBinding Background}" 
+                            KeyboardNavigation.TabNavigation="Local"
+                            KeyboardNavigation.TabIndex="2"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}">
                             <ContentPresenter x:Name="PART_SelectedContentHost"
                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
@@ -352,24 +352,24 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TabItem}">
                     <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
-                        <Border x:Name="mainBorder" 
-                            BorderThickness="1,1,1,0" 
+                        <Border x:Name="mainBorder"
+                            BorderThickness="1,1,1,0"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             Margin="0">
-                            <Border x:Name="innerBorder" 
-                                BorderThickness="1,1,1,0" 
+                            <Border x:Name="innerBorder"
+                                BorderThickness="1,1,1,0"
                                 Background="{DynamicResource TabItem.Selected.Background}"
                                 BorderBrush="{DynamicResource TabItem.Selected.Border}"
                                 Margin="-1"
                                 Opacity="0" />
                         </Border>
-                        <ContentPresenter x:Name="contentPresenter" 
-                            ContentSource="Header" 
-                            HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" 
-                            VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" 
-                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-                            Focusable="False" 
+                        <ContentPresenter x:Name="contentPresenter"
+                            ContentSource="Header"
+                            HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                            VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                            Focusable="False"
                             Margin="{TemplateBinding Padding}"
                             RecognizesAccessKey="True"/>
                     </Grid>
@@ -864,7 +864,7 @@
         </Setter>
     </Style>
 
- 
+
     <Style x:Key="{x:Type ContentControl}"
            TargetType="{x:Type ContentControl}">
         <Setter Property="Template">
@@ -1171,7 +1171,7 @@
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Pressed.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
                                     Value="{DynamicResource Expander.Pressed.Arrow.Stroke}"
                                     TargetName="arrow"/>
@@ -1179,15 +1179,15 @@
                         <Trigger Property="IsEnabled"
                                  Value="false">
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}" 
+                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}"
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Disabled.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}" 
-                                    TargetName="arrow"/>                        
-                        </Trigger>                                    
+                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}"
+                                    TargetName="arrow"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -1252,7 +1252,7 @@
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.MouseOver.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
                                     Value="{DynamicResource Expander.MouseOver.Arrow.Stroke}"
                                     TargetName="arrow"/>
@@ -1267,7 +1267,7 @@
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Pressed.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
                                     Value="{DynamicResource Expander.Pressed.Arrow.Stroke}"
                                     TargetName="arrow"/>
@@ -1275,15 +1275,15 @@
                         <Trigger Property="IsEnabled"
                                  Value="false">
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}" 
+                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}"
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Disabled.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}" 
+                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}"
                                     TargetName="arrow"/>
-                        </Trigger>                                    
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -1348,7 +1348,7 @@
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.MouseOver.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
                                     Value="{DynamicResource Expander.MouseOver.Arrow.Stroke}"
                                     TargetName="arrow"/>
@@ -1371,14 +1371,14 @@
                         <Trigger Property="IsEnabled"
                                  Value="false">
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}" 
+                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}"
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Disabled.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}" 
-                                    TargetName="arrow"/>     
+                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}"
+                                    TargetName="arrow"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -1440,49 +1440,49 @@
                         <Trigger Property="IsMouseOver"
                                  Value="true">
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.MouseOver.Circle.Stroke}" 
+                                    Value="{DynamicResource Expander.MouseOver.Circle.Stroke}"
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.MouseOver.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.MouseOver.Arrow.Stroke}" 
+                                    Value="{DynamicResource Expander.MouseOver.Arrow.Stroke}"
                                     TargetName="arrow"/>
                         </Trigger>
                         <Trigger Property="IsPressed"
                                  Value="true">
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Pressed.Circle.Stroke}" 
+                                    Value="{DynamicResource Expander.Pressed.Circle.Stroke}"
                                     TargetName="circle"/>
                             <Setter Property="StrokeThickness"
                                     Value="1.5"
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Pressed.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Pressed.Arrow.Stroke}" 
+                                    Value="{DynamicResource Expander.Pressed.Arrow.Stroke}"
                                     TargetName="arrow"/>
                         </Trigger>
                         <Trigger Property="IsEnabled"
                                  Value="false">
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}" 
+                                    Value="{DynamicResource Expander.Disabled.Circle.Stroke}"
                                     TargetName="circle"/>
                             <Setter Property="Fill"
                                     Value="{DynamicResource Expander.Disabled.Circle.Fill}"
-                                    TargetName="circle"/>                                    
+                                    TargetName="circle"/>
                             <Setter Property="Stroke"
-                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}" 
+                                    Value="{DynamicResource Expander.Disabled.Arrow.Stroke}"
                                     TargetName="arrow"/>
-                        </Trigger>                        
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    
-    
+
+
     <Style x:Key="{x:Type Expander}"
            TargetType="{x:Type Expander}">
         <Setter Property="Foreground"
@@ -1665,14 +1665,14 @@
                                 </MultiBinding>
                             </Border.OpacityMask>
                         </Border>
-                        
+
                         <Border x:Name="Header"
                                 Padding="3,1,3,1"
                                 Grid.Row="0"
                                 Grid.RowSpan="2"
                                 Grid.Column="1">
-                            <ContentPresenter ContentSource="Header" 
-                                              RecognizesAccessKey="True" 
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"
                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                         </Border>
                         <ContentPresenter Grid.Row="2"
@@ -1832,14 +1832,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                    <Border x:Name="Bd" 
-                        BorderBrush="{TemplateBinding BorderBrush}" 
-                        BorderThickness="{TemplateBinding BorderThickness}" 
-                        Background="{TemplateBinding Background}" 
-                        Padding="{TemplateBinding Padding}" 
+                    <Border x:Name="Bd"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Background="{TemplateBinding Background}"
+                        Padding="{TemplateBinding Padding}"
                         SnapsToDevicePixels="true">
-                        <ContentPresenter 
-                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                     </Border>
@@ -2676,18 +2676,18 @@
                                 </VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Border 
-                            BorderThickness="{TemplateBinding BorderThickness}" 
-                            BorderBrush="{TemplateBinding BorderBrush}" 
+                        <Border
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
                             Background="{TemplateBinding Background}" />
                         <Rectangle x:Name="PART_Track"/>
                         <Grid x:Name="PART_Indicator"
                             HorizontalAlignment="Left"
                             ClipToBounds="true">
-                            <Rectangle x:Name="Indicator" 
+                            <Rectangle x:Name="Indicator"
                                 Fill="{TemplateBinding Foreground}" />
-                            <Rectangle x:Name="Animation" 
-                                RenderTransformOrigin="0.5,0.5" 
+                            <Rectangle x:Name="Animation"
+                                RenderTransformOrigin="0.5,0.5"
                                 Fill="{TemplateBinding Foreground}">
                                 <Rectangle.RenderTransform>
                                     <TransformGroup>
@@ -2729,13 +2729,13 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border x:Name="radioButtonBorder" 
-                            Margin="1,1,2,1" 
-                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
-                            BorderThickness="1" 
-                            Background="{DynamicResource CommonControlsRadioButtonBackground}" 
-                            BorderBrush="{DynamicResource CommonControlsRadioButtonBorder}" 
+                        <Border x:Name="radioButtonBorder"
+                            Margin="1,1,2,1"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            BorderThickness="1"
+                            Background="{DynamicResource CommonControlsRadioButtonBackground}"
+                            BorderBrush="{DynamicResource CommonControlsRadioButtonBorder}"
                             CornerRadius="100">
                             <Grid x:Name="markGrid" Margin="2">
                                 <Ellipse
@@ -2746,13 +2746,13 @@
                                     Fill="{DynamicResource CommonControlsRadioButtonGlyph}"/>
                             </Grid>
                         </Border>
-                        <ContentPresenter x:Name="contentPresenter" 
-                            RecognizesAccessKey="True" 
-                            Grid.Column="1" 
-                            Margin="{TemplateBinding Padding}" 
-                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
-                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                        <ContentPresenter x:Name="contentPresenter"
+                            RecognizesAccessKey="True"
+                            Grid.Column="1"
+                            Margin="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Focusable="False"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -3025,8 +3025,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ResizeGrip}">
                     <Grid SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
-                        <Path HorizontalAlignment="Right" 
-                              VerticalAlignment="Bottom" 
+                        <Path HorizontalAlignment="Right"
+                              VerticalAlignment="Bottom"
                               Margin="0,0,2,2"
                               Data="M 9,0 L 11,0 L 11,11 L 0,11 L 0,9 L 3,9 L 3,6 L 6,6 L 6,3 L 9,3 z">
 
@@ -3324,12 +3324,12 @@
     <!-- Updated to include the default ScrollViewer template. This template isn't included in a
          XAML file. It's created by ScrollViewer.CreateDefaultControlTemplate().
     -->
-    <Style x:Key="{x:Type ScrollViewer}" 
+    <Style x:Key="{x:Type ScrollViewer}"
            TargetType="{x:Type ScrollViewer}">
         <Style.Triggers>
-            <Trigger Property="IsEnabled" 
+            <Trigger Property="IsEnabled"
                      Value="false">
-                <Setter Property="Foreground" 
+                <Setter Property="Foreground"
                         Value="{DynamicResource SystemColorsGrayText}"/>
             </Trigger>
         </Style.Triggers>
@@ -4674,7 +4674,7 @@
     <!--
     End of WPF standard styles
     -->
-    
+
     <!-- The ListView is only used with the GridView at the moment, and our modified styles aren't
         loaded by default for some reason, so add these two styles.
     -->
@@ -4811,7 +4811,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style TargetType="{x:Type shtv:SharpTreeView}"
            BasedOn="{StaticResource {x:Type ListBox}}">
         <Setter Property="Background"
@@ -5391,7 +5391,7 @@
                                 <AdornerDecorator>
                                     <ContentPresenter/>
                                 </AdornerDecorator>
-            
+
                                 <ResizeGrip x:Name="WindowResizeGrip"
                                             HorizontalAlignment="Right"
                                             VerticalAlignment="Bottom"
@@ -5563,7 +5563,7 @@
                         </Grid.RowDefinitions>
                         <TabPanel x:Name="HeaderPanel"
                                   mvvm:IsDraggableAP.IsDraggable="True"
-                                  Panel.ZIndex ="1" 
+                                  Panel.ZIndex ="1"
                                   KeyboardNavigation.TabIndex="1"
                                   Grid.Column="0"
                                   Grid.Row="0"
@@ -6107,6 +6107,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -6119,7 +6121,9 @@
             <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" IsChecked="{Binding DecompileFullType}" Content="{x:Static p:dnSpy_Resources.DisplaySettings_DecompileType}" />
             <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" IsChecked="{Binding RestoreTabs}" Content="{x:Static p:dnSpy_Resources.DisplaySettings_RestoreTabs}" />
             <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" IsChecked="{Binding UseMemoryMappedIO}" Content="{x:Static p:dnSpy_Resources.Options_Misc_UseMmapdIO}" />
-            <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Resources.Options_Misc_Button_EnableAllWarnings}" Command="{Binding ClearAllWarningsCommand}" />
+            <CheckBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" IsChecked="{Binding CheckForUpdateOnStartup}" Content="{x:Static p:dnSpy_Resources.Options_Misc_CheckForUpdatesOnStartup}" />
+            <Button Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Resources.Options_Misc_Button_EnableAllWarnings}" Command="{Binding ClearAllWarningsCommand}" />
+            <Button Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Resources.Options_Misc_Button_ResetIgnoredUpdates}" Command="{Binding ResetIgnoredUpdatesCommand}" />
         </Grid>
     </DataTemplate>
 

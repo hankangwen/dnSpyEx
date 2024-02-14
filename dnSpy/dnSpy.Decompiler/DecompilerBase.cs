@@ -135,14 +135,14 @@ namespace dnSpy.Decompiler {
 		void DecompileInternal(AssemblyDef asm, IDecompilerOutput output, DecompilationContext ctx) {
 			this.WriteCommentLine(output, asm.ManifestModule.Location);
 			if (asm.IsContentTypeWindowsRuntime)
-				this.WriteCommentLine(output, asm.Name + " [WinRT]");
+				this.WriteCommentLine(output, IdentifierEscaper.Escape(asm.Name, true) + " [WinRT]");
 			else
-				this.WriteCommentLine(output, asm.FullName);
+				this.WriteCommentLine(output, IdentifierEscaper.Escape(asm.FullName, true));
 		}
 
 		void DecompileInternal(ModuleDef mod, IDecompilerOutput output, DecompilationContext ctx) {
 			this.WriteCommentLine(output, mod.Location);
-			this.WriteCommentLine(output, mod.Name);
+			this.WriteCommentLine(output, IdentifierEscaper.Escape(mod.Name, true));
 		}
 
 		protected void PrintEntryPoint(ModuleDef mod, IDecompilerOutput output) {

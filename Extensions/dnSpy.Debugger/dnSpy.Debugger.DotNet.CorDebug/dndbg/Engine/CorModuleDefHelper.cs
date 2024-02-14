@@ -37,7 +37,7 @@ namespace dndbg.Engine {
 			Debug.Assert(!module.IsDynamic || module.Address == 0);
 		}
 
-		public IAssembly CorLib {
+		public IAssembly? CorLib {
 			get {
 				var corAsm = module.AppDomain.Assemblies.FirstOrDefault();
 				Debug2.Assert(corAsm is not null);
@@ -47,7 +47,7 @@ namespace dndbg.Engine {
 				Debug2.Assert(corMod is not null);
 				if (corMod is null)
 					return AssemblyRefUser.CreateMscorlibReferenceCLR20();
-				return corMod.GetOrCreateCorModuleDef().Assembly;
+				return corMod.GetOrCreateCorModuleDef()?.Assembly;
 			}
 		}
 
@@ -103,7 +103,8 @@ namespace dndbg.Engine {
 				// it's the 1-byte or fat header.
 				var procReader = new ProcessBinaryReader(new CorProcessReader(module.Process), 0);
 				uint locVarSigTok = func.LocalVarSigToken;
-				bool isBig = codeSize >= 0x40 || (locVarSigTok & 0x00FFFFFF) != 0;
+				uint locVarSigRid = MDToken.ToRID(locVarSigTok);
+				bool isBig = codeSize >= 0x40 || locVarSigRid != 0;
 				if (!isBig) {
 					procReader.Position = (long)addr - 1;
 					byte b = procReader.ReadByte();
@@ -117,8 +118,8 @@ namespace dndbg.Engine {
 						uint headerCodeSize = procReader.ReadUInt32();
 						uint headerLocVarSigTok = procReader.ReadUInt32();
 						bool valid = headerCodeSize == codeSize &&
-							(locVarSigTok & 0x00FFFFFF) == (headerLocVarSigTok & 0x00FFFFFF) &&
-							((locVarSigTok & 0x00FFFFFF) == 0 || locVarSigTok == headerLocVarSigTok);
+							locVarSigRid == MDToken.ToRID(headerLocVarSigTok) &&
+							(locVarSigRid == 0 || locVarSigTok == headerLocVarSigTok);
 						Debug.Assert(valid);
 						if (!valid)
 							return false;
@@ -197,7 +198,7 @@ namespace dndbg.Engine {
 
 		public bool TryCreateResourceStream(uint offset, [NotNullWhen(true)] out DataReaderFactory? dataReaderFactory, out uint resourceOffset, out uint resourceLength) {
 			if (module.IsDynamic) {
-				//TODO: 
+				//TODO:
 				dataReaderFactory = null;
 				resourceOffset = 0;
 				resourceLength = 0;

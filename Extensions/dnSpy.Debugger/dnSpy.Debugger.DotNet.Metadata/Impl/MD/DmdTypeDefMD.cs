@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using dnlib.DotNet;
 using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
@@ -48,7 +49,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 		protected override DmdType? GetDeclaringType() {
 			if (!reader.TablesStream.TryReadNestedClassRow(reader.Metadata.GetNestedClassRid(Rid), out var row))
 				return null;
-			return Module.ResolveType(0x02000000 + (int)row.EnclosingClass, DmdResolveOptions.None);
+			return Module.ResolveType(new MDToken(Table.TypeDef, row.EnclosingClass).ToInt32(), DmdResolveOptions.None);
 		}
 
 		protected override DmdType? GetBaseTypeCore(IList<DmdType> genericTypeArguments) {
@@ -147,7 +148,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 			var res = new DmdType[ridList.Count];
 			for (int i = 0; i < res.Length; i++) {
 				uint rid = ridList[i];
-				var nestedType = Module.ResolveType(0x02000000 + (int)rid, DmdResolveOptions.None);
+				var nestedType = Module.ResolveType(new MDToken(Table.TypeDef, rid).ToInt32(), DmdResolveOptions.None);
 				if (nestedType is null)
 					return null;
 				res[i] = nestedType;

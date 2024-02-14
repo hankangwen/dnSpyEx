@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdTypeDefCOMD : DmdTypeDef {
@@ -33,7 +35,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public DmdTypeDefCOMD(DmdComMetadataReader reader, uint rid, IList<DmdCustomModifier>? customModifiers) : base(rid, customModifiers) {
 			this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
 			reader.Dispatcher.VerifyAccess();
-			uint token = 0x02000000 + rid;
+			uint token = new MDToken(Table.TypeDef, rid).Raw;
 			DmdTypeUtilities.SplitFullName(MDAPI.GetTypeDefName(reader.MetaDataImport, token) ?? string.Empty, out var @namespace, out var name);
 			MetadataNamespace = @namespace;
 			MetadataName = name;
@@ -57,13 +59,13 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		DmdType? GetDeclaringType_COMThread() {
 			reader.Dispatcher.VerifyAccess();
-			return reader.Module.ResolveType((int)(0x02000000 + reader.GetEnclosingTypeDefRid_COMThread(Rid)), DmdResolveOptions.None);
+			return reader.Module.ResolveType(new MDToken(Table.TypeDef, reader.GetEnclosingTypeDefRid_COMThread(Rid)).ToInt32(), DmdResolveOptions.None);
 		}
 
 		protected override DmdType? GetBaseTypeCore(IList<DmdType> genericTypeArguments) => COMThread(() => GetBaseTypeCore_COMThread(genericTypeArguments));
 		DmdType? GetBaseTypeCore_COMThread(IList<DmdType> genericTypeArguments) {
 			reader.Dispatcher.VerifyAccess();
-			uint extends = MDAPI.GetTypeDefExtends(reader.MetaDataImport, 0x02000000 + Rid);
+			uint extends = MDAPI.GetTypeDefExtends(reader.MetaDataImport, (uint)MetadataToken);
 			return reader.Module.ResolveType((int)extends, genericTypeArguments, null, DmdResolveOptions.None);
 		}
 
@@ -76,7 +78,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			var genericParams = new DmdType[tokens.Length];
 			for (int i = 0; i < genericParams.Length; i++) {
 				uint token = tokens[i];
-				uint rid = token & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(token);
 				var gpName = MDAPI.GetGenericParamName(reader.MetaDataImport, token) ?? string.Empty;
 				if (!MDAPI.GetGenericParamNumAndAttrs(reader.MetaDataImport, token, out var gpNumber, out var gpAttrs))
 					return null;
@@ -95,7 +97,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 				return Array.Empty<DmdFieldInfo>();
 			var fields = new DmdFieldInfo[tokens.Length];
 			for (int i = 0; i < fields.Length; i++) {
-				uint rid = tokens[i] & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(tokens[i]);
 				fields[i] = reader.CreateFieldDef_COMThread(rid, declaringType, reflectedType);
 			}
 			return fields;
@@ -110,7 +112,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 				return Array.Empty<DmdMethodBase>();
 			var methods = new DmdMethodBase[tokens.Length];
 			for (int i = 0; i < methods.Length; i++) {
-				uint rid = tokens[i] & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(tokens[i]);
 				methods[i] = reader.CreateMethodDef_COMThread(rid, declaringType, reflectedType);
 			}
 			return methods;
@@ -125,7 +127,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 				return Array.Empty<DmdPropertyInfo>();
 			var properties = new DmdPropertyInfo[tokens.Length];
 			for (int i = 0; i < properties.Length; i++) {
-				uint rid = tokens[i] & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(tokens[i]);
 				properties[i] = reader.CreatePropertyDef_COMThread(rid, declaringType, reflectedType);
 			}
 			return properties;
@@ -140,7 +142,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 				return Array.Empty<DmdEventInfo>();
 			var events = new DmdEventInfo[tokens.Length];
 			for (int i = 0; i < events.Length; i++) {
-				uint rid = tokens[i] & 0x00FFFFFF;
+				uint rid = MDToken.ToRID(tokens[i]);
 				events[i] = reader.CreateEventDef_COMThread(rid, declaringType, reflectedType);
 			}
 			return events;
@@ -170,8 +172,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 				return null;
 			var res = new DmdType[nestedRids.Length];
 			for (int i = 0; i < res.Length; i++) {
-				uint rid = nestedRids[i];
-				var nestedType = Module.ResolveType(0x02000000 + (int)rid, DmdResolveOptions.None);
+				var token = new MDToken(Table.TypeDef, nestedRids[i]);
+				var nestedType = Module.ResolveType(token.ToInt32(), DmdResolveOptions.None);
 				if (nestedType is null)
 					return null;
 				res[i] = nestedType;
@@ -190,7 +192,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		protected override (int packingSize, int classSize) GetClassLayout() => COMThread(GetClassLayout_COMThread);
 		(int packingSize, int classSize) GetClassLayout_COMThread() {
 			reader.Dispatcher.VerifyAccess();
-			MDAPI.GetClassLayout(reader.MetaDataImport, 0x02000000 + Rid, out ushort packingSize, out uint classSize);
+			MDAPI.GetClassLayout(reader.MetaDataImport, (uint)MetadataToken, out ushort packingSize, out uint classSize);
 			return (packingSize, (int)classSize);
 		}
 	}

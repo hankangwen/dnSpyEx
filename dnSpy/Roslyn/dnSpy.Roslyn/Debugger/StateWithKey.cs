@@ -35,7 +35,7 @@ namespace dnSpy.Roslyn.Debugger {
 				var list = state.list;
 				for (int i = 0; i < list.Count; i++) {
 					var info = list[i];
-					if (info.key == key)
+					if (Equals(info.key, key))
 						return info.data;
 				}
 				return null;
@@ -50,7 +50,7 @@ namespace dnSpy.Roslyn.Debugger {
 				var list = state.list;
 				for (int i = 0; i < list.Count; i++) {
 					var info = list[i];
-					if (info.key == key)
+					if (Equals(info.key, key))
 						return info.data;
 				}
 				var data = create();

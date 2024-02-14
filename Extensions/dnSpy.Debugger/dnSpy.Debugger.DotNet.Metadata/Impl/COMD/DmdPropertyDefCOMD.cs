@@ -19,6 +19,8 @@
 
 using System;
 using System.Diagnostics;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdPropertyDefCOMD : DmdPropertyDef {
@@ -31,7 +33,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		public DmdPropertyDefCOMD(DmdComMetadataReader reader, uint rid, DmdType declaringType, DmdType reflectedType) : base(rid, declaringType, reflectedType) {
 			this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
 			reader.Dispatcher.VerifyAccess();
-			uint token = 0x17000000 + rid;
+			uint token = new MDToken(Table.Property, rid).Raw;
 			Name = MDAPI.GetPropertyName(reader.MetaDataImport, token) ?? string.Empty;
 			Attributes = MDAPI.GetPropertyAttributes(reader.MetaDataImport, token);
 			methodSignature = reader.ReadMethodSignature_COMThread(MDAPI.GetPropertySignatureBlob(reader.MetaDataImport, token), DeclaringType!.GetGenericArguments(), null, isProperty: true);
@@ -52,9 +54,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 
 		(DmdMethodInfo? getMethod, DmdMethodInfo? setMethod, DmdMethodInfo[] otherMethods) GetMethods_COMThread() {
 			reader.Dispatcher.VerifyAccess();
-			uint token = 0x17000000 + Rid;
-			MDAPI.GetPropertyGetterSetter(reader.MetaDataImport, token, out uint getToken, out uint setToken);
-			var otherMethodTokens = MDAPI.GetPropertyOtherMethodTokens(reader.MetaDataImport, token);
+			MDAPI.GetPropertyGetterSetter(reader.MetaDataImport, (uint)MetadataToken, out uint getToken, out uint setToken);
+			var otherMethodTokens = MDAPI.GetPropertyOtherMethodTokens(reader.MetaDataImport, (uint)MetadataToken);
 			var getMethod = Lookup_COMThread(getToken);
 			var setMethod = Lookup_COMThread(setToken);
 			var otherMethods = otherMethodTokens.Length == 0 ? Array.Empty<DmdMethodInfo>() : new DmdMethodInfo[otherMethodTokens.Length];
@@ -70,7 +71,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		}
 
 		DmdMethodInfo? Lookup_COMThread(uint token) {
-			if ((token >> 24) != 0x06 || (token & 0x00FFFFFF) == 0)
+			var methodToken = new MDToken(token);
+			if (methodToken.Table != Table.Method || methodToken.IsNull)
 				return null;
 			var method = ReflectedType!.GetMethod(Module, (int)token) as DmdMethodInfo;
 			Debug2.Assert(method is not null);

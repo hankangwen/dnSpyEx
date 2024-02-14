@@ -23,6 +23,7 @@ using System.Linq;
 using dnlib.DotNet.Emit;
 using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation;
+using dnSpy.Contracts.Debugger.DotNet.Evaluation.ExpressionCompiler;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation.Formatters;
 using dnSpy.Contracts.Debugger.Engine.Evaluation;
 using dnSpy.Contracts.Debugger.Evaluation;
@@ -88,8 +89,10 @@ namespace dnSpy.Debugger.DotNet.Evaluation.Engine {
 
 					if (fieldVal.HasError)
 						valueNodes[j++] = valueNodeFactory.CreateError(evalInfo, fieldExpression, fieldVal.ErrorMessage!, fieldExpression.ToString(), false);
-					else
-						valueNodes[j++] = valueNodeFactory.Create(evalInfo, fieldExpression, fieldVal.Value!, null, options, fieldExpression.ToString(), GetFieldImageName(field), false, false, field.FieldType);
+					else {
+						evalInfo.Context.TryGetData(out DbgDotNetExpressionCompiler? expressionCompiler);
+						valueNodes[j++] = valueNodeFactory.Create(evalInfo, fieldExpression, fieldVal.Value!, null, options, fieldExpression.ToString(), GetFieldImageName(field), false, false, field.FieldType, expressionCompiler?.CreateCustomTypeInfo(field));
+					}
 				}
 				ObjectCache.Free(ref output);
 

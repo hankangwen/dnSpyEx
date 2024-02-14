@@ -42,6 +42,15 @@ namespace dnSpy.BamlDecompiler.Handlers {
 			return null;
 
 			XAttribute ConstructXAttribute() {
+				switch (xamlProp.PropertyKind) {
+				case XamlPropertyKind.XmlSpace:
+					return new XAttribute(XNamespace.Xml + "space", value);
+				case XamlPropertyKind.XmlLang:
+					return new XAttribute(XNamespace.Xml + "lang", value);
+				case XamlPropertyKind.RuntimeName:
+					return new XAttribute(ctx.GetKnownNamespace("Name", XamlContext.KnownNamespace_Xaml), value);
+				}
+
 				if (xamlProp.IsAttachedTo(elemType))
 					return new XAttribute(xamlProp.ToXName(ctx, parent.Xaml), value);
 

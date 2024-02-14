@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdMethodDefCOMD : DmdMethodDef {
@@ -35,7 +37,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			MethodImplementationFlags = implementationFlags;
 			Attributes = attributes;
 			Name = name ?? throw new ArgumentNullException(nameof(name));
-			methodSignature = reader.ReadMethodSignature_COMThread(MDAPI.GetMethodSignatureBlob(reader.MetaDataImport, 0x06000000 + rid), DeclaringType!.GetGenericArguments(), GetGenericArguments(), isProperty: false);
+			uint token = new MDToken(Table.Method, rid).Raw;
+			methodSignature = reader.ReadMethodSignature_COMThread(MDAPI.GetMethodSignatureBlob(reader.MetaDataImport, token), DeclaringType!.GetGenericArguments(), GetGenericArguments(), isProperty: false);
 		}
 
 		T COMThread<T>(Func<T> action) => reader.Dispatcher.Invoke(action);
@@ -50,8 +53,8 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 		protected override (DmdCustomAttributeData[]? cas, DmdCustomAttributeData[]? sas, DmdImplMap? implMap) CreateCustomAttributes() => COMThread(CreateCustomAttributes_COMThread);
 		(DmdCustomAttributeData[]? cas, DmdCustomAttributeData[]? sas, DmdImplMap? implMap) CreateCustomAttributes_COMThread() {
 			reader.Dispatcher.VerifyAccess();
-			var cas = reader.ReadCustomAttributes(MetadataToken);
-			var sas = reader.ReadSecurityAttributes(MetadataToken);
+			var cas = reader.ReadCustomAttributesCore_COMThread((uint)MetadataToken);
+			var sas = reader.ReadSecurityAttributesCore_COMThread((uint)MetadataToken);
 			DmdImplMap? implMap;
 			if (IsPinvokeImpl) {
 				var name = MDAPI.GetPinvokeMapName(reader.MetaDataImport, (uint)MetadataToken);
@@ -67,9 +70,9 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			return (cas, sas, implMap);
 		}
 
-		private protected override DmdMethodSignature GetMethodSignatureCore(IList<DmdType> genericMethodArguments) => COMThread(() => reader.ReadMethodSignature_COMThread(MDAPI.GetMethodSignatureBlob(reader.MetaDataImport, 0x06000000 + Rid), DeclaringType!.GetGenericArguments(), genericMethodArguments, isProperty: false));
+		private protected override DmdMethodSignature GetMethodSignatureCore(IList<DmdType> genericMethodArguments) => COMThread(() => reader.ReadMethodSignature_COMThread(MDAPI.GetMethodSignatureBlob(reader.MetaDataImport,(uint)MetadataToken), DeclaringType!.GetGenericArguments(), genericMethodArguments, isProperty: false));
 
 		protected override uint GetRVA() => COMThread(GetRVA_COMThread);
-		uint GetRVA_COMThread() => MDAPI.GetRVA(reader.MetaDataImport, 0x06000000 + Rid) ?? 0;
+		uint GetRVA_COMThread() => MDAPI.GetRVA(reader.MetaDataImport, (uint)MetadataToken) ?? 0;
 	}
 }

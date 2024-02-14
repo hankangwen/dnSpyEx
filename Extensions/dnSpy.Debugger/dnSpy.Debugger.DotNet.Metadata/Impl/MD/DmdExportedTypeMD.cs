@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using dnlib.DotNet;
 using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
@@ -42,18 +43,19 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.MD {
 
 			if (!CodedToken.Implementation.Decode(row.Implementation, out uint implToken))
 				implToken = uint.MaxValue;
-			switch (implToken >> 24) {
-			case 0x23:
-				TypeScope = new DmdTypeScope(reader.ReadAssemblyName(implToken & 0x00FFFFFF));
+			var implRid = MDToken.ToRID(implToken);
+			switch (MDToken.ToTable(implToken)) {
+			case Table.AssemblyRef:
+				TypeScope = new DmdTypeScope(reader.ReadAssemblyName(implRid));
 				break;
 
-			case 0x26:
-				reader.TablesStream.TryReadFileRow(implToken & 0x00FFFFFF, out var fileRow);
+			case Table.File:
+				reader.TablesStream.TryReadFileRow(implRid, out var fileRow);
 				var moduleName = reader.StringsStream.ReadNoNull(fileRow.Name);
 				TypeScope = new DmdTypeScope(reader.GetName(), moduleName);
 				break;
 
-			case 0x27:
+			case Table.ExportedType:
 				TypeScope = DmdTypeScope.Invalid;
 				baseTypeToken = (int)implToken;
 				break;

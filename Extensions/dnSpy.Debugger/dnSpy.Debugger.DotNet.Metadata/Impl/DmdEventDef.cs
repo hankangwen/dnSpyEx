@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 	abstract class DmdEventDef : DmdEventInfo {
@@ -30,7 +32,7 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		public sealed override DmdModule Module => DeclaringType!.Module;
 		public sealed override DmdType? DeclaringType { get; }
 		public sealed override DmdType? ReflectedType { get; }
-		public sealed override int MetadataToken => (int)(0x14000000 + rid);
+		public sealed override int MetadataToken => new MDToken(Table.Event, rid).ToInt32();
 
 		protected uint Rid => rid;
 		readonly uint rid;

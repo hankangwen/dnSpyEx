@@ -35,7 +35,7 @@ namespace dnSpy.Documents {
 		// PERF: Most of the time we only read from the assembly list so use a ReaderWriterLockSlim instead of a normal lock
 		readonly ReaderWriterLockSlim rwLock;
 		readonly List<DocumentInfo> documents;
-		readonly object tempCacheLock;
+		readonly ReaderWriterLockSlim tempCacheLock;
 		HashSet<IDsDocument> tempCache;
 		readonly IDsDocumentProvider[] documentProviders;
 		readonly AssemblyResolver assemblyResolver;
@@ -66,6 +66,21 @@ namespace dnSpy.Documents {
 			}
 		}
 
+		sealed class TempCacheDocumentComparer : IEqualityComparer<IDsDocument> {
+			public static readonly TempCacheDocumentComparer Instance = new TempCacheDocumentComparer();
+			TempCacheDocumentComparer() { }
+
+			public bool Equals(IDsDocument? x, IDsDocument? y) {
+				if (x is null)
+					return false;
+				if (y is null)
+					return false;
+				return x.Key.Equals(y.Key);
+			}
+
+			public int GetHashCode(IDsDocument obj) => obj.Key.GetHashCode();
+		}
+
 		public IAssemblyResolver AssemblyResolver => assemblyResolver;
 
 		sealed class DisableAssemblyLoadHelper : IDisposable {
@@ -94,8 +109,8 @@ namespace dnSpy.Documents {
 		public DsDocumentService(IDsDocumentServiceSettings documentServiceSettings, [ImportMany] IDsDocumentProvider[] documentProviders, [ImportMany] Lazy<IRuntimeAssemblyResolver, IRuntimeAssemblyResolverMetadata>[] runtimeAsmResolvers) {
 			rwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 			documents = new List<DocumentInfo>();
-			tempCacheLock = new object();
-			tempCache = new HashSet<IDsDocument>();
+			tempCacheLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+			tempCache = new HashSet<IDsDocument>(TempCacheDocumentComparer.Instance);
 			assemblyResolver = new AssemblyResolver(this, runtimeAsmResolvers.OrderBy(a => a.Metadata.Order).ToArray());
 			this.documentProviders = documentProviders.OrderBy(a => a.Order).ToArray();
 			Settings = documentServiceSettings;
@@ -172,11 +187,15 @@ namespace dnSpy.Documents {
 			finally {
 				rwLock.ExitReadLock();
 			}
-			lock (tempCacheLock) {
+			tempCacheLock.EnterReadLock();
+			try {
 				foreach (var document in tempCache) {
 					if (comparer.Equals(document.AssemblyDef, assembly))
 						return document;
 				}
+			}
+			finally {
+				tempCacheLock.ExitReadLock();
 			}
 			return null;
 		}
@@ -206,11 +225,15 @@ namespace dnSpy.Documents {
 				return doc;
 
 			if (checkTempCache) {
-				lock (tempCacheLock) {
+				tempCacheLock.EnterReadLock();
+				try {
 					foreach (var document in tempCache) {
 						if (key.Equals(document.Key))
 							return document;
 					}
+				}
+				finally {
+					tempCacheLock.ExitReadLock();
 				}
 			}
 
@@ -293,10 +316,11 @@ namespace dnSpy.Documents {
 			}
 			if (result is null) {
 				if (!AssemblyLoadEnabled)
-					return AddTempCachedDocument(document);
-				result = GetOrAdd(document);
+					result = GetOrAddTempCachedDocument(document);
+				else
+					result = GetOrAdd(document);
 			}
-			if (info.Document is not null && origAssemblyRef is not null && document.AssemblyDef is AssemblyDef asm) {
+			if (AssemblyLoadEnabled && info.Document is not null && origAssemblyRef is not null && document.AssemblyDef is AssemblyDef asm) {
 				if (!AssemblyNameComparer.CompareAll.Equals(origAssemblyRef, asm)) {
 					rwLock.EnterWriteLock();
 					try {
@@ -312,30 +336,44 @@ namespace dnSpy.Documents {
 			return result;
 		}
 
-		IDsDocument AddTempCachedDocument(IDsDocument document) {
-			// PERF: most of the time this method has been called with the same document.
-			// If so, mmap'd IO has already been disabled and we don't need to do it again.
-			bool addIt;
-			lock (tempCacheLock)
-				addIt = !AssemblyLoadEnabled && !tempCache.Contains(document);
+		IDsDocument GetOrAddTempCachedDocument(IDsDocument document) {
+			tempCacheLock.EnterUpgradeableReadLock();
+			try {
+				// PERF: most of the time this method has been called with the same document.
+				// If so, mmap'd IO has already been disabled and we don't need to do it again.
+				if (tempCache.TryGetValue(document, out var existing)) {
+					if (existing is not null)
+						return existing;
+				}
 
-			if (addIt) {
 				// Disable mmap'd I/O before adding it to the temp cache to prevent another thread from
 				// getting the same file while we're disabling mmap'd I/O. Could lead to crashes.
 				DisableMMapdIO(document);
-				lock (tempCacheLock) {
+
+				tempCacheLock.EnterWriteLock();
+				try {
 					if (!AssemblyLoadEnabled)
 						tempCache.Add(document);
 				}
+				finally {
+					tempCacheLock.ExitWriteLock();
+				}
+			}
+			finally {
+				tempCacheLock.ExitUpgradeableReadLock();
 			}
 
 			return document;
 		}
 
 		void ClearTempCache() {
-			lock (tempCacheLock) {
+			tempCacheLock.EnterWriteLock();
+			try {
 				if (tempCache.Count > 0)
-					tempCache = new HashSet<IDsDocument>();
+					tempCache = new HashSet<IDsDocument>(TempCacheDocumentComparer.Instance);
+			}
+			finally {
+				tempCacheLock.ExitWriteLock();
 			}
 		}
 
@@ -361,8 +399,12 @@ namespace dnSpy.Documents {
 			if (newDocument is null)
 				return null;
 			newDocument.IsAutoLoaded = isAutoLoaded;
-			if (isResolve && !AssemblyLoadEnabled)
-				return AddTempCachedDocument(newDocument);
+			if (isResolve && !AssemblyLoadEnabled) {
+				var cacheResult = GetOrAddTempCachedDocument(newDocument);
+				if (cacheResult != newDocument)
+					Dispose(newDocument);
+				return cacheResult;
+			}
 
 			var result = GetOrAdd(newDocument);
 			if (result != newDocument)

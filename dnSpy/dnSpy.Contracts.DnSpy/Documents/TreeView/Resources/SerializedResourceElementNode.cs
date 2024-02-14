@@ -17,10 +17,13 @@
     along with dnSpy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading;
 using dnlib.DotNet.Resources;
 using dnSpy.Contracts.Images;
@@ -91,16 +94,59 @@ namespace dnSpy.Contracts.Documents.TreeView.Resources {
 			if (!CanDeserialize)
 				return;
 
-			var serializedData = ((BinaryResourceData)ResourceElement.ResourceData).Data;
-			var formatter = new BinaryFormatter();
-			try {
+			var binaryResourceData = ((BinaryResourceData)ResourceElement.ResourceData);
+			var serializedData = binaryResourceData.Data;
+			if (binaryResourceData.Format == SerializationFormat.BinaryFormatter) {
 #pragma warning disable SYSLIB0011
-				deserializedData = formatter.Deserialize(new MemoryStream(serializedData));
+				var formatter = new BinaryFormatter();
+				try {
+					deserializedData = formatter.Deserialize(new MemoryStream(serializedData));
+				}
+				catch {
+					return;
+				}
 #pragma warning restore SYSLIB0011
 			}
-			catch {
-				return;
+			else if (binaryResourceData.Format == SerializationFormat.TypeConverterByteArray) {
+				try {
+					var type = Type.GetType(binaryResourceData.TypeName);
+					if (type is null)
+						return;
+					var converter = TypeDescriptor.GetConverter(type);
+					if (converter is null)
+						return;
+					deserializedData = converter.ConvertFrom(serializedData);
+				}
+				catch {
+					return;
+				}
 			}
+			else if (binaryResourceData.Format == SerializationFormat.TypeConverterString) {
+				try {
+					var type = Type.GetType(binaryResourceData.TypeName);
+					if (type is null)
+						return;
+					var converter = TypeDescriptor.GetConverter(type);
+					if (converter is null)
+						return;
+					deserializedData = converter.ConvertFromInvariantString(Encoding.UTF8.GetString(serializedData));
+				}
+				catch {
+					return;
+				}
+			}
+			else if (binaryResourceData.Format == SerializationFormat.ActivatorStream) {
+				try {
+					var type = Type.GetType(binaryResourceData.TypeName);
+					if (type is null)
+						return;
+					deserializedData = Activator.CreateInstance(type, new MemoryStream(serializedData));
+				}
+				catch {
+					return;
+				}
+			}
+
 			if (deserializedData is null)
 				return;
 

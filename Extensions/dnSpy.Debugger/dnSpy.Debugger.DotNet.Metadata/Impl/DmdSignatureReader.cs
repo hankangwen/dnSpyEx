@@ -286,13 +286,12 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl {
 		}
 
 		DmdType ReadTypeDefOrRef() {
-			uint codedToken;
-			codedToken = reader.ReadCompressedUInt32();
-			if (!DMD.MD.CodedToken.TypeDefOrRef.Decode(codedToken, out uint token))
+			uint codedToken = reader.ReadCompressedUInt32();
+			if (!DMD.MD.CodedToken.TypeDefOrRef.Decode(codedToken, out DMD.MDToken token))
 				return module.AppDomain.System_Void;
-			if ((token >> 24) == 0x1B)
+			if (token.Table == DMD.MD.Table.TypeSpec)
 				containedGenericParams = true;
-			var type = module.ResolveType((int)token, genericTypeArguments, null, DmdResolveOptions.None) ?? module.AppDomain.System_Void;
+			var type = module.ResolveType(token.ToInt32(), genericTypeArguments, null, DmdResolveOptions.None) ?? module.AppDomain.System_Void;
 			if (resolve)
 				return type.ResolveNoThrow() ?? type;
 			return type;

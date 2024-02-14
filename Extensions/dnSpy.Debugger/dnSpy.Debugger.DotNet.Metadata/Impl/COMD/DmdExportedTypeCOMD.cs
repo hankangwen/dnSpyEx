@@ -19,6 +19,8 @@
 
 using System;
 using System.Collections.Generic;
+using dnlib.DotNet;
+using dnlib.DotNet.MD;
 
 namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 	sealed class DmdExportedTypeCOMD : DmdTypeRef {
@@ -33,25 +35,26 @@ namespace dnSpy.Debugger.DotNet.Metadata.Impl.COMD {
 			this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
 			reader.Dispatcher.VerifyAccess();
 
-			uint token = 0x27000000 + rid;
+			uint token = new MDToken(Table.ExportedType, rid).Raw;
 			DmdTypeUtilities.SplitFullName(MDAPI.GetExportedTypeName(reader.MetaDataAssemblyImport, token) ?? string.Empty, out var @namespace, out var name);
 			MetadataNamespace = @namespace;
 			MetadataName = name;
 
-			MDAPI.GetExportedTypeProps(reader.MetaDataAssemblyImport, token, out var implToken, out _, out _);
-			switch (implToken >> 24) {
-			case 0x23:
-				TypeScope = new DmdTypeScope(reader.ReadAssemblyName_COMThread(implToken & 0x00FFFFFF));
+			MDAPI.GetExportedTypeProps(reader.MetaDataAssemblyImport, token, out var implTokenRaw, out _, out _);
+			var implToken = new MDToken(implTokenRaw);
+			switch (implToken.Table) {
+			case Table.AssemblyRef:
+				TypeScope = new DmdTypeScope(reader.ReadAssemblyName_COMThread(implToken.Rid));
 				break;
 
-			case 0x26:
-				var moduleName = MDAPI.GetFileName(reader.MetaDataAssemblyImport, implToken) ?? string.Empty;
+			case Table.File:
+				var moduleName = MDAPI.GetFileName(reader.MetaDataAssemblyImport, implToken.Raw) ?? string.Empty;
 				TypeScope = new DmdTypeScope(reader.GetName(), moduleName);
 				break;
 
-			case 0x27:
+			case Table.ExportedType:
 				TypeScope = DmdTypeScope.Invalid;
-				baseTypeToken = (int)implToken;
+				baseTypeToken = implToken.ToInt32();
 				break;
 
 			default:

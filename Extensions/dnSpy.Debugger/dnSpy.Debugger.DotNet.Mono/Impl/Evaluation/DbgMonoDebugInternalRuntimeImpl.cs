@@ -27,6 +27,7 @@ using dnSpy.Contracts.Debugger;
 using dnSpy.Contracts.Debugger.CallStack;
 using dnSpy.Contracts.Debugger.DotNet.Disassembly;
 using dnSpy.Contracts.Debugger.DotNet.Evaluation;
+using dnSpy.Contracts.Debugger.DotNet.Evaluation.ExpressionCompiler;
 using dnSpy.Contracts.Debugger.DotNet.Mono;
 using dnSpy.Contracts.Debugger.Engine.Evaluation;
 using dnSpy.Contracts.Debugger.Evaluation;
@@ -626,6 +627,7 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				exception = GetExceptionCore(evalInfo, DbgDotNetRuntimeConstants.ExceptionId);
 				stowedException = GetStowedExceptionCore(evalInfo, DbgDotNetRuntimeConstants.StowedExceptionId);
 				returnValues = GetReturnValuesCore(evalInfo);
+				evalInfo.Context.TryGetData(out DbgDotNetExpressionCompiler? expressionCompiler);
 
 				int count = (exception is not null ? 1 : 0) + (stowedException is not null ? 1 : 0) + returnValues.Length + (returnValues.Length != 0 ? 1 : 0);
 				if (count == 0)
@@ -638,10 +640,19 @@ namespace dnSpy.Debugger.DotNet.Mono.Impl.Evaluation {
 				if (stowedException is not null)
 					res[w++] = new DbgDotNetAliasInfo(DbgDotNetAliasInfoKind.StowedException, stowedException.Type, DbgDotNetRuntimeConstants.StowedExceptionId, null);
 				if (returnValues.Length != 0) {
-					res[w++] = new DbgDotNetAliasInfo(DbgDotNetAliasInfoKind.ReturnValue, returnValues[returnValues.Length - 1].Value.Type, DbgDotNetRuntimeConstants.LastReturnValueId, null);
+					var lastReturnVal = returnValues[returnValues.Length - 1];
+					res[w++] = new DbgDotNetAliasInfo(DbgDotNetAliasInfoKind.ReturnValue, lastReturnVal.Value.Type, DbgDotNetRuntimeConstants.LastReturnValueId, CreateCustomTypeInfo(lastReturnVal));
+
 					foreach (var returnValue in returnValues) {
 						Debug.Assert(returnValue.Id != DbgDotNetRuntimeConstants.LastReturnValueId);
-						res[w++] = new DbgDotNetAliasInfo(DbgDotNetAliasInfoKind.ReturnValue, returnValue.Value.Type, returnValue.Id, null);
+						res[w++] = new DbgDotNetAliasInfo(DbgDotNetAliasInfoKind.ReturnValue, returnValue.Value.Type, returnValue.Id, CreateCustomTypeInfo(returnValue));
+					}
+
+					DbgDotNetCustomTypeInfo? CreateCustomTypeInfo(DbgDotNetReturnValueInfo returnVal) {
+						var method = returnVal.Method as DmdMethodInfo;
+						if (method?.ReturnType.Equals(returnVal.Value.Type) == true)
+							return expressionCompiler?.CreateCustomTypeInfo(method.ReturnParameter);
+						return null;
 					}
 				}
 				if (w != res.Length)

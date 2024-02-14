@@ -28,6 +28,7 @@ using dnSpy.Contracts.Debugger.DotNet.Text;
 using dnSpy.Contracts.Debugger.Evaluation;
 using dnSpy.Contracts.Debugger.Text;
 using dnSpy.Debugger.DotNet.Metadata;
+using dnSpy.Roslyn.Debugger.Formatters;
 using dnSpy.Roslyn.Properties;
 
 namespace dnSpy.Roslyn.Debugger.ValueNodes {
@@ -42,6 +43,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 
 		sealed class TypeState {
 			public readonly DmdType Type;
+			public readonly AdditionalTypeInfoState AdditionalTypeInfo;
 			public readonly DmdType? EnumerableType;
 			public readonly TypeStateFlags Flags;
 			public readonly string TypeExpression;
@@ -64,8 +66,9 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			public MemberValueNodeInfoCollection CachedRawViewInstanceMembers;
 			public MemberValueNodeInfoCollection CachedRawViewStaticMembers;
 
-			public TypeState(DmdType type, string typeExpression) {
+			public TypeState(DmdType type, string typeExpression, AdditionalTypeInfoState typeInfo) {
 				Type = type;
+				AdditionalTypeInfo = typeInfo;
 				Flags = TypeStateFlags.None;
 				TypeExpression = typeExpression;
 				HasNoChildren = true;
@@ -74,8 +77,9 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 				TupleFields = Array.Empty<TupleField>();
 			}
 
-			public TypeState(DmdType type, string typeExpression, MemberValueNodeInfoCollection instanceMembers, MemberValueNodeInfoCollection staticMembers, TupleField[] tupleFields) {
+			public TypeState(DmdType type, string typeExpression, AdditionalTypeInfoState typeInfo, MemberValueNodeInfoCollection instanceMembers, MemberValueNodeInfoCollection staticMembers, TupleField[] tupleFields) {
 				Type = type;
+				AdditionalTypeInfo = typeInfo;
 				EnumerableType = GetEnumerableType(type);
 				Flags = GetFlags(type, tupleFields);
 				TypeExpression = typeExpression;
@@ -200,47 +204,53 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			NoExtraRawView	= 4,
 		}
 
-		public DbgDotNetValueNodeProviderResult Create(DbgEvaluationInfo evalInfo, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options) {
+		public DbgDotNetValueNodeProviderResult Create(DbgEvaluationInfo evalInfo, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options) =>
+			Create(evalInfo, addParens, slotType, default, nodeInfo, options);
+
+		public DbgDotNetValueNodeProviderResult Create(DbgEvaluationInfo evalInfo, bool addParens, DmdType slotType, AdditionalTypeInfoState typeInfoState, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options) {
 			var providers = new List<DbgDotNetValueNodeProvider>(2);
-			Create(evalInfo, providers, addParens, slotType, nodeInfo, options, CreationOptions.None);
+			Create(evalInfo, providers, addParens, slotType, typeInfoState, nodeInfo, options, CreationOptions.None);
 			return new DbgDotNetValueNodeProviderResult(DbgDotNetValueNodeProvider.Create(providers));
 		}
 
 		public DbgDotNetValueNodeProviderResult CreateDynamicView(DbgEvaluationInfo evalInfo, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options) {
-			var state = GetTypeState(nodeInfo);
-			var provider = TryCreateDynamicView(state, nodeInfo.Expression, nodeInfo.Value, slotType, options);
+			var state = GetTypeState(nodeInfo, slotType, default);
+			var provider = TryCreateDynamicView(state, nodeInfo.Expression, addParens, nodeInfo.Value, slotType, options);
 			if (provider is not null)
 				return new DbgDotNetValueNodeProviderResult(provider);
 			return new DbgDotNetValueNodeProviderResult(dnSpy_Roslyn_Resources.DynamicView_MustBeDynamicOrComType);
 		}
 
 		public DbgDotNetValueNodeProviderResult CreateResultsView(DbgEvaluationInfo evalInfo, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options) {
-			var state = GetTypeState(nodeInfo);
-			var provider = TryCreateResultsView(state, nodeInfo.Expression, nodeInfo.Value, slotType, options);
+			var state = GetTypeState(nodeInfo, slotType, default);
+			var provider = TryCreateResultsView(state, nodeInfo.Expression, addParens, nodeInfo.Value, slotType, options);
 			if (provider is not null)
 				return new DbgDotNetValueNodeProviderResult(provider);
 			return new DbgDotNetValueNodeProviderResult(dnSpy_Roslyn_Resources.ResultsView_MustBeEnumerableType);
 		}
 
-		TypeState GetTypeState(DbgDotNetValueNodeInfo nodeInfo) {
+		void Create(DbgEvaluationInfo evalInfo, List<DbgDotNetValueNodeProvider> providers, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options, CreationOptions creationOptions) =>
+			CreateCore(evalInfo, providers, addParens, slotType, nodeInfo, GetTypeState(nodeInfo, slotType, default), options, creationOptions);
+
+		void Create(DbgEvaluationInfo evalInfo, List<DbgDotNetValueNodeProvider> providers, bool addParens, DmdType slotType, AdditionalTypeInfoState typeInfoState, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options, CreationOptions creationOptions) =>
+			CreateCore(evalInfo, providers, addParens, slotType, nodeInfo, GetTypeState(nodeInfo, slotType, typeInfoState), options, creationOptions);
+
+		TypeState GetTypeState(DbgDotNetValueNodeInfo nodeInfo, DmdType slotType, AdditionalTypeInfoState typeInfoState) {
 			var type = nodeInfo.Value.Type;
 			if (type.IsByRef)
 				type = type.GetElementType()!;
-			return GetOrCreateTypeState(type);
+			return GetOrCreateTypeState(type, nodeInfo.Value.Type == slotType ? typeInfoState : default);
 		}
 
-		void Create(DbgEvaluationInfo evalInfo, List<DbgDotNetValueNodeProvider> providers, bool addParens, DmdType slotType, DbgDotNetValueNodeInfo nodeInfo, DbgValueNodeEvaluationOptions options, CreationOptions creationOptions) =>
-			CreateCore(evalInfo, providers, addParens, slotType, nodeInfo, GetTypeState(nodeInfo), options, creationOptions);
-
-		TypeState GetOrCreateTypeState(DmdType type) {
-			var state = StateWithKey<TypeState>.TryGet(type, this);
+		TypeState GetOrCreateTypeState(DmdType type, AdditionalTypeInfoState typeInfoState) {
+			var state = StateWithKey<TypeState>.TryGet(type, (this, typeInfoState));
 			if (state is not null)
 				return state;
-			return CreateTypeState(type);
+			return CreateTypeState(type, typeInfoState);
 
-			TypeState CreateTypeState(DmdType type2) {
-				var state2 = CreateTypeStateCore(type2);
-				return StateWithKey<TypeState>.GetOrCreate(type2, this, () => state2);
+			TypeState CreateTypeState(DmdType type2, AdditionalTypeInfoState typeInfoState2) {
+				var state2 = CreateTypeStateCore(type2, typeInfoState2);
+				return StateWithKey<TypeState>.GetOrCreate(type2, (this, typeInfoState2), () => state2);
 			}
 		}
 
@@ -278,7 +288,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			return output.ToString();
 		}
 
-		TupleField[]? TryCreateTupleFields(DmdType type) {
+		TupleField[]? TryCreateTupleFields(DmdType type, AdditionalTypeInfoState typeInfoState) {
 			var tupleArity = Formatters.TypeFormatterUtils.GetTupleArity(type);
 			if (tupleArity <= 0)
 				return null;
@@ -288,24 +298,25 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 				if (info.tupleIndex < 0)
 					return null;
 				var defaultName = GetDefaultTupleName(info.tupleIndex);
-				tupleFields[info.tupleIndex] = new TupleField(defaultName, info.fields!.ToArray());
+				var customName = typeInfoState.TypeInfoProvider?.GetTupleElementName(typeInfoState.TupleNameIndex + info.tupleIndex);
+				tupleFields[info.tupleIndex] = new TupleField(defaultName, customName, info.fields!.ToArray());
 			}
 			return tupleFields;
 		}
 
 		static string GetDefaultTupleName(int tupleIndex) => "Item" + (tupleIndex + 1).ToString();
 
-		TypeState CreateTypeStateCore(DmdType type) {
+		TypeState CreateTypeStateCore(DmdType type, AdditionalTypeInfoState typeInfoState) {
 			var typeExpression = GetTypeExpression(type);
 			if (HasNoChildren(type) || type.IsFunctionPointer)
-				return new TypeState(type, typeExpression);
+				return new TypeState(type, typeExpression, typeInfoState);
 
 			MemberValueNodeInfoCollection instanceMembers, staticMembers;
 			TupleField[] tupleFields;
 
 			Debug.Assert(!type.IsByRef);
 			if (type.TypeSignatureKind == DmdTypeSignatureKind.Type || type.TypeSignatureKind == DmdTypeSignatureKind.GenericInstance) {
-				tupleFields = TryCreateTupleFields(type) ?? Array.Empty<TupleField>();
+				tupleFields = TryCreateTupleFields(type, typeInfoState) ?? Array.Empty<TupleField>();
 
 				var instanceMembersList = new List<MemberValueNodeInfo>();
 				var staticMembersList = new List<MemberValueNodeInfo>();
@@ -387,7 +398,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 				tupleFields = Array.Empty<TupleField>();
 			}
 
-			return new TypeState(type, typeExpression, instanceMembers, staticMembers, tupleFields);
+			return new TypeState(type, typeExpression, typeInfoState, instanceMembers, staticMembers, tupleFields);
 		}
 
 		MemberValueNodeInfo[] InitializeOverloadedMembers(MemberValueNodeInfo[] memberInfos) {
@@ -487,7 +498,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 					return false;
 
 				nodeInfo.SetDisplayValue(fieldValue.Value!);
-				Create(evalInfo, providers, addParens, slotType, nodeInfo, evalOptions, creationOptions | CreationOptions.NoNullable);
+				Create(evalInfo, providers, addParens, slotType, state.AdditionalTypeInfo, nodeInfo, evalOptions, creationOptions | CreationOptions.NoNullable);
 				disposeFieldValue = false;
 				return true;
 			}
@@ -508,7 +519,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			}
 
 			if (state.Type.IsArray && !nodeInfo.Value.IsNull) {
-				providers.Add(new ArrayValueNodeProvider(this, addParens, slotType, nodeInfo));
+				providers.Add(new ArrayValueNodeProvider(this, addParens, slotType, state.AdditionalTypeInfo, nodeInfo));
 				return;
 			}
 
@@ -516,7 +527,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			bool funcEval = (evalOptions & DbgValueNodeEvaluationOptions.NoFuncEval) == 0;
 
 			if (state.IsTupleType && !forceRawView) {
-				providers.Add(new TupleValueNodeProvider(addParens, slotType, nodeInfo, state.TupleFields));
+				providers.Add(new TupleValueNodeProvider(addParens, slotType, state.AdditionalTypeInfo, nodeInfo, state.TupleFields));
 				AddProvidersOneChildNode(providers, state, nodeInfo.Expression, addParens, slotType, nodeInfo.Value, evalOptions, isRawView: true);
 				return;
 			}
@@ -551,15 +562,15 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			AddProviders(providers, state, nodeInfo.Expression, addParens, slotType, nodeInfo.Value, evalOptions, forceRawView);
 		}
 
-		DbgDotNetValueNodeProvider? TryCreateDynamicView(TypeState state, string expression, DbgDotNetValue value, DmdType expectedType, DbgValueNodeEvaluationOptions evalOptions) {
+		DbgDotNetValueNodeProvider? TryCreateDynamicView(TypeState state, string expression, bool addParens, DbgDotNetValue value, DmdType expectedType, DbgValueNodeEvaluationOptions evalOptions) {
 			if (state.IsDynamicViewType && !value.IsNull)
-				return new DynamicViewMembersValueNodeProvider(this, valueNodeFactory, value, expectedType, expression, state.Type.AppDomain, evalOptions);
+				return new DynamicViewMembersValueNodeProvider(this, valueNodeFactory, value, expectedType, expression, addParens, state.Type.AppDomain, evalOptions);
 			return null;
 		}
 
-		DbgDotNetValueNodeProvider? TryCreateResultsView(TypeState state, string expression, DbgDotNetValue value, DmdType expectedType, DbgValueNodeEvaluationOptions evalOptions) {
+		DbgDotNetValueNodeProvider? TryCreateResultsView(TypeState state, string expression, bool addParens, DbgDotNetValue value, DmdType expectedType, DbgValueNodeEvaluationOptions evalOptions) {
 			if (state.EnumerableType is not null && !value.IsNull)
-				return new ResultsViewMembersValueNodeProvider(this, valueNodeFactory, state.EnumerableType, value, expectedType, expression, evalOptions);
+				return new ResultsViewMembersValueNodeProvider(this, valueNodeFactory, state.EnumerableType, value, expectedType, expression, addParens, evalOptions);
 			return null;
 		}
 
@@ -571,7 +582,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 		}
 
 		internal void GetMemberCollections(DmdType type, DbgValueNodeEvaluationOptions evalOptions, out MemberValueNodeInfoCollection instanceMembersInfos, out MemberValueNodeInfoCollection staticMembersInfos) {
-			var state = GetOrCreateTypeState(type);
+			var state = GetOrCreateTypeState(type, default);
 			GetMemberCollections(state, evalOptions, out instanceMembersInfos, out staticMembersInfos);
 		}
 
@@ -607,7 +618,7 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			if (value.IsNull)
 				instanceMembersInfos = MemberValueNodeInfoCollection.Empty;
 			if (PointerValueNodeProvider.IsSupported(value))
-				providers.Add(new PointerValueNodeProvider(this, expression, value));
+				providers.Add(new PointerValueNodeProvider(this, expression, value, state.AdditionalTypeInfo));
 			else {
 				providers.Add(new InstanceMembersValueNodeProvider(valueNodeFactory, isRawView ? rawViewName : InstanceMembersName,
 					expression, addParens, slotType, value, instanceMembersInfos, membersEvalOptions,
@@ -617,10 +628,10 @@ namespace dnSpy.Roslyn.Debugger.ValueNodes {
 			if (staticMembersInfos.Members.Length != 0)
 				providers.Add(new StaticMembersValueNodeProvider(this, valueNodeFactory, StaticMembersName, state.TypeExpression, staticMembersInfos, membersEvalOptions));
 
-			var provider = TryCreateResultsView(state, expression, value, slotType, evalOptions);
+			var provider = TryCreateResultsView(state, expression, addParens, value, slotType, evalOptions);
 			if (provider is not null)
 				providers.Add(provider);
-			provider = TryCreateDynamicView(state, expression, value, slotType, evalOptions);
+			provider = TryCreateDynamicView(state, expression, addParens, value, slotType, evalOptions);
 			if (provider is not null)
 				providers.Add(provider);
 		}
