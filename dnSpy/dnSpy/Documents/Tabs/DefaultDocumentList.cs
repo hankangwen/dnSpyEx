@@ -27,6 +27,7 @@ using System.Threading;
 using System.Xml.Linq;
 using dnSpy.Contracts.App;
 using dnSpy.Contracts.Documents;
+using dnSpy.Contracts.Utilities;
 
 namespace dnSpy.Documents.Tabs {
 	sealed class DefaultDocumentList {
@@ -63,15 +64,12 @@ namespace dnSpy.Documents.Tabs {
 		public void Find() {
 			cancellationToken.ThrowIfCancellationRequested();
 
-			if (!TryGetRuntimeFolder(out var runtimesFolder)) {
-				return;
-			}
+			var dotNetPathProvider = new DotNetPathProvider();
 
-			foreach (var appDir in Directory.EnumerateDirectories(runtimesFolder)) {
-				foreach (var versionDir in Directory.EnumerateDirectories(appDir)) {
-					var appName = $"{Path.GetFileName(appDir)} {Path.GetFileName(versionDir)}";
-					allLists.Add(new DefaultDocumentList(appName, Directory.GetFiles(versionDir, "*.dll").Where(FilterFiles).Select(DsDocumentInfo.CreateDocument)));
-				}
+			foreach (var frameworkPath in dotNetPathProvider.GetSharedDotNetPaths()) {
+				cancellationToken.ThrowIfCancellationRequested();
+				var appName = $"{Path.GetFileName(Path.GetDirectoryName(frameworkPath.Path))} {frameworkPath.Version} (x{frameworkPath.Bitness:d})";
+				allLists.Add(new DefaultDocumentList(appName, Directory.GetFiles(frameworkPath.Path, "*.dll").Where(FilterFiles).Select(DsDocumentInfo.CreateDocument)));
 			}
 		}
 
@@ -79,8 +77,32 @@ namespace dnSpy.Documents.Tabs {
 
 			var fileName = Path.GetFileName(file);
 
-			//Here, only DLLs that are obviously not .NET assemblies are filtered out; other files are not filtered, and should not be affected, so to speak.
-			if (fileName.StartsWith("api-ms-win")) {
+			if (fileName.Length == 0) {
+				return false;
+			}
+
+			//The official managed assemblies in .NET Core almost always start with uppercase characters, which makes it easy for quick filtering.
+			if (fileName[0] >= 'A' && fileName[0] <= 'Z') {
+				//Exclude native assemblies here
+				//Microsoft.NETCore.App
+				if (fileName.StartsWith("Microsoft.DiaSymReader.Native.")) {
+					return false;
+				}
+
+				//Microsoft.WindowsDesktop.App
+				if (fileName.StartsWith("D3DCompiler_") || fileName.Equals("PenImc_cor3") || fileName.Equals("PresentationNative_cor3")) {
+					return false;
+				}
+
+				return true;
+			}
+			else if(fileName[0] >= 'a' && fileName[0] <= 'z') {
+				//Include managed assemblies here
+				//Microsoft.NETCore.App
+				if (fileName.Equals("mscorlib") || fileName.Equals("netstandard")) {
+					return true;
+				}
+
 				return false;
 			}
 

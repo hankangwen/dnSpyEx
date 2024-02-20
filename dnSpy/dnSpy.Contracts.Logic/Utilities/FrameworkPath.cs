@@ -31,10 +31,12 @@ namespace dnSpy.Contracts.Utilities {
 		public readonly FrameworkVersion Version;
 		public readonly Version SystemVersion;
 		public readonly bool IsReferencePath;
+		internal readonly FrameworkPath[] frameworkPaths;
 
 		string DebuggerPaths => string.Join(Path.PathSeparator.ToString(), Paths);
 
 		public FrameworkPaths(FrameworkPath[] paths, bool isRef) {
+			frameworkPaths = paths;
 			var firstPath = paths[0];
 #if DEBUG
 			for (int i = 1; i < paths.Length; i++) {
@@ -122,13 +124,32 @@ namespace dnSpy.Contracts.Utilities {
 		}
 	}
 
+	/// <summary>
+	/// .NET Core path info
+	/// </summary>
 	// It's a class since very few of these are created
 	[DebuggerDisplay("{Bitness,d}-bit {Version,nq} {Path,nq}")]
-	sealed class FrameworkPath {
+	public sealed class FrameworkPath {
+		/// <summary>
+		/// .NET Core assembly directories
+		/// </summary>
 		public readonly string Path;
+		/// <summary>
+		/// assembly bitness
+		/// </summary>
 		public readonly int Bitness;
+		/// <summary>
+		/// assembly version
+		/// </summary>
 		public readonly FrameworkVersion Version;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="path">.NET Core assembly directories</param>
+		/// <param name="bitness">assembly bitness</param>
+		/// <param name="version">assembly version</param>
+		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null</exception>
 		public FrameworkPath(string path, int bitness, FrameworkVersion version) {
 			Path = path ?? throw new ArgumentNullException(nameof(path));
 			Bitness = bitness;
@@ -136,12 +157,34 @@ namespace dnSpy.Contracts.Utilities {
 		}
 	}
 
-	readonly struct FrameworkVersion : IComparable<FrameworkVersion>, IEquatable<FrameworkVersion> {
+	/// <summary>
+	/// .NET Core version info
+	/// </summary>
+	public readonly struct FrameworkVersion : IComparable<FrameworkVersion>, IEquatable<FrameworkVersion> {
+		/// <summary>
+		/// the major component
+		/// </summary>
 		public readonly int Major;
+		/// <summary>
+		/// the minor component
+		/// </summary>
 		public readonly int Minor;
+		/// <summary>
+		/// the patch component
+		/// </summary>
 		public readonly int Patch;
+		/// <summary>
+		/// the extra component
+		/// </summary>
 		public readonly string Extra;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="major">the major component</param>
+		/// <param name="minor">the minor component</param>
+		/// <param name="patch">the patch component</param>
+		/// <param name="extra">the extra component</param>
 		public FrameworkVersion(int major, int minor, int patch, string extra) {
 			Major = major;
 			Minor = minor;
@@ -149,12 +192,14 @@ namespace dnSpy.Contracts.Utilities {
 			Extra = extra;
 		}
 
+		///<inheritdoc/>
 		public override string ToString() {
 			if (Extra.Length == 0)
 				return $"{Major}.{Minor}.{Patch}";
 			return $"{Major}.{Minor}.{Patch}-{Extra}";
 		}
 
+		///<inheritdoc/>
 		public int CompareTo(FrameworkVersion other) {
 			int c = Major.CompareTo(other.Major);
 			if (c != 0)
@@ -178,13 +223,17 @@ namespace dnSpy.Contracts.Utilities {
 			return StringComparer.Ordinal.Compare(a, b);
 		}
 
+		///<inheritdoc/>
 		public bool Equals(FrameworkVersion other) =>
 			Major == other.Major &&
 			Minor == other.Minor &&
 			Patch == other.Patch &&
 			StringComparer.Ordinal.Equals(Extra, other.Extra);
 
+		///<inheritdoc/>
 		public override bool Equals(object? obj) => obj is FrameworkVersion other && Equals(other);
+
+		///<inheritdoc/>
 		public override int GetHashCode() => Major ^ Minor ^ Patch ^ StringComparer.Ordinal.GetHashCode(Extra ?? string.Empty);
 	}
 }
