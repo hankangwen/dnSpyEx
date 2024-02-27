@@ -308,8 +308,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 		}
 
 		BuilderState CreateAstBuilder(DecompilationContext ctx, DecompilerSettings settings, ModuleDef? currentModule = null, TypeDef? currentType = null, bool isSingleMember = false) {
-			if (currentModule is null)
-				currentModule = currentType?.Module;
+			currentModule ??= currentType?.Module;
 			if (isSingleMember) {
 				settings = settings.Clone();
 				settings.UsingDeclarations = false;
@@ -320,7 +319,7 @@ namespace dnSpy.Decompiler.ILSpy.Core.CSharp {
 			state.AstBuilder.Context.CancellationToken = ctx.CancellationToken;
 			state.AstBuilder.Context.CurrentType = currentType;
 			state.AstBuilder.Context.Settings = settings;
-			state.AstBuilder.InitializeTypeSystem();
+			state.AstBuilder.InitializeTypeSystem(ctx.GetOrCreate<TypeSystemCache>().GetTypeSystem(currentModule, settings));
 			return state;
 		}
 

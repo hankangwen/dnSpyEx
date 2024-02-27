@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -111,7 +111,8 @@ namespace dnSpy.Decompiler.ILSpy.Core.Mixed {
 				state.AstBuilder.Context.CurrentType = method.DeclaringType;
 				state.AstBuilder.Context.CancellationToken = ctx.CancellationToken;
 				state.AstBuilder.Context.Settings = settings;
-				state.AstBuilder.InitializeTypeSystem();
+				state.AstBuilder.InitializeTypeSystem(ctx.GetOrCreate<ICSharpCode.Decompiler.TypeSystemCache>()
+					.GetTypeSystem(state.AstBuilder.Context.CurrentModule, settings));
 				state.AstBuilder.AddMethod(method);
 				state.AstBuilder.RunTransformations();
 				state.AstBuilder.GenerateCode(output);
