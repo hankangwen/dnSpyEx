@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -74,22 +73,20 @@ namespace dnSpy.Documents.Tabs {
 		}
 
 		static bool FilterFiles(string file) {
-
 			var fileName = Path.GetFileName(file);
 
-			if (fileName.Length == 0) {
+			if (fileName.Length == 0)
 				return false;
-			}
 
-			//The official managed assemblies in .NET Core almost always start with uppercase characters, which makes it easy for quick filtering.
+			// The official managed assemblies in .NET Core almost always start with uppercase characters, which makes it easy for quick filtering.
 			if (fileName[0] >= 'A' && fileName[0] <= 'Z') {
-				//Exclude native assemblies here
-				//Microsoft.NETCore.App
+				// Exclude native assemblies here
+				// Microsoft.NETCore.App
 				if (fileName.StartsWith("Microsoft.DiaSymReader.Native.")) {
 					return false;
 				}
 
-				//Microsoft.WindowsDesktop.App
+				// Microsoft.WindowsDesktop.App
 				if (fileName.StartsWith("D3DCompiler_") || fileName.Equals("PenImc_cor3") || fileName.Equals("PresentationNative_cor3")) {
 					return false;
 				}
@@ -97,8 +94,8 @@ namespace dnSpy.Documents.Tabs {
 				return true;
 			}
 			else if(fileName[0] >= 'a' && fileName[0] <= 'z') {
-				//Include managed assemblies here
-				//Microsoft.NETCore.App
+				// Include managed assemblies here
+				// Microsoft.NETCore.App
 				if (fileName.Equals("mscorlib") || fileName.Equals("netstandard")) {
 					return true;
 				}
@@ -107,21 +104,6 @@ namespace dnSpy.Documents.Tabs {
 			}
 
 			return true;
-		}
-
-		static bool TryGetRuntimeFolder([NotNullWhen(true)] out string path) {
-			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"dotnet\shared");
-			if (Directory.Exists(path)) {
-				return true;
-			}
-
-			//The previous dotnet installation was in the x86 folder
-			path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"dotnet\shared");
-			if (Directory.Exists(path)) {
-				return true;
-			}
-
-			return false;
 		}
 	}
 

@@ -135,16 +135,16 @@ namespace dnSpy.Contracts.Utilities {
 		/// </summary>
 		public readonly string Path;
 		/// <summary>
-		/// assembly bitness
+		/// Assembly bitness
 		/// </summary>
 		public readonly int Bitness;
 		/// <summary>
-		/// assembly version
+		/// Assembly version
 		/// </summary>
 		public readonly FrameworkVersion Version;
 
 		/// <summary>
-		/// 
+		/// Constructor
 		/// </summary>
 		/// <param name="path">.NET Core assembly directories</param>
 		/// <param name="bitness">assembly bitness</param>
@@ -162,24 +162,24 @@ namespace dnSpy.Contracts.Utilities {
 	/// </summary>
 	public readonly struct FrameworkVersion : IComparable<FrameworkVersion>, IEquatable<FrameworkVersion> {
 		/// <summary>
-		/// the major component
+		/// The major component
 		/// </summary>
 		public readonly int Major;
 		/// <summary>
-		/// the minor component
+		/// The minor component
 		/// </summary>
 		public readonly int Minor;
 		/// <summary>
-		/// the patch component
+		/// The patch component
 		/// </summary>
 		public readonly int Patch;
 		/// <summary>
-		/// the extra component
+		/// The extra component
 		/// </summary>
 		public readonly string Extra;
 
 		/// <summary>
-		/// 
+		/// Constructor
 		/// </summary>
 		/// <param name="major">the major component</param>
 		/// <param name="minor">the minor component</param>
