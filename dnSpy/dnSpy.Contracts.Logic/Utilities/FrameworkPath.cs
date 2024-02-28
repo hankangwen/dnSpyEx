@@ -147,8 +147,8 @@ namespace dnSpy.Contracts.Utilities {
 		/// Constructor
 		/// </summary>
 		/// <param name="path">.NET Core assembly directories</param>
-		/// <param name="bitness">assembly bitness</param>
-		/// <param name="version">assembly version</param>
+		/// <param name="bitness">Assembly bitness</param>
+		/// <param name="version">Assembly version</param>
 		/// <exception cref="ArgumentNullException"><paramref name="path"/> is null</exception>
 		public FrameworkPath(string path, int bitness, FrameworkVersion version) {
 			Path = path ?? throw new ArgumentNullException(nameof(path));
@@ -181,10 +181,10 @@ namespace dnSpy.Contracts.Utilities {
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="major">the major component</param>
-		/// <param name="minor">the minor component</param>
-		/// <param name="patch">the patch component</param>
-		/// <param name="extra">the extra component</param>
+		/// <param name="major">The major component</param>
+		/// <param name="minor">The minor component</param>
+		/// <param name="patch">The patch component</param>
+		/// <param name="extra">The extra component</param>
 		public FrameworkVersion(int major, int minor, int patch, string extra) {
 			Major = major;
 			Minor = minor;
