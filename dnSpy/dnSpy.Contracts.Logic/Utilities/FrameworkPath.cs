@@ -192,14 +192,14 @@ namespace dnSpy.Contracts.Utilities {
 			Extra = extra;
 		}
 
-		///<inheritdoc/>
+		/// <inheritdoc/>
 		public override string ToString() {
 			if (Extra.Length == 0)
 				return $"{Major}.{Minor}.{Patch}";
 			return $"{Major}.{Minor}.{Patch}-{Extra}";
 		}
 
-		///<inheritdoc/>
+		/// <inheritdoc/>
 		public int CompareTo(FrameworkVersion other) {
 			int c = Major.CompareTo(other.Major);
 			if (c != 0)
@@ -223,17 +223,17 @@ namespace dnSpy.Contracts.Utilities {
 			return StringComparer.Ordinal.Compare(a, b);
 		}
 
-		///<inheritdoc/>
+		/// <inheritdoc/>
 		public bool Equals(FrameworkVersion other) =>
 			Major == other.Major &&
 			Minor == other.Minor &&
 			Patch == other.Patch &&
 			StringComparer.Ordinal.Equals(Extra, other.Extra);
 
-		///<inheritdoc/>
+		/// <inheritdoc/>
 		public override bool Equals(object? obj) => obj is FrameworkVersion other && Equals(other);
 
-		///<inheritdoc/>
+		/// <inheritdoc/>
 		public override int GetHashCode() => Major ^ Minor ^ Patch ^ StringComparer.Ordinal.GetHashCode(Extra ?? string.Empty);
 	}
 }
