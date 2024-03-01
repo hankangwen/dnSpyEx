@@ -73,7 +73,7 @@ namespace dnSpy.Documents.Tabs {
 		}
 
 		static bool FilterFiles(string file) {
-			var fileName = Path.GetFileName(file);
+			var fileName = Path.GetFileNameWithoutExtension(file);
 
 			if (fileName.Length == 0)
 				return false;
