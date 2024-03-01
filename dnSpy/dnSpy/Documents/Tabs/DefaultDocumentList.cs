@@ -82,23 +82,20 @@ namespace dnSpy.Documents.Tabs {
 			if (fileName[0] >= 'A' && fileName[0] <= 'Z') {
 				// Exclude native assemblies here
 				// Microsoft.NETCore.App
-				if (fileName.StartsWith("Microsoft.DiaSymReader.Native.")) {
+				if (fileName.StartsWith("Microsoft.DiaSymReader.Native.", StringComparison.Ordinal))
 					return false;
-				}
 
 				// Microsoft.WindowsDesktop.App
-				if (fileName.StartsWith("D3DCompiler_") || fileName.Equals("PenImc_cor3") || fileName.Equals("PresentationNative_cor3")) {
+				if (fileName.StartsWith("D3DCompiler_", StringComparison.Ordinal) || fileName.Equals("PenImc_cor3") || fileName.Equals("PresentationNative_cor3"))
 					return false;
-				}
 
 				return true;
 			}
-			else if(fileName[0] >= 'a' && fileName[0] <= 'z') {
+			if (fileName[0] >= 'a' && fileName[0] <= 'z') {
 				// Include managed assemblies here
 				// Microsoft.NETCore.App
-				if (fileName.Equals("mscorlib") || fileName.Equals("netstandard")) {
+				if (fileName.Equals("mscorlib") || fileName.Equals("netstandard"))
 					return true;
-				}
 
 				return false;
 			}
