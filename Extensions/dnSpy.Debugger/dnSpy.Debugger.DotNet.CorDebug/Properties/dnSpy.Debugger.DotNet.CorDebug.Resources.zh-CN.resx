@@ -129,14 +129,20 @@
   <data name="DbgAsm_HostArgs" xml:space="preserve">
     <value>程序参数(_G)</value>
   </data>
+  <data name="DbgAsm_Timeout" xml:space="preserve">
+    <value>超时时间(_T)</value>
+  </data>
   <data name="DbgAsm_WorkingDir" xml:space="preserve">
     <value>工作目录(_W)</value>
   </data>
   <data name="DbgBreak_CreateProcessEvent" xml:space="preserve">
-    <value>CreateProcess</value>
+    <value>进程创建时</value>
   </data>
   <data name="DbgBreak_Dont" xml:space="preserve">
     <value>不要中断</value>
+  </data>
+  <data name="DbgBreak_ModuleClassConstructorOrEntryPoint" xml:space="preserve">
+    <value>模块.cctor或入口点</value>
   </data>
   <data name="DbgBreak_EntryPoint" xml:space="preserve">
     <value>入口点</value>
