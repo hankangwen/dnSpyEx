@@ -1324,6 +1324,15 @@
   <data name="DbgSettings_EnableManagedDebuggingAssistants" xml:space="preserve">
     <value>启用托管调试助手 (MDA)</value>
   </data>
+  <data name="DbgSettings_EnableJustMyCodeDebugging" xml:space="preserve">
+    <value>启用"仅我的代码"调试支持</value>
+  </data>
+  <data name="DbgSettings_StepOverCodeInSystemModules" xml:space="preserve">
+    <value>在系统模块中单步越过代码</value>
+  </data>
+  <data name="DbgSettings_OnlyStepIntoCodeInPrimaryModule" xml:space="preserve">
+    <value>仅单步执行位于主模块中的代码</value>
+  </data>
   <data name="DebugStepProcessError" xml:space="preserve">
     <value>无法单步执行: {0}</value>
   </data>

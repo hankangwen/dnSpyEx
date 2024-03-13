@@ -1774,6 +1774,9 @@
   <data name="SaveModule_AddPECheckSum" xml:space="preserve">
     <value>添加 PE 校验和(_A)</value>
   </data>
+  <data name="SaveModule_AddMVIDSection" xml:space="preserve">
+    <value>添加 MVID 段(_A)</value>
+  </data>
   <data name="SaveModule_CreateHeapEvenIfEmpty" xml:space="preserve">
     <value>即使为空也创建堆栈</value>
   </data>
@@ -2112,6 +2115,9 @@
   <data name="SaveModule_TablesHeap_UseENC" xml:space="preserve">
     <value>使用 #- 表(_U)</value>
   </data>
+  <data name="SaveModule_TablesHeap_ForceBigColumns" xml:space="preserve">
+    <value>强制所有列均为4字节(_F)</value>
+  </data>
   <data name="CustomAttribute_NamedArg_Field" xml:space="preserve">
     <value>字段</value>
   </data>
@@ -2295,6 +2301,12 @@
   <data name="ReplaceNopsInstrsCommand" xml:space="preserve">
     <value>用 NOP 替换(_R)</value>
   </data>
+  <data name="ReplaceMethodBodyWithStubCommand" xml:space="preserve">
+    <value>用桩代码替换方法体...</value>
+  </data>
+  <data name="ReplaceMethodBodyWithStubCommand2" xml:space="preserve">
+    <value>用桩代码替换方法体</value>
+  </data>
   <data name="Type_Flags_Accessibility" xml:space="preserve">
     <value>可访问性(_y)</value>
   </data>
@@ -2309,5 +2321,8 @@
   </data>
   <data name="Type_Flags_Visibility" xml:space="preserve">
     <value>可见性(_Y)</value>
+  </data>
+  <data name="CloseAllFrameworkAssembliesCommand" xml:space="preserve">
+    <value>关闭所有框架程序集</value>
   </data>
 </root>
