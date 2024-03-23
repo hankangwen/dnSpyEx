@@ -159,9 +159,9 @@
   <data name="ImplementedByTreeNode" xml:space="preserve">
     <value>实现于</value>
   </data>
- <data name="SubtypesTreeNode" xml:space="preserve">
-    <value>子类型</value>
-  </data>
+  <data name="SubtypesTreeNode" xml:space="preserve"> 
+    <value>子类型</value> 
+   </data>
   <data name="InstantiatedByTreeNode" xml:space="preserve">
     <value>实例化于</value>
   </data>
@@ -184,7 +184,7 @@
     <value>移除(_R)</value>
   </data>
   <data name="Searching" xml:space="preserve">
-    <value>搜索中……</value>
+    <value>搜索中…</value>
   </data>
   <data name="ShiftDoubleClick" xml:space="preserve">
     <value>Shift+双击</value>
@@ -208,7 +208,7 @@
     <value>语法高亮</value>
   </data>
   <data name="UsedByTreeNode" xml:space="preserve">
-    <value>被使用于</value>
+    <value>被使用</value>
   </data>
   <data name="UsesTreeNode" xml:space="preserve">
     <value>使用</value>
