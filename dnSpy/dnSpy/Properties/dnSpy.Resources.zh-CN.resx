@@ -160,10 +160,10 @@
     <value>确定(_O)</value>
   </data>
   <data name="Button_Save" xml:space="preserve">
-    <value>保存(_S)…</value>
+    <value>保存(_S)...</value>
   </data>
   <data name="Button_SaveCode" xml:space="preserve">
-    <value>保存代码(_S)…</value>
+    <value>保存代码(_S)...</value>
   </data>
   <data name="Button_Yes" xml:space="preserve">
     <value>是(_Y)</value>
@@ -211,7 +211,7 @@
     <value>取消</value>
   </data>
   <data name="Decompiling" xml:space="preserve">
-    <value>反编译中……</value>
+    <value>反编译中…</value>
   </data>
   <data name="DerivedTypes" xml:space="preserve">
     <value>派生类型</value>
@@ -223,7 +223,7 @@
     <value>&lt;空&gt;</value>
   </data>
   <data name="ExceptionMessage" xml:space="preserve">
-    <value>发生异常：</value>
+    <value>发生异常: </value>
   </data>
   <data name="ExitAppCommand" xml:space="preserve">
     <value>退出(_X)</value>
@@ -277,7 +277,7 @@
     <value>双击</value>
   </data>
   <data name="GoToTokenCommand" xml:space="preserve">
-    <value>转到元数据标记(_D)…</value>
+    <value>转到元数据标记(_D)...</value>
   </data>
   <data name="GoToTokenKey" xml:space="preserve">
     <value>Ctrl+D</value>
@@ -307,7 +307,7 @@
     <value>文本输入无效</value>
   </data>
   <data name="LoadingDnSpyPleaseWait" xml:space="preserve">
-    <value>dnSpy 正在加载，请稍候……</value>
+    <value>dnSpy 正在加载，请稍候...</value>
   </data>
   <data name="Menu_Edit" xml:space="preserve">
     <value>编辑(_E)</value>
@@ -391,28 +391,28 @@
     <value>新窗口(_N)</value>
   </data>
   <data name="OpenCommand" xml:space="preserve">
-    <value>打开(_O)…</value>
+    <value>打开(_O)...</value>
   </data>
   <data name="OpenContainingFolderCommand" xml:space="preserve">
     <value>打开所在文件夹(_O)</value>
   </data>
   <data name="OpenGACCommand" xml:space="preserve">
-    <value>从 GAC 打开(_G)…</value>
+    <value>从 GAC 打开(_G)...</value>
   </data>
   <data name="OpenGAC_CreatedBy_Label" xml:space="preserve">
     <value>创建者: </value>
   </data>
   <data name="OpenGAC_FileVersion_Label" xml:space="preserve">
-    <value>文件版本：</value>
+    <value>文件版本: </value>
   </data>
   <data name="OpenGAC_Name_Column" xml:space="preserve">
     <value>名称</value>
   </data>
   <data name="OpenGAC_Name_Label" xml:space="preserve">
-    <value>名称：</value>
+    <value>名称: </value>
   </data>
   <data name="OpenGAC_Path_Label" xml:space="preserve">
-    <value>路径：</value>
+    <value>路径: </value>
   </data>
   <data name="OpenGAC_ShowDupes_CheckBox" xml:space="preserve">
     <value>显示重复</value>
@@ -445,7 +445,7 @@
     <value>Ctrl+O</value>
   </data>
   <data name="OpenListCommand" xml:space="preserve">
-    <value>打开文件列表(_I)…</value>
+    <value>打开文件列表(_I)...</value>
   </data>
   <data name="OpenList_AskForName" xml:space="preserve">
     <value>名称</value>
@@ -460,7 +460,7 @@
     <value>名称</value>
   </data>
   <data name="OpenList_New_Button" xml:space="preserve">
-    <value>新建(_N)…</value>
+    <value>新建(_N)...</value>
   </data>
   <data name="OpenList_Open_Button" xml:space="preserve">
     <value>打开(_O)</value>
@@ -504,9 +504,9 @@
   <data name="ResourcesFolder" xml:space="preserve">
     <value>资源</value>
   </data>
-  <data name="RestartAsAdministratorCommand" xml:space="preserve">
-    <value>以管理员方式重启</value>
-  </data>
+  <data name="RestartAsAdministratorCommand" xml:space="preserve"> 
+    <value>以管理员身份重启</value> 
+   </data>
   <data name="SaveKey" xml:space="preserve">
     <value>Ctrl+S</value>
   </data>
@@ -514,7 +514,7 @@
     <value>保存</value>
   </data>
   <data name="SavingCode" xml:space="preserve">
-    <value>保存中……</value>
+    <value>保存中...</value>
   </data>
   <data name="SearchAbortedMessage" xml:space="preserve">
     <value>搜索中止，已找到超过 {0:n0} 个结果。</value>
@@ -577,7 +577,7 @@
     <value>使用垂直标签组</value>
   </data>
   <data name="WindowsCommand" xml:space="preserve">
-    <value>窗口(_W)…</value>
+    <value>窗口(_W)...</value>
   </data>
   <data name="WordWrapHeader" xml:space="preserve">
     <value>自动换行(_W)</value>
@@ -607,7 +607,7 @@
     <value>显示元数据标记</value>
   </data>
   <data name="OptionsCommand" xml:space="preserve">
-    <value>选项(_O)…</value>
+    <value>选项(_O)...</value>
   </data>
   <data name="SearchWindow_AllAbove" xml:space="preserve">
     <value>以上所有</value>
@@ -769,7 +769,7 @@
     <value>是否加载应用程序的设置？</value>
   </data>
   <data name="ExportToProjectCommand" xml:space="preserve">
-    <value>导出到工程(_J)…</value>
+    <value>导出到工程(_J)...</value>
   </data>
   <data name="ExportToProject_Title" xml:space="preserve">
     <value>导出到工程</value>
@@ -823,7 +823,7 @@
     <value>关闭(_C)</value>
   </data>
   <data name="ErrorExceptionOccurred" xml:space="preserve">
-    <value>发生异常：
+    <value>发生异常: 
 
 {0}</value>
   </data>
@@ -852,7 +852,7 @@
     <value>检查更新</value>
   </data>
   <data name="AboutScreen_CheckingForUpdates" xml:space="preserve">
-    <value>正在检查更新…</value>
+    <value>正在检查更新...</value>
   </data>
   <data name="AboutScreen_FailedToRetrieveUpdateInfo" xml:space="preserve">
     <value>获取更新信息失败！</value>
@@ -861,10 +861,10 @@
     <value>dnSpy is licensed under GPLv3.</value>
   </data>
   <data name="AboutScreen_LoadedFiles" xml:space="preserve">
-    <value>已加载的文件：</value>
+    <value>已加载的文件: </value>
   </data>
   <data name="AboutScreen_NewUpdateAvailable" xml:space="preserve">
-    <value>dnSpy 有新的更新可用：{0}，是否打开下载页面？</value>
+    <value>dnSpy 有新的更新可用: {0}，是否打开下载页面？</value>
   </data>
   <data name="AboutScreen_RunningLatestVersion" xml:space="preserve">
     <value>dnSpy 已是最新版本！</value>
@@ -993,7 +993,7 @@
     <value>水平偏移</value>
   </data>
   <data name="BgImgSettings_Images" xml:space="preserve">
-    <value>添加图片或图片文件夹路径，每行一个：</value>
+    <value>添加图片或图片文件夹路径，每行一个: </value>
   </data>
   <data name="BgImgSettings_Interval" xml:space="preserve">
     <value>切换间隔</value>
@@ -1329,7 +1329,7 @@
     <value>值必须在 {0} 和 {1} 之间</value>
   </data>
   <data name="AnErrorOccurred" xml:space="preserve">
-    <value>发生错误：
+    <value>发生错误: 
 
 {0}</value>
   </data>
@@ -1382,16 +1382,16 @@
     <value>输入值</value>
   </data>
   <data name="GoToOffsetCommand" xml:space="preserve">
-    <value>转到偏移量…</value>
+    <value>转到偏移量...</value>
   </data>
   <data name="HexEditorSaveSelectionCommand" xml:space="preserve">
-    <value>保存选中(_L)…</value>
+    <value>保存选中(_L)...</value>
   </data>
   <data name="HexEditorSelectCommand" xml:space="preserve">
-    <value>选择…</value>
+    <value>选择...</value>
   </data>
   <data name="HexEditorSettingsCommand" xml:space="preserve">
-    <value>设置…</value>
+    <value>设置...</value>
   </data>
   <data name="HexEditor_BytesPerLine_16" xml:space="preserve">
     <value>16 字节(_1)</value>
@@ -1644,7 +1644,7 @@
     <value>Ctrl+6</value>
   </data>
   <data name="GoToMetadataCommand" xml:space="preserve">
-    <value>转至元数据…</value>
+    <value>转至元数据...</value>
   </data>
   <data name="ShortCutKeyCtrlM" xml:space="preserve">
     <value>Ctrl+M</value>
@@ -1836,7 +1836,7 @@
     <value>启用书签</value>
   </data>
   <data name="ExportSelectedCommand" xml:space="preserve">
-    <value>导出选中项(_E)…</value>
+    <value>导出选中项(_E)...</value>
   </data>
   <data name="RemoveAllBookmarksCommand" xml:space="preserve">
     <value>移除所有书签</value>
@@ -2082,7 +2082,7 @@
     <value>显示符号地址</value>
   </data>
   <data name="Decompile_Timestamp" xml:space="preserve">
-    <value>时间戳：</value>
+    <value>时间戳: </value>
   </data>
   <data name="UnknownValue" xml:space="preserve">
     <value>&lt;未知&gt;</value>
@@ -2106,10 +2106,10 @@
     <value>类型</value>
   </data>
   <data name="NumberBaseFormatString" xml:space="preserve">
-    <value>基数 {0}：</value>
+    <value>基数 {0}: </value>
   </data>
   <data name="RawValue" xml:space="preserve">
-    <value>原始值：</value>
+    <value>原始值: </value>
   </data>
   <data name="RecentFilesCommand" xml:space="preserve">
     <value>最近打开过的文件(_F)</value>
