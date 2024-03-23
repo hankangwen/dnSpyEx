@@ -1774,6 +1774,9 @@
   <data name="SaveModule_AddPECheckSum" xml:space="preserve">
     <value>添加 PE 校验和(_A)</value>
   </data>
+  <data name="SaveModule_AddMVIDSection" xml:space="preserve">
+    <value>添加 MVID 节区(_A)</value>
+  </data>
   <data name="SaveModule_CreateHeapEvenIfEmpty" xml:space="preserve">
     <value>即使为空也创建堆栈</value>
   </data>
@@ -2111,6 +2114,9 @@
   </data>
   <data name="SaveModule_TablesHeap_UseENC" xml:space="preserve">
     <value>使用 #- 表(_U)</value>
+  </data>
+  <data name="SaveModule_TablesHeap_ForceBigColumns" xml:space="preserve"> 
+    <value>强制大列(_F)</value> 
   </data>
   <data name="CustomAttribute_NamedArg_Field" xml:space="preserve">
     <value>字段</value>
