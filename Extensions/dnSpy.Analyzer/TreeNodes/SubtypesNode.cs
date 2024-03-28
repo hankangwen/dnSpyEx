@@ -42,26 +42,34 @@ namespace dnSpy.Analyzer.TreeNodes {
 		}
 
 		IEnumerable<AnalyzerTreeNodeData> FindReferencesInType(TypeDef type) {
-			if (analyzedType.IsInterface && type.HasInterfaces) {
-				for (int i = 0; i < type.Interfaces.Count; i++) {
-					if (IsEqual(type.Interfaces[i].Interface)) {
-						yield return new TypeNode(type) { Context = Context };
-						break;
+			var currentType = type;
+			if (analyzedType.IsInterface) {
+				while (currentType is not null) {
+					for (int i = 0; i < currentType.Interfaces.Count; i++) {
+						if (IsEqual(currentType.Interfaces[i].Interface)) {
+							yield return new TypeNode(type) { Context = Context };
+							break;
+						}
 					}
-				}
 
+					currentType = currentType.BaseType.ResolveTypeDef();
+				}
 				yield break;
 			}
 
-			if (type.IsEnum || !type.IsClass)
+			if (!type.IsClass)
 				yield break;
 
-			if (IsEqual(type.BaseType))
-				yield return new TypeNode(type) { Context = Context };
+			while (currentType is not null) {
+				if (IsEqual(currentType.BaseType))
+					yield return new TypeNode(type) { Context = Context };
+
+				currentType = currentType.BaseType.ResolveTypeDef();
+			}
 		}
 
-		private bool IsEqual(ITypeDefOrRef itm) => CheckEquals(analyzedType, itm.GetScopeType());
+		bool IsEqual(ITypeDefOrRef itm) => CheckEquals(analyzedType, itm.GetScopeType());
 
-		public static bool CanShow(TypeDef type) => (type.IsClass || type.IsInterface) && !type.IsEnum && !type.IsSealed;
+		public static bool CanShow(TypeDef type) => !type.IsSealed && !type.IsValueType;
 	}
 }
