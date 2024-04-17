@@ -35,12 +35,10 @@ namespace dnSpy.Decompiler.MSBuild {
 		public string TypeFullName { get; }
 		public bool IsSatelliteFile { get; set; }
 
-		readonly ModuleDef module;
 		readonly ResourceElementSet resourceElementSet;
 		readonly Dictionary<IAssembly, IAssembly> newToOldAsm;
 
 		public ResXProjectFile(ModuleDef module, string filename, string typeFullName, ResourceElementSet resourceElementSet) {
-			this.module = module;
 			this.filename = filename;
 			TypeFullName = typeFullName;
 			this.resourceElementSet = resourceElementSet;
@@ -51,7 +49,7 @@ namespace dnSpy.Decompiler.MSBuild {
 		}
 
 		public override void Create(DecompileContext ctx) {
-			using (var writer = new ResXResourceFileWriter(Filename, TypeNameConverter, HasTypeConverterForByteArray)) {
+			using (var writer = new ResXResourceFileWriter(Filename, TypeNameConverter)) {
 				foreach (var resourceElement in resourceElementSet.ResourceElements) {
 					ctx.CancellationToken.ThrowIfCancellationRequested();
 					writer.AddResourceData(resourceElement);
@@ -68,74 +66,6 @@ namespace dnSpy.Decompiler.MSBuild {
 			if (AssemblyNameComparer.CompareAll.Equals(oldAsm, newAsm))
 				return type.AssemblyQualifiedName ?? throw new ArgumentException();
 			return $"{type.FullName}, {oldAsm.FullName}";
-		}
-
-		bool HasTypeConverterForByteArray(string typeFullName) {
-			var typeDef = TypeNameParser.ParseReflection(module, typeFullName, null)?.ResolveTypeDef();
-
-			while (typeDef is not null) {
-				var attribute = typeDef.CustomAttributes.Find("System.ComponentModel.TypeConverterAttribute");
-				if (attribute is not null && attribute.ConstructorArguments.Count == 1 && attribute.ConstructorArguments[0].Value is ClassOrValueTypeSig typeSig) {
-					var converter = typeSig.TypeDefOrRef.ResolveTypeDef();
-					var (canConvertToMethod, canConvertFromMethod) = FindCanConvertMethods(converter);
-
-					if (canConvertToMethod is not null && canConvertFromMethod is not null) {
-						bool canConvertToHasByteArray = ContainsByteArrayReference(canConvertToMethod);
-						bool canConvertFromHasByteArray = ContainsByteArrayReference(canConvertFromMethod);
-						if (canConvertFromHasByteArray && canConvertToHasByteArray)
-							return true;
-					}
-
-					return false;
-				}
-
-				typeDef = typeDef.BaseType.ResolveTypeDef();
-			}
-
-			return false;
-		}
-
-		static (MethodDef? canConvertToMethod, MethodDef? canConvertFromMethod) FindCanConvertMethods(TypeDef type) {
-			MethodDef? canConvertToMethod = null;
-			MethodDef? canConvertFromMethod = null;
-			foreach (var method in type.Methods) {
-				if (!method.MethodSig.HasThis)
-					continue;
-				if (method.MethodSig.Params.Count != 2)
-					continue;
-				if (method.ReturnType.GetElementType() != ElementType.Boolean)
-					continue;
-
-				if (method.Name == "CanConvertTo")
-					canConvertToMethod ??= method;
-				else if (method.Name == "CanConvertFrom")
-					canConvertFromMethod ??= method;
-				else {
-					foreach (var methodOverride in method.Overrides) {
-						var overridenMethod = methodOverride.MethodDeclaration.ResolveMethodDef();
-						if (overridenMethod.Name == "CanConvertTo")
-							canConvertToMethod ??= method;
-						else if (overridenMethod.Name == "CanConvertFrom")
-							canConvertFromMethod ??= method;
-					}
-				}
-			}
-
-			return (canConvertToMethod, canConvertFromMethod);
-		}
-
-		static bool ContainsByteArrayReference(MethodDef method) {
-			if (!method.HasBody)
-				return false;
-			for (var i = 0; i < method.Body.Instructions.Count; i++) {
-				var instr = method.Body.Instructions[i];
-				if (instr.OpCode.Code == Code.Ldtoken && instr.Operand is TypeSpec typeSpec &&
-				    typeSpec.TypeSig is SZArraySig arraySig &&
-				    arraySig.Next.GetElementType() == ElementType.U1) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 }

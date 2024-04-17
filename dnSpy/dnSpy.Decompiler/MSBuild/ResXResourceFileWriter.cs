@@ -55,13 +55,11 @@ namespace dnSpy.Decompiler.MSBuild {
 		}
 
 		readonly Func<Type, string> typeNameConverter;
-		readonly Func<string, bool> hasByteArrayConverter;
 		readonly XmlTextWriter writer;
 		bool written;
 
-		public ResXResourceFileWriter(string fileName, Func<Type, string> typeNameConverter, Func<string, bool> hasByteArrayConverter) {
+		public ResXResourceFileWriter(string fileName, Func<Type, string> typeNameConverter) {
 			this.typeNameConverter = typeNameConverter;
-			this.hasByteArrayConverter = hasByteArrayConverter;
 			writer = new XmlTextWriter(fileName, Encoding.UTF8) {
 				Formatting = Formatting.Indented,
 				Indentation = 2
