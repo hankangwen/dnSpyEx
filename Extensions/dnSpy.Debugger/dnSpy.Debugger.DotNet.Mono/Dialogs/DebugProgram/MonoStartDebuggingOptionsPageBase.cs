@@ -172,6 +172,8 @@ namespace dnSpy.Debugger.DotNet.Mono.Dialogs.DebugProgram {
 			CommandLine = options.CommandLine ?? string.Empty;
 			// Must be init'd after Filename since it also overwrites this property
 			WorkingDirectory = options.WorkingDirectory ?? string.Empty;
+			Environment.Clear();
+			Environment.AddRange(options.Environment.Environment);
 			ConnectionPort.Value = options.ConnectionPort;
 			ConnectionTimeout.Value = (uint)options.ConnectionTimeout.TotalSeconds;
 			BreakKind = FilterBreakKind(options.BreakKind);
@@ -185,6 +187,8 @@ namespace dnSpy.Debugger.DotNet.Mono.Dialogs.DebugProgram {
 			options.Filename = Filename;
 			options.CommandLine = CommandLine;
 			options.WorkingDirectory = WorkingDirectory;
+			options.Environment.Clear();
+			options.Environment.AddRange(Environment.Environment);
 			options.ConnectionPort = ConnectionPort.Value;
 			options.ConnectionTimeout = TimeSpan.FromSeconds(ConnectionTimeout.Value);
 			options.BreakKind = FilterBreakKind(BreakKind);
