@@ -71,6 +71,15 @@ namespace dnSpy.Debugger.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Add.
         /// </summary>
+        public static string AddEnvironmentVariableButton {
+            get {
+                return ResourceManager.GetString("AddEnvironmentVariableButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
         public static string AddExceptionButton {
             get {
                 return ResourceManager.GetString("AddExceptionButton", resourceCulture);
@@ -2919,6 +2928,15 @@ namespace dnSpy.Debugger.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string RemoveEnvironmentVariableButton {
+            get {
+                return ResourceManager.GetString("RemoveEnvironmentVariableButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Remove.
         /// </summary>
         public static string RemoveExceptionCommand {
@@ -2942,6 +2960,15 @@ namespace dnSpy.Debugger.Properties {
         public static string ResetBreakpointHitCountCommand {
             get {
                 return ResourceManager.GetString("ResetBreakpointHitCountCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset.
+        /// </summary>
+        public static string ResetEnvironmentVariablesButton {
+            get {
+                return ResourceManager.GetString("ResetEnvironmentVariablesButton", resourceCulture);
             }
         }
         
