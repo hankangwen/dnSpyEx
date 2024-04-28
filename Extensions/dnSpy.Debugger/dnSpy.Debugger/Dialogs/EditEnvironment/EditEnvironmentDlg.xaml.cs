@@ -23,6 +23,12 @@ namespace dnSpy.Debugger.Dialogs.EditEnvironment {
 	public partial class EditEnvironmentDlg : WindowBase {
 		public EditEnvironmentDlg() {
 			InitializeComponent();
+			listView.SelectionChanged += (_, e) => {
+				if (e.AddedItems.Count > 0)
+					listView.ScrollIntoView(e.AddedItems[e.AddedItems.Count - 1]);
+				else if (listView.SelectedItems.Count > 0)
+					listView.ScrollIntoView(listView.SelectedItems[listView.SelectedItems.Count - 1]);
+			};
 		}
 	}
 }

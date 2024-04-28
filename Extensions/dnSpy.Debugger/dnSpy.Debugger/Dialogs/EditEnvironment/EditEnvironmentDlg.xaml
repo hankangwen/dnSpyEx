@@ -23,13 +23,11 @@
                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                      xmlns:winlocal="clr-namespace:dnSpy.Contracts.Controls;assembly=dnSpy.Contracts.DnSpy"
                      xmlns:mvvm="clr-namespace:dnSpy.Contracts.MVVM;assembly=dnSpy.Contracts.DnSpy"
-                     xmlns:mvvmvc="clr-namespace:dnSpy.Contracts.MVVM.Converters;assembly=dnSpy.Contracts.DnSpy"
-                     xmlns:img="clr-namespace:dnSpy.Contracts.Images;assembly=dnSpy.Contracts.DnSpy"
                      xmlns:ui="clr-namespace:dnSpy.Contracts.Controls.ToolWindows;assembly=dnSpy.Contracts.DnSpy"
                      xmlns:p="clr-namespace:dnSpy.Debugger.Properties"
                      mc:Ignorable="d"
                      Style="{StaticResource DialogWindowStyle}"
-                     Title="Edit environment variables" Height="350" Width="500"
+                     Title="{x:Static p:dnSpy_Debugger_Resources.EditEnvironmentVariables_Title}" Height="350" Width="500"
                      MinHeight="350" MinWidth="500"
                      WindowStartupLocation="CenterOwner">
     <Grid>
@@ -44,6 +42,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ListView
+                Name="listView"
                 Margin="5 5 5 0"
                 VirtualizingStackPanel.IsVirtualizing="True"
                 VirtualizingStackPanel.VirtualizationMode="Recycling"
@@ -76,11 +75,13 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Button Margin="0 5 0 0" Content="{x:Static p:dnSpy_Debugger_Resources.AddEnvironmentVariableButton}" Style="{StaticResource DialogButton}" Command="{Binding AddEnvironmentVariableCommand}" />
-                <Button Grid.Row="1" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Debugger_Resources.RemoveEnvironmentVariableButton}" Style="{StaticResource DialogButton}" Command="{Binding RemoveEnvironmentVariableCommand}" />
-                <Button Grid.Row="2" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Debugger_Resources.ResetEnvironmentVariablesButton}" Style="{StaticResource DialogButton}" Command="{Binding ResetCommand}" />
+                <Button Grid.Row="1" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Debugger_Resources.AddManyEnvironmentVariablesButton}" Style="{StaticResource DialogButton}"  Command="{Binding AddManyEnvironmentVariablesCommand}"/>
+                <Button Grid.Row="2" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Debugger_Resources.RemoveEnvironmentVariableButton}" Style="{StaticResource DialogButton}" Command="{Binding RemoveEnvironmentVariableCommand}" />
+                <Button Grid.Row="3" Margin="0 5 0 0" Content="{x:Static p:dnSpy_Debugger_Resources.ResetEnvironmentVariablesButton}" Style="{StaticResource DialogButton}" Command="{Binding ResetCommand}" />
             </Grid>
         </Grid>
 
