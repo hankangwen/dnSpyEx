@@ -501,19 +501,20 @@ namespace dnSpy.Debugger.DotNet.Metadata {
 				return false;
 
 			// The original code used a list to check for infinite recursion, we'll use this code unless it throws too often
-			try {
-				// For an unknown to me reason, in .NET 8, the RuntimeHelpers.EnsureSufficientExecutionStack() method does not work.
 #if NETCOREAPP
-				if (RuntimeHelpers.TryEnsureSufficientExecutionStack())
-					throw new InsufficientExecutionStackException();
+			if (!RuntimeHelpers.TryEnsureSufficientExecutionStack()) {
+				Debug.Fail("Should probably not happen often");
+				return false;
+			}
 #else
+			try {
 				RuntimeHelpers.EnsureSufficientExecutionStack();
-#endif
 			}
 			catch (InsufficientExecutionStackException) {
 				Debug.Fail("Should probably not happen often");
 				return false;
 			}
+#endif
 
 			var inst = GetGenericArguments();
 			if (inst.Count > 0) {
