@@ -77,7 +77,7 @@ namespace dnSpy.Controls {
 		}
 
 		public static FrameworkElement Create(IClassificationFormatMap classificationFormatMap, string text, IList<TextClassificationTag> tags, TextElementFlags flags) {
-			bool useFastTextBlock = (flags & (TextElementFlags.TrimmingMask | TextElementFlags.WrapMask | TextElementFlags.FilterOutNewLines)) == (TextElementFlags.NoTrimming | TextElementFlags.NoWrap | TextElementFlags.FilterOutNewLines);
+			bool useFastTextBlock = (flags & (TextElementFlags.TrimmingMask | TextElementFlags.WrapMask)) == (TextElementFlags.NoTrimming | TextElementFlags.NoWrap);
 			bool filterOutNewLines = (flags & TextElementFlags.FilterOutNewLines) != 0;
 			if (tags.Count != 0) {
 				if (useFastTextBlock) {
@@ -232,16 +232,15 @@ namespace dnSpy.Controls {
 					info = tagsList[collIndex + 1];
 				}
 
-				int startIndex = info.Span.Start;
 				int endIndex = info.Span.End;
 
-				int nlIndex = text.IndexOfAny(LineConstants.newLineChars, index, endIndex - startIndex);
+				int nlIndex = text.IndexOfAny(LineConstants.newLineChars, index, endIndex - index);
 				if (nlIndex > 0)
 					endIndex = nlIndex;
 
 				var props = classificationFormatMap.GetTextProperties(info.ClassificationType);
 
-				var tokenText = text.Substring(index, endIndex - startIndex);
+				var tokenText = text.Substring(index, endIndex - index);
 
 				var textProps = new TextProps();
 				textProps.fontSize = TextElement.GetFontSize(parent);
@@ -260,6 +259,18 @@ namespace dnSpy.Controls {
 				);
 
 				return new TextCharacters(tokenText.Length == 0 ? " " : tokenText, textProps);
+			}
+
+			public bool GetNextLineIndex(ref int index) {
+				if (index >= text.Length || index < 0)
+					return false;
+				index = text.IndexOfAny(LineConstants.newLineChars, index);
+				if (index < 0)
+					return false;
+				if (text[index] == '\r' && index + 1 < text.Length && text[index + 1] == '\n')
+					index++;
+				index++;
+				return true;
 			}
 		}
 	}
