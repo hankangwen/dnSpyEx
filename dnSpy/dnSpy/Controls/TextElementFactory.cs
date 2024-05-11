@@ -23,7 +23,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -43,21 +42,6 @@ namespace dnSpy.Controls {
 	}
 
 	static class TextElementFactory {
-		static string ToString(string s, bool filterOutNewLines) {
-			if (!filterOutNewLines)
-				return s;
-			if (s.IndexOfAny(LineConstants.newLineChars) < 0)
-				return s;
-			var sb = new StringBuilder(s.Length);
-			foreach (var c in s) {
-				if (Array.IndexOf(LineConstants.newLineChars, c) >= 0)
-					sb.Append(' ');
-				else
-					sb.Append(c);
-			}
-			return sb.ToString();
-		}
-
 		static TextTrimming GetTextTrimming(TextElementFlags flags) {
 			switch (flags & TextElementFlags.TrimmingMask) {
 			case TextElementFlags.NoTrimming: return TextTrimming.None;
@@ -82,7 +66,7 @@ namespace dnSpy.Controls {
 			if (tags.Count != 0) {
 				if (useFastTextBlock) {
 					return new FastTextBlock(new TextSrc {
-						text = ToString(WpfUnicodeUtils.ReplaceBadChars(text), filterOutNewLines),
+						text = TextBlockFactory.ToString(WpfUnicodeUtils.ReplaceBadChars(text), filterOutNewLines),
 						classificationFormatMap = classificationFormatMap,
 						tagsList = tags.ToArray(),
 					});
@@ -98,12 +82,12 @@ namespace dnSpy.Controls {
 			FrameworkElement fwElem;
 			if (useFastTextBlock) {
 				fwElem = new FastTextBlock() {
-					Text = ToString(WpfUnicodeUtils.ReplaceBadChars(text), filterOutNewLines)
+					Text = TextBlockFactory.ToString(WpfUnicodeUtils.ReplaceBadChars(text), filterOutNewLines)
 				};
 			}
 			else {
 				fwElem = new TextBlock {
-					Text = ToString(WpfUnicodeUtils.ReplaceBadChars(text), filterOutNewLines),
+					Text = TextBlockFactory.ToString(WpfUnicodeUtils.ReplaceBadChars(text), filterOutNewLines),
 					TextTrimming = GetTextTrimming(flags),
 					TextWrapping = GetTextWrapping(flags),
 				};
