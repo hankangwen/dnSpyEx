@@ -653,8 +653,8 @@ namespace dnSpy.Contracts.Controls {
 		static MetroWindow() => DefaultStyleKeyProperty.OverrideMetadata(typeof(MetroWindow), new FrameworkPropertyMetadata(typeof(MetroWindow)));
 
 		// If these get updated, also update the templates if necessary
-		static readonly CornerRadius CornerRadius = new CornerRadius(0, 0, 0, 0);
-		static readonly Thickness GlassFrameThickness = new Thickness(0);
+		static readonly CornerRadius CornerRadius = new CornerRadius(12, 12, 12, 12);
+		static readonly Thickness GlassFrameThickness = new Thickness(1);
 		// NOTE: Keep these in sync: CaptionHeight + ResizeBorderThickness.Top = GridCaptionHeight
 		static readonly double CaptionHeight = 20;
 		static readonly Thickness ResizeBorderThickness = new Thickness(10, 10, 5, 5);
